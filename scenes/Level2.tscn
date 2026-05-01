@@ -1,0 +1,377 @@
+[gd_scene format=3 uid="uid://level2"]
+
+[ext_resource type="Script" path="res://scripts/level2.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="3"]
+
+[sub_resource type="RectangleShape2D" id="RS_start"]
+size = Vector2(200, 80)
+
+[sub_resource type="RectangleShape2D" id="RS_desk1"]
+size = Vector2(130, 20)
+
+[sub_resource type="RectangleShape2D" id="RS_cab"]
+size = Vector2(24, 150)
+
+[sub_resource type="RectangleShape2D" id="RS_shelf"]
+size = Vector2(80, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_narrow"]
+size = Vector2(60, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_p"]
+size = Vector2(240, 90)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_z"]
+size = Vector2(200, 90)
+
+[node name="Level2" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="WC_Tank" type="Polygon2D" parent="Decor"]
+position = Vector2(188, 279)
+color = Color(0.55, 0.78, 0.95, 0.85)
+polygon = PackedVector2Array(-5, -14, 5, -14, 6, 0, -6, 0)
+
+[node name="WC_Body" type="Polygon2D" parent="Decor"]
+position = Vector2(188, 288)
+color = Color(0.88, 0.92, 0.96, 1)
+polygon = PackedVector2Array(-7, 0, 7, 0, 7, 12, -7, 12)
+
+[node name="WC_Tap" type="Polygon2D" parent="Decor"]
+position = Vector2(183, 295)
+color = Color(0.25, 0.55, 0.95, 1)
+polygon = PackedVector2Array(-1, -2, 3, -2, 3, 1, -1, 1)
+
+[node name="Mon1_Case" type="Polygon2D" parent="Decor"]
+position = Vector2(65, 279)
+color = Color(0.18, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-9, -14, 9, -14, 9, 0, -9, 0)
+
+[node name="Mon1_Screen" type="Polygon2D" parent="Decor"]
+position = Vector2(65, 279)
+color = Color(0.15, 0.55, 0.90, 1)
+polygon = PackedVector2Array(-7, -12, 7, -12, 7, -1, -7, -1)
+
+[node name="Kbd1" type="Polygon2D" parent="Decor"]
+position = Vector2(88, 298)
+color = Color(0.30, 0.30, 0.35, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 0, -12, 0)
+
+[node name="Plant1_Pot" type="Polygon2D" parent="Decor"]
+position = Vector2(152, 293)
+color = Color(0.52, 0.28, 0.16, 1)
+polygon = PackedVector2Array(-5, -5, 5, -5, 7, 0, -7, 0)
+
+[node name="Plant1_Leaves" type="Polygon2D" parent="Decor"]
+position = Vector2(152, 278)
+color = Color(0.22, 0.52, 0.18, 1)
+polygon = PackedVector2Array(-7, 0, -3, -12, 0, -14, 3, -12, 7, 0, 4, 4, -4, 4)
+
+[node name="Laptop_Lid" type="Polygon2D" parent="Decor"]
+position = Vector2(305, 255)
+color = Color(0.18, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-12, -9, 12, -9, 10, 0, -10, 0)
+
+[node name="Laptop_Screen" type="Polygon2D" parent="Decor"]
+position = Vector2(305, 255)
+color = Color(0.18, 0.60, 0.90, 1)
+polygon = PackedVector2Array(-10, -7, 10, -7, 8, -1, -8, -1)
+
+[node name="Laptop_Keys" type="Polygon2D" parent="Decor"]
+position = Vector2(305, 267)
+color = Color(0.22, 0.22, 0.28, 1)
+polygon = PackedVector2Array(-14, -2, 14, -2, 14, 0, -14, 0)
+
+[node name="CabA_Line1" type="Polygon2D" parent="Decor"]
+position = Vector2(540, 143)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabA_Line2" type="Polygon2D" parent="Decor"]
+position = Vector2(540, 168)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabA_Line3" type="Polygon2D" parent="Decor"]
+position = Vector2(540, 193)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabA_Line4" type="Polygon2D" parent="Decor"]
+position = Vector2(540, 218)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabB_Line1" type="Polygon2D" parent="Decor"]
+position = Vector2(648, 143)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabB_Line2" type="Polygon2D" parent="Decor"]
+position = Vector2(648, 168)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabB_Line3" type="Polygon2D" parent="Decor"]
+position = Vector2(648, 193)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="CabB_Line4" type="Polygon2D" parent="Decor"]
+position = Vector2(648, 218)
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-11, -1, 11, -1, 11, 1, -11, 1)
+
+[node name="Book1" type="Polygon2D" parent="Decor"]
+position = Vector2(726, 162)
+color = Color(0.80, 0.20, 0.20, 1)
+polygon = PackedVector2Array(-3, -10, 3, -10, 3, 2, -3, 2)
+
+[node name="Book2" type="Polygon2D" parent="Decor"]
+position = Vector2(734, 160)
+color = Color(0.20, 0.50, 0.80, 1)
+polygon = PackedVector2Array(-3, -12, 3, -12, 3, 2, -3, 2)
+
+[node name="Book3" type="Polygon2D" parent="Decor"]
+position = Vector2(742, 163)
+color = Color(0.80, 0.70, 0.15, 1)
+polygon = PackedVector2Array(-3, -9, 3, -9, 3, 2, -3, 2)
+
+[node name="Book4" type="Polygon2D" parent="Decor"]
+position = Vector2(750, 161)
+color = Color(0.20, 0.70, 0.40, 1)
+polygon = PackedVector2Array(-3, -11, 3, -11, 3, 2, -3, 2)
+
+[node name="Book5" type="Polygon2D" parent="Decor"]
+position = Vector2(758, 162)
+color = Color(0.60, 0.20, 0.80, 1)
+polygon = PackedVector2Array(-3, -10, 3, -10, 3, 2, -3, 2)
+
+[node name="Srv1_LED1" type="Polygon2D" parent="Decor"]
+position = Vector2(858, 133)
+color = Color(0.10, 0.90, 0.30, 1)
+polygon = PackedVector2Array(-1, -2, 2, -2, 2, 2, -1, 2)
+
+[node name="Srv1_LED2" type="Polygon2D" parent="Decor"]
+position = Vector2(863, 133)
+color = Color(0.10, 0.90, 0.30, 1)
+polygon = PackedVector2Array(-1, -2, 2, -2, 2, 2, -1, 2)
+
+[node name="Srv1_LED3" type="Polygon2D" parent="Decor"]
+position = Vector2(868, 133)
+color = Color(0.90, 0.30, 0.10, 1)
+polygon = PackedVector2Array(-1, -2, 2, -2, 2, 2, -1, 2)
+
+[node name="Srv1_Vent" type="Polygon2D" parent="Decor"]
+position = Vector2(893, 135)
+color = Color(0.28, 0.30, 0.34, 1)
+polygon = PackedVector2Array(-8, -1, 8, -1, 8, 1, -8, 1)
+
+[node name="Srv2_LED1" type="Polygon2D" parent="Decor"]
+position = Vector2(978, 123)
+color = Color(0.10, 0.90, 0.30, 1)
+polygon = PackedVector2Array(-1, -2, 2, -2, 2, 2, -1, 2)
+
+[node name="Srv2_LED2" type="Polygon2D" parent="Decor"]
+position = Vector2(983, 123)
+color = Color(0.10, 0.90, 0.30, 1)
+polygon = PackedVector2Array(-1, -2, 2, -2, 2, 2, -1, 2)
+
+[node name="Srv2_Vent" type="Polygon2D" parent="Decor"]
+position = Vector2(1007, 125)
+color = Color(0.28, 0.30, 0.34, 1)
+polygon = PackedVector2Array(-8, -1, 8, -1, 8, 1, -8, 1)
+
+[node name="PitHazard" type="Polygon2D" parent="Decor"]
+position = Vector2(1150, 400)
+color = Color(0.55, 0.06, 0.06, 0.75)
+polygon = PackedVector2Array(-120, -8, 120, -8, 120, 8, -120, 8)
+
+[node name="PitGlow" type="Polygon2D" parent="Decor"]
+position = Vector2(1150, 408)
+color = Color(0.80, 0.15, 0.08, 0.20)
+polygon = PackedVector2Array(-120, 0, 120, 0, 120, 22, -120, 22)
+
+[node name="BigMon_Case" type="Polygon2D" parent="Decor"]
+position = Vector2(1480, 137)
+color = Color(0.18, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-16, -18, 16, -18, 16, 0, -16, 0)
+
+[node name="BigMon_Screen" type="Polygon2D" parent="Decor"]
+position = Vector2(1480, 137)
+color = Color(0.20, 0.65, 0.95, 1)
+polygon = PackedVector2Array(-14, -16, 14, -16, 14, -1, -14, -1)
+
+[node name="BigMon_Stand" type="Polygon2D" parent="Decor"]
+position = Vector2(1480, 156)
+color = Color(0.22, 0.22, 0.27, 1)
+polygon = PackedVector2Array(-2, -3, 2, -3, 2, 0, -2, 0)
+
+[node name="Kbd2" type="Polygon2D" parent="Decor"]
+position = Vector2(1512, 158)
+color = Color(0.30, 0.30, 0.35, 1)
+polygon = PackedVector2Array(-14, -2, 14, -2, 14, 0, -14, 0)
+
+[node name="Plant2_Pot" type="Polygon2D" parent="Decor"]
+position = Vector2(1595, 152)
+color = Color(0.52, 0.28, 0.16, 1)
+polygon = PackedVector2Array(-6, -6, 6, -6, 8, 0, -8, 0)
+
+[node name="Plant2_Leaves" type="Polygon2D" parent="Decor"]
+position = Vector2(1595, 133)
+color = Color(0.22, 0.52, 0.18, 1)
+polygon = PackedVector2Array(-8, 0, -4, -14, 0, -16, 4, -14, 8, 0, 5, 4, -5, 4)
+
+[node name="FlagPole" type="Polygon2D" parent="Decor"]
+position = Vector2(1610, 160)
+color = Color(0.80, 0.80, 0.80, 1)
+polygon = PackedVector2Array(-2, 0, 2, 0, 2, -42, -2, -42)
+
+[node name="Flag" type="Polygon2D" parent="Decor"]
+position = Vector2(1610, 160)
+color = Color(0.95, 0.80, 0.10, 1)
+polygon = PackedVector2Array(2, -42, 20, -34, 2, -26)
+
+[node name="StartDesk" type="StaticBody2D" parent="."]
+position = Vector2(100, 340)
+
+[node name="Body" type="Polygon2D" parent="StartDesk"]
+color = Color(0.28, 0.22, 0.16, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, 40, -100, 40)
+
+[node name="Top" type="Polygon2D" parent="StartDesk"]
+color = Color(0.48, 0.38, 0.26, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, -36, -100, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StartDesk"]
+shape = SubResource("RS_start")
+
+[node name="Desk1" type="StaticBody2D" parent="."]
+position = Vector2(315, 280)
+
+[node name="Body" type="Polygon2D" parent="Desk1"]
+color = Color(0.28, 0.22, 0.16, 1)
+polygon = PackedVector2Array(-65, -10, 65, -10, 65, 10, -65, 10)
+
+[node name="Top" type="Polygon2D" parent="Desk1"]
+color = Color(0.48, 0.38, 0.26, 1)
+polygon = PackedVector2Array(-65, -10, 65, -10, 65, -6, -65, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Desk1"]
+shape = SubResource("RS_desk1")
+
+[node name="CabinetA" type="StaticBody2D" parent="."]
+position = Vector2(540, 195)
+
+[node name="Body" type="Polygon2D" parent="CabinetA"]
+color = Color(0.38, 0.40, 0.44, 1)
+polygon = PackedVector2Array(-12, -75, 12, -75, 12, 75, -12, 75)
+
+[node name="Top" type="Polygon2D" parent="CabinetA"]
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-12, -75, 12, -75, 12, -71, -12, -71)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CabinetA"]
+shape = SubResource("RS_cab")
+
+[node name="CabinetB" type="StaticBody2D" parent="."]
+position = Vector2(648, 195)
+
+[node name="Body" type="Polygon2D" parent="CabinetB"]
+color = Color(0.38, 0.40, 0.44, 1)
+polygon = PackedVector2Array(-12, -75, 12, -75, 12, 75, -12, 75)
+
+[node name="Top" type="Polygon2D" parent="CabinetB"]
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-12, -75, 12, -75, 12, -71, -12, -71)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CabinetB"]
+shape = SubResource("RS_cab")
+
+[node name="Shelf" type="StaticBody2D" parent="."]
+position = Vector2(760, 168)
+
+[node name="Body" type="Polygon2D" parent="Shelf"]
+color = Color(0.32, 0.26, 0.18, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, 8, -40, 8)
+
+[node name="Top" type="Polygon2D" parent="Shelf"]
+color = Color(0.52, 0.42, 0.28, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, -4, -40, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Shelf"]
+shape = SubResource("RS_shelf")
+
+[node name="Server1" type="StaticBody2D" parent="."]
+position = Vector2(880, 138)
+
+[node name="Body" type="Polygon2D" parent="Server1"]
+color = Color(0.18, 0.20, 0.24, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="Server1"]
+color = Color(0.28, 0.30, 0.35, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Server1"]
+shape = SubResource("RS_narrow")
+
+[node name="Server2" type="StaticBody2D" parent="."]
+position = Vector2(1000, 128)
+
+[node name="Body" type="Polygon2D" parent="Server2"]
+color = Color(0.18, 0.20, 0.24, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="Server2"]
+color = Color(0.28, 0.30, 0.35, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Server2"]
+shape = SubResource("RS_narrow")
+
+[node name="CableTray" type="StaticBody2D" parent="."]
+position = Vector2(1300, 148)
+
+[node name="Body" type="Polygon2D" parent="CableTray"]
+color = Color(0.40, 0.42, 0.45, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="CableTray"]
+color = Color(0.55, 0.58, 0.62, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CableTray"]
+shape = SubResource("RS_narrow")
+
+[node name="GoalDesk" type="StaticBody2D" parent="."]
+position = Vector2(1510, 205)
+
+[node name="Body" type="Polygon2D" parent="GoalDesk"]
+color = Color(0.22, 0.18, 0.12, 1)
+polygon = PackedVector2Array(-120, -45, 120, -45, 120, 45, -120, 45)
+
+[node name="Top" type="Polygon2D" parent="GoalDesk"]
+color = Color(0.45, 0.35, 0.22, 1)
+polygon = PackedVector2Array(-120, -45, 120, -45, 120, -41, -120, -41)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalDesk"]
+shape = SubResource("RS_goal_p")
+
+[node name="GoalZone" type="Area2D" parent="."]
+position = Vector2(1510, 110)
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone"]
+shape = SubResource("RS_goal_z")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(100, 274)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(100, 274)
+script = ExtResource("3")

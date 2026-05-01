@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://c17drom5pmbl7"]
+
+[ext_resource type="Script" uid="uid://cdusw02sdhfly" path="res://scripts/player.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(18, 50)
+
+[node name="Player" type="CharacterBody2D" unique_id=1116419029]
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=260997243]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=92932434]
+scale = Vector2(0.666667, 0.666667)
+hframes = 10
+
+[node name="DashTrail" type="Line2D" parent="." unique_id=1784000278]

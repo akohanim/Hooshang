@@ -1,0 +1,336 @@
+[gd_scene format=3 uid="uid://level4"]
+
+[ext_resource type="Script" path="res://scripts/level4.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/shredder.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/water_cooler.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/document_floater.tscn" id="6"]
+
+[sub_resource type="RectangleShape2D" id="RS_cab_wall"]
+size = Vector2(28, 220)
+
+[sub_resource type="RectangleShape2D" id="RS_big"]
+size = Vector2(200, 80)
+
+[sub_resource type="RectangleShape2D" id="RS_step"]
+size = Vector2(80, 20)
+
+[sub_resource type="RectangleShape2D" id="RS_small"]
+size = Vector2(40, 20)
+
+[sub_resource type="RectangleShape2D" id="RS_climb_exit"]
+size = Vector2(260, 40)
+
+[sub_resource type="RectangleShape2D" id="RS_leap"]
+size = Vector2(80, 40)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_z"]
+size = Vector2(180, 100)
+
+[node name="Level4" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="LeftCabinet" type="Polygon2D" parent="Decor"]
+position = Vector2(828, 195)
+color = Color(0.26, 0.26, 0.30, 1)
+polygon = PackedVector2Array(-14, -185, 14, -185, 14, 185, -14, 185)
+
+[node name="LeftCab_Draw1" type="Polygon2D" parent="Decor"]
+position = Vector2(828, 60)
+color = Color(0.38, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 2, -12, 2)
+
+[node name="LeftCab_Draw2" type="Polygon2D" parent="Decor"]
+position = Vector2(828, 120)
+color = Color(0.38, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 2, -12, 2)
+
+[node name="LeftCab_Draw3" type="Polygon2D" parent="Decor"]
+position = Vector2(828, 180)
+color = Color(0.38, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 2, -12, 2)
+
+[node name="RightCabinet" type="Polygon2D" parent="Decor"]
+position = Vector2(1132, 195)
+color = Color(0.26, 0.26, 0.30, 1)
+polygon = PackedVector2Array(-14, -185, 14, -185, 14, 185, -14, 185)
+
+[node name="RightCab_Draw1" type="Polygon2D" parent="Decor"]
+position = Vector2(1132, 60)
+color = Color(0.38, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 2, -12, 2)
+
+[node name="RightCab_Draw2" type="Polygon2D" parent="Decor"]
+position = Vector2(1132, 120)
+color = Color(0.38, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 2, -12, 2)
+
+[node name="RightCab_Draw3" type="Polygon2D" parent="Decor"]
+position = Vector2(1132, 180)
+color = Color(0.38, 0.38, 0.44, 1)
+polygon = PackedVector2Array(-12, -2, 12, -2, 12, 2, -12, 2)
+
+[node name="FloatMemo1" type="Polygon2D" parent="Decor"]
+position = Vector2(310, 315)
+rotation = 0.26
+color = Color(0.88, 0.84, 0.70, 0.45)
+polygon = PackedVector2Array(-14, -9, 14, -9, 14, 9, -14, 9)
+
+[node name="FloatMemo2" type="Polygon2D" parent="Decor"]
+position = Vector2(460, 375)
+rotation = -0.18
+color = Color(0.88, 0.84, 0.70, 0.40)
+polygon = PackedVector2Array(-12, -8, 12, -8, 12, 8, -12, 8)
+
+[node name="FloatMemo3" type="Polygon2D" parent="Decor"]
+position = Vector2(1350, 90)
+rotation = 0.35
+color = Color(0.88, 0.84, 0.70, 0.40)
+polygon = PackedVector2Array(-14, -9, 14, -9, 14, 9, -14, 9)
+
+[node name="CabinetBanner" type="Polygon2D" parent="Decor"]
+position = Vector2(100, 298)
+color = Color(0.22, 0.20, 0.18, 1)
+polygon = PackedVector2Array(-80, -8, 80, -8, 80, 8, -80, 8)
+
+[node name="BannerText1" type="Polygon2D" parent="Decor"]
+position = Vector2(100, 298)
+color = Color(0.75, 0.70, 0.55, 0.60)
+polygon = PackedVector2Array(-72, -4, -20, -4, -20, -2, -72, -2)
+
+[node name="BannerText2" type="Polygon2D" parent="Decor"]
+position = Vector2(100, 298)
+color = Color(0.75, 0.70, 0.55, 0.60)
+polygon = PackedVector2Array(-72, 1, 30, 1, 30, 3, -72, 3)
+
+[node name="GapPit1" type="Polygon2D" parent="Decor"]
+position = Vector2(400, 430)
+color = Color(0.45, 0.06, 0.06, 0.60)
+polygon = PackedVector2Array(-200, -6, 200, -6, 200, 6, -200, 6)
+
+[node name="GapGlow1" type="Polygon2D" parent="Decor"]
+position = Vector2(400, 436)
+color = Color(0.70, 0.10, 0.08, 0.18)
+polygon = PackedVector2Array(-200, 0, 200, 0, 200, 20, -200, 20)
+
+[node name="LeapPit" type="Polygon2D" parent="Decor"]
+position = Vector2(1410, 155)
+color = Color(0.45, 0.06, 0.06, 0.60)
+polygon = PackedVector2Array(-200, -5, 200, -5, 200, 5, -200, 5)
+
+[node name="LeapGlow" type="Polygon2D" parent="Decor"]
+position = Vector2(1410, 160)
+color = Color(0.70, 0.10, 0.08, 0.18)
+polygon = PackedVector2Array(-200, 0, 200, 0, 200, 18, -200, 18)
+
+[node name="ExitSign" type="Polygon2D" parent="Decor"]
+position = Vector2(1710, -18)
+color = Color(0.10, 0.55, 0.18, 1)
+polygon = PackedVector2Array(-28, -8, 28, -8, 28, 8, -28, 8)
+
+[node name="ExitBracket_L" type="Polygon2D" parent="Decor"]
+position = Vector2(1682, -6)
+color = Color(0.60, 0.60, 0.65, 1)
+polygon = PackedVector2Array(-2, -18, 2, -18, 2, 18, -2, 18)
+
+[node name="ExitBracket_R" type="Polygon2D" parent="Decor"]
+position = Vector2(1738, -6)
+color = Color(0.60, 0.60, 0.65, 1)
+polygon = PackedVector2Array(-2, -18, 2, -18, 2, 18, -2, 18)
+
+[node name="LeftCabinetWall" type="StaticBody2D" parent="."]
+position = Vector2(828, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftCabinetWall"]
+shape = SubResource("RS_cab_wall")
+
+[node name="RightCabinetWall" type="StaticBody2D" parent="."]
+position = Vector2(1132, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightCabinetWall"]
+shape = SubResource("RS_cab_wall")
+
+[node name="StartPlatform" type="StaticBody2D" parent="."]
+position = Vector2(100, 390)
+
+[node name="Body" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.30, 0.28, 0.24, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, 40, -100, 40)
+
+[node name="Top" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.55, 0.50, 0.38, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, -36, -100, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StartPlatform"]
+shape = SubResource("RS_big")
+
+[node name="Room1Floor" type="StaticBody2D" parent="."]
+position = Vector2(700, 390)
+
+[node name="Body" type="Polygon2D" parent="Room1Floor"]
+color = Color(0.30, 0.28, 0.24, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, 40, -100, 40)
+
+[node name="Top" type="Polygon2D" parent="Room1Floor"]
+color = Color(0.55, 0.50, 0.38, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, -36, -100, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Room1Floor"]
+shape = SubResource("RS_big")
+
+[node name="Step1" type="StaticBody2D" parent="."]
+position = Vector2(930, 330)
+
+[node name="Body" type="Polygon2D" parent="Step1"]
+color = Color(0.30, 0.28, 0.24, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, 10, -40, 10)
+
+[node name="Top" type="Polygon2D" parent="Step1"]
+color = Color(0.55, 0.50, 0.38, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, -6, -40, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Step1"]
+shape = SubResource("RS_step")
+
+[node name="Step2" type="StaticBody2D" parent="."]
+position = Vector2(950, 270)
+
+[node name="Body" type="Polygon2D" parent="Step2"]
+color = Color(0.30, 0.28, 0.24, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, 10, -40, 10)
+
+[node name="Top" type="Polygon2D" parent="Step2"]
+color = Color(0.55, 0.50, 0.38, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, -6, -40, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Step2"]
+shape = SubResource("RS_step")
+
+[node name="ClimbBase" type="StaticBody2D" parent="."]
+position = Vector2(1000, 390)
+
+[node name="Body" type="Polygon2D" parent="ClimbBase"]
+color = Color(0.22, 0.22, 0.25, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, 40, -100, 40)
+
+[node name="Top" type="Polygon2D" parent="ClimbBase"]
+color = Color(0.45, 0.45, 0.50, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, -36, -100, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbBase"]
+shape = SubResource("RS_big")
+
+[node name="ClimbA" type="StaticBody2D" parent="."]
+position = Vector2(960, 210)
+
+[node name="Body" type="Polygon2D" parent="ClimbA"]
+color = Color(0.22, 0.22, 0.25, 1)
+polygon = PackedVector2Array(-20, -10, 20, -10, 20, 10, -20, 10)
+
+[node name="Top" type="Polygon2D" parent="ClimbA"]
+color = Color(0.45, 0.45, 0.50, 1)
+polygon = PackedVector2Array(-20, -10, 20, -10, 20, -6, -20, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbA"]
+shape = SubResource("RS_small")
+
+[node name="ClimbB" type="StaticBody2D" parent="."]
+position = Vector2(1040, 70)
+
+[node name="Body" type="Polygon2D" parent="ClimbB"]
+color = Color(0.22, 0.22, 0.25, 1)
+polygon = PackedVector2Array(-20, -10, 20, -10, 20, 10, -20, 10)
+
+[node name="Top" type="Polygon2D" parent="ClimbB"]
+color = Color(0.45, 0.45, 0.50, 1)
+polygon = PackedVector2Array(-20, -10, 20, -10, 20, -6, -20, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbB"]
+shape = SubResource("RS_small")
+
+[node name="ClimbExit" type="StaticBody2D" parent="."]
+position = Vector2(960, 30)
+
+[node name="Body" type="Polygon2D" parent="ClimbExit"]
+color = Color(0.22, 0.22, 0.25, 1)
+polygon = PackedVector2Array(-130, -20, 130, -20, 130, 20, -130, 20)
+
+[node name="Top" type="Polygon2D" parent="ClimbExit"]
+color = Color(0.45, 0.45, 0.50, 1)
+polygon = PackedVector2Array(-130, -20, 130, -20, 130, -16, -130, -16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbExit"]
+shape = SubResource("RS_climb_exit")
+
+[node name="LeapStart" type="StaticBody2D" parent="."]
+position = Vector2(1170, 30)
+
+[node name="Body" type="Polygon2D" parent="LeapStart"]
+color = Color(0.22, 0.22, 0.25, 1)
+polygon = PackedVector2Array(-40, -20, 40, -20, 40, 20, -40, 20)
+
+[node name="Top" type="Polygon2D" parent="LeapStart"]
+color = Color(0.45, 0.45, 0.50, 1)
+polygon = PackedVector2Array(-40, -20, 40, -20, 40, -16, -40, -16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeapStart"]
+shape = SubResource("RS_leap")
+
+[node name="GoalPlatform" type="StaticBody2D" parent="."]
+position = Vector2(1620, 50)
+
+[node name="Body" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.20, 0.32, 0.22, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, 40, -100, 40)
+
+[node name="Top" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.38, 0.70, 0.45, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, -36, -100, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalPlatform"]
+shape = SubResource("RS_big")
+
+[node name="GoalZone" type="Area2D" parent="."]
+position = Vector2(1620, -55)
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone"]
+shape = SubResource("RS_goal_z")
+
+[node name="Shredder1" parent="." instance=ExtResource("4")]
+position = Vector2(400, 456)
+
+[node name="Shredder2" parent="." instance=ExtResource("4")]
+position = Vector2(1000, 302)
+
+[node name="Shredder3" parent="." instance=ExtResource("4")]
+position = Vector2(975, 85)
+
+[node name="Shredder4" parent="." instance=ExtResource("4")]
+position = Vector2(1365, 200)
+
+[node name="WaterCooler1" parent="." instance=ExtResource("5")]
+position = Vector2(280, 330)
+
+[node name="CalibFloater" parent="." instance=ExtResource("6")]
+position = Vector2(170, 295)
+
+[node name="ClimbFloater1" parent="." instance=ExtResource("6")]
+position = Vector2(970, 300)
+
+[node name="ClimbFloater2" parent="." instance=ExtResource("6")]
+position = Vector2(960, 155)
+
+[node name="LeapFloater" parent="." instance=ExtResource("6")]
+position = Vector2(1170, -42)
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(100, 330)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(100, 330)
+script = ExtResource("3")

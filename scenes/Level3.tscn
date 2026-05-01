@@ -1,0 +1,285 @@
+[gd_scene format=3 uid="uid://level3"]
+
+[ext_resource type="Script" path="res://scripts/level3.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/flicker_platform.gd" id="4"]
+
+[sub_resource type="RectangleShape2D" id="RS_start"]
+size = Vector2(200, 80)
+
+[sub_resource type="RectangleShape2D" id="RS_solid_l"]
+size = Vector2(120, 20)
+
+[sub_resource type="RectangleShape2D" id="RS_solid_m"]
+size = Vector2(80, 20)
+
+[sub_resource type="RectangleShape2D" id="RS_flicker"]
+size = Vector2(60, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_small"]
+size = Vector2(40, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_p"]
+size = Vector2(240, 80)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_z"]
+size = Vector2(200, 80)
+
+[node name="Level3" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="Mon_Case" type="Polygon2D" parent="Decor"]
+position = Vector2(70, 279)
+color = Color(0.18, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-9, -14, 9, -14, 9, 0, -9, 0)
+
+[node name="Mon_Screen" type="Polygon2D" parent="Decor"]
+position = Vector2(70, 279)
+color = Color(0.12, 0.06, 0.26, 1)
+polygon = PackedVector2Array(-7, -12, 7, -12, 7, -1, -7, -1)
+
+[node name="Mon_Glitch1" type="Polygon2D" parent="Decor"]
+position = Vector2(70, 272)
+color = Color(0.90, 0.20, 0.80, 0.85)
+polygon = PackedVector2Array(-7, -2, 3, -2, 3, 1, -7, 1)
+
+[node name="Mon_Glitch2" type="Polygon2D" parent="Decor"]
+position = Vector2(70, 276)
+color = Color(0.10, 0.90, 0.80, 0.85)
+polygon = PackedVector2Array(-2, -2, 7, -2, 7, 1, -2, 1)
+
+[node name="Kbd" type="Polygon2D" parent="Decor"]
+position = Vector2(90, 298)
+color = Color(0.28, 0.28, 0.35, 1)
+polygon = PackedVector2Array(-11, -2, 11, -2, 11, 0, -11, 0)
+
+[node name="Plant_Pot" type="Polygon2D" parent="Decor"]
+position = Vector2(152, 293)
+color = Color(0.45, 0.25, 0.15, 1)
+polygon = PackedVector2Array(-5, -5, 5, -5, 7, 0, -7, 0)
+
+[node name="Plant_Leaves" type="Polygon2D" parent="Decor"]
+position = Vector2(152, 278)
+color = Color(0.22, 0.42, 0.18, 1)
+polygon = PackedVector2Array(-7, 0, -3, -12, 0, -14, 3, -12, 7, 0, 4, 4, -4, 4)
+
+[node name="DataLine1" type="Polygon2D" parent="Decor"]
+position = Vector2(560, 195)
+color = Color(0.20, 0.90, 0.80, 0.30)
+polygon = PackedVector2Array(-80, -1, 80, -1, 80, 1, -80, 1)
+
+[node name="DataLine2" type="Polygon2D" parent="Decor"]
+position = Vector2(850, 178)
+color = Color(0.80, 0.20, 0.90, 0.25)
+polygon = PackedVector2Array(-100, -1, 100, -1, 100, 1, -100, 1)
+
+[node name="DataLine3" type="Polygon2D" parent="Decor"]
+position = Vector2(1150, 193)
+color = Color(0.20, 0.80, 0.90, 0.30)
+polygon = PackedVector2Array(-70, -1, 70, -1, 70, 1, -70, 1)
+
+[node name="Frag1" type="Polygon2D" parent="Decor"]
+position = Vector2(625, 330)
+color = Color(0.22, 0.18, 0.30, 0.55)
+polygon = PackedVector2Array(-18, -4, 18, -4, 14, 4, -14, 4)
+
+[node name="Frag2" type="Polygon2D" parent="Decor"]
+position = Vector2(940, 350)
+color = Color(0.22, 0.18, 0.30, 0.55)
+polygon = PackedVector2Array(-14, -3, 14, -3, 10, 3, -10, 3)
+
+[node name="PitHazard" type="Polygon2D" parent="Decor"]
+position = Vector2(1090, 395)
+color = Color(0.55, 0.06, 0.06, 0.75)
+polygon = PackedVector2Array(-100, -8, 100, -8, 100, 8, -100, 8)
+
+[node name="PitGlow" type="Polygon2D" parent="Decor"]
+position = Vector2(1090, 403)
+color = Color(0.80, 0.15, 0.08, 0.20)
+polygon = PackedVector2Array(-100, 0, 100, 0, 100, 22, -100, 22)
+
+[node name="GoalMon_Case" type="Polygon2D" parent="Decor"]
+position = Vector2(1385, 196)
+color = Color(0.18, 0.18, 0.22, 1)
+polygon = PackedVector2Array(-14, -16, 14, -16, 14, 0, -14, 0)
+
+[node name="GoalMon_Screen" type="Polygon2D" parent="Decor"]
+position = Vector2(1385, 196)
+color = Color(0.12, 0.65, 0.50, 1)
+polygon = PackedVector2Array(-12, -14, 12, -14, 12, -1, -12, -1)
+
+[node name="FlagPole" type="Polygon2D" parent="Decor"]
+position = Vector2(1600, 222)
+color = Color(0.80, 0.80, 0.80, 1)
+polygon = PackedVector2Array(-2, 0, 2, 0, 2, -42, -2, -42)
+
+[node name="Flag" type="Polygon2D" parent="Decor"]
+position = Vector2(1600, 222)
+color = Color(0.10, 0.90, 0.70, 1)
+polygon = PackedVector2Array(2, -42, 20, -34, 2, -26)
+
+[node name="StartPlatform" type="StaticBody2D" parent="."]
+position = Vector2(100, 340)
+
+[node name="Body" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.22, 0.15, 0.32, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, 40, -100, 40)
+
+[node name="Top" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.50, 0.30, 0.75, 1)
+polygon = PackedVector2Array(-100, -40, 100, -40, 100, -36, -100, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StartPlatform"]
+shape = SubResource("RS_start")
+
+[node name="Solid1" type="StaticBody2D" parent="."]
+position = Vector2(315, 280)
+
+[node name="Body" type="Polygon2D" parent="Solid1"]
+color = Color(0.22, 0.15, 0.32, 1)
+polygon = PackedVector2Array(-60, -10, 60, -10, 60, 10, -60, 10)
+
+[node name="Top" type="Polygon2D" parent="Solid1"]
+color = Color(0.50, 0.30, 0.75, 1)
+polygon = PackedVector2Array(-60, -10, 60, -10, 60, -6, -60, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Solid1"]
+shape = SubResource("RS_solid_l")
+
+[node name="Solid2" type="StaticBody2D" parent="."]
+position = Vector2(460, 258)
+
+[node name="Body" type="Polygon2D" parent="Solid2"]
+color = Color(0.22, 0.15, 0.32, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, 10, -40, 10)
+
+[node name="Top" type="Polygon2D" parent="Solid2"]
+color = Color(0.50, 0.30, 0.75, 1)
+polygon = PackedVector2Array(-40, -10, 40, -10, 40, -6, -40, -6)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Solid2"]
+shape = SubResource("RS_solid_m")
+
+[node name="Flicker1" type="StaticBody2D" parent="."]
+position = Vector2(560, 258)
+script = ExtResource("4")
+
+[node name="Body" type="Polygon2D" parent="Flicker1"]
+color = Color(0.38, 0.28, 0.62, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="Flicker1"]
+color = Color(0.65, 0.52, 0.95, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flicker1"]
+shape = SubResource("RS_flicker")
+
+[node name="Flicker2" type="StaticBody2D" parent="."]
+position = Vector2(660, 248)
+script = ExtResource("4")
+phase_offset = 0.75
+
+[node name="Body" type="Polygon2D" parent="Flicker2"]
+color = Color(0.38, 0.28, 0.62, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="Flicker2"]
+color = Color(0.65, 0.52, 0.95, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flicker2"]
+shape = SubResource("RS_flicker")
+
+[node name="Flicker3" type="StaticBody2D" parent="."]
+position = Vector2(770, 240)
+script = ExtResource("4")
+
+[node name="Body" type="Polygon2D" parent="Flicker3"]
+color = Color(0.38, 0.28, 0.62, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="Flicker3"]
+color = Color(0.65, 0.52, 0.95, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flicker3"]
+shape = SubResource("RS_flicker")
+
+[node name="Flicker4" type="StaticBody2D" parent="."]
+position = Vector2(880, 248)
+script = ExtResource("4")
+phase_offset = 0.75
+
+[node name="Body" type="Polygon2D" parent="Flicker4"]
+color = Color(0.38, 0.28, 0.62, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="Flicker4"]
+color = Color(0.65, 0.52, 0.95, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Flicker4"]
+shape = SubResource("RS_flicker")
+
+[node name="SmallStep" type="StaticBody2D" parent="."]
+position = Vector2(970, 228)
+
+[node name="Body" type="Polygon2D" parent="SmallStep"]
+color = Color(0.22, 0.15, 0.32, 1)
+polygon = PackedVector2Array(-20, -8, 20, -8, 20, 8, -20, 8)
+
+[node name="Top" type="Polygon2D" parent="SmallStep"]
+color = Color(0.50, 0.30, 0.75, 1)
+polygon = PackedVector2Array(-20, -8, 20, -8, 20, -4, -20, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SmallStep"]
+shape = SubResource("RS_small")
+
+[node name="FlickerDash" type="StaticBody2D" parent="."]
+position = Vector2(1220, 228)
+script = ExtResource("4")
+duty_cycle = 0.3
+
+[node name="Body" type="Polygon2D" parent="FlickerDash"]
+color = Color(0.38, 0.28, 0.62, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="FlickerDash"]
+color = Color(0.65, 0.52, 0.95, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FlickerDash"]
+shape = SubResource("RS_flicker")
+
+[node name="GoalPlatform" type="StaticBody2D" parent="."]
+position = Vector2(1410, 262)
+
+[node name="Body" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.15, 0.26, 0.22, 1)
+polygon = PackedVector2Array(-120, -40, 120, -40, 120, 40, -120, 40)
+
+[node name="Top" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.28, 0.65, 0.50, 1)
+polygon = PackedVector2Array(-120, -40, 120, -40, 120, -36, -120, -36)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalPlatform"]
+shape = SubResource("RS_goal_p")
+
+[node name="GoalZone" type="Area2D" parent="."]
+position = Vector2(1410, 178)
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone"]
+shape = SubResource("RS_goal_z")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(100, 274)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(100, 274)
+script = ExtResource("3")
