@@ -1,0 +1,315 @@
+[gd_scene format=3 uid="uid://cgiuyta61qhju"]
+
+[ext_resource type="Script" path="res://scripts/level5.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/shredder.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/water_cooler.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/document_floater.tscn" id="6"]
+
+; ── Collision shapes ──────────────────────────────────────────────────────────
+[sub_resource type="RectangleShape2D" id="RS_start"]
+size = Vector2(160, 60)
+
+[sub_resource type="RectangleShape2D" id="RS_hop"]
+size = Vector2(60, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_step"]
+size = Vector2(50, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_wide"]
+size = Vector2(100, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_vert"]
+size = Vector2(80, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_goal"]
+size = Vector2(160, 40)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_z"]
+size = Vector2(32, 56)
+
+; ── Scene root ────────────────────────────────────────────────────────────────
+[node name="Level5" type="Node2D"]
+script = ExtResource("1")
+
+; ── Background decoration – critical server room feel ─────────────────────────
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="BgFloor" type="Polygon2D" parent="Decor"]
+color = Color(0.08, 0.05, 0.05, 1)
+polygon = PackedVector2Array(-50, 390, 1950, 390, 1950, 520, -50, 520)
+
+[node name="BgWall" type="Polygon2D" parent="Decor"]
+color = Color(0.10, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-50, -300, 1950, -300, 1950, 390, -50, 390)
+
+; Warning stripe near start
+[node name="WarnStripe1" type="Polygon2D" parent="Decor"]
+color = Color(0.70, 0.20, 0.02, 0.18)
+polygon = PackedVector2Array(0, 355, 200, 355, 200, 370, 0, 370)
+
+; Section divider glow – above the Paper Canyon
+[node name="DangerGlow1" type="Polygon2D" parent="Decor"]
+color = Color(0.90, 0.10, 0.02, 0.08)
+polygon = PackedVector2Array(840, 0, 1200, 0, 1200, 400, 840, 400)
+
+; Section divider glow – the Ascent column
+[node name="DangerGlow2" type="Polygon2D" parent="Decor"]
+color = Color(0.80, 0.25, 0.05, 0.10)
+polygon = PackedVector2Array(1290, -300, 1460, -300, 1460, 300, 1290, 300)
+
+; Server racks left
+[node name="Rack1" type="Polygon2D" parent="Decor"]
+color = Color(0.13, 0.09, 0.09, 1)
+polygon = PackedVector2Array(18, 230, 58, 230, 58, 350, 18, 350)
+
+[node name="Rack1Led" type="Polygon2D" parent="Decor"]
+color = Color(0.90, 0.18, 0.05, 1)
+polygon = PackedVector2Array(22, 238, 30, 238, 30, 242, 22, 242)
+
+[node name="Rack2" type="Polygon2D" parent="Decor"]
+color = Color(0.13, 0.09, 0.09, 1)
+polygon = PackedVector2Array(66, 230, 106, 230, 106, 350, 66, 350)
+
+[node name="Rack2Led" type="Polygon2D" parent="Decor"]
+color = Color(0.90, 0.18, 0.05, 1)
+polygon = PackedVector2Array(70, 238, 78, 238, 78, 242, 70, 242)
+
+; CRITICAL label hint (thin bar near top of screen)
+[node name="CriticalBar" type="Polygon2D" parent="Decor"]
+color = Color(0.85, 0.12, 0.02, 0.22)
+polygon = PackedVector2Array(-50, -300, 1950, -300, 1950, -292, -50, -292)
+
+; Goal area glow
+[node name="GoalGlow" type="Polygon2D" parent="Decor"]
+color = Color(0.10, 0.45, 0.12, 0.12)
+polygon = PackedVector2Array(1640, -200, 1870, -200, 1870, 0, 1640, 0)
+
+; ── Player ────────────────────────────────────────────────────────────────────
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(100, 325)
+
+; ── Camera ────────────────────────────────────────────────────────────────────
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("3")
+
+; ═════════════════════════════════════════════════════════════════════════════
+; SECTION 1 – Gauntlet  (pure dash mastery)
+; ═════════════════════════════════════════════════════════════════════════════
+
+; Start platform (160×60, safe zone, top y = 350)
+[node name="StartPlatform" type="StaticBody2D" parent="."]
+position = Vector2(100, 380)
+
+[node name="Body" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.18, 0.12, 0.10, 1)
+polygon = PackedVector2Array(-80, -30, 80, -30, 80, 30, -80, 30)
+
+[node name="Top" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-80, -30, 80, -30, 80, -26, -80, -26)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StartPlatform"]
+shape = SubResource("RS_start")
+
+; A1 – hop platform (60×16, top y = 310; gap 90 px / 40 px up — normal jump)
+[node name="A1" type="StaticBody2D" parent="."]
+position = Vector2(300, 318)
+
+[node name="Body" type="Polygon2D" parent="A1"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="A1"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="A1"]
+shape = SubResource("RS_hop")
+
+; A2 – precision platform (50×16, top y = 260; gap 125 px / 50 px up → diagonal dash required)
+[node name="A2" type="StaticBody2D" parent="."]
+position = Vector2(480, 268)
+
+[node name="Body" type="Polygon2D" parent="A2"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-25, -8, 25, -8, 25, 8, -25, 8)
+
+[node name="Top" type="Polygon2D" parent="A2"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-25, -8, 25, -8, 25, -4, -25, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="A2"]
+shape = SubResource("RS_step")
+
+; A3 – exit platform (50×16, top y = 270; gap 125 px / 10 px down → horizontal dash)
+[node name="A3" type="StaticBody2D" parent="."]
+position = Vector2(655, 278)
+
+[node name="Body" type="Polygon2D" parent="A3"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-25, -8, 25, -8, 25, 8, -25, 8)
+
+[node name="Top" type="Polygon2D" parent="A3"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-25, -8, 25, -8, 25, -4, -25, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="A3"]
+shape = SubResource("RS_step")
+
+; Recovery ledge (100×16) – safe wide platform; DocFloater1 floats above it
+[node name="Recovery" type="StaticBody2D" parent="."]
+position = Vector2(800, 278)
+
+[node name="Body" type="Polygon2D" parent="Recovery"]
+color = Color(0.16, 0.11, 0.10, 1)
+polygon = PackedVector2Array(-50, -8, 50, -8, 50, 8, -50, 8)
+
+[node name="Top" type="Polygon2D" parent="Recovery"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-50, -8, 50, -8, 50, -4, -50, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Recovery"]
+shape = SubResource("RS_wide")
+
+; ═════════════════════════════════════════════════════════════════════════════
+; SECTION 2 – Paper Canyon  (250 px gap; DocFloater1 lets you create mid-air steppingstones)
+; ═════════════════════════════════════════════════════════════════════════════
+
+; PaperFar – far side (100×16, top y = 270; gap = 250 px from Recovery.right)
+[node name="PaperFar" type="StaticBody2D" parent="."]
+position = Vector2(1150, 278)
+
+[node name="Body" type="Polygon2D" parent="PaperFar"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-50, -8, 50, -8, 50, 8, -50, 8)
+
+[node name="Top" type="Polygon2D" parent="PaperFar"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-50, -8, 50, -8, 50, -4, -50, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PaperFar"]
+shape = SubResource("RS_wide")
+
+; VertBase – base of the ascent shaft (80×16, top y = 270; gap = 140 px from PaperFar.right)
+[node name="VertBase" type="StaticBody2D" parent="."]
+position = Vector2(1340, 278)
+
+[node name="Body" type="Polygon2D" parent="VertBase"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, 8, -40, 8)
+
+[node name="Top" type="Polygon2D" parent="VertBase"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, -4, -40, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VertBase"]
+shape = SubResource("RS_vert")
+
+; ═════════════════════════════════════════════════════════════════════════════
+; SECTION 3 – The Ascent  (282 px straight up; max jump+dash reach is ~266 px)
+; DocFloater2 is here.  Player must dash STRAIGHT UP → catch paper platform below → dash again.
+; ═════════════════════════════════════════════════════════════════════════════
+
+; ClimbTop – unreachable by single dash from VertBase (80×16, top y = -12)
+[node name="ClimbTop" type="StaticBody2D" parent="."]
+position = Vector2(1380, -4)
+
+[node name="Body" type="Polygon2D" parent="ClimbTop"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, 8, -40, 8)
+
+[node name="Top" type="Polygon2D" parent="ClimbTop"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, -4, -40, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClimbTop"]
+shape = SubResource("RS_vert")
+
+; ═════════════════════════════════════════════════════════════════════════════
+; SECTION 4 – Apex Run  (water cooler + DocFloater3 + final approach)
+; ═════════════════════════════════════════════════════════════════════════════
+
+; ThinFinal – small platform after WaterCooler refresh (50×16, top y = -12; gap 150 px from ClimbTop.right)
+[node name="ThinFinal" type="StaticBody2D" parent="."]
+position = Vector2(1570, -4)
+
+[node name="Body" type="Polygon2D" parent="ThinFinal"]
+color = Color(0.14, 0.10, 0.10, 1)
+polygon = PackedVector2Array(-25, -8, 25, -8, 25, 8, -25, 8)
+
+[node name="Top" type="Polygon2D" parent="ThinFinal"]
+color = Color(0.88, 0.25, 0.05, 1)
+polygon = PackedVector2Array(-25, -8, 25, -8, 25, -4, -25, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ThinFinal"]
+shape = SubResource("RS_step")
+
+; Goal platform (160×40, top y = -90; 155 px gap from ThinFinal.right, 78 px up)
+[node name="GoalPlatform" type="StaticBody2D" parent="."]
+position = Vector2(1750, -70)
+
+[node name="Body" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.10, 0.20, 0.12, 1)
+polygon = PackedVector2Array(-80, -20, 80, -20, 80, 20, -80, 20)
+
+[node name="Top" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.30, 0.78, 0.35, 1)
+polygon = PackedVector2Array(-80, -20, 80, -20, 80, -16, -80, -16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalPlatform"]
+shape = SubResource("RS_goal")
+
+; Flag pole (visual only)
+[node name="FlagPole" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.75, 0.75, 0.80, 1)
+polygon = PackedVector2Array(-2, -20, 2, -20, 2, -62, -2, -62)
+position = Vector2(80, 0)
+
+; Flag (triangle on pole)
+[node name="Flag" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.95, 0.85, 0.10, 1)
+polygon = PackedVector2Array(0, -62, 22, -54, 0, -46)
+position = Vector2(80, 0)
+
+; Goal zone – tight around the flag base
+[node name="GoalZone" type="Area2D" parent="."]
+position = Vector2(1832, -108)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone"]
+shape = SubResource("RS_goal_z")
+
+; ── Hazards ──────────────────────────────────────────────────────────────────
+; Shredder1 – punishes missed A1→A2 dash (between x=330 and x=455)
+[node name="Shredder1" parent="." instance=ExtResource("4")]
+position = Vector2(392, 395)
+
+; Shredder2 – punishes missed A2→A3 dash (between x=505 and x=630)
+[node name="Shredder2" parent="." instance=ExtResource("4")]
+position = Vector2(567, 390)
+
+; Shredder3 – guards the Paper Canyon (between Recovery.right=850 and PaperFar.left=1100)
+[node name="Shredder3" parent="." instance=ExtResource("4")]
+position = Vector2(975, 390)
+
+; Shredder4 – guards the approach to VertBase (between PaperFar.right=1200 and VertBase.left=1300)
+[node name="Shredder4" parent="." instance=ExtResource("4")]
+position = Vector2(1250, 390)
+
+; ── Pickups ───────────────────────────────────────────────────────────────────
+; DocFloater1 – collect from Recovery before the 250 px Paper Canyon leap
+[node name="DocFloater1" parent="." instance=ExtResource("6")]
+position = Vector2(810, 194)
+
+; DocFloater2 – collect from VertBase before the impossible straight-up climb
+[node name="DocFloater2" parent="." instance=ExtResource("6")]
+position = Vector2(1340, 192)
+
+; DocFloater3 – collect from ThinFinal for the final diagonal approach to GoalPlatform
+[node name="DocFloater3" parent="." instance=ExtResource("6")]
+position = Vector2(1570, -82)
+
+; WaterCooler1 – floating above ClimbTop; refreshes dash for the ThinFinal dash
+[node name="WaterCooler1" parent="." instance=ExtResource("5")]
+position = Vector2(1415, -55)

@@ -24,7 +24,7 @@ size = Vector2(40, 16)
 size = Vector2(240, 80)
 
 [sub_resource type="RectangleShape2D" id="RS_goal_z"]
-size = Vector2(200, 80)
+size = Vector2(32, 56)
 
 [node name="Level3" type="Node2D"]
 script = ExtResource("1")
@@ -270,7 +270,7 @@ polygon = PackedVector2Array(-120, -40, 120, -40, 120, -36, -120, -36)
 shape = SubResource("RS_goal_p")
 
 [node name="GoalZone" type="Area2D" parent="."]
-position = Vector2(1410, 178)
+position = Vector2(1602, 194)
 collision_layer = 0
 collision_mask = 1
 

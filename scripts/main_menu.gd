@@ -8,6 +8,8 @@ const LEVELS : Array[Dictionary] = [
 	{ "label": "Level 2",   "scene": "res://scenes/Level2.tscn" },
 	{ "label": "Level 3",   "scene": "res://scenes/Level3.tscn" },
 	{ "label": "Level 4",   "scene": "res://scenes/Level4.tscn" },
+	{ "label": "Level 5",   "scene": "res://scenes/Level5.tscn" },
+	{ "label": "Level 6",   "scene": "res://scenes/Level6.tscn" },
 ]
 
 # ── Layout constants ──────────────────────────────────────────────────────────

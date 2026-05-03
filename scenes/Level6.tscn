@@ -1,0 +1,222 @@
+[gd_scene format=3 uid="uid://boqnundp2c2o0"]
+
+[ext_resource type="Script" path="res://scripts/level6.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/shredder.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/document_floater.tscn" id="5"]
+
+; ── Collision shapes ──────────────────────────────────────────────────────────
+[sub_resource type="RectangleShape2D" id="RS_start"]
+size = Vector2(160, 60)
+
+[sub_resource type="RectangleShape2D" id="RS_mid"]
+size = Vector2(70, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_step"]
+size = Vector2(60, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_wide"]
+size = Vector2(80, 16)
+
+[sub_resource type="RectangleShape2D" id="RS_goal"]
+size = Vector2(200, 40)
+
+[sub_resource type="RectangleShape2D" id="RS_goal_z"]
+size = Vector2(32, 56)
+
+; ── Scene root ────────────────────────────────────────────────────────────────
+[node name="Level6" type="Node2D"]
+script = ExtResource("1")
+
+; ── Background decoration – deep archive / cold server vault ──────────────────
+[node name="Decor" type="Node2D" parent="."]
+
+[node name="BgFloor" type="Polygon2D" parent="Decor"]
+color = Color(0.05, 0.06, 0.10, 1)
+polygon = PackedVector2Array(-50, 390, 1950, 390, 1950, 520, -50, 520)
+
+[node name="BgWall" type="Polygon2D" parent="Decor"]
+color = Color(0.07, 0.08, 0.13, 1)
+polygon = PackedVector2Array(-50, -200, 1950, -200, 1950, 390, -50, 390)
+
+; Subtle vertical column grid (visual depth)
+[node name="VCol1" type="Polygon2D" parent="Decor"]
+color = Color(0.09, 0.11, 0.17, 1)
+polygon = PackedVector2Array(218, -200, 222, -200, 222, 390, 218, 390)
+
+[node name="VCol2" type="Polygon2D" parent="Decor"]
+color = Color(0.09, 0.11, 0.17, 1)
+polygon = PackedVector2Array(438, -200, 442, -200, 442, 390, 438, 390)
+
+[node name="VCol3" type="Polygon2D" parent="Decor"]
+color = Color(0.09, 0.11, 0.17, 1)
+polygon = PackedVector2Array(876, -200, 880, -200, 880, 390, 876, 390)
+
+[node name="VCol4" type="Polygon2D" parent="Decor"]
+color = Color(0.09, 0.11, 0.17, 1)
+polygon = PackedVector2Array(1316, -200, 1320, -200, 1320, 390, 1316, 390)
+
+; Floor grating
+[node name="FloorGrate" type="Polygon2D" parent="Decor"]
+color = Color(0.08, 0.10, 0.16, 1)
+polygon = PackedVector2Array(-50, 385, 1950, 385, 1950, 392, -50, 392)
+
+; "KEYCARD A" hint marker above FloaterA position (visual cue)
+[node name="HintA" type="Polygon2D" parent="Decor"]
+color = Color(0.18, 0.60, 0.65, 0.25)
+polygon = PackedVector2Array(462, 195, 500, 195, 500, 240, 462, 240)
+
+; "KEYCARD B" hint marker above FloaterB position
+[node name="HintB" type="Polygon2D" parent="Decor"]
+color = Color(0.18, 0.60, 0.65, 0.25)
+polygon = PackedVector2Array(1082, 195, 1120, 195, 1120, 240, 1082, 240)
+
+; Void danger tint – Gap 1
+[node name="VoidTint1" type="Polygon2D" parent="Decor"]
+color = Color(0.02, 0.04, 0.10, 0.30)
+polygon = PackedVector2Array(700, 0, 1060, 0, 1060, 400, 700, 400)
+
+; Void danger tint – Gap 2
+[node name="VoidTint2" type="Polygon2D" parent="Decor"]
+color = Color(0.02, 0.04, 0.10, 0.30)
+polygon = PackedVector2Array(1140, 0, 1550, 0, 1550, 400, 1140, 400)
+
+; Goal area soft glow
+[node name="GoalGlow" type="Polygon2D" parent="Decor"]
+color = Color(0.08, 0.40, 0.12, 0.12)
+polygon = PackedVector2Array(1540, 50, 1870, 50, 1870, 350, 1540, 350)
+
+; Server cabinet – left wall decoration
+[node name="Cabinet1" type="Polygon2D" parent="Decor"]
+color = Color(0.09, 0.11, 0.16, 1)
+polygon = PackedVector2Array(18, 260, 58, 260, 58, 350, 18, 350)
+
+[node name="Cabinet1Led" type="Polygon2D" parent="Decor"]
+color = Color(0.10, 0.60, 0.65, 1)
+polygon = PackedVector2Array(22, 268, 30, 268, 30, 272, 22, 272)
+
+[node name="Cabinet2" type="Polygon2D" parent="Decor"]
+color = Color(0.09, 0.11, 0.16, 1)
+polygon = PackedVector2Array(66, 260, 106, 260, 106, 350, 66, 350)
+
+[node name="Cabinet2Led" type="Polygon2D" parent="Decor"]
+color = Color(0.10, 0.60, 0.65, 1)
+polygon = PackedVector2Array(70, 268, 78, 268, 78, 272, 70, 272)
+
+; ── Player ────────────────────────────────────────────────────────────────────
+[node name="Player" parent="." instance=ExtResource("2")]
+position = Vector2(100, 325)
+
+; ── Camera ────────────────────────────────────────────────────────────────────
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("3")
+
+; ── Approach platforms ────────────────────────────────────────────────────────
+
+[node name="StartPlatform" type="StaticBody2D" parent="."]
+position = Vector2(100, 380)
+
+[node name="Body" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.10, 0.12, 0.18, 1)
+polygon = PackedVector2Array(-80, -30, 80, -30, 80, 30, -80, 30)
+
+[node name="Top" type="Polygon2D" parent="StartPlatform"]
+color = Color(0.15, 0.65, 0.70, 1)
+polygon = PackedVector2Array(-80, -30, 80, -30, 80, -26, -80, -26)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StartPlatform"]
+shape = SubResource("RS_start")
+
+[node name="C1" type="StaticBody2D" parent="."]
+position = Vector2(310, 330)
+
+[node name="Body" type="Polygon2D" parent="C1"]
+color = Color(0.10, 0.12, 0.18, 1)
+polygon = PackedVector2Array(-35, -8, 35, -8, 35, 8, -35, 8)
+
+[node name="Top" type="Polygon2D" parent="C1"]
+color = Color(0.15, 0.65, 0.70, 1)
+polygon = PackedVector2Array(-35, -8, 35, -8, 35, -4, -35, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="C1"]
+shape = SubResource("RS_mid")
+
+[node name="C2" type="StaticBody2D" parent="."]
+position = Vector2(480, 300)
+
+[node name="Body" type="Polygon2D" parent="C2"]
+color = Color(0.10, 0.12, 0.18, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, 8, -30, 8)
+
+[node name="Top" type="Polygon2D" parent="C2"]
+color = Color(0.15, 0.65, 0.70, 1)
+polygon = PackedVector2Array(-30, -8, 30, -8, 30, -4, -30, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="C2"]
+shape = SubResource("RS_step")
+
+[node name="LaunchPad" type="StaticBody2D" parent="."]
+position = Vector2(660, 300)
+
+[node name="Body" type="Polygon2D" parent="LaunchPad"]
+color = Color(0.10, 0.12, 0.18, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, 8, -40, 8)
+
+[node name="Top" type="Polygon2D" parent="LaunchPad"]
+color = Color(0.15, 0.65, 0.70, 1)
+polygon = PackedVector2Array(-40, -8, 40, -8, 40, -4, -40, -4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LaunchPad"]
+shape = SubResource("RS_wide")
+
+; ── Goal platform ─────────────────────────────────────────────────────────────
+
+[node name="GoalPlatform" type="StaticBody2D" parent="."]
+position = Vector2(1650, 268)
+
+[node name="Body" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.08, 0.18, 0.10, 1)
+polygon = PackedVector2Array(-100, -20, 100, -20, 100, 20, -100, 20)
+
+[node name="Top" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.30, 0.78, 0.35, 1)
+polygon = PackedVector2Array(-100, -20, 100, -20, 100, -16, -100, -16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalPlatform"]
+shape = SubResource("RS_goal")
+
+[node name="FlagPole" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.75, 0.75, 0.80, 1)
+polygon = PackedVector2Array(-2, -20, 2, -20, 2, -62, -2, -62)
+position = Vector2(90, 0)
+
+[node name="Flag" type="Polygon2D" parent="GoalPlatform"]
+color = Color(0.95, 0.85, 0.10, 1)
+polygon = PackedVector2Array(0, -62, 22, -54, 0, -46)
+position = Vector2(90, 0)
+
+[node name="GoalZone" type="Area2D" parent="."]
+position = Vector2(1742, 226)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZone"]
+shape = SubResource("RS_goal_z")
+
+; ── Hazards ──────────────────────────────────────────────────────────────────
+
+[node name="Shredder1" parent="." instance=ExtResource("4")]
+position = Vector2(562, 395)
+
+[node name="Shredder2" parent="." instance=ExtResource("4")]
+position = Vector2(880, 395)
+
+[node name="Shredder3" parent="." instance=ExtResource("4")]
+position = Vector2(1345, 395)
+
+; ── Pickups ───────────────────────────────────────────────────────────────────
+
+[node name="FloaterA" parent="." instance=ExtResource("5")]
+position = Vector2(480, 215)
+
+[node name="FloaterB" parent="." instance=ExtResource("5")]
+position = Vector2(1100, 215)
