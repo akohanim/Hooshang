@@ -16,8 +16,6 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [autoload]
 
-; Shared dialogue system — one instance for the whole game. Any level/cutscene
-; calls Dialogue.say("Speaker", "line", tint) instead of instancing its own box.
 Dialogue="*res://scenes/ui/DialogueBox.tscn"
 
 [display]

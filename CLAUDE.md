@@ -2,8 +2,11 @@
 
 A 2D precision platformer in the spirit of Celeste. Hooshang, an elderly office
 worker, escapes a dark corporate office; Rumi (a golden guide figure) grants
-abilities at story beats. Godot 4.6, GDScript, pixel art at 320x180 (8px tiles,
-window 4x, viewport stretch + integer scaling, nearest filtering).
+abilities at story beats. Godot 4.6, GDScript. **Art direction: modern detailed
+pixel art** (Celeste / Hollow Knight / Dead Cells) — see the Art direction
+section below. The current greybox still runs at 320×180 with 8px placeholder
+tiles (viewport stretch, integer scale, nearest filtering); real art migrates to
+the target grid.
 
 ## Running things
 
@@ -15,6 +18,32 @@ window 4x, viewport stretch + integer scaling, nearest filtering).
   - `Godot --headless --path . res://tests/level1_test.tscn` — Level 1 beats
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
+
+## Art direction
+
+**Modern detailed pixel art** — the fidelity of Celeste / Hollow Knight / Dead
+Cells. Soft gradient shading, dithering, and dynamic 2D lighting are all wanted;
+**explicitly NOT 8-bit/NES flat-palette retro.** This replaces the earlier
+"8-bit" direction. Design doc §7 (Visual & Audio Style) is the source of truth.
+
+Target specs (real art migrates the greybox toward these):
+- Character canvas ~32×48 px; base tile grid 16×16 px.
+- In-engine scale 2×–3× with pixel snapping (nearest filtering, transforms
+  snapped to whole pixels) so detail stays crisp.
+- Extended palette **per Act (~32–64 colors)**; soft gradients/dithering — not
+  flat retro palettes.
+- Walk/run = 8–12 frame cycles.
+
+Per-Act mood: Act I office = desaturated / dim / flickering fluorescent; Act II
+Iran = warm / saturated / sun-drenched; Act III ocean = luminous, brightens with
+depth.
+
+Tooling:
+- **Pixellab MCP prompts:** always request *"detailed pixel art, soft shading,
+  dynamic lighting, NOT 8-bit/NES"* and state the canvas size (e.g. 32×48
+  character, 16×16 tile) — default prompts skew retro.
+- **Godot Light2D:** prototype new lighting in an isolated test scene first;
+  it's finicky on the first pass (blend modes, masks, normal maps, energy/range).
 
 ## Project conventions
 
