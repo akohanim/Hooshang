@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates levels/level1_office.tscn (+ assets/light_radial.png).
+"""Generates scenes/levels/act1_office/Level1Office.tscn (+ assets/light_radial.png).
 
 Level 1: The Office — single brick-walled room, played left -> right.
 Hooshang wakes against the FAR-LEFT wall in his cramped cubicle. A door stands
@@ -12,7 +12,7 @@ Greybox collision is the TileMapLayer; office pixel-art props are layered on
 top purely as decoration (no collision). Grid: 8px tiles, 101 x 26 tiles.
 
 Run from the repo root:  python3 tools/gen_level1.py
-Re-running OVERWRITES hand-edits to level1_office.tscn.
+Re-running OVERWRITES hand-edits to Level1Office.tscn.
 """
 import base64
 import math
@@ -89,31 +89,36 @@ for (x, y) in sorted(brick | gray):
 b64 = base64.b64encode(bytes(data)).decode()
 
 # --------------------------------------------------------------- lamps ----
-# Sparse, dim, cold fluorescents. One hangs over the cubicle (left).
-COLD = "Color(0.78, 0.92, 0.88, 1)"
+# Sparse, dim, cold fluorescents, each an instance of the LampFixture prefab.
+# (x, y, energy, show_body, cable_length). Every lamp shows its cable+bulb so
+# it reads as a real fixture; the cable reaches up to the ceiling slab (bottom
+# edge at y=48 in the open room, y=128 under the low cubicle soffit).
 lamps = [
-    (100, 140, 1.1),  # cubicle lamp (hangs from the low soffit, by the door)
-    (392, 92, 0.8),   # short pillar
-    (564, 92, 0.8),   # tall pillar
-    (760, 112, 0.9),  # exit alcove (right)
+    (100, 140, 1.1, True, 12.0),  # cubicle lamp (hangs from the low soffit)
+    (392, 92, 0.9, True, 44.0),   # short pillar
+    (564, 92, 0.9, True, 44.0),   # tall pillar
+    (760, 112, 0.95, True, 64.0), # exit alcove (right)
 ]
 lamp_nodes = ""
-for i, (x, y, e) in enumerate(lamps):
+for i, (x, y, e, body, cl) in enumerate(lamps):
     lamp_nodes += f"""
-[node name="Lamp{i}" type="PointLight2D" parent="Lamps"]
+[node name="Lamp{i}" parent="Lamps" instance=ExtResource("LAMP_FIXTURE")]
 position = Vector2({x}, {y})
-color = {COLD}
-energy = {e}
-texture = ExtResource("8_light")
-texture_scale = 2.2
+light_energy = {e}
+show_body = {str(body).lower()}
+cable_length = {cl}
 """
 
 # --------------------------------------------------- office-art decor ----
 # (file, center_x, center_y, scale, flip_h, dim). Purely visual, no collision;
 # the dim flag darkens far/background props for a little depth.
 decos = [
+    # Opening cubicle where Hooshang wakes (far left, by the spawn).
+    ("Chair.png",               52,  153, 0.55, False, False),  # his chair
+    ("desk-with-pc.png",        76,  146, 0.42, True,  False),  # his desk
+    # The rest of the office, left -> right.
     ("office-partitions-1.png", 168, 136, 0.50, False, True),   # cubicle backdrop
-    ("desk-with-pc.png",        232, 146, 0.42, False, False),  # Hooshang's desk
+    ("desk-with-pc.png",        232, 146, 0.42, False, False),  # a passing desk
     ("Chair.png",               250, 153, 0.55, True,  False),
     ("worker1.png",             316, 150, 0.40, False, True),   # neighbour cubicle
     ("cabinet.png",             356, 150, 0.42, False, False),
@@ -144,9 +149,19 @@ flip_h = {str(flip).lower()}
 texture = ExtResource("{deco_ids[f]}"){mod}
 """
 
+# Prefab ext ids follow the deco ids to avoid collisions.
+lamp_id = f"{next_id}_lampfixture"
+door_id = f"{next_id + 1}_door"
+sign_id = f"{next_id + 2}_exitsign"
+lamp_ext = (
+    f'[ext_resource type="PackedScene" path="res://scenes/props/lighting/LampFixture.tscn" id="{lamp_id}"]\n'
+    f'[ext_resource type="PackedScene" path="res://scenes/props/Door.tscn" id="{door_id}"]\n'
+    f'[ext_resource type="PackedScene" path="res://scenes/props/ExitSign.tscn" id="{sign_id}"]\n'
+)
+lamp_nodes = lamp_nodes.replace("LAMP_FIXTURE", lamp_id)
+
 labels = [
     (52, 118, "Z / SPACE  jump"),
-    (744, 100, "EXIT"),
 ]
 label_nodes = ""
 for i, (x, y, text) in enumerate(labels):
@@ -161,17 +176,16 @@ theme_override_font_sizes/font_size = 8
 text = "{text}"
 """
 
-scene = f"""[gd_scene load_steps={12 + len(deco_ids)} format=3]
+scene = f"""[gd_scene load_steps={14 + len(deco_ids)} format=3]
 
 [ext_resource type="TileSet" path="res://assets/tileset.tres" id="1_tileset"]
-[ext_resource type="Script" path="res://scripts/level1_office.gd" id="2_script"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
-[ext_resource type="PackedScene" path="res://scenes/checkpoint.tscn" id="4_checkpoint"]
-[ext_resource type="PackedScene" path="res://scenes/debug_overlay.tscn" id="5_debug"]
-[ext_resource type="PackedScene" path="res://scenes/dialogue_box.tscn" id="6_dialogue"]
+[ext_resource type="Script" path="res://scenes/levels/act1_office/level1_office.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/characters/hooshang/Hooshang.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/props/Checkpoint.tscn" id="4_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DebugOverlay.tscn" id="5_debug"]
 [ext_resource type="SpriteFrames" path="res://assets/hooshang_frames.tres" id="7_frames"]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="8_light"]
-{deco_ext}
+{deco_ext}{lamp_ext}
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_intro"]
 size = Vector2(24, 40)
 
@@ -203,47 +217,10 @@ has_dash = false
 
 [node name="Lamps" type="Node2D" parent="."]
 {lamp_nodes}
-[node name="LampCord" type="ColorRect" parent="."]
-offset_left = 99.0
-offset_top = 128.0
-offset_right = 101.0
-offset_bottom = 136.0
-color = Color(0.3, 0.3, 0.34, 1)
-mouse_filter = 2
-
-[node name="LampBulb" type="ColorRect" parent="."]
-offset_left = 96.0
-offset_top = 136.0
-offset_right = 103.0
-offset_bottom = 143.0
-color = Color(0.95, 0.95, 0.8, 1)
-mouse_filter = 2
-
 [node name="Labels" type="Node2D" parent="."]
 {label_nodes}
-[node name="DoorFrame" type="ColorRect" parent="."]
-offset_left = 109.0
-offset_top = 122.0
-offset_right = 131.0
-offset_bottom = 160.0
-color = Color(0.16, 0.11, 0.08, 1)
-mouse_filter = 2
-
-[node name="Door" type="ColorRect" parent="."]
-offset_left = 112.0
-offset_top = 126.0
-offset_right = 128.0
-offset_bottom = 160.0
-color = Color(0.34, 0.22, 0.14, 1)
-mouse_filter = 2
-
-[node name="DoorKnob" type="ColorRect" parent="."]
-offset_left = 114.0
-offset_top = 141.0
-offset_right = 116.0
-offset_bottom = 144.0
-color = Color(0.85, 0.72, 0.35, 1)
-mouse_filter = 2
+[node name="Door" parent="." instance=ExtResource("{door_id}")]
+position = Vector2(109, 122)
 
 [node name="IntroTrigger" type="Area2D" parent="."]
 position = Vector2(120, 140)
@@ -278,6 +255,9 @@ collision_mask = 2
 [node name="Shape" type="CollisionShape2D" parent="DashTrigger"]
 shape = SubResource("RectangleShape2D_dash")
 
+[node name="ExitSign" parent="." instance=ExtResource("{sign_id}")]
+position = Vector2(780, 106)
+
 [node name="ExitTrigger" type="Area2D" parent="."]
 position = Vector2(784, 150)
 collision_layer = 0
@@ -288,8 +268,6 @@ shape = SubResource("RectangleShape2D_exit")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.09, 0.09, 0.12, 1)
-
-[node name="DialogueBox" parent="." instance=ExtResource("6_dialogue")]
 
 [node name="EndScreen" type="CanvasLayer" parent="."]
 layer = 90
@@ -313,7 +291,8 @@ text = "LEVEL COMPLETE"
 [node name="DebugOverlay" parent="." instance=ExtResource("5_debug")]
 """
 
-with open(os.path.join(ROOT, "levels", "level1_office.tscn"), "w") as f:
+out_path = os.path.join(ROOT, "scenes", "levels", "act1_office", "Level1Office.tscn")
+with open(out_path, "w") as f:
     f.write(scene)
-print(f"level1_office.tscn: {len(brick)} brick + {len(gray)} gray tiles, "
+print(f"Level1Office.tscn: {len(brick)} brick + {len(gray)} gray tiles, "
       f"{len(lamps)} lamps, {len(decos)} props")

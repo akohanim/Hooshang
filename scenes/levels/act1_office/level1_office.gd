@@ -27,8 +27,10 @@ var _completed := false
 
 @onready var rumi: AnimatedSprite2D = $Rumi
 @onready var rumi_light: PointLight2D = $RumiLight
-@onready var dialogue: DialogueBox = $DialogueBox
 @onready var end_screen: CanvasLayer = $EndScreen
+@onready var door: Door = $Door
+## The shared dialogue system (autoload singleton), not a per-level instance.
+@onready var dialogue: DialogueBox = Dialogue
 
 
 func _ready() -> void:
@@ -49,8 +51,10 @@ func _on_intro_trigger_entered(body: Node2D) -> void:
 
 func _play_intro() -> void:
 	player.input_locked = true
+	# Rumi appears and speaks to Hooshang FIRST, then the door opens outward.
 	await _rumi_appear($Rumi.position)
 	await dialogue.say("Rumi", RUMI_INTRO_LINE, RUMI_GOLD)
+	door.open()
 	await _rumi_vanish()
 	player.input_locked = false
 
@@ -69,10 +73,7 @@ func _grant_dash_scene() -> void:
 	await dialogue.say("Rumi", RUMI_DASH_LINE, RUMI_GOLD)
 
 	# The gift: a golden pulse on Hooshang, then dash is his.
-	# (self_modulate so it doesn't fight the dash-tint logic on modulate.)
-	var pulse := create_tween()
-	pulse.tween_property(player.visual, "self_modulate", Color(3.0, 2.6, 1.6), 0.15)
-	pulse.tween_property(player.visual, "self_modulate", Color.WHITE, 0.35)
+	player.flash()
 	player.has_dash = true
 
 	await dialogue.say("", DASH_HINT)  # system hint, no portrait

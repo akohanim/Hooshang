@@ -9,7 +9,7 @@ var player: Player
 
 
 func _ready() -> void:
-	var packed: PackedScene = load("res://levels/test_level.tscn")
+	var packed: PackedScene = load("res://scenes/levels/TestLevel.tscn")
 	level = packed.instantiate()
 	add_child(level)
 	player = level.get_node("Player")

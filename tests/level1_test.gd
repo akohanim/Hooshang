@@ -10,7 +10,7 @@ var player: Player
 
 
 func _ready() -> void:
-	var packed: PackedScene = load("res://levels/level1_office.tscn")
+	var packed: PackedScene = load("res://scenes/levels/act1_office/Level1Office.tscn")
 	level = packed.instantiate()
 	add_child(level)
 	player = level.get_node("Player")
@@ -23,12 +23,15 @@ func _run() -> void:
 	_check(not player.input_locked, "player has control at start")
 	_check(player.is_on_floor(), "stands in the left cubicle")
 	_check(not player.has_dash, "dash is LOCKED at level start")
+	_check(get_tree().get_nodes_in_group("lights").size() == 4,
+		"4 LampFixture prefabs registered in the 'lights' group")
 
 	# --- Beat 1: walk to the door; reaching it triggers Rumi's intro. ---
 	player.global_position = Vector2(120, 150)  # into the IntroTrigger at the door
 	await _frames(20)
 	_check(player.input_locked, "reaching the door starts Rumi's intro")
 	_check(level.get_node("Rumi").modulate.a > 0.1, "Rumi appears at the door")
+	_check(not level.get_node("Door").is_open, "door stays shut until Rumi has spoken")
 
 	# Advance the single intro line (reveal-skip + dismiss); wait for unlock.
 	for i in 40:
@@ -38,6 +41,11 @@ func _run() -> void:
 		await _frames(10)
 	_check(not player.input_locked, "gameplay resumes after the intro")
 	_check(not player.has_dash, "intro does NOT grant dash")
+	# The door opened (outward = flattened) after Rumi's line.
+	_check(level.get_node("Door").is_open, "the door opens after Rumi's line")
+	await _frames(35)  # let the flatten tween run
+	_check(level.get_node("Door/Hinge").scale.x < 0.5,
+		"door leaf flattened open (swings outward)")
 
 	# Dash button must still do nothing before the second Rumi beat.
 	Input.action_press("dash")

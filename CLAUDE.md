@@ -8,34 +8,51 @@ window 4x, viewport stretch + integer scaling, nearest filtering).
 ## Running things
 
 - Godot binary (this machine): `/Users/ari/Downloads/Godot.app/Contents/MacOS/Godot`
-- Main scene: `levels/level1_office.tscn` (Level 1: The Office)
-- Movement test gym: `levels/test_level.tscn` (8 labeled sections, one per mechanic)
+- Main scene: `scenes/levels/act1_office/Level1Office.tscn` (Level 1: The Office)
+- Movement test gym: `scenes/levels/TestLevel.tscn` (8 labeled sections, one per mechanic)
 - Headless tests (run after any player/level change, exit code 0 = pass):
   - `Godot --headless --path . res://tests/smoke_test.tscn` — movement physics
   - `Godot --headless --path . res://tests/level1_test.tscn` — Level 1 beats
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 
+## Project conventions
+
+**Read `STYLE_GUIDE.md` and follow it by default.** In short: composite objects
+(anything that's more than one node acting as one thing) are their own `.tscn`
+prefab, instanced everywhere and tweaked via `@export`s — never assembled inline
+in a level. Folders mirror categories under `scenes/` (`props/{lighting,
+furniture,hazards}`, `characters/`, `levels/`, `ui/`); scripts sit next to their
+scene. Scenes/nodes are `PascalCase`, scripts/vars `snake_case`. Use groups to
+find things (`lights`, `player`, `checkpoint`, `hazard`), signals + methods over
+reaching across the tree, autoloads (`systems/`) for cross-level services, and
+`.tres` in `resources/` for data that repeats.
+
 ## Layout
 
-- `scripts/player.gd` — the whole controller: state machine (IDLE, RUN, JUMP,
-  FALL, DASH, WALL_SLIDE, DEAD), all physics as exported/grouped/commented
-  vars. Abilities gate on flags (`has_dash`); cutscenes use `input_locked`.
-  All player visuals go through `_update_visual()` only.
-- `scripts/level.gd` — `LevelBase`: camera limits, checkpoint group wiring,
-  kill plane (`kill_y`), fast respawn (~0.15s), R = retry. Levels extend it
-  (see `level1_office.gd` for cutscene/trigger patterns).
-- `scripts/dialogue_box.gd` — reusable typewriter dialogue: `await box.say(speaker, text)`.
-- `scenes/` — player, checkpoint, hazard (both @tool, size-exported), debug
-  overlay (F3), dialogue box. `assets/hooshang_frames.tres` = SpriteFrames
-  from the samurai pack (`assets/FREE_Samurai .../Sprites`); Rumi reuses it
-  tinted gold.
+- `scenes/characters/hooshang/` — `Hooshang.tscn` + `player.gd`: the whole
+  controller, a state machine (IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD),
+  all physics as exported/grouped/commented vars. Abilities gate on flags
+  (`has_dash`); cutscenes use `input_locked`; all visuals go through
+  `_update_visual()`. Cosmetic asks come in via methods (`flash()`,
+  `set_camera_limits()`), not reach-ins.
+- `scripts/level_base.gd` — `LevelBase`: camera limits, checkpoint group wiring,
+  kill plane (`kill_y`), fast respawn (~0.15s), R = retry. Levels `extends
+  LevelBase` (see `scenes/levels/act1_office/level1_office.gd` for cutscene/
+  trigger patterns).
+- `scenes/ui/` — `DialogueBox.tscn` (Celeste-style banner + portrait; registered
+  as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint)`) and
+  `DebugOverlay.tscn` (F3).
+- `scenes/props/` — `Checkpoint.tscn`, `hazards/Hazard.tscn` (both @tool,
+  size-exported), `lighting/LampFixture.tscn` (reusable lamp; joins `lights`).
+- `assets/hooshang_frames.tres` = SpriteFrames from the samurai pack
+  (`assets/FREE_Samurai .../Sprites`); Rumi reuses it tinted gold.
 - `tools/gen_level.py`, `tools/gen_level1.py` — regenerate the greybox levels
-  (tilemap bytes + node layout). Re-running OVERWRITES hand-edits to the
-  .tscn. Levels are dark (CanvasModulate ~0.09) + PointLight2D lamps using
-  `assets/light_radial.png`.
+  (tilemap bytes + node layout, incl. prefab instances). Re-running OVERWRITES
+  hand-edits to the generated `.tscn`. Levels are dark (CanvasModulate ~0.09) +
+  `LampFixture` instances.
 
-## Conventions
+## Physics/level conventions
 
 - Physics layer 1 = world, 2 = player. Areas (hazard/checkpoint/triggers)
   collide with mask 2 only.

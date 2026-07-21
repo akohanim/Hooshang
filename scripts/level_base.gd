@@ -26,11 +26,7 @@ var current_checkpoint := Vector2.ZERO
 
 func _ready() -> void:
 	current_checkpoint = $SpawnPoint.global_position
-	var cam: Camera2D = player.get_node("Camera2D")
-	cam.limit_left = camera_limits.position.x
-	cam.limit_top = camera_limits.position.y
-	cam.limit_right = camera_limits.end.x
-	cam.limit_bottom = camera_limits.end.y
+	player.set_camera_limits(camera_limits)
 	player.died.connect(_on_player_died)
 	for cp in get_tree().get_nodes_in_group("checkpoint"):
 		cp.activated.connect(_on_checkpoint_activated)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates assets/tiles.png and levels/test_level.tscn for Hooshang.
+"""Generates assets/tiles.png and scenes/levels/TestLevel.tscn for Hooshang.
 
 The level is a linear gauntlet; each section isolates one movement mechanic.
 Tile grid: 8px tiles. Level bounds: 302 x 46 tiles = 2416 x 368 px.
@@ -37,8 +37,37 @@ def make_tile(base, light, dark):
         t[i][7] = dark
     return t
 
+def make_brick():
+    # NYC / Super-Mario style red brick: two 3px courses of running-bond
+    # bricks separated by dark mortar. The head joints (vertical mortar) are
+    # offset half a brick between the two courses, so tiling gives the classic
+    # staggered wall. Each brick gets a lit top pixel and a shaded bottom pixel.
+    BRICK = (168, 62, 47, 255)   # red brick face
+    HI    = (201, 99, 80, 255)   # sunlit top of each brick
+    LO    = (138, 47, 35, 255)   # shaded bottom of each brick
+    MORTAR = (58, 43, 41, 255)   # dark mortar joints
+    t = [[BRICK] * 8 for _ in range(8)]
+    for y in range(8):
+        for x in range(8):
+            if y == 3 or y == 7:                 # horizontal bed joints
+                t[y][x] = MORTAR
+            elif y < 3:                          # top course
+                if x == 0:                       # head joint at the left edge
+                    t[y][x] = MORTAR
+                else:
+                    t[y][x] = HI if y == 0 else LO if y == 2 else BRICK
+            else:                                # bottom course (offset joint)
+                if x == 4:                       # head joint in the middle
+                    t[y][x] = MORTAR
+                else:
+                    t[y][x] = HI if y == 4 else LO if y == 6 else BRICK
+    return t
+
+# tile0 = neutral grey — used for OBSTACLES (pillars, desk collision) so they
+# stay visually distinct from the walls. tile1 = the building's red brick,
+# used for the room shell (walls/ceiling/floor).
 tile0 = make_tile((140, 145, 155, 255), (190, 195, 205, 255), (95, 100, 110, 255))
-tile1 = make_tile((90, 70, 105, 255), (130, 105, 150, 255), (60, 45, 75, 255))
+tile1 = make_brick()
 pixels = [tile0[y] + tile1[y] for y in range(8)]
 write_png(os.path.join(ROOT, "assets", "tiles.png"), 16, 8, pixels)
 
@@ -128,11 +157,11 @@ text = "{text}"
 scene = f"""[gd_scene load_steps=7 format=3]
 
 [ext_resource type="TileSet" path="res://assets/tileset.tres" id="1_tileset"]
-[ext_resource type="Script" path="res://scripts/level.gd" id="2_level"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
-[ext_resource type="PackedScene" path="res://scenes/checkpoint.tscn" id="4_checkpoint"]
-[ext_resource type="PackedScene" path="res://scenes/hazard.tscn" id="5_hazard"]
-[ext_resource type="PackedScene" path="res://scenes/debug_overlay.tscn" id="6_debug"]
+[ext_resource type="Script" path="res://scripts/level_base.gd" id="2_level"]
+[ext_resource type="PackedScene" path="res://scenes/characters/hooshang/Hooshang.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/props/Checkpoint.tscn" id="4_checkpoint"]
+[ext_resource type="PackedScene" path="res://scenes/props/hazards/Hazard.tscn" id="5_hazard"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DebugOverlay.tscn" id="6_debug"]
 
 [node name="TestLevel" type="Node2D"]
 script = ExtResource("2_level")
@@ -178,7 +207,7 @@ color = Color(1, 1, 1, 1)
 [node name="DebugOverlay" parent="." instance=ExtResource("6_debug")]
 """
 
-with open(os.path.join(ROOT, "levels", "test_level.tscn"), "w") as f:
+with open(os.path.join(ROOT, "scenes", "levels", "TestLevel.tscn"), "w") as f:
     f.write(scene)
 
 print(f"tiles: {len(solid)} cells, scene + png written")

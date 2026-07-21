@@ -362,3 +362,23 @@ func respawn(at: Vector2) -> void:
 
 func state_name() -> String:
 	return State.keys()[state]
+
+
+# ------------------------------------------------------------- cosmetics ----
+# Small API so other nodes ask the player to do a thing, rather than reaching
+# into its child sprite/camera directly.
+
+## Brief cosmetic flash on the sprite (e.g. Rumi granting an ability). Visual
+## only — uses self_modulate so it doesn't fight the dash-tint on modulate.
+func flash(color := Color(3.0, 2.6, 1.6), rise := 0.15, fall := 0.35) -> void:
+	var t := create_tween()
+	t.tween_property(visual, "self_modulate", color, rise)
+	t.tween_property(visual, "self_modulate", Color.WHITE, fall)
+
+
+## Clamp the follow-camera to a level's bounds (pixels). Called by LevelBase.
+func set_camera_limits(bounds: Rect2i) -> void:
+	camera.limit_left = bounds.position.x
+	camera.limit_top = bounds.position.y
+	camera.limit_right = bounds.end.x
+	camera.limit_bottom = bounds.end.y
