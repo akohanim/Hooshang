@@ -18,6 +18,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	Game.test_mode = true  # exercise level progression without swapping scenes
 	# --- Start: Hooshang has control and stands in his left cubicle. ---
 	await _frames(20)
 	_check(not player.input_locked, "player has control at start")
@@ -95,15 +96,15 @@ func _run() -> void:
 	_check(player.global_position.distance_to(Vector2(48, 154)) < 24.0,
 		"respawns at the spawn point (pos=%s)" % player.global_position)
 
-	# Exit trigger in the alcove on the far-right wall.
+	# The exit sign advances the game to Level 2 (Celeste-style flow + checkpoint).
 	player.global_position = Vector2(784, 150)
-	var done := false
-	for i in 60:
+	var advanced := false
+	for i in 40:
 		await _frames(1)
-		if level.get_node("EndScreen").visible:
-			done = true
+		if Game.current_index == 1:
+			advanced = true
 			break
-	_check(done, "exit trigger shows LEVEL COMPLETE")
+	_check(advanced, "reaching the exit advances to Level 2")
 
 	if failures.is_empty():
 		print("LEVEL1 TEST: ALL PASS")

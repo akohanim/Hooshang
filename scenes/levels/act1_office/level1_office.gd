@@ -23,21 +23,18 @@ const DASH_RUMI_POS := Vector2(540.0, 154.0)
 
 var _intro_played := false
 var _dash_granted := false
-var _completed := false
 
 @onready var rumi: AnimatedSprite2D = $Rumi
 @onready var rumi_light: PointLight2D = $RumiLight
-@onready var end_screen: CanvasLayer = $EndScreen
 @onready var door: Door = $Door
 ## The shared dialogue system (autoload singleton), not a per-level instance.
 @onready var dialogue: DialogueBox = Dialogue
 
 
 func _ready() -> void:
-	super()
+	super()  # LevelBase wires the exit sign -> advance to Level 2
 	$IntroTrigger.body_entered.connect(_on_intro_trigger_entered)
 	$DashTrigger.body_entered.connect(_on_dash_trigger_entered)
-	$ExitTrigger.body_entered.connect(_on_exit_entered)
 	# Player keeps control at start and walks the few paces to the door.
 
 
@@ -101,12 +98,3 @@ func _rumi_vanish() -> void:
 	t.tween_property(rumi, "modulate:a", 0.0, 0.5)
 	t.tween_property(rumi_light, "energy", 0.0, 0.5)
 	await t.finished
-
-
-func _on_exit_entered(body: Node2D) -> void:
-	if body != player or _completed:
-		return
-	_completed = true
-	print("LEVEL COMPLETE")
-	player.input_locked = true
-	end_screen.visible = true

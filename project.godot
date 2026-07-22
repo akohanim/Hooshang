@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 [autoload]
 
 Dialogue="*res://scenes/ui/DialogueBox.tscn"
+Game="*res://systems/game.gd"
 
 [display]
 

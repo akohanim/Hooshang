@@ -16,6 +16,8 @@ the target grid.
 - Headless tests (run after any player/level change, exit code 0 = pass):
   - `Godot --headless --path . res://tests/smoke_test.tscn` — movement physics
   - `Godot --headless --path . res://tests/level1_test.tscn` — Level 1 beats
+  - `Godot --headless --path . res://tests/level2_test.tscn` — Level 2 jumps
+  - `Godot --headless --path . res://tests/flow_test.tscn` — Level 1→2 transition
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 
@@ -66,9 +68,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `_update_visual()`. Cosmetic asks come in via methods (`flash()`,
   `set_camera_limits()`), not reach-ins.
 - `scripts/level_base.gd` — `LevelBase`: camera limits, checkpoint group wiring,
-  kill plane (`kill_y`), fast respawn (~0.15s), R = retry. Levels `extends
+  kill plane (`kill_y`), fast respawn (~0.15s), R = retry, and exit wiring — any
+  Area2D in the `exit` group advances the game (see below). Levels `extends
   LevelBase` (see `scenes/levels/act1_office/level1_office.gd` for cutscene/
   trigger patterns).
+- `systems/game.gd` — `Game` autoload: level progression + Celeste-style fade
+  transitions. `Game.LEVELS` is the ordered scene list; reaching a level's exit
+  sign fades out, loads the next, fades in. The loaded level is the running
+  checkpoint (death respawns at its start; completed levels never replay).
+  `Game.test_mode = true` exercises progression without swapping scenes.
 - `scenes/ui/` — `DialogueBox.tscn` (Celeste-style banner + portrait; registered
   as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint)`) and
   `DebugOverlay.tscn` (F3).

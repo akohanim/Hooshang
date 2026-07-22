@@ -20,6 +20,7 @@ extends Node2D
 @export var respawn_delay := 0.15
 
 var current_checkpoint := Vector2.ZERO
+var _exiting := false
 
 @onready var player: Player = $Player
 
@@ -30,6 +31,21 @@ func _ready() -> void:
 	player.died.connect(_on_player_died)
 	for cp in get_tree().get_nodes_in_group("checkpoint"):
 		cp.activated.connect(_on_checkpoint_activated)
+	# Tell the progression system which level this is (banks it as a checkpoint),
+	# and wire every exit sign so walking through one advances to the next level.
+	Game.set_current(scene_file_path)
+	for ex in get_tree().get_nodes_in_group("exit"):
+		ex.body_entered.connect(_on_exit_reached)
+
+
+## An exit sign doubles as the level-to-level checkpoint: pass through it and the
+## game moves on (Celeste-style), never sending you back through this level.
+func _on_exit_reached(body: Node2D) -> void:
+	if body != player or _exiting:
+		return
+	_exiting = true
+	player.input_locked = true  # freeze during the fade-out
+	Game.advance()
 
 
 func _physics_process(_delta: float) -> void:

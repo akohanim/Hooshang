@@ -258,7 +258,7 @@ shape = SubResource("RectangleShape2D_dash")
 [node name="ExitSign" parent="." instance=ExtResource("{sign_id}")]
 position = Vector2(780, 106)
 
-[node name="ExitTrigger" type="Area2D" parent="."]
+[node name="ExitTrigger" type="Area2D" parent="." groups=["exit"]]
 position = Vector2(784, 150)
 collision_layer = 0
 collision_mask = 2
@@ -268,25 +268,6 @@ shape = SubResource("RectangleShape2D_exit")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
 color = Color(0.09, 0.09, 0.12, 1)
-
-[node name="EndScreen" type="CanvasLayer" parent="."]
-layer = 90
-visible = false
-
-[node name="Dim" type="ColorRect" parent="EndScreen"]
-offset_right = 320.0
-offset_bottom = 180.0
-color = Color(0, 0, 0, 0.85)
-
-[node name="Text" type="Label" parent="EndScreen"]
-offset_left = 60.0
-offset_top = 80.0
-offset_right = 260.0
-offset_bottom = 100.0
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
-theme_override_font_sizes/font_size = 16
-text = "LEVEL COMPLETE"
 
 [node name="DebugOverlay" parent="." instance=ExtResource("5_debug")]
 """
