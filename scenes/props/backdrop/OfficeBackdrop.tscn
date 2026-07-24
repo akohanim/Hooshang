@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://d5h1xyhqonom"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/MoonWindow.tscn" id="2_moonwin"]
+[ext_resource type="Texture2D" uid="uid://c2jnylo5tb50w" path="res://assets/background/paper1.png" id="4_paper1"]
+[ext_resource type="Texture2D" uid="uid://cqvoenjqqhvx" path="res://assets/background/paper2.png" id="5_paper2"]
+
+[sub_resource type="ParticleProcessMaterial" id="paper_mat"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(440, 90, 1)
+direction = Vector3(-1, 0.15, 0)
+spread = 25.0
+initial_velocity_min = 5.0
+initial_velocity_max = 14.0
+angular_velocity_min = -35.0
+angular_velocity_max = 35.0
+gravity = Vector3(0, 2, 0)
+scale_min = 0.14
+scale_max = 0.22
+
+[node name="OfficeBackdrop" type="Node2D" unique_id=2058013537]
+
+[node name="Background" type="Parallax2D" parent="." unique_id=1080750826]
+scroll_scale = Vector2(0.2, 0.2)
+
+[node name="Midground" type="Parallax2D" parent="." unique_id=801527263]
+scroll_scale = Vector2(0.5, 0.5)
+
+[node name="MoonWindow" parent="Midground" unique_id=1975254353 instance=ExtResource("2_moonwin")]
+position = Vector2(400, 66)
+
+[node name="Atmosphere" type="Parallax2D" parent="." unique_id=1013334864]
+scroll_scale = Vector2(0.7, 0.7)
+
+[node name="Papers" type="GPUParticles2D" parent="Atmosphere" unique_id=100863303]
+modulate = Color(1, 1, 1, 0.5)
+position = Vector2(404, 96)
+amount = 14
+texture = ExtResource("4_paper1")
+lifetime = 11.0
+preprocess = 6.0
+randomness = 1.0
+process_material = SubResource("paper_mat")
+
+[node name="Papers2" type="GPUParticles2D" parent="Atmosphere" unique_id=1931653513]
+modulate = Color(1, 1, 1, 0.45)
+position = Vector2(404, 120)
+texture = ExtResource("5_paper2")
+lifetime = 13.0
+preprocess = 7.0
+randomness = 1.0
+process_material = SubResource("paper_mat")

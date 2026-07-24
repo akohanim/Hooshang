@@ -98,7 +98,49 @@ layout. **Re-running a generator overwrites hand-edits to that `.tscn`**, so
 change the generator, not the scene, for generated levels. Prefab instances,
 exports, and paths are emitted from the generator too.
 
-## 8. After any change
+## 8. Parallax backdrops (visual depth layers)
+
+Every level's background is a **backdrop prefab** (`scenes/props/backdrop/`,
+e.g. `OfficeBackdrop.tscn`), instanced as the level's first child. It gives the
+Celeste-style depth without touching gameplay. Standard structure:
+
+- **The backdrop root is a plain `Node2D`** (e.g. `OfficeBackdrop.tscn`),
+  instanced as the level's *first* child — normal 2D draw order then puts it
+  behind every later sibling (terrain, decor, player) with no `z_index` needed.
+  **Do not wrap it in a `CanvasLayer`.** `Parallax2D` already tracks the active
+  camera on its own (`follow_viewport`, default true) with no `CanvasLayer`
+  involved. A `CanvasLayer` was tried here for two reasons — render-behind
+  (unnecessary, see above) and exempting the backdrop from the level's dark
+  `CanvasModulate` — but `CanvasLayer` content does not preview correctly
+  nested inside a scene in the Godot **editor**: it renders at a fixed
+  screen-space position instead of panning with the rest of the level, so it
+  visibly drifts and overlaps the play area as soon as you scroll the 2D view.
+  It looked fine at runtime and broke authoring. If a backdrop ever needs to
+  ignore the room's `CanvasModulate`, don't reach for `CanvasLayer` or
+  overbright inverse-modulate math (tried, produced blown-out color — Godot's
+  pipeline isn't a flat linear multiply) — in practice the room's dark tint
+  reads fine on backdrop art too (moody, consistent with the foreground), so
+  the simplest option — no compensation at all — is usually correct.
+- **One `Parallax2D` per depth, back to front**, via `scroll_scale` (lower =
+  deeper = moves less):
+  - `Background` `0.2` — brick wall (barely moves).
+  - `Midground` `0.5` — office decoration: cubicles, the moon-window.
+  - `Atmosphere` `0.7` — drifting-paper `GPUParticles2D` (looping, no collision).
+- **Foreground = the level's own nodes** (terrain, player, hazards, props) on
+  canvas layer 0, moving 1:1. The backdrop never adds collision or gameplay.
+- **Coverage rule:** a layer that must fill the screen uses a **`Sprite2D` with
+  a `Texture2D`** — never a `TileMapLayer` — because `Parallax2D.repeat_size`
+  only tiles textures. Make the texture WIDER than the viewport (the brick strip
+  is 896px) and set `repeat_size` to its width. (This was the fix for persistent
+  coverage gaps.)
+- **Composite background objects are their own prefab** (e.g. `MoonWindow.tscn`
+  = navy backing + moon + frame) instanced in the midground — same prefab rule
+  as §1.
+
+Dev aid: `tests/screenshot.tscn` renders a level windowed and saves viewport
+PNGs at chosen camera x positions — use it to check backdrops without the editor.
+
+## 9. After any change
 
 Run the headless tests (exit 0 = pass) and confirm a clean boot:
 

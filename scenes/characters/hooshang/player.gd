@@ -107,17 +107,26 @@ var wall_lock_timer := 0.0      # reduced air control after wall jump
 
 var dash_dir := Vector2.RIGHT
 
-# The sprite sits at 0.5 scale (96px source frames -> ~17px tall on screen)
-# with its feet offset-pinned to the bottom of the 8x12 hitbox.
-@onready var visual: AnimatedSprite2D = $Visual
+# The sprite sits at 0.55 scale (60px source frames -> ~17px tall on screen)
+# with its feet offset-pinned to the bottom of the 8x12 hitbox. It lives
+# inside SpriteSquash, a wrapper Node2D that Juice scale-tweens for squash &
+# stretch — Visual's own scale/offset above are never touched by that, so
+# they stay exactly as tuned regardless of what juice.gd is doing.
+@onready var visual: AnimatedSprite2D = $SpriteSquash/Visual
 @onready var body_shape: CollisionShape2D = $CollisionShape2D
 @onready var camera: Camera2D = $Camera2D
+@onready var juice: Juice = $Juice
 
 
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
 	# Dash hitstop: freeze everything for a few frames, then resume.
+	# Engine.time_scale (see juice.hitstop()) does NOT shrink this `delta` —
+	# it changes how often fixed-delta physics ticks happen in real time, not
+	# the delta value itself. So this counts down in exactly the same number
+	# of physics FRAMES either way; hitstop just stretches out how much real
+	# wall-clock time those frames take, which is the whole point of it.
 	if freeze_timer > 0.0:
 		freeze_timer -= delta
 		return
@@ -145,8 +154,9 @@ func _physics_process(delta: float) -> void:
 		State.WALL_SLIDE:
 			_state_wall_slide(delta)
 
+	var incoming_vel_y := velocity.y  # fall speed just before landing is resolved, for juice.on_land()
 	move_and_slide()
-	_post_move(was_on_floor, input_x)
+	_post_move(was_on_floor, input_x, incoming_vel_y)
 	_update_visual()
 
 
@@ -192,6 +202,7 @@ func _state_air(delta: float, input_x: float) -> void:
 func _state_dash(delta: float) -> void:
 	# Fixed direction and speed, no gravity: the dash "owns" the player.
 	velocity = dash_dir * dash_speed
+	juice.dash_tick(delta)
 	dash_timer -= delta
 	if dash_timer <= 0.0:
 		velocity = dash_dir * dash_end_speed  # keep some momentum
@@ -236,6 +247,7 @@ func _try_buffered_jump() -> bool:
 		coyote_timer = 0.0
 		velocity.y = -jump_speed
 		state = State.JUMP
+		juice.on_jump()
 		return true
 	return false
 
@@ -255,6 +267,7 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 	velocity = Vector2(-from_wall_dir * wall_jump_speed_x, -jump_speed)
 	wall_lock_timer = wall_jump_lock_time
 	state = State.JUMP
+	juice.on_jump()
 
 
 func _try_dash() -> bool:
@@ -278,16 +291,18 @@ func _try_dash() -> bool:
 	dash_cooldown_timer = dash_time + dash_cooldown
 	freeze_timer = dash_freeze_time
 	state = State.DASH
+	juice.on_dash_start(dash_dir)
 	return true
 
 
 ## Transitions that depend on what move_and_slide() just discovered.
-func _post_move(was_on_floor: bool, input_x: float) -> void:
+func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> void:
 	if state == State.DASH or state == State.DEAD:
 		return
 	if is_on_floor():
 		dash_available = true  # dash refreshes on landing
 		if state == State.FALL or state == State.JUMP or state == State.WALL_SLIDE:
+			juice.on_land(incoming_vel_y)
 			state = State.RUN if input_x != 0.0 else State.IDLE
 		return
 
@@ -323,12 +338,14 @@ func _update_visual() -> void:
 		State.FALL:
 			visual.play("fall")
 		State.DASH:
-			visual.play("dash")  # white-silhouette flash frame
+			visual.play("dash")  # forward lunge burst, one-shot
 		State.WALL_SLIDE:
-			visual.play("wall_slide")
+			visual.play("wall_slide")  # reuses the idle pose; tinted below to read distinctly
 	# Dash availability tint (our stand-in for Celeste's hair color):
 	# normal colors = dash ready, cool blue tint = dash spent.
-	if state != State.DASH:
+	if state == State.WALL_SLIDE:
+		visual.modulate = Color(0.65, 0.65, 0.72)
+	elif state != State.DASH:
 		visual.modulate = Color.WHITE if dash_available else Color(0.6, 0.75, 1.0)
 
 

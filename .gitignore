@@ -3,3 +3,6 @@
 
 # macOS
 .DS_Store
+
+# Local MCP server config (contains an API token — never commit)
+.mcp.json

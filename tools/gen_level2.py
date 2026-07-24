@@ -12,8 +12,9 @@ Measured max jump+dash reach is 87px at a 3-tile rise but 90px at a 2-tile rise
 Miss any gap and you fall into the pit (kill plane) and respawn at the start.
 No checkpoints.
 
-The room is red brick (a non-colliding background fill) like Level 1, with a
-colliding brick border and grey platforms.
+The room has a thin colliding brick shell (ceiling + walls) and grey platforms;
+the interior is hollow, revealing the OfficeBackdrop prefab (moon-window,
+drifting papers) behind it — same treatment as Level 1.
 
 Run from repo root:  python3 tools/gen_level2.py
 Re-running OVERWRITES hand-edits to Level2.tscn.
@@ -26,6 +27,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 W_TILES, H_TILES = 72, 34             # 576 x 272 px
 brick, gray = set(), set()
+
+# Backdrop placement (OfficeBackdrop's moon-window + paper drift), in the open
+# wall space above the platforms, roughly centered over the jump sequence.
+BACKDROP_MOON_X, BACKDROP_MOON_Y = 280, 90
 
 def rect(dst, x0, y0, x1, y1):
     for x in range(x0, x1 + 1):
@@ -64,11 +69,6 @@ def tilemap_bytes(cells):
 # Foreground (colliding): red-brick shell (atlas 1) + grey platforms (atlas 0).
 fg = [(x, y, 1) for (x, y) in sorted(brick)] + [(x, y, 0) for (x, y) in sorted(gray)]
 fg_b64 = tilemap_bytes(sorted(set((x, y, a) for (x, y, a) in fg)))
-
-# Background (non-colliding): red brick everywhere, so the whole room reads as
-# the brick building behind the play area.
-bg_cells = [(x, y, 1) for x in range(W_TILES) for y in range(H_TILES)]
-bg_b64 = tilemap_bytes(bg_cells)
 
 # P3's own (local) tiles — 13 wide x 2 tall grey slab, placed at P3_X/P3_SURF.
 p3_b64 = tilemap_bytes([(x, y, 0) for x in range(P3_W) for y in range(2)])
@@ -111,7 +111,7 @@ text = "{text}"
 spawn_x, spawn_y = 52, 218        # on P0 (top_row 28 -> surface y=224)
 exit_x, exit_y = 480, 154         # on P3 (top_row 20 -> surface y=160), near right end
 
-scene = f"""[gd_scene load_steps=9 format=3]
+scene = f"""[gd_scene load_steps=10 format=3]
 
 [ext_resource type="TileSet" path="res://assets/tileset.tres" id="1_tileset"]
 [ext_resource type="Script" path="res://scripts/level_base.gd" id="2_script"]
@@ -120,6 +120,7 @@ scene = f"""[gd_scene load_steps=9 format=3]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="5_light"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/LampFixture.tscn" id="6_lamp"]
 [ext_resource type="PackedScene" path="res://scenes/props/ExitSign.tscn" id="7_sign"]
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/OfficeBackdrop.tscn" id="8_backdrop"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_exit"]
 size = Vector2(20, 24)
@@ -129,10 +130,16 @@ script = ExtResource("2_script")
 camera_limits = Rect2i(0, 0, {W_TILES * 8}, {H_TILES * 8})
 kill_y = {(H_TILES - 1) * 8}.0
 
-[node name="Background" type="TileMapLayer" parent="."]
-tile_map_data = PackedByteArray("{bg_b64}")
-tile_set = ExtResource("1_tileset")
-collision_enabled = false
+[node name="OfficeBackdrop" parent="." instance=ExtResource("8_backdrop")]
+
+[node name="MoonWindow" parent="OfficeBackdrop/Midground" index="0"]
+position = Vector2({BACKDROP_MOON_X}, {BACKDROP_MOON_Y})
+
+[node name="Papers" parent="OfficeBackdrop/Atmosphere" index="0"]
+position = Vector2({BACKDROP_MOON_X}, {BACKDROP_MOON_Y + 10})
+
+[node name="Papers2" parent="OfficeBackdrop/Atmosphere" index="1"]
+position = Vector2({BACKDROP_MOON_X - 40}, {BACKDROP_MOON_Y + 40})
 
 [node name="Terrain" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("{fg_b64}")
@@ -177,7 +184,7 @@ out = os.path.join(ROOT, "scenes", "levels", "act1_office", "Level2.tscn")
 with open(out, "w") as f:
     f.write(scene)
 
-print(f"Level2.tscn: {len(brick)} brick + {len(gray)} gray tiles (+ {W_TILES*H_TILES} bg)")
+print(f"Level2.tscn: {len(brick)} brick shell + {len(gray)} gray platform tiles, hollow interior")
 for i in range(len(PLATFORMS) - 1):
     a, b = PLATFORMS[i], PLATFORMS[i + 1]
     gap = b[0] * 8 - (a[1] + 1) * 8

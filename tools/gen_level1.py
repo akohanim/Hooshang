@@ -183,8 +183,9 @@ scene = f"""[gd_scene load_steps={14 + len(deco_ids)} format=3]
 [ext_resource type="PackedScene" path="res://scenes/characters/hooshang/Hooshang.tscn" id="3_player"]
 [ext_resource type="PackedScene" path="res://scenes/props/Checkpoint.tscn" id="4_checkpoint"]
 [ext_resource type="PackedScene" path="res://scenes/ui/DebugOverlay.tscn" id="5_debug"]
-[ext_resource type="SpriteFrames" path="res://assets/hooshang_frames.tres" id="7_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/rumi_frames.tres" id="7_frames"]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="8_light"]
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/OfficeBackdrop.tscn" id="100_backdrop"]
 {deco_ext}{lamp_ext}
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_intro"]
 size = Vector2(24, 40)
@@ -199,6 +200,8 @@ size = Vector2(16, 40)
 script = ExtResource("2_script")
 camera_limits = Rect2i(0, 0, 808, 208)
 kill_y = 300.0
+
+[node name="OfficeBackdrop" parent="." instance=ExtResource("100_backdrop")]
 
 [node name="Terrain" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("{b64}")

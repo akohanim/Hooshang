@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/background/moon.png" id="1_moon"]
+[ext_resource type="Texture2D" path="res://assets/background/window_frame.png" id="2_frame"]
+
+[node name="MoonWindow" type="Node2D"]
+
+[node name="SkyPatch" type="ColorRect" parent="."]
+offset_left = -20.0
+offset_top = -27.0
+offset_right = 20.0
+offset_bottom = 27.0
+color = Color(0.05, 0.06, 0.13, 1)
+
+[node name="Moon" type="Sprite2D" parent="."]
+position = Vector2(3, -4)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_moon")
+
+[node name="Frame" type="Sprite2D" parent="."]
+texture = ExtResource("2_frame")

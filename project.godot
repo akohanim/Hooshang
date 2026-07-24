@@ -11,13 +11,17 @@ config_version=5
 [application]
 
 config/name="Hooshang"
-run/main_scene="res://scenes/levels/act1_office/Level1Office.tscn"
+run/main_scene="res://scenes/debug_level_picker.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [autoload]
 
 Dialogue="*res://scenes/ui/DialogueBox.tscn"
 Game="*res://systems/game.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/ldtk-importer/plugin.cfg")
 
 [display]
 
