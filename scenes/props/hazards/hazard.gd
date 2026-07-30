@@ -20,7 +20,7 @@ var _visual: ColorRect
 
 
 func _ready() -> void:
-	collision_layer = 0
+	collision_layer = 4  # layer 3 "hazards"
 	collision_mask = 2  # only looks for the player layer
 	_shape = CollisionShape2D.new()
 	_shape.shape = RectangleShape2D.new()

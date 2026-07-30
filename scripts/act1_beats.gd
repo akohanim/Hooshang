@@ -22,8 +22,21 @@ extends Node
 ## up, the shared parts (fade, hold, portrait tints) want extracting first.
 
 ## Portrait tints in the dialogue box — alpha > 0 is what makes a portrait show.
-const HOOSHANG_PALE := Color(0.82, 0.86, 0.95, 1.0)
+## Hooshang has real portrait art (below) so his tint is plain white; Rumi is
+## still the tinted stand-in.
+const HOOSHANG_PALE := Color(1.0, 1.0, 1.0, 1.0)
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
+
+## Hooshang's face per line. Each beat names the state it wants rather than a
+## file, so re-cutting the portrait sheet never touches the dialogue.
+const FACES := {
+	"dazed": preload("res://assets/portraits/hooshang_dazed.png"),
+	"confused": preload("res://assets/portraits/hooshang_confused.png"),
+	"hesitant": preload("res://assets/portraits/hooshang_hesitant.png"),
+	"skeptical": preload("res://assets/portraits/hooshang_skeptical.png"),
+	"annoyed": preload("res://assets/portraits/hooshang_annoyed.png"),
+	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
+}
 
 ## Rumi's line at the second encounter. It teaches the control itself, so there
 ## is no separate system hint after it.
@@ -134,7 +147,7 @@ func _play_waking() -> void:
 	await t.finished
 	await _hold(come_round_pause)
 
-	await Dialogue.say("Hooshang", "...I fell. I remember falling.", HOOSHANG_PALE)
+	await _hooshang("...I fell. I remember falling.", "dazed")
 
 	# "(looking around)" is a stage direction, so play it rather than print it.
 	player.look(-1)
@@ -142,7 +155,7 @@ func _play_waking() -> void:
 	player.look(1)
 	await _hold(look_time * 0.6)
 
-	await Dialogue.say("Hooshang", "This doesn't feel like my cubicle...", HOOSHANG_PALE)
+	await _hooshang("This doesn't feel like my cubicle...", "confused")
 	player.input_locked = false
 
 
@@ -160,18 +173,18 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await trigger.appear(ahead * rumi_stand_offset)
 	trigger.breathe(true)
 
-	await Dialogue.say("Hooshang", "Hello?", HOOSHANG_PALE)
-	await Dialogue.say("Hooshang",
+	await _hooshang("Hello?", "hesitant")
+	await _hooshang(
 		"I've worked in this office nine years. I've never once seen you at an all hands.",
-		HOOSHANG_PALE)
+		"skeptical")
 
 	# He says nothing yet. He only stands there, unhurried.
 	await _hold(silence_time)
 
-	await Dialogue.say("Hooshang",
+	await _hooshang(
 		"Are you going to say something, or just stand there glowing at me.",
-		HOOSHANG_PALE)
-	await _say_softly("Hooshang", "I think I hit my head harder than I thought.")
+		"annoyed")
+	await _say_softly("I think I hit my head harder than I thought.", "vulnerable")
 
 	await _hold(before_rumi_speaks)
 	await Dialogue.say("Rumi",
@@ -220,11 +233,16 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.arm_room_door()
 
 
-## Same line, delivered slower — our stand-in for "(softer)".
-func _say_softly(speaker: String, text: String) -> void:
+## One of Hooshang's lines, with the face that goes with it.
+func _hooshang(text: String, face: String) -> void:
+	await Dialogue.say("Hooshang", text, HOOSHANG_PALE, FACES.get(face))
+
+
+## Same, delivered slower — our stand-in for "(softer)".
+func _say_softly(text: String, face: String) -> void:
 	var normal := Dialogue.chars_per_second
 	Dialogue.chars_per_second = normal * soft_speech_mult
-	await Dialogue.say(speaker, text, HOOSHANG_PALE)
+	await Dialogue.say("Hooshang", text, HOOSHANG_PALE, FACES.get(face))
 	Dialogue.chars_per_second = normal
 
 

@@ -168,7 +168,7 @@ position = Vector2({exit_x + 8}, {exit_y - 22})
 
 [node name="ExitTrigger" type="Area2D" parent="." groups=["exit"]]
 position = Vector2({exit_x}, {exit_y})
-collision_layer = 0
+collision_layer = 8
 collision_mask = 2
 
 [node name="Shape" type="CollisionShape2D" parent="ExitTrigger"]

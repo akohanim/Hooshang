@@ -90,7 +90,7 @@ func _build_exit(data: Dictionary) -> Area2D:
 	var trigger := Area2D.new()
 	trigger.name = "Exit"
 	trigger.position = data.position
-	trigger.collision_layer = 0
+	trigger.collision_layer = 8  # layer 4 "triggers"
 	trigger.collision_mask = 2  # player only
 	trigger.add_to_group("exit", true)  # persistent so it survives packing
 	trigger.set_meta("next_room", _field_str(data, "NextRoom"))

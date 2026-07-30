@@ -27,10 +27,21 @@
 const VALUES_LAYER_SUFFIX := "-values"
 
 
+## Draw bands, applied by LDtk layer name so the ordering is explicit rather
+## than an accident of sibling order: -1 is scenery the player walks IN FRONT of,
+## 0 is the playable area (tiles, entities, the player), 1 is scenery the player
+## walks BEHIND.
+const Z_BANDS := {"Background": -1, "Foreground": 1}
+
+
 func post_import(level: LDTKLevel) -> LDTKLevel:
 	for child in level.get_children():
-		if child is TileMapLayer and child.name.ends_with(VALUES_LAYER_SUFFIX):
-			var layer: TileMapLayer = child
+		if child is not TileMapLayer:
+			continue
+		var layer: TileMapLayer = child
+		if layer.name.ends_with(VALUES_LAYER_SUFFIX):
 			layer.visible = false
 			layer.collision_enabled = false
+		elif Z_BANDS.has(layer.name):
+			layer.z_index = Z_BANDS[layer.name]
 	return level

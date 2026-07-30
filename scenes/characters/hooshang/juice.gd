@@ -144,8 +144,23 @@ func _spawn_afterimage() -> void:
 	img.centered = _visual.centered
 	img.offset = _visual.offset
 	img.modulate = trail_color
-	img.z_index = -1  # behind the live sprite
-	get_tree().current_scene.add_child(img)
+
+	# Parent to the PLAYER'S PARENT — the level — not get_tree().current_scene.
+	# Levels load into Screen's game sub-viewport, so current_scene is the root
+	# UI scene: afterimages were landing on the UI surface, at window resolution
+	# and in window coordinates, i.e. the wrong size in the wrong place.
+	#
+	# Depth: stay in the playable band (z 0) rather than dropping to -1, which is
+	# the BACKGROUND band and would draw the trail behind floors and walls.
+	# Within one band draw order is sibling order, so slotting in at the player's
+	# own index puts the trail in front of the tiles and behind the player.
+	img.z_as_relative = false
+	img.z_index = 0
+	var world := _player.get_parent()
+	if world == null:
+		return
+	world.add_child(img)
+	world.move_child(img, _player.get_index())
 	var t := img.create_tween()
 	t.tween_property(img, "modulate:a", 0.0, trail_lifetime)
 	t.tween_callback(img.queue_free)

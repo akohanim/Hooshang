@@ -16,6 +16,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [autoload]
 
+Screen="*res://systems/screen.gd"
 Dialogue="*res://scenes/ui/DialogueBox.tscn"
 Game="*res://systems/game.gd"
 
@@ -26,7 +27,7 @@ window/size/viewport_height=180
 window/size/mode=3
 window/size/window_width_override=1280
 window/size/window_height_override=720
-window/stretch/mode="viewport"
+window/stretch/mode="canvas_items"
 window/stretch/scale_mode="integer"
 
 [editor_plugins]
@@ -97,6 +98,8 @@ debug_toggle={
 
 2d_physics/layer_1="world"
 2d_physics/layer_2="player"
+2d_physics/layer_3="hazards"
+2d_physics/layer_4="triggers"
 
 [rendering]
 

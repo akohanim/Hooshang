@@ -15,7 +15,7 @@ var _visual: ColorRect
 
 
 func _ready() -> void:
-	collision_layer = 0
+	collision_layer = 8  # layer 4 "triggers"
 	collision_mask = 2  # only the player triggers it
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()

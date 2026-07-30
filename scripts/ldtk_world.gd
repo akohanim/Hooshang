@@ -196,7 +196,9 @@ func _add_backdrop(room: Node2D) -> void:
 	panel.color = room_backdrop_color
 	panel.position = r.position - room.position  # room-local
 	panel.size = r.size
-	panel.z_index = -100  # behind every tile layer
+	# Background band. Sibling order (move_child below) is what keeps it behind
+	# the room's own Background tile layer, which shares this z-index.
+	panel.z_index = -1
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	room.add_child(panel)
 	room.move_child(panel, 0)
@@ -347,7 +349,7 @@ func _on_exit_reached(body: Node2D, exit: Node2D) -> void:
 func _build_return_zone() -> void:
 	_return_zone = Area2D.new()
 	_return_zone.name = "ReturnDoor"
-	_return_zone.collision_layer = 0
+	_return_zone.collision_layer = 8  # layer 4 "triggers"
 	_return_zone.collision_mask = 2  # player only
 	_return_zone.monitoring = false
 	var shape := CollisionShape2D.new()

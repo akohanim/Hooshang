@@ -24,6 +24,8 @@ the target grid.
     both ways all the way back, not just one room deep
   - `Godot --headless --path . res://tests/intro_test.tscn` — Act I's beats:
     dialogue order, dashless start, room 1 grants nothing, room 2 grants dash
+  - `Godot --headless --path . res://tests/screen_test.tscn` — UI and world stay
+    on separate render surfaces (restyling dialogue can't touch the game)
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 
@@ -78,6 +80,12 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   Area2D in the `exit` group advances the game (see below). Levels `extends
   LevelBase` (see `scenes/levels/act1_office/level1_office.gd` for cutscene/
   trigger patterns).
+- `systems/screen.gd` — `Screen` autoload: owns the two render surfaces. The
+  world lives in a 320x180 `SubViewport` (pixel-art rasterisation, integer
+  upscale); UI — dialogue, overlays, fades — sits on the window's own
+  full-resolution surface in front of it. **Load levels with
+  `Screen.load_scene()`, not `get_tree().change_scene_to_file()`**, or they land
+  outside the game viewport; `Screen.current` replaces `current_scene`.
 - `systems/game.gd` — `Game` autoload: level progression + Celeste-style fade
   transitions. `Game.LEVELS` is the ordered scene list; reaching a level's exit
   sign fades out, loads the next, fades in. The loaded level is the running

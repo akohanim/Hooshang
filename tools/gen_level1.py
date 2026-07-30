@@ -227,7 +227,7 @@ position = Vector2(109, 122)
 
 [node name="IntroTrigger" type="Area2D" parent="."]
 position = Vector2(120, 140)
-collision_layer = 0
+collision_layer = 8
 collision_mask = 2
 
 [node name="Shape" type="CollisionShape2D" parent="IntroTrigger"]
@@ -252,7 +252,7 @@ texture_scale = 2.8
 
 [node name="DashTrigger" type="Area2D" parent="."]
 position = Vector2(520, 140)
-collision_layer = 0
+collision_layer = 8
 collision_mask = 2
 
 [node name="Shape" type="CollisionShape2D" parent="DashTrigger"]
@@ -263,7 +263,7 @@ position = Vector2(780, 106)
 
 [node name="ExitTrigger" type="Area2D" parent="." groups=["exit"]]
 position = Vector2(784, 150)
-collision_layer = 0
+collision_layer = 8
 collision_mask = 2
 
 [node name="Shape" type="CollisionShape2D" parent="ExitTrigger"]

@@ -72,7 +72,7 @@ func advance() -> void:
 	await _fade_to(1.0)
 	if has_next:
 		current_index += 1
-		get_tree().change_scene_to_file(LEVELS[current_index])
+		Screen.load_scene(LEVELS[current_index])
 		await get_tree().process_frame
 		level_changed.emit(current_index)
 		await _fade_to(0.0)
@@ -83,7 +83,7 @@ func advance() -> void:
 		_banner.visible = true
 		await get_tree().create_timer(1.6).timeout
 		current_index = 0
-		get_tree().change_scene_to_file(LEVELS[0])
+		Screen.load_scene(LEVELS[0])
 		await get_tree().process_frame
 		_banner.visible = false
 		await _fade_to(0.0)

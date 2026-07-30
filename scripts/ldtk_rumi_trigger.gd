@@ -33,7 +33,7 @@ var _breath: Tween
 
 
 func _ready() -> void:
-	collision_layer = 0
+	collision_layer = 8  # layer 4 "triggers"
 	collision_mask = 2  # player only
 	body_entered.connect(_on_body_entered)
 

@@ -19,6 +19,11 @@ const MEETING: Array[String] = [
 	"I think I hit my head harder than I thought.",
 	"You have knocked on this door your whole life from the inside.",
 ]
+## Hooshang's face per line, in order. The mapping is a directing choice, not
+## something the code can infer, so it is pinned here.
+const WAKING_FACES: Array[String] = ["dazed", "confused"]
+const MEETING_FACES: Array[String] = ["hesitant", "skeptical", "annoyed", "vulnerable", "", ""]
+
 const GIFT: Array[String] = [
 	"Some gaps won't yield to a jump. Press the SHIFT key to dash.",
 ]
@@ -27,6 +32,7 @@ var failures: Array[String] = []
 var world: LdtkWorld
 var lines: Array[String] = []
 var speakers: Array[String] = []
+var faces: Array[String] = []
 # Rumi's distance from Hooshang, sampled when he appears and when he touches him.
 var _gap_on_arrival := -1.0
 var _gap_at_touch := -1.0
@@ -44,6 +50,7 @@ func _ready() -> void:
 	_check(not world.player.input_locked, "control is returned after the waking scene")
 	_check(not world.player.has_dash, "Hooshang starts DASHLESS — the gift has to mean something")
 	_check(lines == WAKING, "waking lines, in order  [got %s]" % str(lines))
+	_check(faces == WAKING_FACES, "waking portraits: dazed then confused  [got %s]" % str(faces))
 
 	var trigger := _find_trigger(world.rooms[0])
 	_check(trigger != null, "room 1 has a Rumi trigger")
@@ -52,6 +59,7 @@ func _ready() -> void:
 
 	lines.clear()
 	speakers.clear()
+	faces.clear()
 	_watch = trigger
 	world.player.global_position = trigger.global_position + Vector2(0, 16)
 	await _run_scene(900)
@@ -59,6 +67,8 @@ func _ready() -> void:
 	_check(lines == MEETING, "meeting lines, in order  [got %s]" % str(lines))
 	_check(speakers == ["Hooshang", "Hooshang", "Hooshang", "Hooshang", "Rumi"],
 		"Rumi stays silent until his one line  [got %s]" % str(speakers))
+	_check(faces == MEETING_FACES.slice(0, faces.size()),
+		"meeting portraits: hesitant, skeptical, annoyed, vulnerable  [got %s]" % str(faces))
 	_check(not world.player.has_dash,
 		"room 1 grants NO dash — the first meeting is an introduction, not a gift")
 	_check(not world.player.input_locked, "control is returned after the meeting")
@@ -76,6 +86,7 @@ func _ready() -> void:
 	# --- second encounter, room 2: the dash ---
 	lines.clear()
 	speakers.clear()
+	faces.clear()
 	_gap_on_arrival = -1.0
 	_gap_at_touch = -1.0
 	world._enter_room(world.rooms[1], true)
@@ -117,6 +128,7 @@ func _run_scene(max_frames: int) -> void:
 			seen = key
 			lines.append(text_label.text)
 			speakers.append(name_label.text if name_label.visible else "")
+			faces.append(_face_name())
 		# First press finishes the typewriter, second dismisses. Has to be a real
 		# InputEvent — DialogueBox listens in _unhandled_input, which
 		# Input.action_press() does not feed.
@@ -141,6 +153,17 @@ func _sample_staging() -> void:
 	if _gap_at_touch < 0.0 or gap < _gap_at_touch:
 		if _gap_on_arrival >= 0.0:
 			_gap_at_touch = gap
+
+
+## Which portrait state is on screen, from the texture's filename ("" if none).
+func _face_name() -> String:
+	var tr: TextureRect = Dialogue.get_node("Portrait")
+	if not tr.visible or tr.texture == null:
+		return ""
+	var path := tr.texture.resource_path
+	if not path.contains("hooshang_"):
+		return ""
+	return path.get_file().get_basename().replace("hooshang_", "")
 
 
 func _press_jump() -> void:

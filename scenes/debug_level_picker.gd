@@ -109,6 +109,10 @@ func _on_level_pressed(path: String) -> void:
 	_launch(path)
 
 
+## Hand over to the world. The level goes into Screen's game viewport, not the
+## scene root, so the picker (and every other UI scene) stays on the window's
+## own full-resolution surface — see systems/screen.gd.
 func _launch(path: String) -> void:
 	_restore_scale()
-	get_tree().change_scene_to_file(path)
+	Screen.load_scene(path)
+	queue_free()

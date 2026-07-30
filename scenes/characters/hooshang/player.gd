@@ -234,7 +234,11 @@ func _state_dash(delta: float) -> void:
 	dash_timer -= delta
 	if dash_timer <= 0.0:
 		velocity = dash_dir * dash_end_speed  # keep some momentum
-		state = State.IDLE if is_on_floor() else State.FALL
+		# Landing in IDLE with the dash's UPWARD momentum still applied is what
+		# used to strand him mid-air (see the invariant in _post_move). Go to
+		# FALL whenever there is any rise left, so gravity owns him again; IDLE
+		# is only for a dash that genuinely finished on the ground.
+		state = State.IDLE if is_on_floor() and velocity.y >= 0.0 else State.FALL
 
 
 func _state_wall_slide(delta: float) -> void:
@@ -337,6 +341,25 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 	# Just walked off a ledge (didn't jump): start coyote time.
 	if was_on_floor and velocity.y >= 0.0 and state != State.JUMP:
 		coyote_timer = coyote_time
+		state = State.FALL
+
+	# INVARIANT: a ground state must never run in mid-air.
+	#
+	# _state_ground() deliberately applies no gravity — on the floor there is
+	# nothing to fall towards. So being airborne in IDLE or RUN means NOTHING
+	# pulls the player down: he keeps whatever vertical speed he had forever.
+	# With upward speed that is a permanent float — he rises at a constant rate,
+	# reaches the ceiling, has velocity.y zeroed by the collision, and then hangs
+	# there for good, because no branch below moves a ground state on.
+	#
+	# The coyote check above used to be the only way out and it cannot cover
+	# this: it requires `velocity.y >= 0.0`, which is exactly false in the case
+	# that strands him. Anything that leaves a ground state set while off the
+	# floor lands here instead (the dash exit below can, when a dash with an
+	# upward component happens to end on the frame the player is still touching
+	# the floor). Fixing the invariant rather than that one caller keeps the
+	# whole class of bug closed.
+	if state == State.IDLE or state == State.RUN:
 		state = State.FALL
 
 	if state == State.WALL_SLIDE:

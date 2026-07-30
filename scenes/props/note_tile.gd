@@ -53,7 +53,7 @@ func _ready() -> void:
 
 	var touch := Area2D.new()
 	touch.name = "Touch"
-	touch.collision_layer = 0
+	touch.collision_layer = 8  # layer 4 "triggers"
 	touch.collision_mask = 2  # player only
 	var touch_shape := CollisionShape2D.new()
 	var touch_rect := RectangleShape2D.new()

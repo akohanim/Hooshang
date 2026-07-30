@@ -93,8 +93,11 @@ func _run() -> void:
 	Input.action_release("move_left")
 	await _frames(60)
 
+	await _check_no_float()
+
 	# Death and respawn at the last checkpoint.
 	player.die()
+
 	_check(player.state == Player.State.DEAD, "die() enters DEAD state")
 	await _frames(30)
 	_check(player.state != Player.State.DEAD, "respawns automatically")
@@ -106,6 +109,42 @@ func _run() -> void:
 	else:
 		print("SMOKE TEST: %d FAILURE(S)" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+
+## Regression: a GROUND state must never survive being airborne.
+##
+## _state_ground() applies no gravity, so an airborne IDLE/RUN keeps its vertical
+## speed forever. With upward speed that was a permanent float: the player rose
+## at a constant rate, hit the ceiling, and hung there for good — nothing moved a
+## ground state on, and the coyote-time escape needs velocity.y >= 0, which is
+## exactly false in that case. The dash exit could produce it (an upward dash
+## ending on the frame the player still touched the floor), so this forces the
+## stranded state directly rather than relying on hitting that timing.
+func _check_no_float() -> void:
+	player.respawn(level.current_checkpoint)
+	await _frames(30)
+	var floor_y := player.global_position.y
+	_check(player.is_on_floor(), "float check: starts grounded")
+
+	player.state = Player.State.IDLE
+	player.velocity = Vector2(0.0, -player.dash_end_speed)
+	# One frame is all it takes for the invariant to hand him back to gravity.
+	await _frames(2)
+	_check(player.state != Player.State.IDLE and player.state != Player.State.RUN,
+		"airborne ground state is corrected to FALL (got %s)" % player.state_name())
+
+	var highest := player.global_position.y
+	var landed := false
+	for i in 180:
+		await _frames(1)
+		highest = minf(highest, player.global_position.y)
+		if i > 4 and player.is_on_floor():
+			landed = true
+			break
+	_check(landed, "gravity resumes and he comes back down (peak %.1fpx up)"
+		% (floor_y - highest))
+	_check(absf(player.global_position.y - floor_y) < 2.0,
+		"lands back at floor level (%.1f vs %.1f)" % [player.global_position.y, floor_y])
 
 
 func _frames(n: int) -> void:

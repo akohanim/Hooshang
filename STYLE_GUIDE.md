@@ -140,6 +140,24 @@ Celeste-style depth without touching gameplay. Standard structure:
 Dev aid: `tests/screenshot.tscn` renders a level windowed and saves viewport
 PNGs at chosen camera x positions — use it to check backdrops without the editor.
 
+### Player state invariants
+
+`_state_ground()` (IDLE / RUN) deliberately applies **no gravity** — standing on
+the floor there is nothing to fall towards. That makes one rule load-bearing:
+
+- **A ground state must never survive being airborne.** Airborne in IDLE/RUN
+  means nothing pulls the player down, so he keeps his vertical speed forever.
+  With upward speed that is a permanent float: constant rise, ceiling, velocity
+  zeroed by the collision, and then he hangs there for good. `_post_move()`
+  enforces the invariant at the end of every frame; the coyote-time branch above
+  it cannot, because it requires `velocity.y >= 0.0`, which is exactly false in
+  the case that strands him.
+- When adding a state, ask which of them apply gravity. If a new state doesn't,
+  it needs the same guard.
+
+Guarded by `tests/smoke_test.tscn`, which forces the stranded state directly
+rather than trying to reproduce the input timing that produced it.
+
 ## 9. LDtk-authored levels
 
 Levels built in the LDtk editor (rather than the Python generators in §7) live
@@ -257,6 +275,45 @@ positioned at their world coordinates. Those children are the **rooms**, and
   has never visited — this already bit the Rumi trigger, which was swinging
   open every `story_door` in the Act. Compare parents (same room's `Entities`
   layer) before acting.
+### UI and world render on separate surfaces
+
+`systems/screen.gd` (`Screen` autoload) owns two surfaces:
+
+```
+root viewport (window resolution)      <- UI: DialogueBox, overlays, fades
+  └─ GameView (SubViewportContainer)
+       └─ GameViewport (320x180)       <- the world: levels, player, tiles
+```
+
+The world is rasterised at 320x180 and integer-upscaled, exactly as pixel art
+wants. UI is drawn at the window's real resolution, so type can be sharp.
+Neither can affect the other's sampling — which is the whole point.
+
+This exists because they were once the same surface. Making the window render at
+native resolution so the dialogue font could be sharp *also* stopped the world
+being rasterised at 320x180, and Hooshang's sprites — 88px source art shown at
+0.39 scale — silently gained about 2.6x detail. The tiles were unaffected
+(authentic 16px art at 16px), which is exactly why a spot-check missed it: this
+only bites art whose source resolution exceeds its on-screen size.
+
+- **Load levels with `Screen.load_scene()`**, never
+  `get_tree().change_scene_to_file()` — the world has to land inside the
+  sub-viewport. `Screen.current` / `Screen.current_path()` replace
+  `get_tree().current_scene`.
+- **UI that needs real type is authored at 1280x720 in a CanvasLayer with
+  `scale = 0.25`** (see `scenes/ui/DialogueBox.tscn`). 0.25 is a constant: the
+  window's canvas_items stretch maps 180 design px to the window height, and the
+  UI wants 720 mapped to the same height.
+- **A SubViewport receives no key events of its own.** `Screen` forwards them
+  from `_unhandled_input`, which also means UI gets first refusal: the dialogue
+  box calls `set_input_as_handled()` on the key that advances a line, so that
+  press can't also make Hooshang jump.
+- **Positional audio needs `audio_listener_enable_2d` on the sub-viewport**, or
+  every `AudioStreamPlayer2D` in the world plays silently.
+
+Guarded by `tests/screen_test.tscn`, which restyles the dialogue box mid-test and
+asserts the game viewport and the player's sprite are untouched.
+
 - **One music player per Act, on the world node** — `Act1World.tscn`'s `Music`
   (`AudioStreamPlayer`, `autoplay`, `volume_db = -10`). Not one per room: every
   room of the Act lives in that one scene, so a single player runs the track
