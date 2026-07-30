@@ -24,12 +24,20 @@ const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ## Set from code (the script that takes over), not from LDtk: which beats are
 ## scripted is a story fact, not level data.
 @export var defer_to_cutscene := false
+## Stand Rumi on the floor beneath him rather than at the height the trigger
+## happens to be placed at. Off = he stays exactly where the LDtk entity sits,
+## for a beat that deliberately wants him hovering.
+@export var snap_to_ground := true
 
 @onready var _rumi: AnimatedSprite2D = $Rumi
 @onready var _rumi_light: PointLight2D = $RumiLight
 
+## How far down to look for a floor, in px. Comfortably more than a room's height.
+const FLOOR_PROBE_DEPTH := 400.0
+
 var _fired := false
 var _breath: Tween
+var _feet_row_cache := -1.0
 
 
 func _ready() -> void:
@@ -69,16 +77,67 @@ func _play_beat(player: Player) -> void:
 ## beat where he has to step TOWARD Hooshang needs him to start with some room to
 ## cross, and the player is standing on the trigger by definition.
 func appear(stand_x := 0.0) -> void:
-	_rumi.position = Vector2(stand_x, -10)
-	_rumi_light.position.x = stand_x
+	var rest_y := _ground_rest_y(stand_x) if snap_to_ground else 0.0
+	_rumi.position = Vector2(stand_x, rest_y - 10.0)
+	_rumi_light.position = Vector2(stand_x, rest_y - 19.0)
 	# Face back towards the trigger — i.e. towards whoever just walked into it.
 	_rumi.flip_h = stand_x > 0.0
 	var t := create_tween().set_parallel()
 	t.tween_property(_rumi, "modulate:a", 1.0, 0.5)
-	t.tween_property(_rumi, "position:y", 0.0, 0.5) \
+	t.tween_property(_rumi, "position:y", rest_y, 0.5) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	t.tween_property(_rumi_light, "energy", 1.4, 0.5)
 	await t.finished
+
+
+## Local y that puts Rumi's DRAWN FEET on the floor below `stand_x`.
+##
+## Two corrections, both needed, and the second is the one that actually made him
+## hover: the trigger is placed wherever it reads well in LDtk rather than on the
+## ground, AND his sprite frame has transparent padding under his feet — 96px
+## frames whose lowest opaque row is 80, so at 0.5 scale there are 7.5px of empty
+## pixels below him. Sitting the sprite's BOX on the floor therefore left him
+## floating by exactly that much.
+##
+## Measured from the texture rather than hardcoded, so re-cutting Rumi's art
+## can't silently reintroduce the hover.
+func _ground_rest_y(stand_x: float) -> float:
+	var floor_y := _floor_under(global_position.x + stand_x)
+	if is_inf(floor_y):
+		return 0.0  # nothing below (mid-air trigger) — leave him where he was placed
+	var tex := _rumi.sprite_frames.get_frame_texture(_rumi.animation, 0)
+	if tex == null:
+		return floor_y - global_position.y
+	# Sprite is centred, so its local top edge is -h/2; the feet sit at the last
+	# opaque row, measured down from there.
+	var feet_offset := (_feet_row(tex) - tex.get_height() * 0.5) * _rumi.scale.y
+	return floor_y - feet_offset - global_position.y
+
+
+## World y of the first world-layer surface below `world_x`.
+func _floor_under(world_x: float) -> float:
+	var from := Vector2(world_x, global_position.y - 8.0)
+	var query := PhysicsRayQueryParameters2D.create(from, from + Vector2(0.0, FLOOR_PROBE_DEPTH))
+	query.collision_mask = 1  # world
+	var hit := get_world_2d().direct_space_state.intersect_ray(query)
+	return hit.position.y if hit else INF
+
+
+## Row just past the lowest non-transparent pixel of a frame. Cached: reading an
+## imported texture back to an Image is not something to do every beat.
+func _feet_row(tex: Texture2D) -> float:
+	if _feet_row_cache >= 0.0:
+		return _feet_row_cache
+	_feet_row_cache = float(tex.get_height())  # fallback: the frame's bottom edge
+	var img := tex.get_image()
+	if img == null:
+		return _feet_row_cache
+	for y in range(img.get_height() - 1, -1, -1):
+		for x in img.get_width():
+			if img.get_pixel(x, y).a > 0.05:
+				_feet_row_cache = float(y + 1)
+				return _feet_row_cache
+	return _feet_row_cache
 
 
 func vanish() -> void:
