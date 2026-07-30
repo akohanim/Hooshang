@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/door.gd" id="1_door"]
+
+[node name="DoorGlass" type="Node2D"]
+script = ExtResource("1_door")
+
+[node name="Frame" type="ColorRect" parent="."]
+offset_right = 22.0
+offset_bottom = 38.0
+color = Color(0.5, 0.52, 0.56, 1)
+mouse_filter = 2
+
+[node name="Hinge" type="Node2D" parent="."]
+position = Vector2(3, 38)
+
+[node name="Leaf" type="ColorRect" parent="Hinge"]
+offset_top = -34.0
+offset_right = 16.0
+color = Color(0.72, 0.83, 0.88, 0.75)
+mouse_filter = 2
+
+[node name="Mullion" type="ColorRect" parent="Hinge"]
+offset_left = 7.0
+offset_top = -34.0
+offset_right = 9.0
+color = Color(0.55, 0.57, 0.6, 1)
+mouse_filter = 2
+
+[node name="Knob" type="ColorRect" parent="Hinge"]
+offset_left = 12.0
+offset_top = -19.0
+offset_right = 14.0
+offset_bottom = -16.0
+color = Color(0.8, 0.82, 0.86, 1)
+mouse_filter = 2

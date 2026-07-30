@@ -6,7 +6,7 @@
 
 [node name="Glow" type="PointLight2D" parent="."]
 color = Color(0.35, 1, 0.45, 1)
-energy = 0.7
+energy = 0.35
 texture = ExtResource("1_light")
 texture_scale = 0.8
 

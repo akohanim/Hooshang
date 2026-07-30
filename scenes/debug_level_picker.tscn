@@ -12,41 +12,70 @@ anchor_bottom = 1.0
 color = Color(0.05, 0.05, 0.08, 1)
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -80.0
-offset_right = 100.0
-offset_bottom = 80.0
-alignment = 1
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 
-[node name="Title" type="Label" parent="VBox"]
+[node name="VBox" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Center/VBox"]
 layout_mode = 2
 text = "DEBUG LEVEL PICKER"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 30
 
-[node name="HSeparator" type="HSeparator" parent="VBox"]
+[node name="HSeparator" type="HSeparator" parent="Center/VBox"]
 layout_mode = 2
 
-[node name="Level1" type="Button" parent="VBox"]
+[node name="Act1World" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "LDtk: Act 1 World (all rooms)"
+theme_override_font_sizes/font_size = 22
+
+[node name="RoomsLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "— or start in a single room —"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 15
+
+[node name="Rooms" type="VBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HSeparator2" type="HSeparator" parent="Center/VBox"]
+layout_mode = 2
+
+[node name="LegacyLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "hand-built scenes (pre-LDtk)"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 15
+
+[node name="Level1" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Level 1: The Office"
+theme_override_font_sizes/font_size = 18
 
-[node name="Level2" type="Button" parent="VBox"]
+[node name="Level2" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Level 2: The Jump Gauntlet"
+theme_override_font_sizes/font_size = 18
 
-[node name="HSeparator2" type="HSeparator" parent="VBox"]
+[node name="LDtkOffice" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "LDtk: Level 1 Office (single room)"
+theme_override_font_sizes/font_size = 18
+
+[node name="HSeparator3" type="HSeparator" parent="Center/VBox"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBox"]
+[node name="Label" type="Label" parent="Center/VBox"]
 layout_mode = 2
 text = "(Debug mode — change main_scene
 back to Level1Office.tscn before shipping)"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 14

@@ -1,90 +1,84 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://rm3kk2lr82dl"]
 
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_000.png" id="1_dash0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_001.png" id="19_dash1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_002.png" id="20_dash2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_003.png" id="21_dash3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_004.png" id="22_dash4"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_005.png" id="23_dash5"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_006.png" id="24_dash6"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_007.png" id="25_dash7"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Dash/east/frame_008.png" id="26_dash8"]
-[ext_resource type="Texture2D" uid="uid://ld18u5hiwoos" path="res://assets/hooshang_sprites/rotations/east.png" id="2_idle"]
-[ext_resource type="Texture2D" uid="uid://ch1b3pkstui8y" path="res://assets/hooshang_sprites/animations/Running/east/frame_000.png" id="3_run0"]
-[ext_resource type="Texture2D" uid="uid://dfbrtj70gmm62" path="res://assets/hooshang_sprites/animations/Running/east/frame_001.png" id="4_run1"]
-[ext_resource type="Texture2D" uid="uid://bjq05ub80i332" path="res://assets/hooshang_sprites/animations/Running/east/frame_002.png" id="5_run2"]
-[ext_resource type="Texture2D" uid="uid://dgvyawv0mdv2" path="res://assets/hooshang_sprites/animations/Running/east/frame_003.png" id="6_run3"]
-[ext_resource type="Texture2D" uid="uid://bmj076adm6cw2" path="res://assets/hooshang_sprites/animations/Running/east/frame_004.png" id="7_run4"]
-[ext_resource type="Texture2D" uid="uid://buf2apkfreurr" path="res://assets/hooshang_sprites/animations/Running/east/frame_005.png" id="8_run5"]
-[ext_resource type="Texture2D" uid="uid://d0d64ue04edfa" path="res://assets/hooshang_sprites/animations/Running/east/frame_006.png" id="9_run6"]
-[ext_resource type="Texture2D" uid="uid://mgk8s2ma6p3s" path="res://assets/hooshang_sprites/animations/Running/east/frame_007.png" id="10_run7"]
-[ext_resource type="Texture2D" uid="uid://bhnn3f1p2hs21" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_000.png" id="11_jump0"]
-[ext_resource type="Texture2D" uid="uid://be2ugmc5jq6vm" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_001.png" id="12_jump1"]
-[ext_resource type="Texture2D" uid="uid://cjec8rupgaxeh" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_002.png" id="13_jump2"]
-[ext_resource type="Texture2D" uid="uid://b2jj2mhtx0jeh" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_003.png" id="14_jump3"]
-[ext_resource type="Texture2D" uid="uid://bdh5tsyrxmtn3" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_004.png" id="15_jump4"]
-[ext_resource type="Texture2D" uid="uid://k2o870tsxhqx" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_005.png" id="16_jump5"]
-[ext_resource type="Texture2D" uid="uid://bu2owvs7oxikw" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_006.png" id="17_jump6"]
-[ext_resource type="Texture2D" uid="uid://c1gmgap0aqrn7" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_007.png" id="18_jump7"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_000.png" id="30_idle0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_001.png" id="31_idle1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_002.png" id="32_idle2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_003.png" id="33_idle3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_000.png" id="40_run0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_001.png" id="41_run1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_002.png" id="42_run2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_003.png" id="43_run3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_004.png" id="44_run4"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_005.png" id="45_run5"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_000.png" id="50_jump0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_001.png" id="51_jump1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_002.png" id="52_jump2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_003.png" id="53_jump3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_004.png" id="54_jump4"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_005.png" id="55_jump5"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_006.png" id="56_jump6"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_007.png" id="57_jump7"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_008.png" id="58_jump8"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_000.png" id="60_fall0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_001.png" id="61_fall1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_002.png" id="62_fall2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_003.png" id="63_fall3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_004.png" id="64_fall4"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_005.png" id="65_fall5"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_006.png" id="66_fall6"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_000.png" id="70_slide0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_001.png" id="71_slide1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_002.png" id="72_slide2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_003.png" id="73_slide3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_004.png" id="74_slide4"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_005.png" id="75_slide5"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_dash0")
+"texture": ExtResource("70_slide0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("19_dash1")
+"texture": ExtResource("71_slide1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("20_dash2")
+"texture": ExtResource("72_slide2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("21_dash3")
+"texture": ExtResource("73_slide3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("22_dash4")
+"texture": ExtResource("74_slide4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("23_dash5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("24_dash6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("25_dash7")
-}, {
-"duration": 1.0,
-"texture": ExtResource("26_dash8")
+"texture": ExtResource("75_slide5")
 }],
 "loop": false,
 "name": &"dash",
-"speed": 45.0
+"speed": 30.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("11_jump0")
+"texture": ExtResource("60_fall0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_jump1")
+"texture": ExtResource("61_fall1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("13_jump2")
+"texture": ExtResource("62_fall2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_jump3")
+"texture": ExtResource("63_fall3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_jump4")
+"texture": ExtResource("64_fall4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_jump5")
+"texture": ExtResource("65_fall5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("17_jump6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("18_jump7")
+"texture": ExtResource("66_fall6")
 }],
 "loop": true,
 "name": &"fall",
@@ -92,75 +86,96 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_idle")
+"texture": ExtResource("30_idle0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_idle1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_idle2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_idle3")
 }],
 "loop": true,
 "name": &"idle",
-"speed": 5.0
+"speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("11_jump0")
+"texture": ExtResource("50_jump0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_jump1")
+"texture": ExtResource("51_jump1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("13_jump2")
+"texture": ExtResource("52_jump2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_jump3")
+"texture": ExtResource("53_jump3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_jump4")
+"texture": ExtResource("54_jump4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_jump5")
+"texture": ExtResource("55_jump5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("17_jump6")
+"texture": ExtResource("56_jump6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("18_jump7")
+"texture": ExtResource("57_jump7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58_jump8")
 }],
 "loop": true,
 "name": &"jump",
-"speed": 10.0
+"speed": 11.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_run0")
+"texture": ExtResource("40_run0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_run1")
+"texture": ExtResource("41_run1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("5_run2")
+"texture": ExtResource("42_run2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_run3")
+"texture": ExtResource("43_run3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_run4")
+"texture": ExtResource("44_run4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_run5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("9_run6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("10_run7")
+"texture": ExtResource("45_run5")
 }],
 "loop": true,
 "name": &"run",
-"speed": 12.0
+"speed": 9.0
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_idle")
+"texture": ExtResource("70_slide0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("71_slide1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("72_slide2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("73_slide3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("74_slide4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_slide5")
 }],
 "loop": true,
 "name": &"wall_slide",
-"speed": 5.0
+"speed": 10.0
 }]

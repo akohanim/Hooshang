@@ -1,7 +1,7 @@
 class_name Juice
 extends Node
 ## Self-contained "game feel" component: squash & stretch, dash afterimages,
-## camera shake, hitstop, and particle accents.
+## camera shake, and hitstop.
 ##
 ## HOW THIS WORKS: the player controller calls this node's public methods at
 ## the moments things happen (on_jump, on_land, on_dash_start, dash_tick) —
@@ -55,11 +55,6 @@ extends Node
 ## cases elsewhere in the engine.
 @export_range(0.0, 1.0) var hitstop_time_scale := 0.05
 
-@export_group("Particles")
-@export var dust_particle_count := 3
-@export var dash_particle_count := 8
-@export var dust_color := Color(0.75, 0.7, 0.62, 0.85)
-
 @onready var _player: Node2D = get_parent()
 @onready var _sprite_squash: Node2D = _player.get_node("SpriteSquash")
 @onready var _visual: AnimatedSprite2D = _player.get_node("SpriteSquash/Visual")
@@ -106,7 +101,6 @@ func on_land(impact_speed: float) -> void:
 		[Vector2.ONE, squash_ease_time],
 	], Tween.EASE_OUT, Tween.TRANS_BACK)
 	_camera_shake(landing_shake_max_strength * t, landing_shake_time)
-	spawn_dust(_player.global_position + Vector2(0, 6))  # feet, not hitbox center
 
 
 func _play_squash_sequence(keys: Array, ease_mode: Tween.EaseType, trans_mode: Tween.TransitionType) -> void:
@@ -122,10 +116,9 @@ func _play_squash_sequence(keys: Array, ease_mode: Tween.EaseType, trans_mode: T
 # --------------------------------------------------------------- dashing ----
 
 ## Call once, the moment a dash successfully starts.
-func on_dash_start(dash_dir: Vector2) -> void:
+func on_dash_start(_dash_dir: Vector2) -> void:
 	_trail_timer = 0.0  # spawn the first afterimage immediately
 	hitstop(hitstop_time)
-	_spawn_burst(_player.global_position, -dash_dir, dash_particle_count, trail_color)
 
 
 ## Call every physics frame while state == DASH, passing delta. Spawns
@@ -186,34 +179,3 @@ func _camera_shake(strength: float, duration: float) -> void:
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
 	_shake_tween.tween_property(_camera, "offset:y", 0.0, duration * 0.75) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
-
-
-# ------------------------------------------------------------- particles ----
-
-func _spawn_burst(at: Vector2, direction: Vector2, count: int, color: Color) -> void:
-	var p := CPUParticles2D.new()
-	p.position = at
-	p.z_index = 5
-	p.one_shot = true
-	p.emitting = false
-	p.amount = count
-	p.lifetime = 0.35
-	p.explosiveness = 1.0
-	p.direction = direction if direction != Vector2.ZERO else Vector2.UP
-	p.spread = 30.0
-	p.gravity = Vector2(0, 260)
-	p.initial_velocity_min = 40.0
-	p.initial_velocity_max = 90.0
-	p.scale_amount_min = 0.4
-	p.scale_amount_max = 0.9
-	p.color = color
-	get_tree().current_scene.add_child(p)
-	p.emitting = true
-	p.finished.connect(p.queue_free)
-
-
-## Small dust puff. Already called automatically by on_land() once a landing
-## clears landing_shake_min_speed — exposed publicly too in case you want to
-## trigger dust from somewhere else (e.g. a running footstep effect later).
-func spawn_dust(at: Vector2) -> void:
-	_spawn_burst(at, Vector2.UP, dust_particle_count, dust_color)

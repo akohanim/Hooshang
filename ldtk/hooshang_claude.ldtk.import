@@ -1,0 +1,37 @@
+[remap]
+
+importer="ldtk.import"
+type="PackedScene"
+uid="uid://dc8v6mkhcimnl"
+path="res://.godot/imported/hooshang_claude.ldtk-903a37bb5f4ceec60bfc2be652d277e9.scn"
+
+[deps]
+
+files=["res://ldtk/tilesets/tileset_16px.res", "res://ldtk/levels/Level_1_Office.scn", "res://ldtk/levels/Level_1.scn", "res://ldtk/levels/Level_2.scn", "res://ldtk/levels/Level_3.scn", "res://.godot/imported/hooshang_claude.ldtk-903a37bb5f4ceec60bfc2be652d277e9.scn"]
+
+source_file="res://ldtk/hooshang_claude.ldtk"
+dest_files=["res://.godot/imported/hooshang_claude.ldtk-903a37bb5f4ceec60bfc2be652d277e9.scn", "res://ldtk/tilesets/tileset_16px.res", "res://ldtk/levels/Level_1_Office.scn", "res://ldtk/levels/Level_1.scn", "res://ldtk/levels/Level_2.scn", "res://ldtk/levels/Level_3.scn", "res://.godot/imported/hooshang_claude.ldtk-903a37bb5f4ceec60bfc2be652d277e9.scn"]
+
+[params]
+
+World=""
+group_world_layers=false
+Level=""
+pack_levels=true
+Layer=""
+layers_always_visible=false
+Tileset=""
+tileset_custom_data=false
+integer_grid_tilesets=false
+atlas_texture_type=0
+Entity=""
+resolve_entityrefs=true
+use_entity_placeholders=false
+Post Import=""
+tileset_post_import="res://scripts/ldtk_tileset_post_import.gd"
+entities_post_import="res://scripts/ldtk_entities_post_import.gd"
+level_post_import="res://scripts/ldtk_level_post_import.gd"
+world_post_import=""
+Debug=""
+force_tileset_reimport=false
+verbose_output=false

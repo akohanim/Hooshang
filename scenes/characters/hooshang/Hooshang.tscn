@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/characters/hooshang/player.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://assets/hooshang_frames.tres" id="2_frames"]
 [ext_resource type="PackedScene" path="res://scenes/characters/hooshang/Juice.tscn" id="3_juice"]
+[ext_resource type="Texture2D" path="res://assets/light_radial.png" id="4_light"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(8, 12)
@@ -18,11 +19,18 @@ shape = SubResource("RectangleShape2D_body")
 [node name="SpriteSquash" type="Node2D" parent="."]
 
 [node name="Visual" type="AnimatedSprite2D" parent="SpriteSquash"]
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.39, 0.39)
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
 autoplay = "idle"
-offset = Vector2(0, -4)
+offset = Vector2(0, -7)
+
+[node name="GlowLight" type="PointLight2D" parent="."]
+enabled = false
+color = Color(1, 0.9, 0.42, 1)
+energy = 0.0
+texture = ExtResource("4_light")
+texture_scale = 0.75
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true

@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://cktdl6l6c7a5v"]
 
 [ext_resource type="Texture2D" uid="uid://68i1bcym3x" path="res://assets/FREE_Samurai 2D Pixel Art v1.2/Sprites/IDLE.png" id="1_idle"]
 [ext_resource type="Texture2D" uid="uid://ryrdg32vp0br" path="res://assets/FREE_Samurai 2D Pixel Art v1.2/Sprites/RUN.png" id="2_run"]

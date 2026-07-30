@@ -31,9 +31,11 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 @export_range(0.0, 1.0) var air_decel_mult := 0.6
 
 @export_group("Jump")
-## Initial upward speed. With rise_gravity 1400 this gives a ~28px (3.5 tile)
-## jump, reaching the apex in 0.2s.
-@export var jump_speed := 280.0
+## Initial upward speed. With rise_gravity 1400 (and the anti-gravity apex
+## below) this measures to a ~33px apex — just over a 2-cell pillar on the
+## 16px LDtk grid (32px), so a full-height jump BARELY clears it (~1px spare).
+## Measured, not derived: the apex modifier makes the closed-form v^2/2g wrong.
+@export var jump_speed := 290.0
 ## Releasing jump early multiplies upward speed by this — that's the variable
 ## jump height. ~0.45 means a tap gives roughly half the full height.
 @export_range(0.0, 1.0) var jump_cut_multiplier := 0.45
@@ -59,7 +61,13 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## Ability gate: Level 1 starts with this OFF and Rumi grants it mid-level.
 ## The test level leaves it on. (Future abilities should follow this pattern.)
 @export var has_dash := true
-## Dash speed. 260 px/s for 0.15s = ~39px (~5 tiles) of fixed-distance dash.
+## Dash speed. Sized so a full jump + upward dash clears a 4-cell platform on
+## the 16px LDtk grid (64px) RELIABLY rather than frame-perfectly: measured
+## apex runs 54-82px depending on when you dash, clearing 64px on 17 of 20
+## tested timings. Tuning this down to a "barely clears" ~1px margin was tried
+## and is wrong — that margin only exists at the single best dash timing, so
+## in play the platform reads as impossible (it cleared on just 6 of 20).
+## Vertical clearance needs a WINDOW, not a knife edge.
 @export var dash_speed := 260.0
 ## How long the dash lasts. Distance = dash_speed * dash_time.
 @export var dash_time := 0.15
@@ -69,6 +77,21 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 @export var dash_cooldown := 0.2
 ## Freeze-frame on dash start (~3 frames at 60fps). Sells the impact.
 @export var dash_freeze_time := 0.05
+
+@export_group("Glow")
+## Ability gate, same pattern as has_dash: OFF until earned. The musical-tile
+## sequence grants it (see scripts/note_sequence.gd).
+@export var has_glow := false
+## How far the glow reaches, in CELLS of the 16px LDtk grid. The falloff comes
+## from the radial texture, so it fades out toward this edge rather than
+## ending at a hard rim.
+@export var glow_radius_cells := 4.0
+## Brightness at full strength.
+@export var glow_energy := 1.25
+## Warm yellow, to read as "Hooshang's own light" against the cold office.
+@export var glow_color := Color(1.0, 0.9, 0.42)
+## Fade-in when the ability is granted.
+@export var glow_grant_time := 0.8
 
 @export_group("Wall")
 ## Max downward speed while sliding on a wall (much slower than free fall).
@@ -107,7 +130,7 @@ var wall_lock_timer := 0.0      # reduced air control after wall jump
 
 var dash_dir := Vector2.RIGHT
 
-# The sprite sits at 0.55 scale (60px source frames -> ~17px tall on screen)
+# The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
 # with its feet offset-pinned to the bottom of the 8x12 hitbox. It lives
 # inside SpriteSquash, a wrapper Node2D that Juice scale-tweens for squash &
 # stretch — Visual's own scale/offset above are never touched by that, so
@@ -116,6 +139,11 @@ var dash_dir := Vector2.RIGHT
 @onready var body_shape: CollisionShape2D = $CollisionShape2D
 @onready var camera: Camera2D = $Camera2D
 @onready var juice: Juice = $Juice
+@onready var glow_light: PointLight2D = $GlowLight
+
+
+func _ready() -> void:
+	_apply_glow(has_glow)
 
 
 func _physics_process(delta: float) -> void:
@@ -340,12 +368,10 @@ func _update_visual() -> void:
 		State.DASH:
 			visual.play("dash")  # forward lunge burst, one-shot
 		State.WALL_SLIDE:
-			visual.play("wall_slide")  # reuses the idle pose; tinted below to read distinctly
+			visual.play("wall_slide")  # dedicated Slide pose
 	# Dash availability tint (our stand-in for Celeste's hair color):
 	# normal colors = dash ready, cool blue tint = dash spent.
-	if state == State.WALL_SLIDE:
-		visual.modulate = Color(0.65, 0.65, 0.72)
-	elif state != State.DASH:
+	if state != State.DASH:
 		visual.modulate = Color.WHITE if dash_available else Color(0.6, 0.75, 1.0)
 
 
@@ -385,12 +411,59 @@ func state_name() -> String:
 # Small API so other nodes ask the player to do a thing, rather than reaching
 # into its child sprite/camera directly.
 
+## Turn Hooshang to face a direction during a cutscene (-1 left, 1 right).
+## Exists because input_locked zeroes the input axis, so a locked player can
+## never turn himself — a scripted "he looks around" beat has to ask. Takes
+## effect on the next frame's _update_visual(), like every other visual.
+func look(dir: int) -> void:
+	if dir != 0:
+		facing = signi(dir)
+
+
 ## Brief cosmetic flash on the sprite (e.g. Rumi granting an ability). Visual
 ## only — uses self_modulate so it doesn't fight the dash-tint on modulate.
 func flash(color := Color(3.0, 2.6, 1.6), rise := 0.15, fall := 0.35) -> void:
 	var t := create_tween()
 	t.tween_property(visual, "self_modulate", color, rise)
 	t.tween_property(visual, "self_modulate", Color.WHITE, fall)
+
+
+## Turn the glow on (the musical-tile sequence's reward), fading it up rather
+## than popping it on. Safe to call twice.
+##
+## Deliberately NOT permanent, unlike has_dash: the glow lasts only for the
+## current room and the current life. NoteSequence revokes it on death or on
+## leaving the room, and you re-earn it by solving the tiles again.
+func grant_glow() -> void:
+	if has_glow:
+		return
+	has_glow = true
+	_apply_glow(true)
+	glow_light.energy = 0.0
+	var t := create_tween()
+	t.tween_property(glow_light, "energy", glow_energy, glow_grant_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+## Lose the glow. Snaps off rather than fading — it fires on death and on room
+## transitions, and a glow lingering across either of those reads as a bug.
+func revoke_glow() -> void:
+	if not has_glow:
+		return
+	has_glow = false
+	_apply_glow(false)
+
+
+## Push the glow exports onto the light. The radial texture is 128px wide, so
+## its untouched radius is 64px; scale that to the requested cell radius.
+func _apply_glow(on: bool) -> void:
+	if glow_light == null:
+		return
+	glow_light.enabled = on
+	glow_light.color = glow_color
+	glow_light.energy = glow_energy if on else 0.0
+	const TEXTURE_RADIUS := 64.0
+	glow_light.texture_scale = (glow_radius_cells * 16.0) / TEXTURE_RADIUS
 
 
 ## Clamp the follow-camera to a level's bounds (pixels). Called by LevelBase.

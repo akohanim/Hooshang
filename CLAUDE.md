@@ -18,6 +18,12 @@ the target grid.
   - `Godot --headless --path . res://tests/level1_test.tscn` — Level 1 beats
   - `Godot --headless --path . res://tests/level2_test.tscn` — Level 2 jumps
   - `Godot --headless --path . res://tests/flow_test.tscn` — Level 1→2 transition
+  - `Godot --headless --path . res://tests/world_bounds_test.tscn` — LDtk rooms
+    are sealed at the top (a jump+dash can't leave through the ceiling)
+  - `Godot --headless --path . res://tests/backtrack_test.tscn` — Exits work
+    both ways all the way back, not just one room deep
+  - `Godot --headless --path . res://tests/intro_test.tscn` — Act I's beats:
+    dialogue order, dashless start, room 1 grants nothing, room 2 grants dash
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 
