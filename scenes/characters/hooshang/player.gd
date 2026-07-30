@@ -109,6 +109,10 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 @export var wall_jump_check_distance := 3.0
 ## Coyote time for walls: jumping shortly after drifting off a wall still works.
 @export var wall_coyote_time := 0.1
+## How long the dedicated wall-jump kick animation plays for after pushing off.
+## Sized to the clip (5 frames at 14fps = 0.36s) so it reads fully before the
+## normal jump/fall pose takes over; shorten it to cut the kick short.
+@export var wall_jump_anim_time := 0.36
 
 var state: State = State.FALL
 var facing := 1                 # 1 = right, -1 = left; used for neutral dashes
@@ -127,6 +131,7 @@ var dash_timer := 0.0
 var dash_cooldown_timer := 0.0
 var freeze_timer := 0.0         # dash hitstop: physics is skipped while > 0
 var wall_lock_timer := 0.0      # reduced air control after wall jump
+var wall_jump_timer := 0.0      # how long the wall-jump kick animation still has to run
 
 var dash_dir := Vector2.RIGHT
 
@@ -194,6 +199,7 @@ func _tick_timers(delta: float) -> void:
 	wall_coyote_timer = maxf(wall_coyote_timer - delta, 0.0)
 	dash_cooldown_timer = maxf(dash_cooldown_timer - delta, 0.0)
 	wall_lock_timer = maxf(wall_lock_timer - delta, 0.0)
+	wall_jump_timer = maxf(wall_jump_timer - delta, 0.0)
 
 
 # ---------------------------------------------------------------- states ----
@@ -298,6 +304,7 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 	wall_coyote_timer = 0.0
 	velocity = Vector2(-from_wall_dir * wall_jump_speed_x, -jump_speed)
 	wall_lock_timer = wall_jump_lock_time
+	wall_jump_timer = wall_jump_anim_time
 	state = State.JUMP
 	juice.on_jump()
 
@@ -385,9 +392,13 @@ func _update_visual() -> void:
 		State.RUN:
 			visual.play("run")
 		State.JUMP:
-			visual.play("jump")
+			# A wall jump is an ordinary JUMP state — the dedicated kick is
+			# selected by how the jump STARTED, which only this timer records.
+			visual.play("wall_jump" if wall_jump_timer > 0.0 else "jump")
 		State.FALL:
-			visual.play("fall")
+			# Keep the kick through the arc if it is still running: a short hop
+			# off a wall can reach FALL before the clip has played out.
+			visual.play("wall_jump" if wall_jump_timer > 0.0 else "fall")
 		State.DASH:
 			visual.play("dash")  # forward lunge burst, one-shot
 		State.WALL_SLIDE:
@@ -420,6 +431,7 @@ func respawn(at: Vector2) -> void:
 	dash_cooldown_timer = 0.0
 	freeze_timer = 0.0
 	wall_lock_timer = 0.0
+	wall_jump_timer = 0.0
 	visible = true
 	body_shape.set_deferred("disabled", false)
 	state = State.FALL

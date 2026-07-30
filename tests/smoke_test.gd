@@ -37,6 +37,8 @@ func _run() -> void:
 	await _frames(8)
 	Input.action_release("jump")
 	_check(player.global_position.y < y0 - 4.0, "jump gains height")
+	_check(player.visual.animation == "jump",
+		"a ground jump uses the normal jump pose (got '%s')" % player.visual.animation)
 	_check(player.state == Player.State.JUMP or player.state == Player.State.FALL,
 		"airborne state during jump")
 	await _frames(60)
@@ -73,6 +75,15 @@ func _run() -> void:
 		Input.action_release("jump")
 		_check(player.velocity.x > 0.0 and player.state == Player.State.JUMP,
 			"wall jump kicks away from the wall (vx=%.1f)" % player.velocity.x)
+		# A wall jump is an ordinary JUMP state, so only the kick TIMER can tell
+		# the two apart — if that regresses, the dedicated clip silently stops
+		# playing and you are back to the generic jump pose.
+		_check(player.visual.animation == "wall_jump",
+			"wall jump plays its own kick clip (got '%s')" % player.visual.animation)
+		await _frames(30)
+		_check(player.visual.animation != "wall_jump",
+			"the kick clip hands back to the normal pose when it ends (got '%s')"
+				% player.visual.animation)
 	Input.action_release("move_left")
 	await _frames(60)
 

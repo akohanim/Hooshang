@@ -32,9 +32,34 @@
 [ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_003.png" id="73_slide3"]
 [ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_004.png" id="74_slide4"]
 [ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_005.png" id="75_slide5"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_000.png" id="80_wj0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_001.png" id="80_wj1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_002.png" id="80_wj2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_003.png" id="80_wj3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_004.png" id="80_wj4"]
 
 [resource]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("80_wj0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj4")
+}],
+"loop": false,
+"name": &"wall_jump",
+"speed": 14.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("70_slide0")
