@@ -67,6 +67,7 @@ Consequences worth knowing before you touch anything:
 | `Screen` | `systems/screen.gd` | Owns the two render surfaces; loads worlds into the game viewport |
 | `Dialogue` | `scenes/ui/DialogueBox.tscn` | Celeste-style dialogue box — `Dialogue.say(speaker, text, tint, portrait)` |
 | `Game` | `systems/game.gd` | Level progression through `Game.LEVELS` + fade transitions |
+| `Collectibles` | `systems/collectibles.gd` | Pomegranate total + the on-screen counter; survives every level change |
 
 `Screen` is registered first because `Game` loads levels through it.
 
@@ -90,7 +91,8 @@ clobbered by a re-export from LDtk:
 
 - `ldtk_tileset_post_import.gd` — per-tile collision on the world layer
 - `ldtk_entities_post_import.gd` — turns LDtk entities into real nodes
-  (PlayerStart, Door, Checkpoint, Hazard, RumiTrigger, Exit, MusicNote1–5)
+  (PlayerStart, Door, Checkpoint, Hazard, RumiTrigger, Exit, MusicNote1–5,
+  Pomegranate)
 - `ldtk_level_post_import.gd` — assigns draw bands and neutralises the
   importer's IntGrid debug swatch layers
 
@@ -109,7 +111,8 @@ res://
 │
 ├── systems/                 Autoload singletons (cross-level services)
 │   ├── screen.gd            Screen: the two render surfaces; world loading
-│   └── game.gd              Game: level progression + fade transitions
+│   ├── game.gd              Game: level progression + fade transitions
+│   └── collectibles.gd      Collectibles: pomegranate total + counter HUD
 │
 ├── scenes/
 │   ├── characters/hooshang/
@@ -122,6 +125,7 @@ res://
 │   │   ├── Door.tscn / door.gd            (+ DoorGlass, DoorMetal variants)
 │   │   ├── ExitSign.tscn
 │   │   ├── NoteTile.tscn / note_tile.gd   Musical puzzle tile
+│   │   ├── Pomegranate.tscn / pomegranate.gd   Collectible ("coin")
 │   │   ├── backdrop/        OfficeBackdrop.tscn, MoonWindow.tscn
 │   │   ├── hazards/         Hazard.tscn / hazard.gd
 │   │   └── lighting/        LampFixture.tscn / lamp_fixture.gd
@@ -250,6 +254,7 @@ layer 1 = `1`, layer 2 = `2`, layer 3 = `4`, layer 4 = `8`.
 | `NoteTile` → `Touch` area | `8` triggers | `2` player | Oversized contact skin |
 | LDtk `Exit` trigger | `8` triggers | `2` player | Built by the entities hook |
 | `LdtkRumiTrigger` | `8` triggers | `2` player | Full-height pillar; cannot be jumped over |
+| `Pomegranate.tscn` | `8` triggers | `2` player | Collectible; only the player can take it |
 | `LdtkWorld` return door | `8` triggers | `2` player | Makes an exit two-way |
 | Level trigger areas (`.tscn`) | `8` triggers | `2` player | Intro / dash / exit triggers |
 
@@ -344,9 +349,28 @@ done
 | `backtrack_test` | Exits work both ways, all the way back, not just one room deep |
 | `intro_test` | Act I dialogue order, portrait per line, dashless start, dash granted in room 2 |
 | `screen_test` | UI and world stay on separate surfaces; restyling dialogue can't touch the game |
+| `pomegranate_test` | Collectible pickup, and the total surviving level changes and death |
 
 `tests/screenshot.tscn` renders a level **windowed** and saves viewport PNGs —
 useful for checking visuals without opening the editor.
+
+### Collectibles (pomegranates)
+
+Place **`Pomegranate`** entities by hand in LDtk — that is the whole authoring
+step, there are no fields to fill in. `ldtk_entities_post_import.gd` turns each
+one into `scenes/props/Pomegranate.tscn`, which spins, bobs, glows faintly so it
+is findable in the dark rooms, and pops when Hooshang touches it.
+
+The running total lives in the `Collectibles` autoload, so it carries across
+rooms, levels, Acts and deaths. It also records which fruit have been taken, keyed
+by world position — otherwise reloading a world would re-spawn ones you had
+already banked and let you farm the count.
+
+Add the entity definition to a fresh `.ldtk` (or restore it if a save wipes it):
+
+```bash
+python3 tools/ldtk_entities.py
+```
 
 ### Editing levels
 
