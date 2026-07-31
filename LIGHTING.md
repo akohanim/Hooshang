@@ -112,11 +112,18 @@ Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 
 ## Finding the position to place something
 
-**You can now place lights visually.** `LdtkWorld` is a `@tool` script, so
-opening `ldtk/Act1World.tscn` builds a look-only copy of every room in the 2D
-view — drag `LampFixture.tscn` onto the `Lights` node and move it where you want
-it. The preview is added without an owner, so Godot never saves it into the
-scene; it is rebuilt each time you open it and cannot be committed by accident.
+**You can place lights visually.** `ldtk/Act1World.tscn` has an **`EditorPreview`**
+node at the bottom of the tree — a real instance of the imported world, there so
+the rooms are visible in the editor and lights can be dragged onto actual
+geometry. `LdtkWorld` deletes it the instant the game starts, in `_enter_tree()`,
+before its contents ever wake up.
+
+**Leave it alone**: don't rename, move or delete it, and don't add anything
+inside it. Put lights under `Lights` as usual.
+
+(A `@tool` script that generated the preview at edit time was tried first and
+does not work — nodes a tool script adds at runtime never show in the Scene dock,
+so there is nothing to drag against.)
 
 Do **not** drag `ldtk/levels/*.scn` into the scene to see the map. Those are
 generated imports, and parenting one into `Act1World` puts a second copy of that

@@ -30,7 +30,7 @@ position = Vector2(1700, 220)
 position = Vector2(160, 216)
 light_color = Color(1, 0.87, 0.66, 1)
 light_energy = 2.1
-cable_length = 40
+cable_length = 40.0
 flickers = true
 flicker_amount = 0.1
 flicker_speed = 9.0
@@ -45,14 +45,14 @@ position = Vector2(410, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="CeilingRoom2b" parent="Lights" unique_id=1991474359 instance=ExtResource("3_lamp")]
 position = Vector2(550, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="MoonGlowRoom2" parent="Lights" unique_id=2044158423 instance=ExtResource("3_lamp")]
 position = Vector2(480, 224)
@@ -66,14 +66,14 @@ position = Vector2(698, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="CeilingRoom3b" parent="Lights" unique_id=1798228503 instance=ExtResource("3_lamp")]
 position = Vector2(838, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="MonitorRoom3" parent="Lights" unique_id=2080055240 instance=ExtResource("9_mon")]
 position = Vector2(760, 300)
@@ -84,35 +84,35 @@ position = Vector2(1018, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="CeilingRoom4b" parent="Lights" unique_id=872844841 instance=ExtResource("3_lamp")]
 position = Vector2(1140, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="TileLampRoom5" parent="Lights" unique_id=1745046324 instance=ExtResource("3_lamp")]
 position = Vector2(1352, 214)
 light_color = Color(1, 0.87, 0.66, 1)
 light_energy = 1.6
 light_scale = 1.3
-cable_length = 38
+cable_length = 38.0
 
 [node name="CeilingRoom6a" parent="Lights" unique_id=159846677 instance=ExtResource("3_lamp")]
 position = Vector2(1666, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 74
+cable_length = 74.0
 
 [node name="CeilingRoom6b" parent="Lights" unique_id=904064966 instance=ExtResource("3_lamp")]
 position = Vector2(1800, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
-cable_length = 58
+cable_length = 58.0
 
 [node name="MoonGlowRoom6" parent="Lights" unique_id=995142792 instance=ExtResource("3_lamp")]
 position = Vector2(1700, 224)
@@ -123,15 +123,15 @@ show_body = false
 
 [node name="SpawnMonitorRoom6" parent="Lights" unique_id=1506925432 instance=ExtResource("9_mon")]
 position = Vector2(1600, 318)
-light_energy = 1
-light_scale = 1
+light_energy = 1.0
+light_scale = 1.0
 
 [node name="ExitLampRoom1" parent="Lights" unique_id=1768840961 instance=ExtResource("3_lamp")]
 position = Vector2(264, 204)
 light_color = Color(0.9762936, 0.9015216, 0, 1)
-light_energy = 1.6
+light_energy = 0.2
 light_scale = 1.4
-cable_length = 28
+cable_length = 28.0
 
 [node name="NoteSequence" type="Node" parent="." unique_id=1281660635]
 script = ExtResource("5_seq")
@@ -144,3 +144,4 @@ autoplay = true
 [node name="Act1Beats" type="Node" parent="." unique_id=1256093015]
 script = ExtResource("7_beats")
 
+[node name="EditorPreview" parent="." instance=ExtResource("2_ldtk")]
