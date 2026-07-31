@@ -39,19 +39,31 @@ light_scale = 3.0
 show_body = false
 
 [node name="FillRoom3a" parent="Lights" instance=ExtResource("3_lamp")]
-position = Vector2(720, 250)
+position = Vector2(690, 250)
 light_energy = 2.0
 light_scale = 3.0
 show_body = false
 
 [node name="FillRoom3b" parent="Lights" instance=ExtResource("3_lamp")]
-position = Vector2(880, 250)
+position = Vector2(850, 250)
 light_energy = 2.0
 light_scale = 3.0
 show_body = false
 
-[node name="PuzzleLightRoom4" parent="Lights" instance=ExtResource("3_lamp")]
-position = Vector2(1040, 188)
+[node name="FillRoom4a" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1010, 250)
+light_energy = 2.0
+light_scale = 3.0
+show_body = false
+
+[node name="FillRoom4b" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1170, 250)
+light_energy = 2.0
+light_scale = 3.0
+show_body = false
+
+[node name="PuzzleLightRoom5" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1328, 188)
 light_energy = 1.9
 light_scale = 1.3
 show_body = false
