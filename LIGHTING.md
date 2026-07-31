@@ -6,6 +6,23 @@ it going wrong. Everything here is 2D lighting: `CanvasModulate` for darkness,
 
 ---
 
+## The style: every light has a visible source
+
+Act I is an office at night, so the lighting is **diegetic** — you should always
+be able to point at what is emitting it. Hanging fluorescent tubes, the moon
+through a window, a monitor left on. There are no invisible "fill" lights parked
+mid-room any more; the look comes from pools of light with genuinely dark corners
+between them, which is the point.
+
+Practically that means:
+
+- A ceiling fixture is a `LampFixture` with `show_body = true`, so you see the
+  cord and bulb.
+- Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
+  `show_body = false` — the window itself IS the visible source.
+- A screen is `MonitorGlow.tscn`.
+- If a corner needs light, ask what would be lighting it, and place that.
+
 ## The two knobs
 
 **1. `CanvasModulate` — the master darkness.** One node in `ldtk/Act1World.tscn`,
@@ -23,9 +40,9 @@ manager's light-sweep) will use to find every lamp at once.
 | Export | What it does |
 | --- | --- |
 | `light_color` | Colour of the pool. Default is cold fluorescent; warm office lamps recolour it |
-| `light_energy` | Brightness. Fill lights use ~2.0, feature lights 1.3–1.9 |
+| `light_energy` | Brightness. Ceiling fixtures ~1.7, the cubicle bulb 2.1 |
 | `light_scale` | **Size of the pool** — see the radius formula below |
-| `show_body` | `true` draws the physical cable + bulb; `false` is an invisible source (all fill lights use `false`) |
+| `show_body` | `true` draws the physical cable + bulb — the default for a fixture. `false` only for a source that is already visible as art, e.g. moonlight on a window |
 | `cable_length` | How far the bulb hangs below its anchor, in px |
 | `flickers` / `flicker_amount` / `flicker_speed` | Fluorescent sputter. Off by default — the cubicle bulb is the only one using it |
 
@@ -70,7 +87,8 @@ light_x + radius  ≤  room_right_edge
 ```
 
 If that forces the light too small to cover the room, use **several smaller
-lights** rather than one big one. That is exactly why room 6 has four.
+lights** rather than one big one — or hang the bulb lower, which shrinks the
+radius you need (see *How a hanging fixture is positioned*).
 
 ### Room positions (world X)
 
@@ -85,7 +103,7 @@ Lights are positioned in **world coordinates**, not per room, so you need these:
 | 5 | `Level_4` | 1248 – 1568 | **Cave** — lit at the musical tiles, dark after |
 | 6 | `Level_5` | 1568 – 1888 | |
 
-Floor level is around **y = 336**; fill lights sit at **y = 250** (mid-room).
+Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 
 > These shift whenever you add or move a room in LDtk. Re-check them before
 > placing anything — see *When you add a room* below.
@@ -99,25 +117,58 @@ Floor level is around **y = 336**; fill lights sit at **y = 250** (mid-room).
 3. Drag `scenes/props/lighting/LampFixture.tscn` from the FileSystem dock onto
    it (or **Ctrl/Cmd + Shift + A** → Instance Child Scene).
 4. Set **Transform → Position** to a world coordinate inside the target room.
-5. Set the exports in the Inspector. For a normal fill: `light_energy 2.0`,
-   `light_scale 2.0`, `show_body false`.
+5. Set the exports in the Inspector. For a standard room fixture:
+   `light_energy 1.7`, `light_scale 1.5`, `cable_length 74`, `show_body true`.
 6. Check the radius against the seam rule above.
 7. Run it — pick the room straight from the debug picker (F5), no need to play
    up to it.
 
 **Name it for the room it serves.** The convention in the scene is
-`FillRoomNa` / `FillRoomNb` for general fill, and a descriptive name for a
-feature light (`PuzzleLightRoom5`, `SpawnLightRoom6`, `CubicleBulb`). When rooms
-shift, these names are how you tell what is now in the wrong place.
+`CeilingRoomNa` / `CeilingRoomNb` for room fixtures, and a descriptive name for
+anything else (`CubicleBulb`, `MoonGlowRoom2`, `TileLampRoom5`,
+`SpawnMonitorRoom6`). When rooms shift, these names are how you tell what is now
+in the wrong place.
+
+### How a hanging fixture is positioned
+
+**The node's position is the BULB, and the cable is drawn upward from it to the
+ceiling.** So you place the lamp where the light should be, and set
+`cable_length` to the distance back up to the ceiling:
+
+```
+cable_length = bulb_y − ceiling_y
+```
+
+Rooms start at y = 160 and the ceiling tile is one 16 px cell, so the ceiling
+underside is **y = 176**. Floor is **y = 336**.
+
+Hang bulbs LOW — around **y = 250**, `cable_length = 74`. That matters for more
+than looks: a bulb at 250 only needs an 86 px reach to light the floor
+(`light_scale 1.5`, radius 96), whereas one tucked up at the ceiling needs a
+160 px radius to do the same job — and that wide a pool spills straight through
+the seam into the next room. **Hanging lower is what keeps rooms independent.**
+
+This is a real trap: the first pass at this put lamps at y = 178 with radius 115,
+which cannot reach a floor 158 px below. Three rooms measured 0–5 brightness at
+floor level — effectively black.
 
 ### Recipes
 
 ```
-Normal room fill        energy 2.0   scale 2.0   show_body false
-Wide fill (mid-room)    energy 2.0   scale 3.0   show_body false   ← watch seams
-Feature / puzzle light  energy 1.9   scale 1.3   show_body false
-Spawn point             energy 1.7   scale 0.75  show_body false
-Visible ceiling lamp    energy 1.15  scale 2.4   show_body true    + flickers
+Hanging ceiling lamp    energy 1.7   scale 1.5   cable 74   show_body true
+  bulb at y 250, ceiling y 176 — the standard room fixture
+
+Cubicle bulb            energy 2.1   scale 2.2   cable 40   show_body true
+  + flickers, warm Color(1, 0.87, 0.66) — deliberately the dimmest room
+
+Moonlight               energy 1.3   scale 1.6   show_body false
+  cold Color(0.62, 0.74, 1.0), placed on a MoonWindow
+
+Monitor (MonitorGlow)   energy 0.9-1.1   scale 1.0-1.2
+  cold Color(0.55, 0.78, 0.95); glows/wanders slowly by default
+
+Feature light           energy 1.6   scale 1.3   show_body true
+  e.g. over the musical tiles in the cave
 ```
 
 ---
