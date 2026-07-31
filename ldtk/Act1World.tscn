@@ -1,141 +1,146 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://cnrwx577guta"]
 
-[ext_resource type="Script" path="res://scripts/ldtk_world.gd" id="1_world"]
-[ext_resource type="PackedScene" path="res://ldtk/hooshang_claude.ldtk" id="2_ldtk"]
+[ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
+[ext_resource type="PackedScene" uid="uid://dc8v6mkhcimnl" path="res://ldtk/hooshang_claude.ldtk" id="2_ldtk"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/LampFixture.tscn" id="3_lamp"]
-[ext_resource type="Script" path="res://scripts/note_sequence.gd" id="5_seq"]
-[ext_resource type="AudioStream" path="res://assets/music/shur_circuit_climb.mp3" id="6_music"]
-[ext_resource type="Script" path="res://scripts/act1_beats.gd" id="7_beats"]
+[ext_resource type="Script" uid="uid://cq0ixl1iodot6" path="res://scripts/note_sequence.gd" id="5_seq"]
+[ext_resource type="AudioStream" uid="uid://dygagb2v424do" path="res://assets/music/shur_circuit_climb.mp3" id="6_music"]
+[ext_resource type="Script" uid="uid://dnieqpd0uwgq2" path="res://scripts/act1_beats.gd" id="7_beats"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/MoonWindow.tscn" id="8_moon"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/MonitorGlow.tscn" id="9_mon"]
+[ext_resource type="PackedScene" uid="uid://7bgqd402umas" path="res://ldtk/levels/Level_1.scn" id="9_wict1"]
 
-[node name="Act1World" type="Node2D"]
+[node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
 world_scene = ExtResource("2_ldtk")
 
-[node name="CanvasModulate" type="CanvasModulate" parent="."]
+[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=331792219]
 color = Color(0.05, 0.05, 0.065, 1)
 
-[node name="Backdrop" type="Node2D" parent="."]
+[node name="Backdrop" type="Node2D" parent="." unique_id=1311038231]
 
-[node name="MoonWindowRoom2" parent="Backdrop" instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom2" parent="Backdrop" unique_id=337326383 instance=ExtResource("8_moon")]
 position = Vector2(480, 220)
 
-[node name="MoonWindowRoom6" parent="Backdrop" instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom6" parent="Backdrop" unique_id=1500267559 instance=ExtResource("8_moon")]
 position = Vector2(1700, 220)
 
-[node name="Lights" type="Node2D" parent="."]
+[node name="Lights" type="Node2D" parent="." unique_id=1945229334]
 
-; Room 1 - the cubicle. Deliberately the dimmest room in the Act.
-[node name="CubicleBulb" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CubicleBulb" parent="Lights" unique_id=703681485 instance=ExtResource("3_lamp")]
 position = Vector2(160, 216)
 light_color = Color(1, 0.87, 0.66, 1)
 light_energy = 2.1
-light_scale = 2.2
 cable_length = 40
 flickers = true
 flicker_amount = 0.1
 flicker_speed = 9.0
 
-[node name="CubicleMonitor" parent="Lights" instance=ExtResource("9_mon")]
+[node name="CubicleMonitor" parent="Lights" unique_id=71436151 instance=ExtResource("9_mon")]
 position = Vector2(96, 244)
 light_energy = 1.1
 light_scale = 1.2
 
-[node name="CeilingRoom2a" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom2a" parent="Lights" unique_id=829256936 instance=ExtResource("3_lamp")]
 position = Vector2(410, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="CeilingRoom2b" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom2b" parent="Lights" unique_id=1991474359 instance=ExtResource("3_lamp")]
 position = Vector2(550, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="MoonGlowRoom2" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom2" parent="Lights" unique_id=2044158423 instance=ExtResource("3_lamp")]
 position = Vector2(480, 224)
 light_color = Color(0.62, 0.74, 1, 1)
 light_energy = 1.3
 light_scale = 1.6
 show_body = false
 
-[node name="CeilingRoom3a" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom3a" parent="Lights" unique_id=122162714 instance=ExtResource("3_lamp")]
 position = Vector2(698, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="CeilingRoom3b" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom3b" parent="Lights" unique_id=1798228503 instance=ExtResource("3_lamp")]
 position = Vector2(838, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="MonitorRoom3" parent="Lights" instance=ExtResource("9_mon")]
+[node name="MonitorRoom3" parent="Lights" unique_id=2080055240 instance=ExtResource("9_mon")]
 position = Vector2(760, 300)
 light_energy = 0.8
-light_scale = 1.1
 
-[node name="CeilingRoom4a" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom4a" parent="Lights" unique_id=1945420944 instance=ExtResource("3_lamp")]
 position = Vector2(1018, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="CeilingRoom4b" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom4b" parent="Lights" unique_id=872844841 instance=ExtResource("3_lamp")]
 position = Vector2(1140, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="TileLampRoom5" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="TileLampRoom5" parent="Lights" unique_id=1745046324 instance=ExtResource("3_lamp")]
 position = Vector2(1352, 214)
 light_color = Color(1, 0.87, 0.66, 1)
 light_energy = 1.6
 light_scale = 1.3
 cable_length = 38
 
-[node name="CeilingRoom6a" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom6a" parent="Lights" unique_id=159846677 instance=ExtResource("3_lamp")]
 position = Vector2(1666, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 74
 
-[node name="CeilingRoom6b" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="CeilingRoom6b" parent="Lights" unique_id=904064966 instance=ExtResource("3_lamp")]
 position = Vector2(1800, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
 light_energy = 1.7
 light_scale = 1.5
 cable_length = 58
 
-[node name="MoonGlowRoom6" parent="Lights" instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom6" parent="Lights" unique_id=995142792 instance=ExtResource("3_lamp")]
 position = Vector2(1700, 224)
 light_color = Color(0.62, 0.74, 1, 1)
 light_energy = 1.3
 light_scale = 1.6
 show_body = false
 
-[node name="SpawnMonitorRoom6" parent="Lights" instance=ExtResource("9_mon")]
+[node name="SpawnMonitorRoom6" parent="Lights" unique_id=1506925432 instance=ExtResource("9_mon")]
 position = Vector2(1600, 318)
 light_energy = 1
 light_scale = 1
 
-[node name="NoteSequence" type="Node" parent="."]
+[node name="LampFixture" parent="Lights" unique_id=1768840961 instance=ExtResource("3_lamp")]
+light_color = Color(0.9762936, 0.9015216, 0, 1)
+
+[node name="NoteSequence" type="Node" parent="." unique_id=1281660635]
 script = ExtResource("5_seq")
 
-[node name="Music" type="AudioStreamPlayer" parent="."]
+[node name="Music" type="AudioStreamPlayer" parent="." unique_id=1079197811]
 stream = ExtResource("6_music")
 volume_db = -10.0
 autoplay = true
 
-[node name="Act1Beats" type="Node" parent="."]
+[node name="Act1Beats" type="Node" parent="." unique_id=1256093015]
 script = ExtResource("7_beats")
+
+[node name="LampFixture" parent="." unique_id=1121594319 instance=ExtResource("3_lamp")]
+
+[node name="Level_1" parent="LampFixture" unique_id=295388634 instance=ExtResource("9_wict1")]

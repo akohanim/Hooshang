@@ -19,7 +19,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	if not visible or player == null:
 		return
-	label.text = "vel   %4.0f, %4.0f\nstate %s\ndash  %s  (cd %.2f)\ncoyote %.2f  wall %.2f\nbuffer %.2f\nfloor %s  wall %s" % [
+	# World position first: it is what you need when placing lights, props or
+	# LDtk entities by hand — walk to the spot and read the number off.
+	label.text = "pos   %4.0f, %4.0f\nvel   %4.0f, %4.0f\nstate %s\ndash  %s  (cd %.2f)\ncoyote %.2f  wall %.2f\nbuffer %.2f\nfloor %s  wall %s" % [
+		player.global_position.x, player.global_position.y,
 		player.velocity.x, player.velocity.y,
 		player.state_name(),
 		"READY" if player.dash_available else "spent", player.dash_cooldown_timer,

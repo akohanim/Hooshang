@@ -110,6 +110,37 @@ Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 
 ---
 
+## Finding the position to place something
+
+`Act1World.tscn` looks **empty in the editor** — the rooms are instanced at
+runtime by `LdtkWorld._ready()`, so the 2D view shows only your lights floating
+in blank space. Positions therefore come from numbers, not from dragging onto
+level geometry. Two ways to get them:
+
+**1. Walk there and read it off.** Run the game, press **F3**, and the debug
+overlay's first line is the player's world position. Stand where you want the
+thing and note the number. Easiest method by far.
+
+**2. Do the arithmetic from LDtk.** An entity's `px` in LDtk is local to its
+level, so:
+
+```
+world position = room world origin + local px
+```
+
+Room 1's origin is `(0, 160)`, so its Exit at local `(264, 96)` is world
+`(264, 256)`. Room origins are in the table above.
+
+Useful landmarks in room 1 (the opening scene):
+
+| | World position |
+| --- | --- |
+| PlayerStart | (72, 248) |
+| RumiTrigger | (216, 232) |
+| Door | (250, 227) |
+| Exit trigger | (264, 256) |
+| **ExitSign** | **(264, 220)** |
+
 ## Adding a light fixture
 
 1. Open `ldtk/Act1World.tscn`.
