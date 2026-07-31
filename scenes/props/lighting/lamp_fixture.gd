@@ -1,3 +1,4 @@
+@tool
 class_name LampFixture
 extends Node2D
 ## Reusable ceiling lamp fixture: a light source with an optional visible body
@@ -58,6 +59,8 @@ func _apply() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	if not flickers or glow == null:
 		return
 	_t += delta * flicker_speed

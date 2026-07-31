@@ -1,3 +1,4 @@
+@tool
 class_name LdtkWorld
 extends Node2D
 ## Celeste-style room manager for an LDtk world (see STYLE_GUIDE.md §9).
@@ -98,6 +99,12 @@ var _return_armed := false
 
 
 func _ready() -> void:
+	# In the editor, build a LOOK-ONLY copy of the world so lights and props can
+	# be dragged onto real geometry. Everything below this is gameplay — player,
+	# signals, room entry — and must not run while authoring.
+	if Engine.is_editor_hint():
+		_build_editor_preview()
+		return
 	_world = world_scene.instantiate()
 	add_child(_world)
 
@@ -204,6 +211,29 @@ func _add_backdrop(room: Node2D) -> void:
 	room.move_child(panel, 0)
 
 
+## Editor-only preview of the imported world.
+##
+## The rooms are normally instanced at runtime, which left ldtk/Act1World.tscn
+## rendering as an empty scene in the editor — there was nothing to position a
+## light against, so every placement had to be worked out as a number. This
+## rebuilds the geometry (and the room backdrops, so the dark is legible) purely
+## for authoring.
+##
+## The preview is added WITHOUT an owner, so Godot never serialises it into the
+## .tscn: it is rebuilt each time the scene is opened and can't be accidentally
+## saved or committed. It carries no collision worth trusting and no player —
+## it is a backdrop to drag against, nothing more.
+func _build_editor_preview() -> void:
+	if world_scene == null:
+		return
+	var preview := world_scene.instantiate()
+	preview.name = "EditorPreview"
+	add_child(preview)          # no set_owner() -> not saved with the scene
+	if draw_room_backdrops:
+		for room in rooms_in(preview):
+			_add_backdrop(room)
+
+
 ## Invisible lid for one room, resting on top of the room rect (see
 ## seal_room_ceilings). Layer 1 = world, so the player's mask already sees it.
 func _add_ceiling(room: Node2D) -> void:
@@ -263,6 +293,8 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	if current_room == null or _transitioning:
 		return
 	if player.state == Player.State.DEAD:
@@ -274,6 +306,8 @@ func _physics_process(_delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if Engine.is_editor_hint():
+		return
 	# R = instant retry from the last checkpoint.
 	if event.is_action_pressed("respawn") and player.state != Player.State.DEAD \
 			and not player.input_locked and not _transitioning:

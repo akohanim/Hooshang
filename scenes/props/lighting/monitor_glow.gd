@@ -1,3 +1,4 @@
+@tool
 class_name MonitorGlow
 extends Node2D
 ## A computer screen left on overnight: a small bright panel plus the cold light
@@ -38,6 +39,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	if not glows:
 		return
 	_t += delta * glow_speed

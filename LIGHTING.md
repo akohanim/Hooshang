@@ -112,10 +112,17 @@ Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 
 ## Finding the position to place something
 
-`Act1World.tscn` looks **empty in the editor** — the rooms are instanced at
-runtime by `LdtkWorld._ready()`, so the 2D view shows only your lights floating
-in blank space. Positions therefore come from numbers, not from dragging onto
-level geometry. Two ways to get them:
+**You can now place lights visually.** `LdtkWorld` is a `@tool` script, so
+opening `ldtk/Act1World.tscn` builds a look-only copy of every room in the 2D
+view — drag `LampFixture.tscn` onto the `Lights` node and move it where you want
+it. The preview is added without an owner, so Godot never saves it into the
+scene; it is rebuilt each time you open it and cannot be committed by accident.
+
+Do **not** drag `ldtk/levels/*.scn` into the scene to see the map. Those are
+generated imports, and parenting one into `Act1World` puts a second copy of that
+room at the world origin, on top of room 1, with live collision.
+
+If you would rather work in numbers, two ways to get them:
 
 **1. Walk there and read it off.** Run the game, press **F3**, and the debug
 overlay's first line is the player's world position. Stand where you want the

@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://dnieqpd0uwgq2" path="res://scripts/act1_beats.gd" id="7_beats"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/MoonWindow.tscn" id="8_moon"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/MonitorGlow.tscn" id="9_mon"]
-[ext_resource type="PackedScene" uid="uid://7bgqd402umas" path="res://ldtk/levels/Level_1.scn" id="9_wict1"]
 
 [node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
@@ -127,8 +126,12 @@ position = Vector2(1600, 318)
 light_energy = 1
 light_scale = 1
 
-[node name="LampFixture" parent="Lights" unique_id=1768840961 instance=ExtResource("3_lamp")]
+[node name="ExitLampRoom1" parent="Lights" unique_id=1768840961 instance=ExtResource("3_lamp")]
+position = Vector2(264, 204)
 light_color = Color(0.9762936, 0.9015216, 0, 1)
+light_energy = 1.6
+light_scale = 1.4
+cable_length = 28
 
 [node name="NoteSequence" type="Node" parent="." unique_id=1281660635]
 script = ExtResource("5_seq")
@@ -141,6 +144,3 @@ autoplay = true
 [node name="Act1Beats" type="Node" parent="." unique_id=1256093015]
 script = ExtResource("7_beats")
 
-[node name="LampFixture" parent="." unique_id=1121594319 instance=ExtResource("3_lamp")]
-
-[node name="Level_1" parent="LampFixture" unique_id=295388634 instance=ExtResource("9_wict1")]
