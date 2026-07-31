@@ -3,7 +3,7 @@
 A 2D precision platformer in the spirit of Celeste. Hooshang, an elderly office
 worker, escapes a dark corporate office; Rumi (a golden guide figure) grants
 abilities at story beats. Godot 4.6, GDScript. **Art direction: modern detailed
-pixel art** (Celeste / Hollow Knight / Dead Cells) — see the Art direction
+pixel art** (Celeste / Hollow Knight/ Super Mario) — see the Art direction
 section below. The current greybox still runs at 320×180 with 8px placeholder
 tiles (viewport stretch, integer scale, nearest filtering); real art migrates to
 the target grid.
@@ -35,8 +35,7 @@ Lighting a room by hand (fixtures, the moon window, seam spill): `LIGHTING.md`.
 
 ## Art direction## Art direction
 
-**Modern detailed pixel art** — the fidelity of Celeste / Hollow Knight / Dead
-Cells. Soft gradient shading, dithering, and dynamic 2D lighting are all wanted;
+**Modern detailed pixel art** — the fidelity of Celeste / Hollow Knight / Super Mario. Soft gradient shading, dithering, and dynamic 2D lighting are all wanted;
 **explicitly NOT 8-bit/NES flat-palette retro.** This replaces the earlier
 "8-bit" direction. Design doc §7 (Visual & Audio Style) is the source of truth.
 
@@ -121,11 +120,3 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   2-tile (16px) slot. Jump reaches ~3.5 tiles, dash ~5, jump+dash gap ~10.
 - Checkpoints are silent Area2Ds; death is instant respawn, no penalty.
 
-## Roadmap (do not build until asked)
-
-- Underworld dimension: palette shift + stay-too-long death timer — hooks
-  noted in `level1_office.gd` / `LevelBase` (CanvasModulate is the seam).
-- Still Sight black-&-white power mode — CanvasModulate/shader + player state.
-- Manager's light-sweep hazard in the corridor (beat 4).
-- Musical tile puzzles — planned as a TileMapLayer + conductor node per level.
-- Story beats 2+: Rumi returns; dialogue system is ready for sequences.
