@@ -68,6 +68,36 @@ light_energy = 1.9
 light_scale = 1.3
 show_body = false
 
+[node name="FillRoom6a" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1636, 300)
+light_energy = 1.5
+light_scale = 1.05
+show_body = false
+
+[node name="FillRoom6b" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1650, 240)
+light_energy = 1.6
+light_scale = 1.05
+show_body = false
+
+[node name="SpawnLightRoom6" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1604, 322)
+light_energy = 1.7
+light_scale = 0.75
+show_body = false
+
+[node name="FillRoom6c" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1760, 250)
+light_energy = 2.0
+light_scale = 2.0
+show_body = false
+
+[node name="FillRoom6d" parent="Lights" instance=ExtResource("3_lamp")]
+position = Vector2(1860, 250)
+light_energy = 2.0
+light_scale = 2.0
+show_body = false
+
 [node name="NoteSequence" type="Node" parent="."]
 script = ExtResource("5_seq")
 
