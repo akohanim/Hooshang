@@ -386,7 +386,8 @@ python3 tools/ldtk_entities.py
 
 ### Conventions
 
-`STYLE_GUIDE.md` is the full reference and should be followed by default. In
+`STYLE_GUIDE.md` is the full reference and should be followed by default;
+`LIGHTING.md` covers lighting rooms by hand. In
 short: composite objects are their own `.tscn` prefab tweaked via `@export`s,
 never assembled inline in a level; scripts live next to their scene; scenes and
 nodes are `PascalCase`, scripts and variables `snake_case`; use groups

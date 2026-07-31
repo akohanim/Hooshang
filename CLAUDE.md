@@ -31,7 +31,9 @@ the target grid.
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 
-## Art direction
+Lighting a room by hand (fixtures, the moon window, seam spill): `LIGHTING.md`.
+
+## Art direction## Art direction
 
 **Modern detailed pixel art** — the fidelity of Celeste / Hollow Knight / Dead
 Cells. Soft gradient shading, dithering, and dynamic 2D lighting are all wanted;
