@@ -27,6 +27,14 @@ signal line_finished
 
 ## Reveal speed of the typewriter effect, in characters per second.
 @export var chars_per_second := 40.0
+## A beat inside a line — "(a breath)" in a script. Put PAUSE_MARK where it
+## falls and the typewriter holds there for this long; the mark itself is never
+## drawn. Stage directions get PLAYED rather than printed, which is the same
+## rule "(looking around)" follows in scripts/act1_beats.gd, and the alternative
+## here was a second dialogue box — a button press, which is a much bigger beat
+## than a breath. One mark per line.
+@export var pause_time := 0.5
+const PAUSE_MARK := "[p]"
 ## Weight added to the UI font. Godot's default font ships in one weight; a
 ## little synthetic emboldening is what gives the Celeste-ish solid look.
 @export_range(0.0, 1.0) var font_weight := 0.28
@@ -35,6 +43,14 @@ signal line_finished
 const PORTRAIT_TEXT_LEFT := 256.0
 const FULL_TEXT_LEFT := 48.0
 
+## Banner sizing. The text block never shrinks below MIN_TEXT_HEIGHT, which is
+## the height the box was fixed at and what one- and two-row lines still get, so
+## the overwhelming majority of lines look exactly as they did.
+const MIN_TEXT_HEIGHT := 146.0
+## Gap under the text, and the arrow's own box.
+const BANNER_PAD := 8.0
+const ARROW_HEIGHT := 44.0
+
 ## Extra pixels between glyphs, in the box's own 1280x720 space. Celeste's type
 ## is noticeably tracked-out; without this it reads cramped at this size.
 @export var letter_spacing := 2
@@ -42,7 +58,11 @@ const FULL_TEXT_LEFT := 48.0
 var _active := false
 var _revealing := false
 var _reveal_accum := 0.0
+## Character index the reveal holds at, or -1 for none / already spent.
+var _pause_at := -1
+var _pause_left := 0.0
 
+@onready var banner: ColorRect = $Banner
 @onready var name_label: Label = $NameLabel
 @onready var text_label: Label = $TextLabel
 @onready var arrow: Label = $Arrow
@@ -96,7 +116,14 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		else:
 			portrait.texture = _default_portrait
 			portrait.modulate = portrait_tint
-	text_label.text = text
+	# The mark is a timing instruction, not words: strip it, and remember the
+	# index it sat at so the reveal knows where to hold. Its position in the raw
+	# string IS its index in the stripped one, since everything before it is
+	# untouched.
+	_pause_at = text.find(PAUSE_MARK)
+	text_label.text = text.replace(PAUSE_MARK, "") if _pause_at >= 0 else text
+	_fit_banner()
+	_pause_left = 0.0
 	text_label.visible_characters = 0
 	arrow.visible = false
 	_reveal_accum = 0.0
@@ -108,10 +135,51 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	_active = false
 
 
+## Grow the banner to fit the line just set, if the line needs it.
+##
+## The box hides between lines (say() ends with visible = false), so a per-line
+## size is never seen as a morph — the banner simply comes back the right size.
+##
+## Needed because the type is large enough that a long line wraps to three rows,
+## and the box was a fixed 146px: "Who are you? I've worked in this office
+## fifteen years. I've never once seen you at an all hands." measures 181px and
+## had its last row cut off. Shrinking the font was the alternative and is the
+## wrong trade — the size is the thing that makes this read like Celeste.
+func _fit_banner() -> void:
+	var font := text_label.get_theme_font("font")
+	if font == null:
+		return
+	var size := text_label.get_theme_font_size("font_size")
+	# offset_right/left rather than `size.x`: the left edge was just moved for
+	# this line's portrait, and the rect does not catch up until layout runs.
+	var width := text_label.offset_right - text_label.offset_left
+	var wrapped := font.get_multiline_string_size(
+		text_label.text, HORIZONTAL_ALIGNMENT_CENTER, width, size)
+	var rows := maxi(int(round(wrapped.y / float(size))), 1)
+	var needed: float = wrapped.y \
+		+ float(text_label.get_theme_constant("line_spacing")) * (rows - 1)
+	text_label.offset_bottom = text_label.offset_top \
+		+ maxf(needed + BANNER_PAD, MIN_TEXT_HEIGHT)
+	banner.offset_bottom = text_label.offset_bottom + BANNER_PAD
+	arrow.offset_bottom = banner.offset_bottom - BANNER_PAD
+	arrow.offset_top = arrow.offset_bottom - ARROW_HEIGHT
+
+
 func _process(delta: float) -> void:
 	if not _revealing:
 		return
+	if _pause_left > 0.0:
+		_pause_left -= delta
+		return
 	_reveal_accum += chars_per_second * delta
+	if _pause_at >= 0 and int(_reveal_accum) >= _pause_at:
+		# Land exactly on the mark rather than wherever this frame's delta
+		# overshot to, so the hold reads the same at any frame rate.
+		_reveal_accum = float(_pause_at)
+		_pause_left = pause_time
+		_pause_at = -1  # one beat per line, and it has now been spent
+		text_label.visible_characters = int(_reveal_accum)
+		return
 	text_label.visible_characters = int(_reveal_accum)
 	if text_label.visible_characters >= text_label.text.length():
 		text_label.visible_characters = -1  # -1 = show everything
@@ -125,9 +193,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()
 		if _revealing:
-			# First press: finish the reveal instantly.
+			# First press: finish the reveal instantly. Skipping ahead skips the
+			# breath too — holding a reader at a dramatic beat they have just
+			# asked to skip past is the wrong way round.
 			text_label.visible_characters = -1
 			_revealing = false
+			_pause_at = -1
+			_pause_left = 0.0
 			arrow.visible = true
 		else:
 			# Second press: dismiss.

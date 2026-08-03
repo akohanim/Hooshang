@@ -7,8 +7,9 @@ extends Node
 ##      works out he isn't where he should be. He has control after this.
 ##   2. THE MEETING (room 1) — walking into the RumiTrigger brings Rumi in. Rumi
 ##      says nothing for a long moment; Hooshang fills the silence, gets no
-##      answer, and talks himself into a concussion theory. Then Rumi speaks
-##      once and reaches out. No ability yet — this beat is the introduction.
+##      answer, and talks himself into a concussion theory. Then Rumi answers,
+##      names the journey, and reaches out. Hooshang agrees to one step. No
+##      ability yet — this beat is the introduction.
 ##   3. THE GIFT (room 2) — at the second encounter Rumi explains the gap and
 ##      grants the DASH. Deliberately not in room 1: the ability arrives in the
 ##      room that first demands it, so the lesson and the need land together.
@@ -147,7 +148,7 @@ func _play_waking() -> void:
 	await t.finished
 	await _hold(come_round_pause)
 
-	await _hooshang("...I fell. I remember falling.", "dazed")
+	await _hooshang("I remember falling...", "dazed")
 
 	# "(looking around)" is a stage direction, so play it rather than print it.
 	player.look(-1)
@@ -173,23 +174,32 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await trigger.appear(ahead * rumi_stand_offset)
 	trigger.breathe(true)
 
-	await _hooshang("Hello?", "hesitant")
+	await _hooshang("!", "confused")
+	await _hooshang("Hello??", "hesitant")
+	await _hooshang("...", "hesitant")
 	await _hooshang(
-		"I've worked in this office nine years. I've never once seen you at an all hands.",
+		"Who are you? I've worked in this office fifteen years. I've never once seen you at an all hands.",
 		"skeptical")
 
-	# He says nothing yet. He only stands there, unhurried.
+	# He says nothing yet. He only stands there, unhurried, the light along his
+	# sleeves breathing slightly — that breathing is trigger.breathe(true),
+	# already running since he appeared.
 	await _hold(silence_time)
 
 	await _hooshang(
-		"Are you going to say something, or just stand there glowing at me.",
+		"Are you going to say something, or just stand there glowing at me...",
 		"annoyed")
-	await _say_softly("I think I hit my head harder than I thought.", "vulnerable")
+	await _hooshang("...", "vulnerable")
+	await _say_softly("I think I hit my head harder than I thought...", "vulnerable")
 
 	await _hold(before_rumi_speaks)
-	await Dialogue.say("Rumi",
-		"You have knocked on this door your whole life from the inside.",
-		RUMI_GOLD)
+	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan")
+	# "(muttering)" — same treatment as "(softer)": slower, which is the only
+	# volume knob a dialogue box has.
+	await _say_softly("A journey? I just wanted to make it to my car.", "skeptical")
+	await _rumi("Do not turn away now. The way out is the way through, and the way through is inward.")
+	await _rumi("You have knocked on this door your whole life, from the inside.")
+	await _rumi("Walk toward the light. You need not see the whole road, only the next step of it.")
 
 	# He reaches out — one hand, sleeve trailing light — and touches his chest.
 	# Something wrapped in cloth for fifty years comes loose. No ABILITY here,
@@ -200,6 +210,9 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await trigger.give_to(player)
 	player.flash()
 	await _hold(0.45)
+
+	# He answers with Rumi still standing there, and only then does Rumi go.
+	await _hooshang("One step.[p] Okay. One step I can probably do.", "hesitant")
 
 	await trigger.vanish()
 	player.input_locked = false
@@ -239,6 +252,11 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 ## One of Hooshang's lines, with the face that goes with it.
 func _hooshang(text: String, face: String) -> void:
 	await Dialogue.say("Hooshang", text, HOOSHANG_PALE, FACES.get(face))
+
+
+## One of Rumi's. He has no portrait art yet, so he gets the tinted stand-in.
+func _rumi(text: String) -> void:
+	await Dialogue.say("Rumi", text, RUMI_GOLD)
 
 
 ## Same, delivered slower — our stand-in for "(softer)".

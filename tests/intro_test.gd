@@ -9,20 +9,45 @@ extends Node
 ## Run:  godot --headless res://tests/intro_test.tscn
 
 const WAKING: Array[String] = [
-	"...I fell. I remember falling.",
+	"I remember falling...",
 	"This doesn't feel like my cubicle...",
 ]
+## The meeting, in order, both speakers interleaved. "[p]" in the last line is a
+## breath the typewriter holds for (see DialogueBox.PAUSE_MARK) — it is stripped
+## before it is drawn, so what is asserted here is what a player actually reads.
 const MEETING: Array[String] = [
-	"Hello?",
-	"I've worked in this office nine years. I've never once seen you at an all hands.",
-	"Are you going to say something, or just stand there glowing at me.",
-	"I think I hit my head harder than I thought.",
-	"You have knocked on this door your whole life from the inside.",
+	"!",
+	"Hello??",
+	"...",
+	"Who are you? I've worked in this office fifteen years. I've never once seen you at an all hands.",
+	"Are you going to say something, or just stand there glowing at me...",
+	"...",
+	"I think I hit my head harder than I thought...",
+	"You stand at the beginning of your most important journey, Hooshang jaan",
+	"A journey? I just wanted to make it to my car.",
+	"Do not turn away now. The way out is the way through, and the way through is inward.",
+	"You have knocked on this door your whole life, from the inside.",
+	"Walk toward the light. You need not see the whole road, only the next step of it.",
+	"One step. Okay. One step I can probably do.",
+]
+const MEETING_SPEAKERS: Array[String] = [
+	"Hooshang", "Hooshang", "Hooshang", "Hooshang", "Hooshang", "Hooshang", "Hooshang",
+	"Rumi",
+	"Hooshang",
+	"Rumi", "Rumi", "Rumi",
+	"Hooshang",
 ]
 ## Hooshang's face per line, in order. The mapping is a directing choice, not
-## something the code can infer, so it is pinned here.
+## something the code can infer, so it is pinned here. Rumi's lines are "" —
+## he has no portrait art yet, only the tinted stand-in.
 const WAKING_FACES: Array[String] = ["dazed", "confused"]
-const MEETING_FACES: Array[String] = ["hesitant", "skeptical", "annoyed", "vulnerable", "", ""]
+const MEETING_FACES: Array[String] = [
+	"confused", "hesitant", "hesitant", "skeptical", "annoyed", "vulnerable", "vulnerable",
+	"",
+	"skeptical",
+	"", "", "",
+	"hesitant",
+]
 
 const GIFT: Array[String] = [
 	"Some gaps won't yield to a jump. Press the SHIFT key to dash.",
@@ -72,10 +97,10 @@ func _ready() -> void:
 	await _run_scene(900)
 
 	_check(lines == MEETING, "meeting lines, in order  [got %s]" % str(lines))
-	_check(speakers == ["Hooshang", "Hooshang", "Hooshang", "Hooshang", "Rumi"],
-		"Rumi stays silent until his one line  [got %s]" % str(speakers))
-	_check(faces == MEETING_FACES.slice(0, faces.size()),
-		"meeting portraits: hesitant, skeptical, annoyed, vulnerable  [got %s]" % str(faces))
+	_check(speakers == MEETING_SPEAKERS,
+		"Rumi stays silent through the first seven lines  [got %s]" % str(speakers))
+	_check(faces == MEETING_FACES,
+		"meeting portraits, one state per line  [got %s]" % str(faces))
 	_check(not world.player.has_dash,
 		"room 1 grants NO dash — the first meeting is an introduction, not a gift")
 	_check(not world.player.input_locked, "control is returned after the meeting")
@@ -115,12 +140,49 @@ func _ready() -> void:
 	_check(not world.player.input_locked, "control is returned after the gift")
 	_check(_rumi_alpha(gift_trigger) < 0.01, "Rumi has faded out again")
 	_check_gift("the gift")
+	await _check_lines_fit()
 
 	if failures.is_empty():
 		print("INTRO TEST: ALL PASS")
 	else:
 		print("INTRO TEST: %d FAILURE(S)" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+
+## Every scripted line has to fit the banner it is drawn in.
+##
+## At this type size a long line wraps to three rows, and the banner was a fixed
+## height sized for two — so the third row was simply cut off. Nothing catches
+## that except reading the line in game, which is exactly the kind of thing
+## nobody does for the fifteenth line of a cutscene. DialogueBox now grows to
+## fit; this checks it actually did, through the real say() path rather than a
+## copy of the sizing rule.
+##
+## Font metrics are real under --headless (verified), so this measures the same
+## numbers the game will.
+func _check_lines_fit() -> void:
+	var box: DialogueBox = Dialogue
+	var label: Label = box.get_node("TextLabel")
+	var font: Font = label.get_theme_font("font")
+	var size: int = label.get_theme_font_size("font_size")
+	var spacing := float(label.get_theme_constant("line_spacing"))
+	var clipped: Array[String] = []
+	for text in WAKING + MEETING + GIFT:
+		# With a portrait, which is the narrower and therefore worse case.
+		box.say("Hooshang", text, Color(1, 1, 1, 1))
+		await get_tree().process_frame
+		var width := label.offset_right - label.offset_left
+		var wrapped := font.get_multiline_string_size(
+			label.text, HORIZONTAL_ALIGNMENT_CENTER, width, size)
+		var rows := maxi(int(round(wrapped.y / float(size))), 1)
+		var needed: float = wrapped.y + spacing * (rows - 1)
+		if needed > label.offset_bottom - label.offset_top:
+			clipped.append("%.0f>%.0f '%s'" % [
+				needed, label.offset_bottom - label.offset_top, text.substr(0, 32)])
+		box.line_finished.emit()
+		await get_tree().process_frame
+	_check(clipped.is_empty(),
+		"every line fits its banner  %s" % ("" if clipped.is_empty() else str(clipped)))
 
 
 ## Follow the gift mote for as long as it exists.
