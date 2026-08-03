@@ -92,7 +92,14 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `systems/collectibles.gd` — `Collectibles` autoload: the pomegranate ("coin")
   total, which carries across rooms, deaths and Act -> Act loads. Also remembers
   WHICH fruit were taken, so reloading a world can't re-spawn banked ones. Owns
-  the small on-screen counter (built in code, CanvasLayer 92).
+  the small on-screen counter, top-left (built in code, CanvasLayer 92). On
+  pickup the fruit flies from where it was taken into the counter, and the
+  DISPLAYED number ticks over on arrival — `total` banks immediately, so nothing
+  else ever waits on the animation (`Collectibles.shown()` is the display).
+- `systems/deaths.gd` — `Deaths` autoload: the run's death count, top-right.
+  `Player.die()` calls `Deaths.record()` — the player reports its own death
+  rather than the counter hunting for a player, which would race every level's
+  different build order.
 - `systems/game.gd` — `Game` autoload: level progression + Celeste-style fade
   transitions. `Game.LEVELS` is the ordered scene list; reaching a level's exit
   sign fades out, loads the next, fades in. The loaded level is the running

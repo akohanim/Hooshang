@@ -13,9 +13,10 @@ extends Area2D
 ## Bob height in px, and how long one up-down cycle takes.
 @export var bob_height := 2.0
 @export var bob_time := 1.6
-## Pop-on-collect: how far it rises and how long the flourish lasts.
-@export var pop_rise := 10.0
-@export var pop_time := 0.28
+## How fast the fruit clears the world on pickup. Short: the flourish itself is
+## the flight to the counter, which Collectibles stages on the HUD layer, and a
+## slow fade here would leave two pomegranates on screen at once.
+@export var pop_time := 0.1
 ## Small warm light so the fruit is findable in the dark rooms. 0 disables it.
 @export var light_energy := 0.55
 
@@ -60,14 +61,16 @@ func _on_body_entered(body: Node2D) -> void:
 	if _taken or body is not Player:
 		return
 	_taken = true
-	Collectibles.collect(collect_id())
+	# Handing `self` over is what lets the counter fly the fruit in from exactly
+	# here — the two live on different render surfaces, so Collectibles converts
+	# this position rather than reading it directly.
+	Collectibles.collect(collect_id(), 1, self)
 	set_deferred("monitoring", false)
 
-	# Flourish, then go. Detached from the bob loop so they can't fight.
+	# Clear out. The HUD's copy takes over the motion from this same point, so
+	# this one only has to get out of the way without a visible pop. Detached
+	# from the bob loop so they can't fight.
 	var t := create_tween().set_parallel()
-	t.tween_property(_sprite, "position:y", _sprite.position.y - pop_rise, pop_time) \
-		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(_sprite, "scale", Vector2(1.4, 1.4), pop_time * 0.4)
 	t.tween_property(self, "modulate:a", 0.0, pop_time)
 	if has_node("Glow"):
 		t.tween_property($Glow, "energy", 0.0, pop_time)

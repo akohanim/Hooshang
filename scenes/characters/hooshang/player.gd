@@ -418,6 +418,7 @@ func die() -> void:
 	velocity = Vector2.ZERO
 	visible = false
 	body_shape.set_deferred("disabled", true)
+	Deaths.record()  # the run's death count, shown top-right
 	died.emit()
 
 

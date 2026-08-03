@@ -39,7 +39,15 @@ func _ready() -> void:
 	await _frames(20)
 	_check(Collectibles.total == 1, "picking one up banks it (total=%d)" % Collectibles.total)
 	_check(Collectibles.is_taken(id), "the fruit is remembered as taken")
-	await _frames(40)
+	# The fruit flies to the counter and the DISPLAYED number ticks over when it
+	# lands — but the banked total goes up on contact. Nothing the rest of the
+	# game reads may wait on an animation, so the two are checked apart.
+	_check(Collectibles.shown() == 0,
+		"the counter hasn't ticked yet — the fruit is still in the air (shown=%d)"
+			% Collectibles.shown())
+	await _frames(60)
+	_check(Collectibles.shown() == 1,
+		"it ticks over when the fruit lands (shown=%d)" % Collectibles.shown())
 	_check(not is_instance_valid(pom), "the node goes away after the pop")
 
 	# The requirement: the count carries from level to level.

@@ -67,7 +67,8 @@ Consequences worth knowing before you touch anything:
 | `Screen` | `systems/screen.gd` | Owns the two render surfaces; loads worlds into the game viewport |
 | `Dialogue` | `scenes/ui/DialogueBox.tscn` | Celeste-style dialogue box — `Dialogue.say(speaker, text, tint, portrait)` |
 | `Game` | `systems/game.gd` | Level progression through `Game.LEVELS` + fade transitions |
-| `Collectibles` | `systems/collectibles.gd` | Pomegranate total + the on-screen counter; survives every level change |
+| `Collectibles` | `systems/collectibles.gd` | Pomegranate total + the top-left counter, and the fruit's flight into it; survives every level change |
+| `Deaths` | `systems/deaths.gd` | The run's death count + the top-right counter |
 
 `Screen` is registered first because `Game` loads levels through it.
 
@@ -112,7 +113,8 @@ res://
 ├── systems/                 Autoload singletons (cross-level services)
 │   ├── screen.gd            Screen: the two render surfaces; world loading
 │   ├── game.gd              Game: level progression + fade transitions
-│   └── collectibles.gd      Collectibles: pomegranate total + counter HUD
+│   ├── collectibles.gd      Collectibles: pomegranate total + counter HUD
+│   └── deaths.gd            Deaths: death count + counter HUD
 │
 ├── scenes/
 │   ├── characters/hooshang/

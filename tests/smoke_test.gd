@@ -107,13 +107,20 @@ func _run() -> void:
 	await _check_no_float()
 
 	# Death and respawn at the last checkpoint.
+	Deaths.reset()
 	player.die()
 
 	_check(player.state == Player.State.DEAD, "die() enters DEAD state")
+	_check(Deaths.total == 1, "dying counts on the run's death counter (%d)" % Deaths.total)
+	# die() already refuses to re-enter DEAD; the counter must not double-count
+	# off the kill plane firing again on the same corpse.
+	player.die()
+	_check(Deaths.total == 1, "one death counts once (%d)" % Deaths.total)
 	await _frames(30)
 	_check(player.state != Player.State.DEAD, "respawns automatically")
 	_check(player.global_position.distance_to(level.current_checkpoint) < 24.0,
 		"respawns at the checkpoint")
+	_check(Deaths.total == 1, "respawning doesn't add another (%d)" % Deaths.total)
 
 	if failures.is_empty():
 		print("SMOKE TEST: ALL PASS")
