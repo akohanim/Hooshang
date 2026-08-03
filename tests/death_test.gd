@@ -1,20 +1,28 @@
 extends Node
 ## One death per respawn, whatever killed him.
 ##
-## Guards a bug that was invisible until the counter existed: hazard deaths were
-## counted TWICE. Death disabled Hooshang's collision shape and respawn
-## re-enabled it, and re-adding a shape to an Area2D's broadphase made the
-## hazard fire `body_entered` again about 25 frames after the respawn, with him
-## standing 20px clear of it. He was alive again by then, so die()'s "already
-## DEAD" guard couldn't catch it — nothing short of the phantom not happening
-## would have.
+## Every Hazard actually placed in the LDtk world is walked into, one at a time.
+## That breadth is the point, and it is why this test exists in this shape: an
+## earlier version stood up a Hazard of its own with Hazard.new(), which did NOT
+## reproduce the bug, so a fix that changed nothing in the real game looked
+## verified. Hazards as the game builds them — instanced from Hazard.tscn by the
+## LDtk import, sitting inside a room — are the only ones worth asserting on.
 ##
-## The kill plane never doubled, which is why this needs both paths: whatever
-## replaces the fix has to keep them agreeing.
+## THE BUG. Death disabled Hooshang's collision and respawn re-enabled it.
+## Taking a body out of an Area2D's detection and putting it back makes that area
+## fire `body_entered` again at the position it was removed from — so every spike
+## killed him a second time ~25 frames after he respawned, 200px away. He is
+## alive by then, so die()'s "already DEAD" guard cannot catch it. Toggling
+## `collision_layer` instead has the identical fault; the fix is to never remove
+## him at all.
+##
+## The kill plane never doubled, which is why both paths are checked: they have
+## to keep agreeing.
 ## Run:  godot --headless res://tests/death_test.tscn
 
 var failures: Array[String] = []
 var world: LdtkWorld
+var player: Player
 
 
 func _ready() -> void:
@@ -25,46 +33,49 @@ func _ready() -> void:
 			break
 		await get_tree().process_frame
 	await _frames(20)
-	var player := world.player
+	player = world.player
 	player.input_locked = true  # no stray input walking him back in
 
-	# --- a hazard, the path that used to count twice ---
-	var hazard := Hazard.new()
-	hazard.size = Vector2(16, 16)
-	hazard.global_position = player.global_position + Vector2(20, 0)
-	world.add_child(hazard)
-	await _frames(5)
+	var hazards: Array[Node] = []
+	_collect(world, hazards)
+	_check(hazards.size() > 0, "the world has hazards to test (%d)" % hazards.size())
 
-	Deaths.reset()
-	player.global_position = hazard.global_position
-	await _frames(10)
-	_check(Deaths.total == 1, "touching a hazard counts one death (%d)" % Deaths.total)
-	_check(player.collision_layer == 0,
-		"the corpse is off the detection layer, so nothing can kill it again (%d)"
-			% player.collision_layer)
-
-	# Long enough to cover the respawn AND the window the phantom used to land in.
-	await _frames(90)
-	_check(player.state != Player.State.DEAD, "he respawns")
-	_check(player.collision_layer != 0, "and is detectable again (%d)" % player.collision_layer)
-	_check(Deaths.total == 1,
-		"still one death a full second after respawning — no phantom re-entry (%d)"
-			% Deaths.total)
-	_check(player.global_position.distance_to(hazard.global_position) > 8.0,
-		"he is clear of the hazard, so a second death here would be bogus")
+	var doubled: Array[String] = []
+	for h in hazards:
+		var hz: Hazard = h
+		world._enter_room(_room_holding(hz), true)
+		await _frames(10)
+		Deaths.reset()
+		player.global_position = hz.global_position
+		# Long enough to cover the respawn AND the window the phantom landed in.
+		await _frames(120)
+		if Deaths.total != 1:
+			doubled.append("%s in %s counted %d" % [
+				hz.global_position, _room_holding(hz).name, Deaths.total])
+	_check(doubled.is_empty(),
+		"every hazard counts exactly one death  %s" % ("" if doubled.is_empty() else doubled))
 
 	# --- the kill plane, which always counted correctly ---
 	Deaths.reset()
 	player.global_position = Vector2(player.global_position.x, 900.0)
-	await _frames(100)
+	await _frames(120)
 	_check(Deaths.total == 1, "falling out of the world counts one death (%d)" % Deaths.total)
 
-	# --- and dying twice really is two ---
+	# --- the corpse stays put, which is what makes leaving collision on safe ---
+	Deaths.reset()
+	var resting := player.global_position
+	player.die()
+	await _frames(5)
+	_check(player.global_position == resting,
+		"a dead player does not move, so it cannot enter anything new")
+	await _frames(120)
+
+	# --- and two real deaths really are two ---
 	Deaths.reset()
 	player.die()
-	await _frames(90)
+	await _frames(120)
 	player.die()
-	await _frames(90)
+	await _frames(120)
 	_check(Deaths.total == 2, "two separate deaths count two (%d)" % Deaths.total)
 
 	if failures.is_empty():
@@ -72,6 +83,22 @@ func _ready() -> void:
 	else:
 		print("DEATH TEST: %d FAILURE(S)" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+
+func _collect(n: Node, out: Array[Node]) -> void:
+	if n is Hazard:
+		out.append(n)
+	for c in n.get_children():
+		_collect(c, out)
+
+
+func _room_holding(n: Node) -> Node2D:
+	var p := n.get_parent()
+	while p != null:
+		if world.rooms.has(p):
+			return p
+		p = p.get_parent()
+	return world.current_room
 
 
 func _check(ok: bool, msg: String) -> void:

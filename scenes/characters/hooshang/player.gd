@@ -148,7 +148,6 @@ var dash_dir := Vector2.RIGHT
 
 func _ready() -> void:
 	_apply_glow(has_glow)
-	_alive_layer = collision_layer
 
 
 func _physics_process(delta: float) -> void:
@@ -411,20 +410,24 @@ func _update_visual() -> void:
 
 # -------------------------------------------------------- death/respawn ----
 
-## The physics layer Hooshang sits on while alive, remembered from the scene so
-## dying and respawning can take him off it and put him back without hardcoding
-## the number here as well as in Hooshang.tscn.
-##
-## WHY THE LAYER AND NOT THE COLLISION SHAPE. Death used to disable
-## $CollisionShape2D and respawn re-enabled it, and that double-counted every hazard
-## death: disabling a shape and then re-adding it in a different place makes the
-## Area2D it was standing in fire `body_entered` a second time, ~25 frames after
-## the respawn, with Hooshang 20px clear of the hazard. He was genuinely alive
-## again by then, so no amount of guarding inside die() could tell that phantom
-## apart from a real death — it had to stop happening. Taking him off the layer
-## leaves the shape alone and never re-enters him anywhere.
-var _alive_layer := 2
-
+# DYING DOES NOT TOUCH COLLISION, AND THAT IS DELIBERATE.
+#
+# Death used to disable $CollisionShape2D and respawn re-enabled it. That
+# double-counted EVERY hazard death, and the reason is worth keeping written
+# down: taking a body out of an Area2D's detection and putting it back makes the
+# area fire `body_entered` again at the position it was removed from. Measured
+# on the real spikes — the second one arrives ~25 frames after the respawn, with
+# Hooshang standing 200px away at his checkpoint. He is genuinely alive by then,
+# so die()'s "already DEAD" guard has nothing to reject; the call is
+# indistinguishable from a real death and no guard can fix it.
+#
+# Toggling `collision_layer` instead has exactly the same fault — it is the
+# removal and re-add that does it, not which property performs them. The only
+# fix is to never remove him.
+#
+# Nothing needs him removed: a DEAD player returns from _physics_process before
+# move_and_slide, so the corpse cannot move, cannot be pushed, and cannot enter
+# anything new in the 0.15s before it respawns.
 
 func die() -> void:
 	if state == State.DEAD:
@@ -432,7 +435,6 @@ func die() -> void:
 	state = State.DEAD
 	velocity = Vector2.ZERO
 	visible = false
-	set_deferred("collision_layer", 0)  # nothing can see the corpse — see _alive_layer
 	Deaths.record()  # the run's death count, shown top-right
 	died.emit()
 
@@ -449,7 +451,6 @@ func respawn(at: Vector2) -> void:
 	wall_lock_timer = 0.0
 	wall_jump_timer = 0.0
 	visible = true
-	set_deferred("collision_layer", _alive_layer)
 	state = State.FALL
 	camera.reset_smoothing()  # snap the camera so retries feel instant
 
