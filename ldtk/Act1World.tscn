@@ -51,9 +51,16 @@ screen_size = Vector2(7, 6)
 [node name="CeilingRoom2a" parent="Lights" unique_id=829256936 instance=ExtResource("3_lamp")]
 position = Vector2(410, 250)
 light_color = Color(0.99215686, 0.95686275, 0.8627451, 1)
-light_energy = 2.0
-light_scale = 2.0
+light_energy = 1.5
+light_scale = 1.5
 cable_length = 74.0
+
+[node name="CeilingRoom2a2" parent="Lights" unique_id=392802172 instance=ExtResource("3_lamp")]
+position = Vector2(350, 260)
+light_color = Color(0.99215686, 0.95686275, 0.8627451, 1)
+light_energy = 1.5
+light_scale = 1.5
+cable_length = 84.0
 
 [node name="CeilingRoom2b" parent="Lights" unique_id=1991474359 instance=ExtResource("3_lamp")]
 position = Vector2(550, 250)
@@ -64,24 +71,30 @@ cable_length = 74.0
 
 [node name="MoonGlowRoom2" parent="Lights" unique_id=2044158423 instance=ExtResource("3_lamp")]
 position = Vector2(480, 224)
-light_color = Color(0.62, 0.74, 1, 1)
-light_energy = 2.0
+light_color = Color(0.47319007, 0.60152256, 0.89444286, 1)
+light_energy = 3.0
 light_scale = 5.0
 show_body = false
 
 [node name="CeilingRoom3a" parent="Lights" unique_id=122162714 instance=ExtResource("3_lamp")]
 position = Vector2(698, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
-light_energy = 3.0
+light_energy = 2.0
 light_scale = 3.0
 cable_length = 74.0
 
 [node name="CeilingRoom3b" parent="Lights" unique_id=1798228503 instance=ExtResource("3_lamp")]
 position = Vector2(838, 250)
 light_color = Color(0.86, 0.95, 0.92, 1)
-light_energy = 3.0
+light_energy = 2.0
 light_scale = 3.0
 cable_length = 74.0
+
+[node name="CeilingRoom3c" parent="Lights" unique_id=2013780385 instance=ExtResource("3_lamp")]
+position = Vector2(775, 200)
+light_energy = 0.7
+light_scale = 1.5
+cable_length = 25.0
 
 [node name="CeilingRoom4a" parent="Lights" unique_id=1945420944 instance=ExtResource("3_lamp")]
 position = Vector2(1018, 250)
@@ -122,12 +135,6 @@ show_body = false
 position = Vector2(1600, 318)
 light_energy = 1.0
 light_scale = 1.0
-
-[node name="LampFixture" parent="Lights" unique_id=2013780385 instance=ExtResource("3_lamp")]
-position = Vector2(775, 200)
-light_energy = 0.7
-light_scale = 1.5
-cable_length = 25.0
 
 [node name="NoteSequence" type="Node" parent="." unique_id=1281660635]
 script = ExtResource("5_seq")

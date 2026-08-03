@@ -23,6 +23,19 @@ Practically that means:
 - A screen is `MonitorGlow.tscn`.
 - If a corner needs light, ask what would be lighting it, and place that.
 
+Some props light themselves and need nothing placed next to them:
+
+- **Note tiles** (`scenes/props/note_tile.gd`) carry their own `PointLight2D`.
+  It rests at `idle_energy 0.5` so an unstepped pad still announces itself in a
+  dark room, and jumps to `lit_energy 1.5` for `lit_time` when the pad sounds,
+  easing back down on the same curve as the pad's own flash. The colour is
+  sampled from the pad's art and pushed up to full saturation, so re-colouring
+  `assets/notes/note_N.png` re-colours its light too — don't set it by hand.
+- **Rumi's gift** (`scripts/ldtk_rumi_trigger.gd`) spawns a mote for the length
+  of the beat and frees it. Worth knowing because it is the one case where a
+  light was *not* enough: room 1's walls already sit at 255 in the red channel,
+  so the mote carries a drawn core (`assets/gift_mote.png`) as well.
+
 ## The two knobs
 
 **1. `CanvasModulate` — the master darkness.** One node in `ldtk/Act1World.tscn`,

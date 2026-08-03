@@ -197,6 +197,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# there is finally a gap that needs it.
 	await trigger.step_to(player.global_position.x)
 	await trigger.swell()
+	await trigger.give_to(player)
 	player.flash()
 	await _hold(0.45)
 
@@ -221,9 +222,11 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 	await Dialogue.say("Rumi", DASH_LINE, RUMI_GOLD)
 
-	# The gift: he closes the distance, the light swells, and it's Hooshang's.
+	# The gift: he closes the distance, the light swells, crosses the gap, and
+	# it's Hooshang's. The ability lands on the same frame the mote does.
 	await trigger.step_to(player.global_position.x)
 	await trigger.swell()
+	await trigger.give_to(player)
 	player.flash()
 	player.has_dash = true
 	await _hold(0.5)

@@ -37,6 +37,13 @@ var faces: Array[String] = []
 var _gap_on_arrival := -1.0
 var _gap_at_touch := -1.0
 var _watch: LdtkRumiTrigger
+# The gift mote: where it was first seen, and where it was last seen. The point
+# of the beat is that the light MOVES from Rumi to Hooshang, and every way that
+# has broken so far was silent — the mote sourced from Rumi's aura (above his
+# head), or starting so far out along his arm that it crossed 6px and read as a
+# flicker. Both looked fine in a still frame.
+var _mote_first := Vector2.INF
+var _mote_last := Vector2.INF
 
 
 func _ready() -> void:
@@ -82,6 +89,7 @@ func _ready() -> void:
 	_check(_gap_at_touch > 0.0 and _gap_at_touch < _gap_on_arrival,
 		"he closes that distance to reach out  [%.0fpx -> %.0fpx]" % [
 			_gap_on_arrival, _gap_at_touch])
+	_check_gift("the meeting")
 
 	# --- second encounter, room 2: the dash ---
 	lines.clear()
@@ -89,6 +97,8 @@ func _ready() -> void:
 	faces.clear()
 	_gap_on_arrival = -1.0
 	_gap_at_touch = -1.0
+	_mote_first = Vector2.INF
+	_mote_last = Vector2.INF
 	world._enter_room(world.rooms[1], true)
 	await _frames(10)
 	var gift_trigger := _find_trigger(world.rooms[1])
@@ -104,12 +114,44 @@ func _ready() -> void:
 	_check(world.player.has_dash, "the SECOND encounter grants the dash")
 	_check(not world.player.input_locked, "control is returned after the gift")
 	_check(_rumi_alpha(gift_trigger) < 0.01, "Rumi has faded out again")
+	_check_gift("the gift")
 
 	if failures.is_empty():
 		print("INTRO TEST: ALL PASS")
 	else:
 		print("INTRO TEST: %d FAILURE(S)" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+
+## Follow the gift mote for as long as it exists.
+func _sample_gift() -> void:
+	var mote := _watch.get_node_or_null("Gift") as Node2D
+	if mote == null:
+		return
+	if _mote_first == Vector2.INF:
+		_mote_first = mote.global_position
+	_mote_last = mote.global_position
+
+
+## Assert the light actually crossed from Rumi to Hooshang, for `who`'s beat.
+func _check_gift(who: String) -> void:
+	if _mote_first == Vector2.INF:
+		_check(false, "%s: a gift mote leaves Rumi" % who)
+		return
+	var rumi := _watch.get_node_or_null("Rumi") as Node2D
+	var him := world.player.global_position
+	_check(_mote_first.distance_to(him) > _mote_last.distance_to(him),
+		"%s: the mote ends up closer to Hooshang than it started  [%.0fpx -> %.0fpx]" % [
+			who, _mote_first.distance_to(him), _mote_last.distance_to(him)])
+	_check(_mote_first.distance_to(_mote_last) >= 8.0,
+		"%s: it crosses a visible distance, not a flicker  [%.0fpx]" % [
+			who, _mote_first.distance_to(_mote_last)])
+	# It has to leave from his body, not his aura: the aura light sits 19px up,
+	# which is over his head, and sourcing there lobbed the mote at the ceiling.
+	if rumi != null:
+		_check(absf(_mote_first.y - rumi.global_position.y) <= 8.0,
+			"%s: it leaves Rumi at body height, not above his head  [%.0fpx off]" % [
+				who, absf(_mote_first.y - rumi.global_position.y)])
 
 
 ## Let the scene play, recording each new line and pressing on through it.
@@ -142,6 +184,7 @@ func _run_scene(max_frames: int) -> void:
 func _sample_staging() -> void:
 	if _watch == null:
 		return
+	_sample_gift()
 	var rumi := _watch.get_node_or_null("Rumi") as Node2D
 	if rumi == null:
 		return

@@ -17,6 +17,14 @@ extends Area2D
 signal triggered(player: Player)
 
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
+const LIGHT_TEXTURE := preload("res://assets/light_radial.png")
+## The mote's solid core. A PointLight2D alone is not enough to carry this beat:
+## rooms lit for the diegetic pass sit close to clipping, and in room 1 the walls
+## are already at 255 in the red channel — adding light there changes nothing you
+## can see. A drawn sprite reads at any exposure.
+const MOTE_TEXTURE := preload("res://assets/gift_mote.png")
+## light_radial.png is 128px, so its untouched radius is 64 (see LIGHTING.md).
+const TEXTURE_RADIUS := 64.0
 
 @export var dialogue_line: String = ""
 ## When a cutscene script owns this beat, it sets this so the trigger does NOT
@@ -28,6 +36,44 @@ const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ## happens to be placed at. Off = he stays exactly where the LDtk entity sits,
 ## for a beat that deliberately wants him hovering.
 @export var snap_to_ground := true
+
+@export_group("The gift")
+## Radius of the travelling mote, in px — small and intense, so it reads as a
+## thing being carried rather than as area lighting.
+@export var gift_radius := 9.0
+## How bright the mote burns while it crosses.
+@export var gift_energy := 1.9
+## How high the mote arcs above the straight line between them. A flat slide
+## reads as a UI tween; a lob reads as something handed over.
+@export var gift_arc := 3.0
+## Size of the drawn core, as a multiple of gift_mote.png's 11px. Rumi stops at
+## arm's length (14px), so a full-size orb fills most of the gap it is meant to
+## be crossing.
+@export var gift_core_scale := 0.65
+## Seconds the mote takes to cross.
+@export var gift_travel_time := 0.55
+## What Rumi's own light drops to as the mote leaves him. Draining him is what
+## sells it as a TRANSFER rather than two lights that happen to be on.
+@export var gift_cost := 1.0
+## The burst on impact: radius it blooms to, and how long the bloom takes to
+## fade out. Runs detached, after `give_to` has already returned.
+@export var gift_burst_radius := 46.0
+@export var gift_burst_time := 0.32
+## Where on the target the mote lands, relative to its origin. The player's
+## origin is the middle of his 8x12 box, so a few px up is chest height.
+@export var gift_target_offset := Vector2(0.0, -3.0)
+## Where the mote leaves Rumi, relative to his sprite's centre. X is applied
+## towards the target, so positive means "out in front of him".
+##
+## Deliberately NOT taken from `_rumi_light`: that light is his aura and sits at
+## -19, which is above his head — sourcing the mote there sent it arcing up over
+## the ceiling and down onto Hooshang, like something thrown rather than handed
+## across.
+##
+## Kept small for a second reason. Rumi stops at arm's length, 14px, so every
+## pixel of this offset is a pixel the gift does NOT visibly cross: at 8 the mote
+## travelled 6px and read as a flicker rather than a journey.
+@export var gift_source_offset := Vector2(2.0, -2.0)
 
 @onready var _rumi: AnimatedSprite2D = $Rumi
 @onready var _rumi_light: PointLight2D = $RumiLight
@@ -195,6 +241,78 @@ func swell(to := 3.2, duration := 0.45) -> void:
 	t.tween_property(_rumi_light, "energy", to, duration) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	await t.finished
+
+
+## Hand the light over. A mote leaves Rumi's sleeve, arcs across the gap and
+## lands on `target`; Rumi's own light drains by the same beat, so the glow
+## visibly MOVES from one of them to the other instead of each just flaring in
+## place.
+##
+## Awaits only the crossing, and returns on impact — the burst plays on
+## afterwards under its own tween. That way the caller regains control at the
+## exact frame the gift lands, which is when the ability and the player's flash
+## belong. This node stays cosmetic and never reaches into the player.
+func give_to(target: Node2D) -> void:
+	if target == null:
+		return
+	var gift := _make_gift()
+	var core: Sprite2D = gift.get_node("Core")
+	var toward := signf(target.global_position.x - _rumi.global_position.x)
+	if toward == 0.0:
+		toward = 1.0
+	var from := _rumi.global_position \
+		+ Vector2(toward * gift_source_offset.x, gift_source_offset.y)
+	var to := target.global_position + gift_target_offset
+	gift.global_position = from
+
+	var t := create_tween().set_parallel()
+	# Straight lerp plus a sine lift — one sine hump over the crossing, so the
+	# mote leaves and arrives level and is highest halfway.
+	t.tween_method(func(k: float) -> void:
+			var p := from.lerp(to, k)
+			p.y -= sin(k * PI) * gift_arc
+			gift.global_position = p,
+		0.0, 1.0, gift_travel_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	t.tween_property(gift, "energy", gift_energy, gift_travel_time * 0.3)
+	t.tween_property(core, "scale", Vector2.ONE * gift_core_scale, gift_travel_time * 0.3) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(_rumi_light, "energy", gift_cost, gift_travel_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await t.finished
+
+	# Impact: bloom outward and die. Not awaited — see the note above.
+	var burst := create_tween().set_parallel()
+	burst.tween_property(gift, "texture_scale", gift_burst_radius / TEXTURE_RADIUS,
+		gift_burst_time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	burst.tween_property(gift, "energy", 0.0, gift_burst_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	burst.tween_property(core, "scale", Vector2.ONE * gift_core_scale * 3.0, gift_burst_time) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	burst.tween_property(core, "modulate:a", 0.0, gift_burst_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	burst.chain().tween_callback(gift.queue_free)
+
+
+## The mote itself: a light for the pool it throws, with a drawn core inside it
+## so it stays visible in a bright room. Built per gift and freed with its burst,
+## so nothing lingers in the scene between beats. A child of the trigger, so it
+## can't outlive it.
+func _make_gift() -> PointLight2D:
+	var gift := PointLight2D.new()
+	gift.name = "Gift"
+	gift.texture = LIGHT_TEXTURE
+	gift.texture_scale = gift_radius / TEXTURE_RADIUS
+	gift.color = RUMI_GOLD
+	gift.energy = 0.0
+	var core := Sprite2D.new()
+	core.name = "Core"
+	core.texture = MOTE_TEXTURE
+	core.z_index = 1  # the foreground band — over Rumi, the player and the tiles
+	core.scale = Vector2.ZERO  # blooms open as it leaves his sleeve
+	gift.add_child(core)
+	add_child(gift)
+	return gift
 
 
 ## Rumi leaving is the cue for the story door to swing open onto the void.
