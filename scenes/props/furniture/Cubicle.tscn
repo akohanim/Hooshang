@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/office-pixel-art/free-office-pixel-art/desk-with-pc.png" id="1_desk"]
+[ext_resource type="Texture2D" path="res://assets/office-pixel-art/free-office-pixel-art/Chair.png" id="2_chair"]
+
+[node name="Cubicle" type="Node2D"]
+
+[node name="BackPanel" type="ColorRect" parent="."]
+offset_left = -46.0
+offset_top = -44.0
+offset_right = 46.0
+offset_bottom = 0.0
+color = Color(0.35, 0.36, 0.33, 1)
+mouse_filter = 2
+
+[node name="BackPanelTrim" type="ColorRect" parent="."]
+offset_left = -46.0
+offset_top = -46.0
+offset_right = 46.0
+offset_bottom = -44.0
+color = Color(0.5, 0.51, 0.47, 1)
+mouse_filter = 2
+
+[node name="SidePanelLeft" type="ColorRect" parent="."]
+offset_left = -50.0
+offset_top = -47.0
+offset_right = -46.0
+offset_bottom = 0.0
+color = Color(0.29, 0.3, 0.28, 1)
+mouse_filter = 2
+
+[node name="SidePanelRight" type="ColorRect" parent="."]
+offset_left = 46.0
+offset_top = -47.0
+offset_right = 50.0
+offset_bottom = 0.0
+color = Color(0.29, 0.3, 0.28, 1)
+mouse_filter = 2
+
+[node name="Desk" type="Sprite2D" parent="."]
+position = Vector2(4, -12)
+scale = Vector2(0.38, 0.38)
+texture = ExtResource("1_desk")
+
+[node name="Chair" type="Sprite2D" parent="."]
+position = Vector2(-28, -7)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("2_chair")
