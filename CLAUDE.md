@@ -28,6 +28,8 @@ the target grid.
     on separate render surfaces (restyling dialogue can't touch the game)
   - `Godot --headless --path . res://tests/pomegranate_test.tscn` — collectibles:
     pickup, and the total surviving level changes and death
+  - `Godot --headless --path . res://tests/death_test.tscn` — exactly one death
+    counted per respawn, from a hazard and from the kill plane alike
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 
