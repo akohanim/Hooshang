@@ -108,8 +108,9 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   checkpoint (death respawns at its start; completed levels never replay).
   `Game.test_mode = true` exercises progression without swapping scenes.
 - `scenes/ui/` — `DialogueBox.tscn` (Celeste-style banner + portrait; registered
-  as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint)`) and
-  `DebugOverlay.tscn` (F3).
+  as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint, face,
+  side)`), `EmoteBubble.tscn` (world-space reaction bubble) and
+  `DebugOverlay.tscn` (F3). See the dialogue rules below before writing a scene.
 - `scenes/props/` — `Checkpoint.tscn`, `hazards/Hazard.tscn` (both @tool,
   size-exported), `lighting/LampFixture.tscn` (reusable lamp; joins `lights`).
 - `assets/hooshang_frames.tres` = SpriteFrames from the samurai pack
@@ -118,6 +119,36 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   (tilemap bytes + node layout, incl. prefab instances). Re-running OVERWRITES
   hand-edits to the generated `.tscn`. Levels are dark (CanvasModulate ~0.09) +
   `LampFixture` instances.
+
+## Dialogue rules
+
+How a written script becomes a scene. `scripts/act1_beats.gd` is the worked
+example; `tests/intro_test.gd` asserts every rule here, so breaking one fails a
+test rather than being noticed months later in play.
+
+- **Stage directions are played, never printed.** A parenthetical in a script is
+  an instruction to the scene, not words anyone says. `(looking around)` becomes
+  `player.look()`; `(a breath)` becomes `DialogueBox.PAUSE_MARK` (`[p]`) placed
+  mid-line, which holds the typewriter and is stripped before drawing. Never let
+  one reach the screen as text.
+- **Punctuation-only lines are reactions, not speech.** `!` and `...` play as an
+  `EmoteBubble` over the speaker's sprite — see `Act1Beats.EMOTE_LINES`. A banner
+  that slides in, types out `...` and waits for a button press turns a beat of
+  silence into paperwork. You watch a reaction; you read a line.
+- **Every line types at the same speed.** No per-line `chars_per_second`. A line
+  that reveals at its own rate reads as a different KIND of text rather than a
+  quieter one — say it with the words and the portrait instead.
+- **A speaker's face sits on the side they are standing on.** Pass
+  `DialogueBox.Side`; `LdtkRumiTrigger.portrait_side()` derives it from where the
+  sprite actually is, so it cannot disagree with the screen. Hooshang is the
+  player, so he is the other side.
+- **One portrait state per line.** Beats name a state (`"annoyed"`), not a file,
+  so re-cutting the portrait sheet never touches the dialogue.
+- **Long lines are fine.** The banner grows to fit (`_fit_banner()`); do not
+  shrink the font, which is the thing that makes this read like Celeste.
+- Dialogue is drawn on the window's own surface at full resolution, the emote
+  bubble inside the 320x180 game viewport with the sprites. That split is
+  deliberate — see `systems/screen.gd`. Restyling one can never touch the other.
 
 ## Physics/level conventions
 

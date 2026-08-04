@@ -106,7 +106,7 @@ func _on_body_entered(body: Node2D) -> void:
 func _play_beat(player: Player) -> void:
 	player.input_locked = true
 	await appear()
-	await Dialogue.say("Rumi", dialogue_line, RUMI_GOLD)
+	await Dialogue.say("Rumi", dialogue_line, RUMI_GOLD, null, portrait_side(player))
 	await vanish()
 	player.input_locked = false
 	arm_room_door()
@@ -115,6 +115,19 @@ func _play_beat(player: Player) -> void:
 # ------------------------------------------------------------- staging API ----
 # Public so a cutscene script can direct Rumi without reaching into his sprite
 # and light (STYLE_GUIDE §4). Each one awaits its own tween.
+
+## Which end of the dialogue banner Rumi's face belongs at, given who he is
+## talking to: the side he is actually standing on.
+##
+## Read off the sprite rather than off whichever direction the beat asked him to
+## appear in, so it cannot disagree with what is on screen — and so it stays
+## right after step_to() has moved him.
+func portrait_side(other: Node2D) -> int:
+	if other == null:
+		return DialogueBox.Side.RIGHT
+	return DialogueBox.Side.RIGHT if _rumi.global_position.x >= other.global_position.x \
+		else DialogueBox.Side.LEFT
+
 
 ## Fade Rumi in with a small descend, and raise his warm gold light.
 ##

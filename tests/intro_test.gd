@@ -83,6 +83,11 @@ var _last_emote_id := 0
 # ever be one: beats used to slow the reveal down for a muttered line, which
 # reads as a different KIND of text rather than a quieter one.
 var _speeds: Array[float] = []
+## Which end of the banner each line's portrait sat at. A speaker's face belongs
+## on the side they are standing on, and Rumi materialises to Hooshang's right.
+var sides: Array[String] = []
+## 1 if Rumi materialised to Hooshang's right this beat, 0 if left, -1 unknown.
+var _rumi_on_right := -1
 
 
 func _ready() -> void:
@@ -107,6 +112,7 @@ func _ready() -> void:
 	speakers.clear()
 	faces.clear()
 	emotes.clear()
+	sides.clear()
 	_watch = trigger
 	world.player.global_position = trigger.global_position + Vector2(0, 16)
 	# Roomier than the other beats: the three wordless bubbles are on timers
@@ -123,6 +129,9 @@ func _ready() -> void:
 		"the wordless beats play as bubbles, in order  [got %s]" % str(emotes))
 	_check(_speeds.size() == 1,
 		"every line types at the same speed  [saw %s]" % str(_speeds))
+	_check(sides == _sides_for(MEETING_SPEAKERS, _rumi_on_right == 1),
+		"each face sits on the side that speaker is standing on  [Rumi %s, got %s]" % [
+			"right" if _rumi_on_right == 1 else "left", str(sides)])
 	_check(not world.player.has_dash,
 		"room 1 grants NO dash — the first meeting is an introduction, not a gift")
 	_check(not world.player.input_locked, "control is returned after the meeting")
@@ -142,8 +151,10 @@ func _ready() -> void:
 	lines.clear()
 	speakers.clear()
 	faces.clear()
+	sides.clear()
 	_gap_on_arrival = -1.0
 	_gap_at_touch = -1.0
+	_rumi_on_right = -1
 	_mote_first = Vector2.INF
 	_mote_last = Vector2.INF
 	world._enter_room(world.rooms[1], true)
@@ -158,6 +169,9 @@ func _ready() -> void:
 
 	_check(lines == GIFT, "the dash line, alone  [got %s]" % str(lines))
 	_check(speakers == ["Rumi"], "spoken by Rumi  [got %s]" % str(speakers))
+	_check(sides == _sides_for(["Rumi"], _rumi_on_right == 1),
+		"his face is on his side of the screen here too  [Rumi %s, got %s]" % [
+			"right" if _rumi_on_right == 1 else "left", str(sides)])
 	_check(world.player.has_dash, "the SECOND encounter grants the dash")
 	_check(not world.player.input_locked, "control is returned after the gift")
 	_check(_rumi_alpha(gift_trigger) < 0.01, "Rumi has faded out again")
@@ -205,6 +219,28 @@ func _check_lines_fit() -> void:
 		await get_tree().process_frame
 	_check(clipped.is_empty(),
 		"every line fits its banner  %s" % ("" if clipped.is_empty() else str(clipped)))
+
+
+## Expected portrait side per line, given which side Rumi actually turned up on.
+func _sides_for(who: Array[String], rumi_right: bool) -> Array[String]:
+	var out: Array[String] = []
+	for name in who:
+		if name == "Rumi":
+			out.append("right" if rumi_right else "left")
+		else:
+			out.append("left")   # Hooshang is by definition the other one
+	return out
+
+
+## Which half of the banner the portrait frame is actually sitting in. Read off
+## the live layout rather than off the Side we passed in, so this catches the
+## mirroring being wrong as well as the wrong side being asked for.
+func _portrait_side() -> String:
+	var box: DialogueBox = Dialogue
+	if not box.portrait_frame.visible:
+		return ""
+	var middle: float = DialogueBox.CANVAS_WIDTH * 0.5
+	return "right" if box.portrait_frame.offset_left >= middle else "left"
 
 
 ## Record each reaction bubble once, by instance — two identical "..." beats in
@@ -265,6 +301,7 @@ func _run_scene(max_frames: int) -> void:
 			lines.append(text_label.text)
 			speakers.append(name_label.text if name_label.visible else "")
 			faces.append(_face_name())
+			sides.append(_portrait_side())
 		# First press finishes the typewriter, second dismisses. Has to be a real
 		# InputEvent — DialogueBox listens in _unhandled_input, which
 		# Input.action_press() does not feed.
@@ -289,6 +326,12 @@ func _sample_staging() -> void:
 	var gap: float = absf(rumi.global_position.x - world.player.global_position.x)
 	if _gap_on_arrival < 0.0 and (rumi as CanvasItem).modulate.a > 0.99:
 		_gap_on_arrival = gap
+		# Which side he actually materialised on. Not a constant: it follows the
+		# direction Hooshang came from, and when he drops onto a trigger from
+		# directly above (as this test does) that is decided by sub-pixel drift.
+		# The invariant worth asserting is that his FACE follows his FEET, so it
+		# is read from the staging rather than pinned to one side.
+		_rumi_on_right = 1 if rumi.global_position.x > world.player.global_position.x else 0
 	# Closest approach, which is the reach-out moment. has_dash can't be the
 	# marker any more: room 1's touch deliberately grants nothing.
 	if _gap_at_touch < 0.0 or gap < _gap_at_touch:

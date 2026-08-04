@@ -25,6 +25,20 @@ extends CanvasLayer
 
 signal line_finished
 
+## Which end of the banner the portrait sits at. A speaker's face belongs on the
+## side of the screen they are actually standing on, so a conversation reads as
+## happening between two places rather than out of one corner.
+##
+## Passed around as plain `int`, not as `Side`: GDScript's analyser treats the
+## enum named from inside this class and the same enum named as
+## `DialogueBox.Side` from outside it as different types, and rejects the call.
+enum Side { LEFT, RIGHT }
+
+## The banner's own width, in its 1280x720 authoring space. The RIGHT layout is
+## the authored LEFT one mirrored about this, so nudging the portrait frame in
+## DialogueBox.tscn moves both sides and they cannot drift apart.
+const CANVAS_WIDTH := 1280.0
+
 ## Reveal speed of the typewriter effect, in characters per second.
 @export var chars_per_second := 40.0
 ## A beat inside a line — "(a breath)" in a script. Put PAUSE_MARK where it
@@ -38,9 +52,8 @@ const PAUSE_MARK := "[p]"
 ## Weight added to the UI font. Godot's default font ships in one weight; a
 ## little synthetic emboldening is what gives the Celeste-ish solid look.
 @export_range(0.0, 1.0) var font_weight := 0.28
-## Left edge of the text block, in the box's own space: clear of the portrait
-## frame, or near the banner edge when there is no portrait.
-const PORTRAIT_TEXT_LEFT := 256.0
+## Left edge of the text block when there is no portrait to clear. With one, the
+## text sits where DialogueBox.tscn puts it — see _place().
 const FULL_TEXT_LEFT := 48.0
 
 ## Banner sizing. The text block never shrinks below MIN_TEXT_HEIGHT, which is
@@ -73,10 +86,47 @@ var _pause_left := 0.0
 ## after a line that supplied real art.
 @onready var _default_portrait: Texture2D = $Portrait.texture
 
+## Each mirrored Control's authored horizontal span, as (offset_left,
+## offset_right). Captured once, because _place() overwrites these.
+var _authored := {}
+
 
 func _ready() -> void:
 	visible = false
+	for node in _mirrored():
+		_authored[node] = Vector2(node.offset_left, node.offset_right)
 	_apply_font()
+
+
+## Everything whose horizontal position flips with the speaker's side. The
+## arrow flips too: it belongs at the far end of the text block, and with the
+## portrait on the right that end is the left.
+func _mirrored() -> Array[Control]:
+	return [portrait_frame, portrait_back, portrait, name_label, text_label, arrow]
+
+
+## Lay the banner out for `side`, or hand the whole width to the text when there
+## is no portrait to make room for.
+func _place(side: int, show_portrait: bool) -> void:
+	for node in _mirrored():
+		var span: Vector2 = _authored[node]
+		if side == Side.LEFT:
+			node.offset_left = span.x
+			node.offset_right = span.y
+		else:
+			node.offset_left = CANVAS_WIDTH - span.y
+			node.offset_right = CANVAS_WIDTH - span.x
+	# The name reads as a label ON the portrait, so it hugs whichever side the
+	# face is on.
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if side == Side.LEFT \
+		else HORIZONTAL_ALIGNMENT_RIGHT
+	if show_portrait:
+		return
+	# No portrait: the text owns the whole banner, so it reads centred rather
+	# than hanging off to one side of an empty frame.
+	for node in [name_label, text_label]:
+		node.offset_left = FULL_TEXT_LEFT
+		node.offset_right = CANVAS_WIDTH - FULL_TEXT_LEFT
 
 
 ## Emboldened, tracked-out variant of the default font, applied to both labels.
@@ -97,18 +147,14 @@ func _apply_font() -> void:
 ## supplies a real portrait; without one the speaker gets the tinted stand-in
 ## baked into the scene, which is still how Rumi is drawn.
 func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
-		portrait_texture: Texture2D = null) -> void:
+		portrait_texture: Texture2D = null, side: int = Side.LEFT) -> void:
 	name_label.text = speaker
 	name_label.visible = speaker != ""
 	var show_portrait := portrait_tint.a > 0.0 or portrait_texture != null
 	portrait.visible = show_portrait
 	portrait_frame.visible = show_portrait
 	portrait_back.visible = show_portrait
-	# With no portrait the text owns the whole banner, so it reads centred rather
-	# than hanging off to the right of an empty frame.
-	var left := PORTRAIT_TEXT_LEFT if show_portrait else FULL_TEXT_LEFT
-	text_label.offset_left = left
-	name_label.offset_left = left
+	_place(side, show_portrait)
 	if show_portrait:
 		if portrait_texture != null:
 			portrait.texture = portrait_texture

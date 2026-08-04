@@ -89,6 +89,9 @@ const EMOTE_LINES := {
 ## it. This keeps a couple of pixels' clearance and no more.
 @export var emote_height := -14.0
 
+## The trigger staging Rumi right now. Held so his lines can ask it which side
+## he is standing on rather than tracking that separately and drifting from it.
+var _rumi_trigger: LdtkRumiTrigger
 var _world: LdtkWorld
 var _room: Node2D
 var _dash_room: Node2D
@@ -181,6 +184,7 @@ func _play_waking() -> void:
 
 func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	player.input_locked = true
+	_rumi_trigger = trigger
 	player.look(1)  # he's walking right into this; face the visitor
 
 	# Rumi arrives first — that's what Hooshang is reacting to. He materialises
@@ -243,6 +247,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 ## Second encounter: the dash, in the room whose gaps demand it.
 func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	player.input_locked = true
+	_rumi_trigger = trigger
 	player.look(1)
 
 	var ahead := signf(trigger.global_position.x - player.global_position.x)
@@ -252,7 +257,7 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.breathe(true)
 	await _hold(before_rumi_speaks)
 
-	await Dialogue.say("Rumi", DASH_LINE, RUMI_GOLD)
+	await _rumi(DASH_LINE)
 
 	# The gift: he closes the distance, the light swells, crosses the gap, and
 	# it's Hooshang's. The ability lands on the same frame the mote does.
@@ -290,8 +295,14 @@ func _emote(over: Node2D, kind: EmoteBubble.Kind) -> void:
 
 
 ## One of Rumi's. He has no portrait art yet, so he gets the tinted stand-in.
+##
+## His face goes on whichever end of the banner he is actually standing at, so
+## the two of them read as talking across a space rather than out of the same
+## corner. Hooshang is always the other one, so his stays left.
 func _rumi(text: String) -> void:
-	await Dialogue.say("Rumi", text, RUMI_GOLD)
+	var side: int = _rumi_trigger.portrait_side(_world.player) if _rumi_trigger != null \
+		else DialogueBox.Side.RIGHT
+	await Dialogue.say("Rumi", text, RUMI_GOLD, null, side)
 
 
 # -------------------------------------------------------------- plumbing ----
