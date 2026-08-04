@@ -43,6 +43,17 @@ const FACES := {
 ## is no separate system hint after it.
 const DASH_LINE := "Some gaps won't yield to a jump. Press the SHIFT key to dash."
 
+const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
+## Script lines that are nothing but punctuation. These are reactions, not
+## speech: they play as a bubble over the speaker's head instead of opening the
+## dialogue banner. A banner that slides in, types out "...", and then waits for
+## a button press turns a beat of silence into paperwork — you watch a reaction,
+## you read a line. See scenes/ui/emote_bubble.gd.
+const EMOTE_LINES := {
+	"!": EmoteBubble.Kind.EXCLAIM,
+	"...": EmoteBubble.Kind.ELLIPSIS,
+}
+
 ## Room holding the waking scene and the first meeting (LDtk level identifier).
 @export var room_name := "Level_1_Office"
 ## Room holding the second encounter, where the dash is granted.
@@ -68,9 +79,15 @@ const DASH_LINE := "Some gaps won't yield to a jump. Press the SHIFT key to dash
 @export var silence_time := 1.7
 ## Pause before Rumi finally answers.
 @export var before_rumi_speaks := 0.7
-## Typewriter speed for Hooshang's quieter line, as a fraction of the normal
-## rate. Slower reads as softer — the dialogue box has no volume to lower.
-@export_range(0.2, 1.0) var soft_speech_mult := 0.55
+
+@export_group("Emotes")
+## Where the bubble's tail sits, relative to the speaker's origin.
+##
+## Measured, not guessed. Hooshang's DRAWN head — the top opaque row of his
+## frame, not the top of the 88px frame itself — sits about 11px above his
+## origin, so -22 left the tail pointing at nothing, with 13px of daylight under
+## it. This keeps a couple of pixels' clearance and no more.
+@export var emote_height := -14.0
 
 var _world: LdtkWorld
 var _room: Node2D
@@ -148,7 +165,7 @@ func _play_waking() -> void:
 	await t.finished
 	await _hold(come_round_pause)
 
-	await _hooshang("I remember falling...", "dazed")
+	await _hooshang("Where am I?", "dazed")
 
 	# "(looking around)" is a stage direction, so play it rather than print it.
 	player.look(-1)
@@ -190,13 +207,15 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 		"Are you going to say something, or just stand there glowing at me...",
 		"annoyed")
 	await _hooshang("...", "vulnerable")
-	await _say_softly("I think I hit my head harder than I thought...", "vulnerable")
+	await _hooshang("I think I hit my head harder than I thought...", "vulnerable")
 
 	await _hold(before_rumi_speaks)
 	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan")
-	# "(muttering)" — same treatment as "(softer)": slower, which is the only
-	# volume knob a dialogue box has.
-	await _say_softly("A journey? I just wanted to make it to my car.", "skeptical")
+	# "(muttering)" is carried by the wording and his face. It used to slow the
+	# typewriter down, but a line that types at its own rate reads as a different
+	# KIND of text rather than a quieter one — every line reveals at
+	# DialogueBox.chars_per_second now.
+	await _hooshang("A journey? I just wanted to make it to my car.", "skeptical")
 	await _rumi("Do not turn away now. The way out is the way through, and the way through is inward.")
 	await _rumi("You have knocked on this door your whole life, from the inside.")
 	await _rumi("Walk toward the light. You need not see the whole road, only the next step of it.")
@@ -249,22 +268,30 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.arm_room_door()
 
 
-## One of Hooshang's lines, with the face that goes with it.
+## One of Hooshang's lines, with the face that goes with it — or a bubble over
+## his head, if the "line" is only punctuation.
 func _hooshang(text: String, face: String) -> void:
+	if EMOTE_LINES.has(text):
+		await _emote(_world.player, EMOTE_LINES[text])
+		return
 	await Dialogue.say("Hooshang", text, HOOSHANG_PALE, FACES.get(face))
+
+
+## Pop a reaction over `over` and wait for it to finish. Parented to the speaker
+## so it tracks them, and freed after — nothing of it outlives the beat.
+func _emote(over: Node2D, kind: EmoteBubble.Kind) -> void:
+	if over == null:
+		return
+	var bubble: EmoteBubble = EMOTE_SCENE.instantiate()
+	over.add_child(bubble)
+	bubble.position = Vector2(0.0, emote_height)
+	await bubble.play(kind)
+	bubble.queue_free()
 
 
 ## One of Rumi's. He has no portrait art yet, so he gets the tinted stand-in.
 func _rumi(text: String) -> void:
 	await Dialogue.say("Rumi", text, RUMI_GOLD)
-
-
-## Same, delivered slower — our stand-in for "(softer)".
-func _say_softly(text: String, face: String) -> void:
-	var normal := Dialogue.chars_per_second
-	Dialogue.chars_per_second = normal * soft_speech_mult
-	await Dialogue.say("Hooshang", text, HOOSHANG_PALE, FACES.get(face))
-	Dialogue.chars_per_second = normal
 
 
 # -------------------------------------------------------------- plumbing ----

@@ -9,19 +9,23 @@ extends Node
 ## Run:  godot --headless res://tests/intro_test.tscn
 
 const WAKING: Array[String] = [
-	"I remember falling...",
+	"Where am I?",
 	"This doesn't feel like my cubicle...",
 ]
-## The meeting, in order, both speakers interleaved. "[p]" in the last line is a
-## breath the typewriter holds for (see DialogueBox.PAUSE_MARK) — it is stripped
-## before it is drawn, so what is asserted here is what a player actually reads.
+## The SPOKEN lines of the meeting, in order, both speakers interleaved.
+##
+## The script's "!" and "..." beats are deliberately NOT here: they play as
+## bubbles over his head rather than in the banner, and are asserted separately
+## in MEETING_EMOTES. A regression that quietly routed them back through the
+## dialogue box would show up as extra entries in this list.
+##
+## "[p]" in the last line is a breath the typewriter holds for (see
+## DialogueBox.PAUSE_MARK) — it is stripped before it is drawn, so what is
+## pinned here is what a player actually reads.
 const MEETING: Array[String] = [
-	"!",
 	"Hello??",
-	"...",
 	"Who are you? I've worked in this office fifteen years. I've never once seen you at an all hands.",
 	"Are you going to say something, or just stand there glowing at me...",
-	"...",
 	"I think I hit my head harder than I thought...",
 	"You stand at the beginning of your most important journey, Hooshang jaan",
 	"A journey? I just wanted to make it to my car.",
@@ -31,18 +35,21 @@ const MEETING: Array[String] = [
 	"One step. Okay. One step I can probably do.",
 ]
 const MEETING_SPEAKERS: Array[String] = [
-	"Hooshang", "Hooshang", "Hooshang", "Hooshang", "Hooshang", "Hooshang", "Hooshang",
+	"Hooshang", "Hooshang", "Hooshang", "Hooshang",
 	"Rumi",
 	"Hooshang",
 	"Rumi", "Rumi", "Rumi",
 	"Hooshang",
 ]
+## The wordless beats, in order: he startles, waits for an answer that does not
+## come, then deflates before admitting he might be concussed.
+const MEETING_EMOTES: Array[String] = ["!", "...", "..."]
 ## Hooshang's face per line, in order. The mapping is a directing choice, not
 ## something the code can infer, so it is pinned here. Rumi's lines are "" —
 ## he has no portrait art yet, only the tinted stand-in.
 const WAKING_FACES: Array[String] = ["dazed", "confused"]
 const MEETING_FACES: Array[String] = [
-	"confused", "hesitant", "hesitant", "skeptical", "annoyed", "vulnerable", "vulnerable",
+	"hesitant", "skeptical", "annoyed", "vulnerable",
 	"",
 	"skeptical",
 	"", "", "",
@@ -69,6 +76,13 @@ var _watch: LdtkRumiTrigger
 # flicker. Both looked fine in a still frame.
 var _mote_first := Vector2.INF
 var _mote_last := Vector2.INF
+# Wordless beats seen, in order, and the instance already counted.
+var emotes: Array[String] = []
+var _last_emote_id := 0
+# Every distinct typewriter speed seen while the scene played. There must only
+# ever be one: beats used to slow the reveal down for a muttered line, which
+# reads as a different KIND of text rather than a quieter one.
+var _speeds: Array[float] = []
 
 
 func _ready() -> void:
@@ -92,15 +106,23 @@ func _ready() -> void:
 	lines.clear()
 	speakers.clear()
 	faces.clear()
+	emotes.clear()
 	_watch = trigger
 	world.player.global_position = trigger.global_position + Vector2(0, 16)
-	await _run_scene(900)
+	# Roomier than the other beats: the three wordless bubbles are on timers
+	# rather than button presses, and add a few seconds nothing can skip.
+	await _run_scene(2000)
 
 	_check(lines == MEETING, "meeting lines, in order  [got %s]" % str(lines))
 	_check(speakers == MEETING_SPEAKERS,
-		"Rumi stays silent through the first seven lines  [got %s]" % str(speakers))
+		"Rumi stays silent until Hooshang has run out of things to say  [got %s]"
+			% str(speakers))
 	_check(faces == MEETING_FACES,
 		"meeting portraits, one state per line  [got %s]" % str(faces))
+	_check(emotes == MEETING_EMOTES,
+		"the wordless beats play as bubbles, in order  [got %s]" % str(emotes))
+	_check(_speeds.size() == 1,
+		"every line types at the same speed  [saw %s]" % str(_speeds))
 	_check(not world.player.has_dash,
 		"room 1 grants NO dash — the first meeting is an introduction, not a gift")
 	_check(not world.player.input_locked, "control is returned after the meeting")
@@ -185,6 +207,16 @@ func _check_lines_fit() -> void:
 		"every line fits its banner  %s" % ("" if clipped.is_empty() else str(clipped)))
 
 
+## Record each reaction bubble once, by instance — two identical "..." beats in
+## one scene are two events, and comparing kinds alone would merge them.
+func _sample_emote() -> void:
+	var bubble := get_tree().get_first_node_in_group("emote") as EmoteBubble
+	if bubble == null or bubble.get_instance_id() == _last_emote_id:
+		return
+	_last_emote_id = bubble.get_instance_id()
+	emotes.append(bubble.kind_name())
+
+
 ## Follow the gift mote for as long as it exists.
 func _sample_gift() -> void:
 	var mote := _watch.get_node_or_null("Gift") as Node2D
@@ -244,6 +276,10 @@ func _run_scene(max_frames: int) -> void:
 
 ## Record how far Rumi is from Hooshang at the two moments that matter.
 func _sample_staging() -> void:
+	var speed: float = Dialogue.chars_per_second
+	if not _speeds.has(speed):
+		_speeds.append(speed)
+	_sample_emote()
 	if _watch == null:
 		return
 	_sample_gift()

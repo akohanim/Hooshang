@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/emote_bubble.gd" id="1_emote"]
+[ext_resource type="Texture2D" path="res://assets/emote_exclaim.png" id="2_art"]
+
+[node name="EmoteBubble" type="Node2D"]
+z_index = 1
+script = ExtResource("1_emote")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture_filter = 1
+centered = false
+offset = Vector2(-7, -21)
+texture = ExtResource("2_art")
