@@ -56,15 +56,37 @@ const MEETING_FACES: Array[String] = [
 	"hesitant",
 ]
 
+## The second encounter, in order. Two lines with the gift BETWEEN them: he names
+## the need and hands the ability over, and only then names the key — so the
+## button is taught to someone who already has the thing it operates.
 const GIFT: Array[String] = [
-	"Some gaps won't yield to a jump. Press the SHIFT key to dash.",
+	"Some walls won't yield to a jump. Take this, and dash.",
+	"Press the SHIFT key to dash.",
 ]
+## Whether Hooshang already had the dash as each GIFT line went up. This is what
+## pins the gift to the MIDDLE of the exchange rather than either end of it.
+const GIFT_HAS_DASH: Array[bool] = [false, true]
+
+## The third encounter, at the mouth of the sounding tiles. He complains into the
+## dark BEFORE Rumi turns up — the complaint is what Rumi answers by appearing —
+## and nothing is granted here, so the room stays the gift.
+const TILES: Array[String] = [
+	"I can't see a thing.",
+	"You show up right before the parts I'm going to hate, don't you?",
+	"Something's ahead of you. You think you've lost your rhythm. You haven't.",
+	"The tiles will light as you cross them, and the music will carry you through the dark.",
+]
+const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi"]
+const TILES_FACES: Array[String] = ["confused", "annoyed", "", ""]
 
 var failures: Array[String] = []
 var world: LdtkWorld
 var lines: Array[String] = []
 var speakers: Array[String] = []
 var faces: Array[String] = []
+## Whether the player had the dash as each line went up — the cheapest way to
+## place an ability grant WITHIN a conversation rather than after it.
+var dash_when_said: Array[bool] = []
 # Rumi's distance from Hooshang, sampled when he appears and when he touches him.
 var _gap_on_arrival := -1.0
 var _gap_at_touch := -1.0
@@ -88,6 +110,17 @@ var _speeds: Array[float] = []
 var sides: Array[String] = []
 ## 1 if Rumi materialised to Hooshang's right this beat, 0 if left, -1 unknown.
 var _rumi_on_right := -1
+## Brightest his aura, and his own body glow, got this beat — both sampled while
+## he was actually on screen.
+var _light_peak := 0.0
+var _glow_peak := 0.0
+var _glow_report := ""
+## Seconds between Rumi finishing his entrance and the next line going up.
+var _arrival_msec := 0
+var _arrival_gap := -1.0
+## What the ledge and staging checks measured, for their failure messages.
+var _ledge_report := ""
+var _between_report := ""
 
 
 func _ready() -> void:
@@ -113,6 +146,7 @@ func _ready() -> void:
 	faces.clear()
 	emotes.clear()
 	sides.clear()
+	dash_when_said.clear()
 	_watch = trigger
 	world.player.global_position = trigger.global_position + Vector2(0, 16)
 	# Roomier than the other beats: the three wordless bubbles are on timers
@@ -152,6 +186,7 @@ func _ready() -> void:
 	speakers.clear()
 	faces.clear()
 	sides.clear()
+	dash_when_said.clear()
 	_gap_on_arrival = -1.0
 	_gap_at_touch = -1.0
 	_rumi_on_right = -1
@@ -167,15 +202,90 @@ func _ready() -> void:
 	world.player.global_position = gift_trigger.global_position + Vector2(0, 16)
 	await _run_scene(900)
 
-	_check(lines == GIFT, "the dash line, alone  [got %s]" % str(lines))
-	_check(speakers == ["Rumi"], "spoken by Rumi  [got %s]" % str(speakers))
-	_check(sides == _sides_for(["Rumi"], _rumi_on_right == 1),
+	_check(lines == GIFT, "the dash lines, in order  [got %s]" % str(lines))
+	_check(speakers == ["Rumi", "Rumi"], "both spoken by Rumi  [got %s]" % str(speakers))
+	_check(dash_when_said == GIFT_HAS_DASH,
+		"the gift lands BETWEEN the two lines — offer, touch, then the key  [got %s]"
+			% str(dash_when_said))
+	_check(sides == _sides_for(["Rumi", "Rumi"], _rumi_on_right == 1),
 		"his face is on his side of the screen here too  [Rumi %s, got %s]" % [
 			"right" if _rumi_on_right == 1 else "left", str(sides)])
 	_check(world.player.has_dash, "the SECOND encounter grants the dash")
 	_check(not world.player.input_locked, "control is returned after the gift")
 	_check(_rumi_alpha(gift_trigger) < 0.01, "Rumi has faded out again")
 	_check_gift("the gift")
+
+	# --- third encounter, room 5: the sounding tiles ---
+	lines.clear()
+	speakers.clear()
+	faces.clear()
+	sides.clear()
+	dash_when_said.clear()
+	_gap_on_arrival = -1.0
+	_gap_at_touch = -1.0
+	_rumi_on_right = -1
+	_mote_first = Vector2.INF
+	_mote_last = Vector2.INF
+	_light_peak = 0.0
+	_glow_peak = 0.0
+	_arrival_msec = 0
+	_arrival_gap = -1.0
+	var tile_room := _room_named("Level_4")
+	_check(tile_room != null, "the world has room 5 (Level_4)")
+	if tile_room != null:
+		world._enter_room(tile_room, true)
+		await _frames(10)
+		var tile_trigger := _find_trigger(tile_room)
+		_check(tile_trigger != null, "room 5 has a Rumi trigger")
+		_check(tile_trigger != null and tile_trigger.defer_to_cutscene,
+			"room 5's trigger defers to the cutscene too")
+		_watch = tile_trigger
+		# On the trigger, not 16px under it like the other two rooms: this ledge
+		# sits only 8px below the trigger, so the usual drop-in spawns him INSIDE
+		# the floor tile and every measurement taken off him afterwards is junk.
+		world.player.global_position = tile_trigger.global_position
+		await _run_scene(900)
+
+		_check(lines == TILES, "the tile lines, in order  [got %s]" % str(lines))
+		_check(speakers == TILES_SPEAKERS,
+			"he complains into the dark before Rumi answers  [got %s]" % str(speakers))
+		_check(faces == TILES_FACES,
+			"tile portraits, one state per line  [got %s]" % str(faces))
+		_check(sides == _sides_for(TILES_SPEAKERS, _rumi_on_right == 1),
+			"each face sits on the side that speaker is standing on  [Rumi %s, got %s]" % [
+				"right" if _rumi_on_right == 1 else "left", str(sides)])
+		# The beat is about crossing what you cannot see. A Rumi who arrives at his
+		# usual brightness answers that himself, so this pins the dim entrance —
+		# including the breath, which used to swell to a fixed 1.9 and would have
+		# hauled him back up to full a second and a half in.
+		_check(_light_peak > 0.0 and _light_peak < 1.0,
+			"the POOL he casts stays faint, breath and all  [peak %.2f]" % _light_peak)
+		# ...but he is still a luminous figure, and the Act is nearly black. The
+		# aura used to be the only thing lifting him out of the CanvasModulate, so
+		# dimming it for this beat dimmed HIM. His own glow is separate now.
+		_check(_glow_peak > 1.0,
+			"he glows HIMSELF, faint pool or not  [peak %.2f]" % _glow_peak)
+		_check(_glow_lights_only_rumi(tile_trigger),
+			"and that glow touches nothing but him  [%s]" % _glow_report)
+		# The scene holds on him before anyone speaks. Timed off the real clock,
+		# since a "pause" that no longer pauses is invisible in a line list.
+		_check(_arrival_gap >= 1.5,
+			"the scene holds on his arrival before Hooshang speaks  [%.1fs]" % _arrival_gap)
+		# Nothing changes hands here — no mote, because the room is the gift.
+		_check(_mote_first == Vector2.INF,
+			"no ability is granted at the tiles — the room is the gift")
+		_check(not world.player.input_locked, "control is returned after the tiles")
+		_check(_rumi_alpha(tile_trigger) < 0.01, "Rumi has faded out again")
+		# He has to be standing on real floor at Hooshang's own height. The ledge
+		# under the trigger runs out one tile along, where the tiles begin, so an
+		# offset sized like the other beats' drops him into the first gap.
+		_check(_on_ledge(tile_trigger),
+			"he stands across the gap on solid floor  [%s]" % _ledge_report)
+		# ...and on the far side of it, or "run across these tiles" is being said
+		# by someone standing next to you.
+		_check(_tiles_between(tile_trigger),
+			"the sounding tiles are BETWEEN them  [%s]" % _between_report)
+
 	await _check_lines_fit()
 
 	if failures.is_empty():
@@ -203,7 +313,7 @@ func _check_lines_fit() -> void:
 	var size: int = label.get_theme_font_size("font_size")
 	var spacing := float(label.get_theme_constant("line_spacing"))
 	var clipped: Array[String] = []
-	for text in WAKING + MEETING + GIFT:
+	for text in WAKING + MEETING + GIFT + TILES:
 		# With a portrait, which is the narrower and therefore worse case.
 		box.say("Hooshang", text, Color(1, 1, 1, 1))
 		await get_tree().process_frame
@@ -302,6 +412,11 @@ func _run_scene(max_frames: int) -> void:
 			speakers.append(name_label.text if name_label.visible else "")
 			faces.append(_face_name())
 			sides.append(_portrait_side())
+			dash_when_said.append(world.player.has_dash)
+			# The first line after he finishes arriving — how long the scene held
+			# on him with nobody talking.
+			if _arrival_msec > 0 and _arrival_gap < 0.0:
+				_arrival_gap = (Time.get_ticks_msec() - _arrival_msec) / 1000.0
 		# First press finishes the typewriter, second dismisses. Has to be a real
 		# InputEvent — DialogueBox listens in _unhandled_input, which
 		# Input.action_press() does not feed.
@@ -323,6 +438,15 @@ func _sample_staging() -> void:
 	var rumi := _watch.get_node_or_null("Rumi") as Node2D
 	if rumi == null:
 		return
+	# His aura, while he is actually on screen — during the fades it is on its way
+	# up or down and says nothing about how bright he MEANT to arrive.
+	var light := _watch.get_node_or_null("RumiLight") as PointLight2D
+	var glow := _watch.get_node_or_null("RumiGlow") as PointLight2D
+	if (rumi as CanvasItem).modulate.a > 0.99:
+		if light != null:
+			_light_peak = maxf(_light_peak, light.energy)
+		if glow != null:
+			_glow_peak = maxf(_glow_peak, glow.energy)
 	var gap: float = absf(rumi.global_position.x - world.player.global_position.x)
 	if _gap_on_arrival < 0.0 and (rumi as CanvasItem).modulate.a > 0.99:
 		_gap_on_arrival = gap
@@ -332,6 +456,7 @@ func _sample_staging() -> void:
 		# The invariant worth asserting is that his FACE follows his FEET, so it
 		# is read from the staging rather than pinned to one side.
 		_rumi_on_right = 1 if rumi.global_position.x > world.player.global_position.x else 0
+		_arrival_msec = Time.get_ticks_msec()
 	# Closest approach, which is the reach-out moment. has_dash can't be the
 	# marker any more: room 1's touch deliberately grants nothing.
 	if _gap_at_touch < 0.0 or gap < _gap_at_touch:
@@ -363,6 +488,101 @@ func _fade_alpha() -> float:
 			if cc is ColorRect:
 				return (cc as ColorRect).color.a
 	return -1.0
+
+
+## The room node with this LDtk identifier, or null.
+func _room_named(name: String) -> Node2D:
+	for room in world.rooms:
+		if room.name == name:
+			return room
+	return null
+
+
+## Is Rumi standing on the same floor Hooshang is, rather than down in one of the
+## gaps the sounding tiles fill?
+##
+## "Is there ground under him" is not enough on its own to catch this: appear()
+## snaps him to WHATEVER floor is below, so a bad offset does not leave him
+## hovering — it quietly drops him a tile into the first hole, standing inside
+## MusicNote1. Comparing the two floor heights is what makes that a failure.
+##
+## Both sampled from the physics world rather than the tilemap: the room's holes
+## are exactly where grid arithmetic goes subtly wrong.
+func _on_ledge(trigger: LdtkRumiTrigger) -> bool:
+	var rumi := trigger.get_node_or_null("Rumi") as Node2D
+	if rumi == null:
+		_ledge_report = "no Rumi sprite"
+		return false
+	var his := _floor_under(rumi.global_position)
+	var ours := _floor_under(world.player.global_position)
+	if is_inf(his):
+		_ledge_report = "nothing under him at all (x=%.0f)" % rumi.global_position.x
+		return false
+	_ledge_report = "his floor y=%.0f, Hooshang's y=%.0f" % [his, ours]
+	return absf(his - ours) < 8.0
+
+
+## Is Rumi's self-glow reaching him and NOTHING else in his room?
+##
+## A light bright enough to make a man luminous under a 0.05 CanvasModulate would
+## also blow out the wall behind him, which is why it is cull-masked to a layer
+## only his sprite listens on. That is a two-sided arrangement — the light's mask
+## and the sprite's — and either half being wrong is invisible except as a room
+## that quietly stopped being dark.
+func _glow_lights_only_rumi(trigger: LdtkRumiTrigger) -> bool:
+	var glow := trigger.get_node_or_null("RumiGlow") as PointLight2D
+	if glow == null:
+		_glow_report = "no RumiGlow light"
+		return false
+	if glow.range_item_cull_mask != LdtkRumiTrigger.GLOW_LAYER:
+		_glow_report = "glow cull mask is %d, not the glow layer" % glow.range_item_cull_mask
+		return false
+	var listening: Array[String] = []
+	_collect_glow_lit(trigger.get_parent(), listening)
+	_glow_report = "%d item(s) on the glow layer: %s" % [listening.size(), str(listening)]
+	return listening == ["Rumi"]
+
+
+## Names of every CanvasItem under `node` that the glow layer can light.
+func _collect_glow_lit(node: Node, out: Array[String]) -> void:
+	if node is CanvasItem and (node as CanvasItem).light_mask & LdtkRumiTrigger.GLOW_LAYER:
+		out.append(node.name)
+	for child in node.get_children():
+		_collect_glow_lit(child, out)
+
+
+## Do the sounding tiles lie between Hooshang and Rumi?
+##
+## This is the whole staging of the beat in one number. Rumi is meant to be the
+## far side of a stretch you cannot see, so "run across these tiles" is spoken
+## across them — a Rumi standing on the near ledge would be pointing at the floor
+## by his own feet.
+func _tiles_between(trigger: LdtkRumiTrigger) -> bool:
+	var rumi := trigger.get_node_or_null("Rumi") as Node2D
+	if rumi == null:
+		_between_report = "no Rumi sprite"
+		return false
+	var him := world.player.global_position.x
+	var her := rumi.global_position.x
+	var lo := minf(him, her)
+	var hi := maxf(him, her)
+	var between := 0
+	for tile in get_tree().get_nodes_in_group("note_tile"):
+		if tile.get_parent() != trigger.get_parent():
+			continue  # another room's tiles — every room is loaded at once
+		var x: float = (tile as Node2D).global_position.x
+		if x > lo and x < hi:
+			between += 1
+	_between_report = "%d tiles in the %.0fpx between them" % [between, hi - lo]
+	return between >= 3
+
+
+## World y of the first solid surface below `from`, or INF.
+func _floor_under(from: Vector2) -> float:
+	var query := PhysicsRayQueryParameters2D.create(from, from + Vector2(0.0, 64.0))
+	query.collision_mask = 1  # world
+	var hit := world.get_world_2d().direct_space_state.intersect_ray(query)
+	return hit.position.y if hit else INF
 
 
 func _rumi_alpha(trigger: Node) -> float:

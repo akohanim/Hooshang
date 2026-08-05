@@ -40,6 +40,35 @@ extends Node
 ## Warm gold, ties into the Rumi/dash-grant theme (alpha here sets max opacity).
 @export var trail_color := Color(1.0, 0.82, 0.35, 0.55)
 
+## The sheet Hooshang comes apart into — three shapes, 8px cells. Draw it with
+## tools/gen_death_shards.py.
+const SHARD_SHEET := preload("res://assets/effects/death_shard.png")
+const SHARD_CELL := 8.0
+const SHARD_SHAPES := 3
+
+@export_group("Death")
+## How many shards the burst throws. Celeste's is a ring, not a spray: they go
+## out evenly and the eye reads a circle opening rather than a puff.
+@export var death_shards := 12
+## How far they travel, in px. Jittered per shard by death_spread so the ring
+## breaks up on its way out instead of staying a perfect circle.
+@export var death_reach := 26.0
+@export_range(0.0, 1.0) var death_spread := 0.35
+## How long a shard flies before it is gone. Shorter than the full death pause
+## on purpose — the burst should be over and the screen still for a beat before
+## he comes back, which is what makes the respawn feel like a new attempt
+## rather than a bounce.
+@export var death_shard_time := 0.5
+## How big a shard starts and ends, as a multiple of the 8px art. They shrink as
+## they fly, which is what sells them as debris losing energy.
+@export var death_shard_scale := 0.75
+## Colour of the burst. White-hot at the centre of the ring, so it reads against
+## both the dark office and a lit room.
+@export var death_tint := Color(0.93, 0.96, 1.0, 1.0)
+## The freeze on the frame he dies. Real seconds — the whole screen stops, which
+## is the single biggest reason a Celeste death lands as an event.
+@export var death_hitstop := 0.08
+
 @export_group("Camera")
 ## Landings slower than this don't bounce the camera or squash much at all.
 @export var landing_shake_min_speed := 160.0
@@ -130,6 +159,61 @@ func dash_tick(delta: float) -> void:
 	if _trail_timer <= 0.0:
 		_trail_timer = trail_interval
 		_spawn_afterimage()
+
+
+# ---------------------------------------------------------------- death ----
+
+## Call the instant he dies. Throws the burst, freezes the screen for a frame or
+## two, and shakes the camera.
+##
+## Everything here is cosmetic and nothing waits on it: the shards live in the
+## room and free themselves, so the player is free to respawn on top of them and
+## the burst simply finishes where it happened. How long the game HOLDS before
+## respawning is Player.death_time, not this — an animation that also controlled
+## the pacing would mean retuning the feel every time the art changed.
+func on_death() -> void:
+	hitstop(death_hitstop)
+	_camera_shake(landing_shake_max_strength, landing_shake_time)
+	var world := _player.get_parent()
+	if world == null:
+		return
+	for i in death_shards:
+		_spawn_shard(world, i)
+
+
+## One piece of him, thrown out along the ring and shrinking as it goes.
+func _spawn_shard(world: Node, index: int) -> void:
+	var shard := Sprite2D.new()
+	var tex := AtlasTexture.new()
+	tex.atlas = SHARD_SHEET
+	# Shapes cycle rather than being picked at random: a ring of 12 that has
+	# every shape spread evenly around it looks broken up, where 12 random picks
+	# reliably clumps three of a kind together somewhere.
+	tex.region = Rect2((index % SHARD_SHAPES) * SHARD_CELL, 0.0, SHARD_CELL, SHARD_CELL)
+	shard.texture = tex
+	shard.modulate = death_tint
+	shard.global_position = _player.global_position
+	shard.rotation = TAU * float(index) / float(death_shards)
+	shard.scale = Vector2.ONE * death_shard_scale
+	# Same two rules the dash trail learned: parent to the ROOM (levels live in
+	# Screen's sub-viewport, so current_scene is the UI surface), and stay in the
+	# playable band rather than dropping behind the tiles.
+	shard.z_as_relative = false
+	shard.z_index = 0
+	world.add_child(shard)
+
+	var angle := TAU * float(index) / float(death_shards)
+	var reach: float = death_reach * (1.0 + randf_range(-death_spread, death_spread))
+	var to: Vector2 = _player.global_position + Vector2.RIGHT.rotated(angle) * reach
+	var t := shard.create_tween().set_parallel()
+	t.tween_property(shard, "global_position", to, death_shard_time) \
+		.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	t.tween_property(shard, "scale", Vector2.ZERO, death_shard_time) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.tween_property(shard, "rotation", shard.rotation + TAU * 0.4, death_shard_time)
+	t.tween_property(shard, "modulate:a", 0.0, death_shard_time) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t.chain().tween_callback(shard.queue_free)
 
 
 func _spawn_afterimage() -> void:

@@ -91,7 +91,8 @@ func _run() -> void:
 	# Death respawns at the level spawn (this room has no checkpoints).
 	player.die()
 	_check(player.state == Player.State.DEAD, "die() enters DEAD state")
-	await _frames(30)
+	# See the note in smoke_test: the respawn waits out the death animation now.
+	await _wait_for_respawn()
 	_check(player.state != Player.State.DEAD, "respawns quickly")
 	_check(player.global_position.distance_to(Vector2(48, 154)) < 24.0,
 		"respawns at the spawn point (pos=%s)" % player.global_position)
@@ -135,3 +136,13 @@ func _check(cond: bool, name: String) -> void:
 	print(("  PASS  " if cond else "  FAIL  ") + name)
 	if not cond:
 		failures.append(name)
+
+
+## Wait until he is actually back, rather than for a frame count that happens to
+## be longer than the respawn. Player.death_time decides the hold, and hard-coded
+## budgets here silently become wrong the moment it is retuned.
+func _wait_for_respawn() -> void:
+	for i in 400:
+		await get_tree().process_frame
+		if player.state != Player.State.DEAD:
+			return

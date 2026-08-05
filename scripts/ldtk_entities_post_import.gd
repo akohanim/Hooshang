@@ -12,6 +12,9 @@
 const DOOR_SCENE := preload("res://scenes/props/Door.tscn")
 const CHECKPOINT_SCENE := preload("res://scenes/props/Checkpoint.tscn")
 const HAZARD_SCENE := preload("res://scenes/props/hazards/Hazard.tscn")
+const GLASS_SPIKES_SCENE := preload("res://scenes/props/hazards/GlassSpikes.tscn")
+const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
+const CONVEYOR_BELT_SCENE := preload("res://scenes/props/zones/ConveyorBelt.tscn")
 const RUMI_TRIGGER_SCRIPT := preload("res://scripts/ldtk_rumi_trigger.gd")
 const LDTK_DOOR_SCRIPT := preload("res://scripts/ldtk_door.gd")
 const EXIT_SIGN_SCENE := preload("res://scenes/props/ExitSign.tscn")
@@ -63,6 +66,29 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				hazard.position = data.position
 				hazard.size = Vector2(data.size)
 				entity_layer.add_child(hazard)
+			# One entity per surface, so which way the points aim is chosen by
+			# picking the right entity rather than by remembering a field.
+			"GlassSpikes":
+				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.UP))
+			"GlassSpikesCeiling":
+				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.DOWN))
+			"GlassSpikesLeftWall":
+				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.RIGHT))
+			"GlassSpikesRightWall":
+				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.LEFT))
+			"SlideZone":
+				entity_layer.add_child(_build_slide_zone(data))
+			# One entity per direction, so which way a belt runs is chosen by
+			# picking the right entity rather than by remembering a field — the
+			# same reason the note tiles are five and the glass spikes four. The
+			# bare "ConveyorBelt" is the name these had before they were split;
+			# every one of them ran right.
+			"ConveyorBelt_Right", "ConveyorBelt":
+				entity_layer.add_child(
+					_build_conveyor_belt(data, ConveyorBelt.Direction.RIGHT))
+			"ConveyorBelt_Left":
+				entity_layer.add_child(
+					_build_conveyor_belt(data, ConveyorBelt.Direction.LEFT))
 			"RumiTrigger":
 				entity_layer.add_child(_build_rumi_trigger(data))
 			"Exit":
@@ -89,6 +115,63 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				tile.note_index = _field_int(data, "NoteIndex", 1)
 				entity_layer.add_child(tile)
 	return entity_layer
+
+
+## A strip of broken glass on one of the four surfaces. Stretch the entity ALONG
+## that surface in LDtk and the prefab lays out that many cells of shards; the
+## other dimension is forced to one cell, however the entity got dragged.
+##
+## Its own function rather than four inline branches because the length is the
+## whole point of these entities, and Vector2(data.size) quietly carrying the
+## across-axis through would put the kill box somewhere nobody asked for.
+func _build_glass_spikes(data: Dictionary, facing: GlassSpikes.Facing) -> Area2D:
+	var spikes: Area2D = GLASS_SPIKES_SCENE.instantiate()
+	spikes.position = data.position
+	spikes.facing = facing
+	var drawn := Vector2(data.size)
+	var wall := facing == GlassSpikes.Facing.RIGHT or facing == GlassSpikes.Facing.LEFT
+	spikes.size = Vector2(GlassSpikes.CELL, drawn.y) if wall \
+		else Vector2(drawn.x, GlassSpikes.CELL)
+	return spikes
+
+
+## A stretch of floor that will not hold him. Unlike the spike entities, this one
+## DOES read fields: angle, control_strength and speed_ramp are tuning, and
+## tuning belongs on the instance — two chutes in one room can legitimately want
+## different numbers, which is exactly the case an entity-per-variant cannot
+## serve.
+##
+## Every field falls back to the prefab's own default, so a zone placed before
+## the fields were added to the LDtk definition still behaves like a slide
+## rather than like a zone with an angle of zero.
+func _build_slide_zone(data: Dictionary) -> Area2D:
+	var zone: Area2D = SLIDE_ZONE_SCENE.instantiate()
+	zone.position = data.position
+	zone.size = Vector2(data.size)
+	zone.angle = _field_float(data, "angle", zone.angle)
+	zone.control_strength = clampf(
+		_field_float(data, "control_strength", zone.control_strength), 0.0, 1.0)
+	zone.speed_ramp = maxf(_field_float(data, "speed_ramp", zone.speed_ramp), 0.0)
+	return zone
+
+
+## A stretch of floor that walks. Stretch the entity ALONG the floor row it
+## covers; it is one cell tall by definition (resizableY is off in LDtk), so the
+## drawn box is the belt surface and the prefab grows its own trigger upward
+## from there to catch whoever is standing on it.
+##
+## Both fields fall back to the prefab's own defaults, so a belt placed before
+## the fields existed still runs right at 60 rather than standing still.
+func _build_conveyor_belt(data: Dictionary, direction: ConveyorBelt.Direction) -> Area2D:
+	var belt: Area2D = CONVEYOR_BELT_SCENE.instantiate()
+	belt.position = data.position
+	belt.size = Vector2(data.size)
+	belt.direction = direction
+	# absf, not maxf: the sign belongs to `direction`, so a negative typed into
+	# the speed field is a magnitude someone got the wrong way round, not a stop.
+	belt.speed = absf(_field_float(data, "speed", belt.speed))
+	return belt
+
 
 
 ## The room's finish line: an ExitSign to look at plus an invisible Area2D
@@ -131,6 +214,14 @@ func _field_str(data: Dictionary, key: String) -> String:
 func _field_int(data: Dictionary, key: String, fallback: int) -> int:
 	var raw = data.fields.get(key)
 	return int(raw) if raw is int or raw is float else fallback
+
+
+## Same, for Float fields. An unset LDtk field arrives as null, and a null that
+## becomes 0.0 is a slide with no angle and no push — worse than the default,
+## because it looks configured.
+func _field_float(data: Dictionary, key: String, fallback: float) -> float:
+	var raw = data.fields.get(key)
+	return float(raw) if raw is float or raw is int else fallback
 
 
 ## Walking into this Area2D (invisible at runtime — Area2D/CollisionShape2D

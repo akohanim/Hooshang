@@ -2,7 +2,7 @@ class_name Act1Beats
 extends Node
 ## Act I's scripted story beats, across the rooms of the LDtk world.
 ##
-## Three scenes:
+## Four scenes:
 ##   1. WAKING (room 1) — the game fades up from black, Hooshang comes round and
 ##      works out he isn't where he should be. He has control after this.
 ##   2. THE MEETING (room 1) — walking into the RumiTrigger brings Rumi in. Rumi
@@ -13,6 +13,10 @@ extends Node
 ##   3. THE GIFT (room 2) — at the second encounter Rumi explains the gap and
 ##      grants the DASH. Deliberately not in room 1: the ability arrives in the
 ##      room that first demands it, so the lesson and the need land together.
+##   4. THE TILES (room 5) — at the mouth of the sounding tiles, in a stretch
+##      Hooshang cannot see across. No ability: the room is the gift, and Rumi
+##      only tells him the tiles will answer him. He arrives faint and stays
+##      faint — lighting the room would answer the problem for him.
 ##
 ## Lives as a child of the world (ldtk/Act1World.tscn) rather than inside the
 ## RumiTriggers, because story beats are code with staging in them, while the
@@ -39,9 +43,23 @@ const FACES := {
 	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
 }
 
-## Rumi's line at the second encounter. It teaches the control itself, so there
-## is no separate system hint after it.
-const DASH_LINE := "Some gaps won't yield to a jump. Press the SHIFT key to dash."
+## Rumi's two lines at the second encounter, with the gift between them. He names
+## the need and hands the ability over first; the control comes after, once
+## Hooshang actually has the thing the key operates. Teaching the button before
+## the ability exists is an instruction; teaching it after is a use.
+const DASH_OFFER_LINE := "Some walls won't yield to a jump. Take this, and dash."
+## The key here has to match the `dash` action in project.godot — SHIFT, with X
+## and the gamepad face buttons bound alongside it.
+const DASH_CONTROL_LINE := "Press the SHIFT key to dash."
+
+## Rumi's lines at the third encounter, over the sounding tiles. He grants
+## nothing here — the room itself is the gift, and what he hands over is
+## permission to trust it.
+const RHYTHM_LINE := "Something's ahead of you. You think you've lost your rhythm. You haven't."
+## Describes what the room actually does — NoteTile lights on contact and sounds
+## its pitch (scenes/props/note_tile.gd) — so the line doubles as the tutorial
+## for a stretch that is otherwise unlit.
+const MUSIC_LINE := "The tiles will light as you cross them, and the music will carry you through the dark."
 
 const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
 ## Script lines that are nothing but punctuation. These are reactions, not
@@ -58,6 +76,8 @@ const EMOTE_LINES := {
 @export var room_name := "Level_1_Office"
 ## Room holding the second encounter, where the dash is granted.
 @export var dash_room_name := "Level_1"
+## Room holding the third encounter, at the mouth of the sounding tiles.
+@export var music_room_name := "Level_4"
 
 @export_group("Waking")
 ## How long the screen stays fully black before it starts lifting.
@@ -80,6 +100,29 @@ const EMOTE_LINES := {
 ## Pause before Rumi finally answers.
 @export var before_rumi_speaks := 0.7
 
+@export_group("The tiles")
+## How brightly Rumi arrives for the third encounter. He is "glowing faintly at
+## the edge of the dark" here, not lighting the room — the whole beat is about
+## crossing a stretch you cannot see, so a Rumi who turns the lights on would be
+## answering the problem he came to talk about.
+@export var rumi_faint_energy := 0.55
+## Where he stands, in pixels from the trigger — the FAR side of the sounding
+## tiles, so he is the thing you run toward.
+##
+## Measured off the room, not chosen: the ledge under the trigger runs out one
+## tile along, where the tiles begin, and the next solid floor at that height is
+## 96px on. Anything shorter stands him in the first gap, inside MusicNote1.
+##
+## Deliberately NOT signed by which way Hooshang walked in, the way the other two
+## beats are. "Ahead" here is a fact about the room — the tiles run right — and a
+## player who backtracks into this room from the far side would otherwise summon
+## Rumi 96px off the left edge of the world.
+@export var rumi_far_offset := 96.0
+## How long the scene holds on him after he arrives, before Hooshang speaks. He
+## turns up across a dark room without a word; give that a moment to land rather
+## than stepping on it with the next banner.
+@export var arrival_pause := 2.0
+
 @export_group("Emotes")
 ## Where the bubble's tail sits, relative to the speaker's origin.
 ##
@@ -95,6 +138,7 @@ var _rumi_trigger: LdtkRumiTrigger
 var _world: LdtkWorld
 var _room: Node2D
 var _dash_room: Node2D
+var _music_room: Node2D
 var _fade: ColorRect
 var _opening_played := false
 
@@ -127,6 +171,12 @@ func _ready() -> void:
 	else:
 		push_warning("Act1Beats: no room named '%s' — the dash is never granted."
 			% dash_room_name)
+	_music_room = _find_room(music_room_name)
+	if _music_room != null:
+		_claim(_music_room, _play_music_beat)
+	else:
+		push_warning("Act1Beats: no room named '%s' — the tiles go unexplained."
+			% music_room_name)
 
 	# Only wake him where he actually wakes. The debug picker can start the
 	# world in any room, and fading up from black in room 3 would be nonsense.
@@ -257,16 +307,52 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.breathe(true)
 	await _hold(before_rumi_speaks)
 
-	await _rumi(DASH_LINE)
+	await _rumi(DASH_OFFER_LINE)
 
-	# The gift: he closes the distance, the light swells, crosses the gap, and
-	# it's Hooshang's. The ability lands on the same frame the mote does.
+	# "take this" is the stage direction in that line, so it gets PLAYED: he
+	# closes the distance, the light swells, crosses the gap, and it's
+	# Hooshang's. The ability lands on the same frame the mote does.
 	await trigger.step_to(player.global_position.x)
 	await trigger.swell()
 	await trigger.give_to(player)
 	player.flash()
 	player.has_dash = true
 	await _hold(0.5)
+
+	# Only now the button, with the dash already his to press it with.
+	await _rumi(DASH_CONTROL_LINE)
+
+	await trigger.vanish()
+	player.input_locked = false
+	trigger.arm_room_door()
+
+
+# -------------------------------------------------------------- 4. tiles ----
+
+## Third encounter, at the mouth of the sounding tiles. Nothing is granted here:
+## the room is the gift. Hooshang cannot see the way across, and what Rumi hands
+## him is the reason to step onto it anyway.
+func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
+	player.input_locked = true
+	_rumi_trigger = trigger
+
+	# He speaks into the dark FIRST — the complaint is what Rumi answers by
+	# turning up at all.
+	await _hooshang("I can't see a thing.", "confused")
+
+	# "glowing faintly at the edge of the dark" is staging, so it gets played: he
+	# arrives dim, across the unlit stretch, and stays dim. See rumi_faint_energy
+	# — a Rumi who lit the room would be solving the problem he came to talk
+	# about, and standing him on the FAR side makes him the thing you cross to.
+	await trigger.appear(rumi_far_offset, rumi_faint_energy)
+	trigger.breathe(true)
+	player.look(1)  # he is always deeper into the room; face him
+	await _hold(arrival_pause)
+
+	await _hooshang("You show up right before the parts I'm going to hate, don't you?",
+		"annoyed")
+	await _rumi(RHYTHM_LINE)
+	await _rumi(MUSIC_LINE)
 
 	await trigger.vanish()
 	player.input_locked = false

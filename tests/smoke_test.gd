@@ -116,7 +116,10 @@ func _run() -> void:
 	# off the kill plane firing again on the same corpse.
 	player.die()
 	_check(Deaths.total == 1, "one death counts once (%d)" % Deaths.total)
-	await _frames(30)
+	# Long enough for the death animation to finish — the hold is Player.death_time
+	# (1s of Celeste-style burst), not the 0.15s it used to be, and a fixed 30
+	# frames was reading the screen mid-animation and calling it a hang.
+	await _wait_for_respawn()
 	_check(player.state != Player.State.DEAD, "respawns automatically")
 	_check(player.global_position.distance_to(level.current_checkpoint) < 24.0,
 		"respawns at the checkpoint")
@@ -174,3 +177,13 @@ func _check(cond: bool, name: String) -> void:
 	print(("  PASS  " if cond else "  FAIL  ") + name)
 	if not cond:
 		failures.append(name)
+
+
+## Wait until he is actually back, rather than for a frame count that happens to
+## be longer than the respawn. Player.death_time decides the hold, and hard-coded
+## budgets here silently become wrong the moment it is retuned.
+func _wait_for_respawn() -> void:
+	for i in 400:
+		await get_tree().process_frame
+		if player.state != Player.State.DEAD:
+			return

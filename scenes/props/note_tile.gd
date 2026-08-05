@@ -1,16 +1,19 @@
 class_name NoteTile
 extends StaticBody2D
 ## One musical tile: a SOLID coloured 1-cell block that sounds its note when
-## Hooshang makes contact — standing on top of it, head-butting it from
-## underneath, or brushing a side. Five of these in the right order grant the
-## glow; the ordering itself lives in scripts/note_sequence.gd, which listens
-## to `stepped`. This node only knows its own index and how to sound.
+## Hooshang steps onto it — standing on top of it or head-butting it from
+## underneath. Five of these in the right order grant the glow; the ordering
+## itself lives in scripts/note_sequence.gd, which listens to `stepped`. This
+## node only knows its own index and how to sound.
 ##
 ## It is a StaticBody2D (world layer) so it blocks and can be landed on, plus a
 ## slightly oversized Area2D "skin" for detection. The skin is needed because a
 ## StaticBody2D emits no contact signals of its own, and because resting
 ## exactly ON a surface is a touch, not an overlap — the skin stands 2px proud
 ## of the solid box on every side so any real contact registers.
+##
+## The skin answers "is he against me", NOT "is he on me" — see
+## _standing_on(). Overlap alone made ONE landing sound TWO pads.
 ##
 ## Joins the "note_tile" group so the sequence manager finds every tile without
 ## a hardcoded list (STYLE_GUIDE §4).
@@ -55,6 +58,11 @@ var _audio: AudioStreamPlayer2D
 var _tween: Tween
 var _glow_tween: Tween
 var _last_sound := -999.0
+## The player while any part of him is inside the skin. Presence only — whether
+## he is actually ON this pad is the second, narrower question.
+var _visitor: Player
+## Was he on this pad last frame? A step is the TRANSITION onto it.
+var _was_on := false
 
 
 func _ready() -> void:
@@ -92,6 +100,7 @@ func _ready() -> void:
 
 	_apply()
 	touch.body_entered.connect(_on_touched)
+	touch.body_exited.connect(_on_left)
 
 
 func _apply() -> void:
@@ -137,8 +146,45 @@ func _glow_color(tex: Texture2D) -> Color:
 
 
 func _on_touched(body: Node2D) -> void:
-	if body is not Player:
-		return
+	if body is Player:
+		_visitor = body
+
+
+func _on_left(body: Node2D) -> void:
+	if body == _visitor:
+		_visitor = null
+
+
+## A step is the moment the player ARRIVES on this pad, and he is on the pad his
+## own centre line is over — not every pad he happens to be touching.
+##
+## Overlap alone was the bug. The skin stands 2px proud on each side and the pads
+## sit shoulder to shoulder, so at a seam the player overlaps two skins at once —
+## he is 8px wide on a 16px grid, which makes that a 12px band out of every 16
+## rather than a corner case. One landing therefore sounded two pads and advanced
+## the puzzle two steps, and the run could be "solved" without ever being stepped.
+##
+## His centre is over exactly one cell, always, so this is unambiguous by
+## construction. And because it is a POSITION rather than an enter event, walking
+## off one pad onto its neighbour is a step in its own right — he does not have
+## to leave and re-enter a skin he is already standing in.
+func _physics_process(_delta: float) -> void:
+	var on := _standing_on()
+	if on and not _was_on:
+		_step()
+	_was_on = on
+
+
+func _standing_on() -> bool:
+	if _visitor == null or not is_instance_valid(_visitor):
+		return false
+	# Half-open, so a player balanced exactly on a seam belongs to one pad and
+	# never to both.
+	var dx: float = _visitor.global_position.x - global_position.x
+	return dx >= -CELL * 0.5 and dx < CELL * 0.5
+
+
+func _step() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	if now - _last_sound < retrigger_grace:
 		return

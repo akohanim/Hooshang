@@ -4,6 +4,12 @@ extends Node
 ## earns the glow. Step one out of order and the run resets — you start again
 ## from note 1.
 ##
+## A run is five DISTINCT pads, one step each, ascending. Stepping a pad that
+## already counted this run breaks it, exactly like stepping the wrong one:
+## "1, 2, 3, 3, 4, 5" is not the sequence, and letting a pad count twice was one
+## of the two ways the glow could be earned without playing the tune. (The other
+## was two pads counting off a single landing — see note_tile.gd.)
+##
 ## Owns ONLY the ordering; each tile owns its own colour and pitch (see
 ## note_tile.gd). Finds its tiles through the "note_tile" group rather than a
 ## hardcoded list, so adding or moving tiles in a level needs no changes here.
@@ -24,6 +30,10 @@ var total := 0
 var _solved := false
 var _last_tile: NoteTile
 var _last_time := -999.0
+## Pads already counted in the current run, by instance id. Instances rather than
+## note indices because two pads are allowed to share an index (see below), and
+## then each of them is its own step.
+var _counted := {}
 var _audio: AudioStreamPlayer
 var _player: Player
 
@@ -66,16 +76,23 @@ func _on_tile_stepped(tile: NoteTile) -> void:
 	_last_tile = tile
 	_last_time = now
 
-	if tile.note_index == progress + 1:
+	if tile.note_index == progress + 1 and not _counted.has(tile.get_instance_id()):
 		progress += 1
+		_counted[tile.get_instance_id()] = true
 		progressed.emit(progress, total)
 		if progress >= total and total > 0:
 			_complete()
 	else:
-		# Wrong pad. Start over — but if they just stepped on note 1, that
-		# counts as the first step of the new run rather than a dead stop.
+		# Wrong pad, or a pad that already had its turn. Start over — but if they
+		# just stepped on note 1, that counts as the first step of the new run
+		# rather than a dead stop.
 		var was := progress
-		progress = 1 if tile.note_index == 1 else 0
+		_counted.clear()
+		if tile.note_index == 1:
+			progress = 1
+			_counted[tile.get_instance_id()] = true
+		else:
+			progress = 0
 		broken.emit(was + 1, tile.note_index)
 		if play_feedback and tile.note_index != 1:
 			_play("res://assets/notes/wrong.wav")
@@ -106,6 +123,7 @@ func reset() -> void:
 	_solved = false
 	_last_tile = null
 	_last_time = -999.0
+	_counted.clear()
 
 
 ## Take the glow back and re-arm the tiles. Fires on death and on leaving the

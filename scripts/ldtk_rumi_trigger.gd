@@ -75,8 +75,34 @@ const TEXTURE_RADIUS := 64.0
 ## travelled 6px and read as a flicker rather than a journey.
 @export var gift_source_offset := Vector2(2.0, -2.0)
 
+@export_group("His own glow")
+## How brightly Rumi's own BODY reads, separate from the pool he throws.
+##
+## He is a luminous figure, so he cannot be a silhouette in a dark room. The Act
+## runs under a CanvasModulate of about 0.05 (LIGHTING.md), which multiplies him
+## along with the walls, and his aura is the only thing that had been lifting him
+## back out of it — so dimming the aura for a beat that wants a faint Rumi dimmed
+## RUMI, which is the opposite of the note.
+@export var glow_energy := 1.9
+## Size of that self-glow, as a texture_scale (radius = 64 x this). Only needs to
+## cover his sprite: 48px tall at 0.5 scale.
+@export var glow_scale := 0.85
+## Where it sits relative to his origin — his chest, so the light falls off
+## towards his feet and hood rather than being flat.
+@export var glow_offset := Vector2(0.0, -8.0)
+
+## Light layer the self-glow lives on, and the ONLY layer his sprite listens to
+## beyond the default. The glow is cull-masked to it and he is the one item with
+## it, so a light bright enough to make him luminous cannot touch a single wall
+## tile beside him. Bit 2 (value 2) — bit 1 is everything else in the world.
+const GLOW_LAYER := 2
+
 @onready var _rumi: AnimatedSprite2D = $Rumi
 @onready var _rumi_light: PointLight2D = $RumiLight
+## Built here rather than by the post-import script: this node's children are
+## packed into ldtk/levels/*.scn at import time, and adding one there means
+## re-importing the whole world. Same reasoning as the signals below.
+var _glow: PointLight2D
 
 ## How far down to look for a floor, in px. Comfortably more than a room's height.
 const FLOOR_PROBE_DEPTH := 400.0
@@ -90,6 +116,23 @@ func _ready() -> void:
 	collision_layer = 8  # layer 4 "triggers"
 	collision_mask = 2  # player only
 	body_entered.connect(_on_body_entered)
+	_build_glow()
+
+
+## The light that makes Rumi himself luminous. Culled to him alone, so it lights
+## a man and not a room — the pool he casts is still _rumi_light's job, and a
+## beat is free to keep that faint while he stays visible.
+func _build_glow() -> void:
+	_rumi.light_mask |= GLOW_LAYER
+	_glow = PointLight2D.new()
+	_glow.name = "RumiGlow"
+	_glow.texture = LIGHT_TEXTURE
+	_glow.texture_scale = glow_scale
+	_glow.color = Color(1, 0.86, 0.55, 1)
+	_glow.energy = 0.0
+	_glow.position = glow_offset
+	_glow.range_item_cull_mask = GLOW_LAYER
+	add_child(_glow)
 
 
 func _on_body_entered(body: Node2D) -> void:
@@ -135,7 +178,11 @@ func portrait_side(other: Node2D) -> int:
 ## puts him at the trigger itself, which is fine for a one-line drive-by — but a
 ## beat where he has to step TOWARD Hooshang needs him to start with some room to
 ## cross, and the player is standing on the trigger by definition.
-func appear(stand_x := 0.0) -> void:
+##
+## `light_energy` is how brightly he arrives. A beat can bring him in dim — "a
+## faint glow at the edge of the dark" is a different entrance from the one that
+## lights a whole cubicle, and it is his light doing the acting.
+func appear(stand_x := 0.0, light_energy := 1.4) -> void:
 	var rest_y := _ground_rest_y(stand_x) if snap_to_ground else 0.0
 	_rumi.position = Vector2(stand_x, rest_y - 10.0)
 	_rumi_light.position = Vector2(stand_x, rest_y - 19.0)
@@ -145,7 +192,9 @@ func appear(stand_x := 0.0) -> void:
 	t.tween_property(_rumi, "modulate:a", 1.0, 0.5)
 	t.tween_property(_rumi, "position:y", rest_y, 0.5) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(_rumi_light, "energy", 1.4, 0.5)
+	t.tween_property(_rumi_light, "energy", light_energy, 0.5)
+	# His own glow comes up regardless of how faint the pool is — see glow_energy.
+	t.tween_property(_glow, "energy", glow_energy, 0.5)
 	await t.finished
 
 
@@ -204,8 +253,24 @@ func vanish() -> void:
 	var t := create_tween().set_parallel()
 	t.tween_property(_rumi, "modulate:a", 0.0, 0.5)
 	t.tween_property(_rumi_light, "energy", 0.0, 0.5)
+	t.tween_property(_glow, "energy", 0.0, 0.5)
 	await t.finished
 
+
+## Keep the self-glow on him. Followed per frame rather than tweened alongside
+## every move: appear() and step_to() both shift him, and a glow that has to be
+## remembered in two places is a glow that gets left behind by the third.
+func _process(_delta: float) -> void:
+	if _glow != null and _glow.energy > 0.0:
+		_glow.position = _rumi.position + glow_offset
+
+
+## How far the breath swells, as a MULTIPLE of whatever the light is resting at
+## when it starts. Relative rather than a fixed 1.4 -> 1.9 pair so a Rumi who
+## arrived faint keeps breathing faintly — absolute numbers would have hauled him
+## up to full brightness a second and a half after a deliberately dim entrance.
+## 1.36 x his usual 1.4 is the 1.9 this always swelled to.
+const BREATH_SWELL := 1.36
 
 ## The light along his sleeves breathing slightly — a slow looping swell, so a
 ## silent Rumi still reads as present and alive rather than as a frozen sprite.
@@ -216,10 +281,11 @@ func breathe(on: bool) -> void:
 		_breath = null
 	if not on:
 		return
+	var rest: float = _rumi_light.energy
 	_breath = create_tween().set_loops()
-	_breath.tween_property(_rumi_light, "energy", 1.9, 1.5) \
+	_breath.tween_property(_rumi_light, "energy", rest * BREATH_SWELL, 1.5) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_breath.tween_property(_rumi_light, "energy", 1.4, 1.5) \
+	_breath.tween_property(_rumi_light, "energy", rest, 1.5) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 

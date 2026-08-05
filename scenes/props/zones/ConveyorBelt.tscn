@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/zones/conveyor_belt.gd" id="1_conveyor"]
+
+[node name="ConveyorBelt" type="Area2D" groups=["conveyor_belt"]]
+script = ExtResource("1_conveyor")
+size = Vector2(16, 16)
+speed = 60.0

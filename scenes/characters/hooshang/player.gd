@@ -24,6 +24,19 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## Used when stopping OR turning around. Higher than accel so stops and
 ## direction flips feel snappy rather than skatey.
 @export var ground_decel := 1600.0
+## How fast momentum he was HANDED bleeds away, px/s^2 — a conveyor belt's
+## takeoff today, anything else that gives him speed later. Much gentler than
+## ground_decel: this is the knob that decides how long a boost lasts. Raise it
+## to make boosts snappier and shorter, drop it to make them carry.
+@export var overspeed_decel := 150.0
+## How long after a handover that gentler rate applies. It exists to SCOPE the
+## rule, not to time it: at 150 px/s^2 a 60 px/s boost is spent in 0.4s anyway.
+##
+## Scoped deliberately. The dash also leaves him well above his top speed
+## (dash_end_speed 160), and a rule written as "anything above max_run_speed
+## decays gently" quietly made every dash carry half again as far — 49px to 77px
+## in smoke_test — which is tuned feel nobody asked to change.
+@export var boost_time := 0.6
 ## Air acceleration as a fraction of the ground value. Below 1 so air feels
 ## slightly floatier, but still high for strong mid-air control.
 @export_range(0.0, 1.0) var air_accel_mult := 0.8
@@ -114,6 +127,25 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## normal jump/fall pose takes over; shorten it to cut the kick short.
 @export var wall_jump_anim_time := 0.36
 
+@export_group("Death")
+## How long the death animation owns the screen before he respawns, in seconds.
+##
+## Lives on the PLAYER rather than in each level's respawn_delay because it is a
+## property of dying, not of a room: two levels disagreeing about it would mean
+## the burst getting cut off in one of them. Levels wait at least this long (see
+## level_base.gd / ldtk_world.gd), so a level is still free to hold longer.
+##
+## The burst itself is shorter (Juice.death_shard_time) on purpose — the shards
+## are gone and the screen is still for a beat before he comes back, which is
+## what makes a retry read as a new attempt rather than a bounce.
+@export var death_time := 1.0
+
+@export_group("Slide zones")
+## Ceiling on how fast a slide zone can carry him, in px/s. The zone supplies
+## the acceleration; this is the limit, so a long chute cannot ramp him up to a
+## speed that tunnels him through a wall in one physics step.
+@export var max_slide_speed := 260.0
+
 var state: State = State.FALL
 var facing := 1                 # 1 = right, -1 = left; used for neutral dashes
 ## Cutscene lock: physics keeps running (gravity settles the player) but all
@@ -132,8 +164,24 @@ var dash_cooldown_timer := 0.0
 var freeze_timer := 0.0         # dash hitstop: physics is skipped while > 0
 var wall_lock_timer := 0.0      # reduced air control after wall jump
 var wall_jump_timer := 0.0      # how long the wall-jump kick animation still has to run
+var boost_timer := 0.0          # while > 0, handed-over momentum decays gently
 
 var dash_dir := Vector2.RIGHT
+
+# Slide zones. The zone he is standing in owns part of his movement: it drags
+# him along `slide_dir`, throttles his steering to `slide_control`, and takes
+# jump and dash away entirely until he is out of it.
+#
+# The zone hands these over through enter_slide() and does NOT drive velocity
+# itself. A zone writing velocity from its own _physics_process would land
+# either side of this node's move_and_slide() depending on tree order, which is
+# the kind of bug that only shows up in one room. Everything that moves him
+# lives here, in one frame order.
+var slide_zone: Node = null     # which zone, so a second one leaving can't clear it
+var slide_dir := Vector2.ZERO   # unit vector he is being dragged along
+var slide_control := 1.0        # multiplier on steering while inside, 1 = full
+var slide_accel := 0.0          # px/s^2 the drag builds at
+var slide_speed := 0.0          # px/s it has built to so far
 
 # The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
 # with its feet offset-pinned to the bottom of the 8x12 hitbox. It lives
@@ -164,6 +212,11 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_tick_timers(delta)
+	# A slide owns him: no jumps, including one buffered on the way in. Cleared
+	# here rather than guarded at each jump site, because there are four of them
+	# (ground, coyote, wall slide, wall coyote) and a fifth would forget.
+	if sliding():
+		jump_buffer_timer = 0.0
 
 	var input_x := 0.0 if input_locked else Input.get_axis("move_left", "move_right")
 	if input_x != 0.0:
@@ -186,6 +239,9 @@ func _physics_process(delta: float) -> void:
 		State.WALL_SLIDE:
 			_state_wall_slide(delta)
 
+	if sliding():
+		_apply_slide(delta)
+
 	var incoming_vel_y := velocity.y  # fall speed just before landing is resolved, for juice.on_land()
 	move_and_slide()
 	_post_move(was_on_floor, input_x, incoming_vel_y)
@@ -194,6 +250,7 @@ func _physics_process(delta: float) -> void:
 
 func _tick_timers(delta: float) -> void:
 	coyote_timer = maxf(coyote_timer - delta, 0.0)
+	boost_timer = maxf(boost_timer - delta, 0.0)
 	jump_buffer_timer = maxf(jump_buffer_timer - delta, 0.0)
 	wall_coyote_timer = maxf(wall_coyote_timer - delta, 0.0)
 	dash_cooldown_timer = maxf(dash_cooldown_timer - delta, 0.0)
@@ -266,8 +323,40 @@ func _apply_run(delta: float, input_x: float, control_mult: float) -> void:
 		rate = ground_decel
 	if not is_on_floor():
 		rate *= air_accel_mult if target != 0.0 else air_decel_mult
-	rate *= control_mult
+	# slide_control is 1.0 unless he is in a slide zone. Applied to the RATE, the
+	# same knob wall_jump_control_mult turns: he still has a top speed and can
+	# still choose a direction, he just cannot change his mind quickly. Capping
+	# his top speed instead would read as walking through treacle rather than as
+	# losing his footing.
+	rate *= control_mult * slide_control
+	# Momentum he was GIVEN bleeds off at its own gentle rate rather than at the
+	# rate he changes his mind. Without this a boost is arithmetically real and
+	# completely imperceptible: his own deceleration drags him back to the speed
+	# he asked for inside a fifth of a second, so a 60 px/s conveyor bought about
+	# ten pixels of extra jump.
+	#
+	# Only while he is not fighting it — pushing the other way still turns him
+	# around at the usual rate, so nothing about steering changes — and only
+	# while it is SLOWING him, so it can never cap his acceleration.
+	if boost_timer > 0.0 and absf(velocity.x) > absf(target) \
+			and (target == 0.0 or signf(target) == signf(velocity.x)):
+		rate = overspeed_decel
 	velocity.x = move_toward(velocity.x, target, rate * delta)
+
+
+## Drag him along the slide, and build that drag up over time.
+##
+## slide_speed is a FLOOR on how fast he is going along the slope, not a force
+## added each frame: it ramps at slide_accel and the velocity is projected up to
+## meet it. That way gravity and his own running still add on top — a player who
+## throws himself down the chute goes faster than one who does not — while the
+## slide alone can never stall, and never compounds with gravity into a speed
+## nobody chose.
+func _apply_slide(delta: float) -> void:
+	slide_speed = minf(slide_speed + slide_accel * delta, max_slide_speed)
+	var along := velocity.dot(slide_dir)
+	if along < slide_speed:
+		velocity += slide_dir * (slide_speed - along)
 
 
 func _apply_gravity(delta: float) -> void:
@@ -311,6 +400,8 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 func _try_dash() -> bool:
 	if not has_dash:
 		return false  # ability not unlocked yet (see Level 1's Rumi scene)
+	if sliding():
+		return false  # the slide owns him until he is out of it
 	if state == State.DASH or state == State.DEAD:
 		return false
 	if not dash_available or dash_cooldown_timer > 0.0:
@@ -324,6 +415,11 @@ func _try_dash() -> bool:
 		dir = Vector2(facing, 0)
 	dash_dir = dir.normalized()
 	velocity = dash_dir * dash_speed
+	# A dash starts from a clean slate, so nothing it was handed earlier trails
+	# into it: dash_end_speed decaying gently instead of normally would make a
+	# dash off a conveyor carry further than the same dash anywhere else, and a
+	# dash has to be the same move everywhere it is used.
+	boost_timer = 0.0
 	dash_available = false
 	dash_timer = dash_time
 	dash_cooldown_timer = dash_time + dash_cooldown
@@ -435,6 +531,10 @@ func die() -> void:
 	state = State.DEAD
 	velocity = Vector2.ZERO
 	visible = false
+	# The burst is thrown BEFORE he is counted or announced, so it leaves from
+	# where he actually was. Purely cosmetic and nothing waits on it — see
+	# juice.on_death(); how long the game holds is death_time, below.
+	juice.on_death()
 	Deaths.record()  # the run's death count, shown top-right
 	died.emit()
 
@@ -450,6 +550,11 @@ func respawn(at: Vector2) -> void:
 	freeze_timer = 0.0
 	wall_lock_timer = 0.0
 	wall_jump_timer = 0.0
+	# Respawning outside a zone he died in still fires its body_exited, since he
+	# is never removed from collision (see above) — but a checkpoint INSIDE the
+	# same zone would not, and he would come back sliding with no zone to blame.
+	# Cheaper to start every life with full control and let the zone re-take it.
+	_clear_slide()
 	visible = true
 	state = State.FALL
 	camera.reset_smoothing()  # snap the camera so retries feel instant
@@ -457,6 +562,64 @@ func respawn(at: Vector2) -> void:
 
 func state_name() -> String:
 	return State.keys()[state]
+
+
+# ----------------------------------------------------------- slide zones ----
+# The API a SlideZone drives him through (scenes/props/zones/slide_zone.gd).
+# The zone says what the slide IS; this node is the only thing that moves him.
+
+func sliding() -> bool:
+	return slide_zone != null
+
+
+## Hand part of his movement to `zone`: dragged along `direction`, steering
+## throttled to `control` (0..1), the drag building at `ramp` px/s^2.
+##
+## The drag starts at whatever speed he already had along the slope, so arriving
+## at a run is not punished with a stall — a chute entered fast stays fast.
+##
+## A second zone entered while inside the first simply takes over. Overlapping
+## zones are a level-design accident rather than a feature, and the alternative
+## (counting overlaps) leaves him stuck sliding forever if one of them is ever
+## freed while he is inside it.
+## Hand him horizontal momentum, in px/s — a conveyor belt letting go of him on
+## takeoff, and whatever else gives him speed later.
+##
+## A method rather than a prop writing `player.velocity.x` itself (STYLE_GUIDE
+## §4), because the interesting half is not the addition: it is `boost_timer`,
+## which is what tells _apply_run this speed was GIVEN and should bleed off
+## gently instead of being scrubbed by his own deceleration in three frames.
+## Reaching in from outside gets the addition and silently loses that.
+func add_momentum(dx: float) -> void:
+	if state == State.DEAD or is_zero_approx(dx):
+		return
+	velocity.x += dx
+	boost_timer = boost_time
+
+
+func enter_slide(zone: Node, direction: Vector2, control: float, ramp: float) -> void:
+	if direction == Vector2.ZERO:
+		return
+	slide_zone = zone
+	slide_dir = direction.normalized()
+	slide_control = clampf(control, 0.0, 1.0)
+	slide_accel = maxf(ramp, 0.0)
+	slide_speed = maxf(velocity.dot(slide_dir), 0.0)
+
+
+## Give control back, if `zone` is the one that took it. The check matters when
+## zones overlap: the one he left is not always the one holding him.
+func exit_slide(zone: Node) -> void:
+	if slide_zone == zone:
+		_clear_slide()
+
+
+func _clear_slide() -> void:
+	slide_zone = null
+	slide_dir = Vector2.ZERO
+	slide_control = 1.0
+	slide_accel = 0.0
+	slide_speed = 0.0
 
 
 # ------------------------------------------------------------- cosmetics ----

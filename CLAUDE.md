@@ -30,8 +30,25 @@ the target grid.
     pickup, and the total surviving level changes and death
   - `Godot --headless --path . res://tests/death_test.tscn` — exactly one death
     counted per respawn, from a hazard and from the kill plane alike
+  - `Godot --headless --path . res://tests/slide_test.tscn` — SlideZone: control
+    throttled inside, no jump or dash, and everything restored on the way out
+  - `Godot --headless --path . res://tests/music_test.tscn` — the tile puzzle:
+    the glow needs all five pads, once each, in order, and one landing on a
+    seam between two pads counts as one step
+  - `Godot --headless --path . res://tests/conveyor_test.tscn` — ConveyorBelt:
+    carries a rider at `speed` in `direction`, never touches his velocity, and
+    lets go the moment he is airborne
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
+- **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
+  world.** Godot re-imports a `.ldtk` when the `.ldtk` changes, not when the
+  hook that builds its entities changes — so a newly handled (or renamed)
+  entity stays raw data in `ldtk/levels/*.scn` and simply never appears, with
+  no error anywhere. `touch ldtk/hooshang_claude.ldtk` then `--import`.
+- **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
+  holds the whole project in memory and writes it back wholesale; it has
+  already silently reverted one entity rename. Reload the project in LDtk after
+  any scripted edit.
 
 Lighting a room by hand (fixtures, the moon window, seam spill): `LIGHTING.md`.
 
@@ -113,6 +130,19 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `DebugOverlay.tscn` (F3). See the dialogue rules below before writing a scene.
 - `scenes/props/` — `Checkpoint.tscn`, `hazards/Hazard.tscn` (both @tool,
   size-exported), `lighting/LampFixture.tscn` (reusable lamp; joins `lights`).
+  `hazards/GlassSpikes.tscn` EXTENDS `Hazard`, so layer, mask and the kill are
+  inherited and can't drift from the greybox boxes — it only overrides
+  `_build_visual()`/`_update_extents()`. One LDtk entity per surface —
+  `GlassSpikes` (floor), `GlassSpikesCeiling`, `GlassSpikesLeftWall`,
+  `GlassSpikesRightWall` — each stretchable only ALONG the surface it is stuck
+  to; the other axis is forced to one cell on import. Art:
+  `tools/gen_glass_spikes.py` draws the floor sheet and transforms the other
+  three, keeping the light in the upper left rather than rotating it.
+  `zones/SlideZone.tscn` is a volume, not a prop: inside it Hooshang's steering
+  drops to `control_strength`, a drag builds along `angle`, and jump and dash
+  are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the
+  numbers and player.gd does all the moving, so nothing else writes velocity.
+  Place it in LDtk as a `SlideZone` and set the three fields per instance.
 - `assets/hooshang_frames.tres` = SpriteFrames from the samurai pack
   (`assets/FREE_Samurai .../Sprites`); Rumi reuses it tinted gold.
 - `tools/gen_level.py`, `tools/gen_level1.py` — regenerate the greybox levels

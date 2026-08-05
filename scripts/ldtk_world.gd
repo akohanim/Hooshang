@@ -313,8 +313,13 @@ func _on_checkpoint_activated(cp: Checkpoint) -> void:
 		c.is_active = c == cp
 
 
+## Hold long enough for the death animation to play, then put him back.
+##
+## maxf, not either number alone: `death_time` belongs to dying and is the same
+## everywhere, `respawn_delay` belongs to this level and may want to be longer.
+## Taking the larger means a level can never cut the burst off half way.
 func _on_player_died() -> void:
-	await get_tree().create_timer(respawn_delay).timeout
+	await get_tree().create_timer(maxf(respawn_delay, player.death_time)).timeout
 	player.respawn(_checkpoint)
 
 

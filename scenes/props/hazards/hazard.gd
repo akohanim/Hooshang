@@ -16,7 +16,7 @@ extends Area2D
 const KILL_MARGIN := 2.0
 
 var _shape: CollisionShape2D
-var _visual: ColorRect
+var _visual: CanvasItem
 
 
 func _ready() -> void:
@@ -25,21 +25,32 @@ func _ready() -> void:
 	_shape = CollisionShape2D.new()
 	_shape.shape = RectangleShape2D.new()
 	add_child(_shape)
-	_visual = ColorRect.new()
-	_visual.color = Color(0.9, 0.25, 0.3)
-	_visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_visual)
+	_build_visual()
 	_update_extents()
 	if not Engine.is_editor_hint():
 		body_entered.connect(_on_body_entered)
+
+
+## What the hazard looks like. The greybox default is the red rectangle; a
+## hazard with real art overrides this and _update_extents() together and
+## inherits everything that makes it lethal — layer, mask, and the one line
+## below that kills the player. See hazards/glass_spikes.gd.
+func _build_visual() -> void:
+	var rect := ColorRect.new()
+	rect.color = Color(0.9, 0.25, 0.3)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_visual = rect
+	add_child(rect)
 
 
 func _update_extents() -> void:
 	if _shape == null:
 		return
 	_shape.shape.size = (size - Vector2(KILL_MARGIN, KILL_MARGIN)).max(Vector2(1.0, 1.0))
-	_visual.position = -size / 2.0
-	_visual.size = size
+	var rect := _visual as ColorRect
+	if rect != null:
+		rect.position = -size / 2.0
+		rect.size = size
 
 
 func _on_body_entered(body: Node2D) -> void:

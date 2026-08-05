@@ -6,3 +6,6 @@
 
 # Local MCP server config (contains an API token — never commit)
 .mcp.json
+
+# LDtk keeps timestamped copies of the project here on every save.
+ldtk/*/backups/
