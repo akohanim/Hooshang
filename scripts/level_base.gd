@@ -71,6 +71,11 @@ func _on_checkpoint_activated(cp: Checkpoint) -> void:
 ## maxf, not either number alone: `death_time` belongs to dying and is the same
 ## everywhere, `respawn_delay` belongs to this level and may want to be longer.
 ## Taking the larger means a level can never cut the burst off half way.
+##
+## process_always = false so the hold STOPS while the game is paused — a
+## SceneTreeTimer counts through a pause by default, which would respawn him
+## behind the pause menu (see scenes/ui/pause_menu.gd).
 func _on_player_died() -> void:
-	await get_tree().create_timer(maxf(respawn_delay, player.death_time)).timeout
+	await get_tree().create_timer(
+		maxf(respawn_delay, player.death_time), false).timeout
 	player.respawn(current_checkpoint)

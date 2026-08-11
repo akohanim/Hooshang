@@ -1,7 +1,18 @@
 extends CanvasLayer
 ## Debug level picker: a quick launcher for testing levels — and individual
-## ROOMS of the LDtk world — without playing through the game. Set this as the
-## main scene during dev, then swap back to Level1Office.tscn before shipping.
+## ROOMS of the LDtk world — without playing through the game.
+##
+## NOT the front door any more. `run/main_scene` is MainMenu.tscn; this is
+## reached from its DEBUG PICKER row, which only exists in a debug build. The
+## distinction is deliberate and is the whole reason both exist: this one lists
+## every room and every scene in the project including prototypes, with no notion
+## of what a run has unlocked, because that is what a developer wants and exactly
+## what a player must not have. The player-facing level select lives on the main
+## menu and offers only rooms a save slot has actually stood in.
+##
+## Nothing here writes to a save slot: launching from the picker leaves
+## SaveGame's slot unbound, so a session spent jumping between rooms cannot
+## overwrite a run.
 ##
 ## The room buttons are built at runtime from the world scene itself, so rooms
 ## added in LDtk show up here with no changes to this file.
@@ -15,6 +26,9 @@ const LEVELS := {
 	"Level2": "res://scenes/levels/act1_office/Level2.tscn",
 	"LDtkOffice": "res://ldtk/Level_1_Office_Test.tscn",
 	"Act1World": WORLD_SCENE,
+	# Rendering prototype, not a level: a pomegranate drawn on a 640x360 layer
+	# over the 320x180 world. See tests/token_density.gd.
+	"TokenDensity": "res://tests/token_density.tscn",
 }
 
 ## Font size for the generated room buttons, matching the ones in the scene.
@@ -24,7 +38,7 @@ const ROOM_FONT_SIZE := 20
 ## and a maximised one — see _unscale_ui().
 const DESIGN_HEIGHT := 720.0
 
-@onready var box: VBoxContainer = $Center/VBox
+@onready var box: VBoxContainer = $Scroll/Center/VBox
 
 var _saved_scale := {}
 
@@ -95,7 +109,7 @@ func _build_room_buttons() -> void:
 		btn.text = "Room %d  —  %s" % [i + 1, rooms[i].name]
 		btn.add_theme_font_size_override("font_size", ROOM_FONT_SIZE)
 		btn.pressed.connect(_on_room_pressed.bind(rooms[i].name))
-		$Center/VBox/Rooms.add_child(btn)
+		$Scroll/Center/VBox/Rooms.add_child(btn)
 	world.free()
 
 
@@ -114,5 +128,10 @@ func _on_level_pressed(path: String) -> void:
 ## own full-resolution surface — see systems/screen.gd.
 func _launch(path: String) -> void:
 	_restore_scale()
+	# Unbound, and cleared of anything a previous run staged: a dev launch must
+	# neither write to a slot nor inherit one's dash and re-routed doorways, or
+	# "start me in room 14" would silently mean "start me in room 14 as whoever
+	# last played".
+	SaveGame.unbind()
 	Screen.load_scene(path)
 	queue_free()

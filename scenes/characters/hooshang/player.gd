@@ -98,7 +98,11 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## How far the glow reaches, in CELLS of the 16px LDtk grid. The falloff comes
 ## from the radial texture, so it fades out toward this edge rather than
 ## ending at a hard rim.
-@export var glow_radius_cells := 4.0
+##
+## 5.2 = 83px, a third of the 320px room's width. Widened from 4.0 by request:
+## the reward for playing the tune is being able to SEE, and at 4 cells the lit
+## pool barely reached past his own body in the rooms the puzzle unlocks.
+@export var glow_radius_cells := 5.2
 ## Brightness at full strength.
 @export var glow_energy := 1.25
 ## Warm yellow, to read as "Hooshang's own light" against the cold office.
@@ -137,8 +141,10 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ##
 ## The burst itself is shorter (Juice.death_shard_time) on purpose — the shards
 ## are gone and the screen is still for a beat before he comes back, which is
-## what makes a retry read as a new attempt rather than a bounce.
-@export var death_time := 1.0
+## what makes a retry read as a new attempt rather than a bounce. Halving this
+## therefore means halving that too, or the burst runs right up to the respawn
+## and the beat disappears.
+@export var death_time := 0.5
 
 @export_group("Slide zones")
 ## Ceiling on how fast a slide zone can carry him, in px/s. The zone supplies
@@ -641,6 +647,46 @@ func flash(color := Color(3.0, 2.6, 1.6), rise := 0.15, fall := 0.35) -> void:
 	var t := create_tween()
 	t.tween_property(visual, "self_modulate", color, rise)
 	t.tween_property(visual, "self_modulate", Color.WHITE, fall)
+
+
+## Bounce the camera, for something happening TO him rather than something he
+## did. Forwards to the same dip-and-spring Juice uses for hard landings, so a
+## collapsing room and a heavy fall shake the screen the same way.
+##
+## A method here rather than callers reaching into $Juice: cosmetic asks come in
+## through the controller (see flash()), which is what lets Juice be deleted
+## outright without breaking anything that talks to the player.
+func shake(strength := 1.4, duration := 0.35) -> void:
+	juice.shake(strength, duration)
+
+
+## Rattle the camera for as long as something is coming apart around him. Unlike
+## shake(), which is one knock, this runs for `duration` and decays — see
+## Juice.rumble().
+func rumble(strength := 1.6, duration := 1.0) -> void:
+	juice.rumble(strength, duration)
+
+
+## Freeze him mid-scene: no input, no gravity, no state machine, exactly where he
+## stands. Comes back with velocity cleared, so a hold during a fall doesn't hand
+## control back to a player who is suddenly moving at terminal speed.
+##
+## `input_locked` alone is not this — that takes his controls away and leaves him
+## falling, which is right for a cutscene he walks into and wrong for one where
+## the floor is the thing being dramatic.
+func hold(seconds: float) -> void:
+	if seconds <= 0.0:
+		return
+	var locked := input_locked
+	input_locked = true
+	velocity = Vector2.ZERO
+	set_physics_process(false)
+	await get_tree().create_timer(seconds).timeout
+	if not is_inside_tree():
+		return
+	set_physics_process(true)
+	velocity = Vector2.ZERO
+	input_locked = locked
 
 
 ## Turn the glow on (the musical-tile sequence's reward), fading it up rather

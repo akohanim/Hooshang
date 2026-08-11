@@ -24,19 +24,35 @@ const WAKING: Array[String] = [
 ## pinned here is what a player actually reads.
 const MEETING: Array[String] = [
 	"Hello??",
-	"Who are you? I've worked in this office fifteen years. I've never once seen you at an all hands.",
+	"Who are you? I've worked in this office fifteen years. I've never seen you once.",
 	"Are you going to say something, or just stand there glowing at me...",
 	"I think I hit my head harder than I thought...",
-	"You stand at the beginning of your most important journey, Hooshang jaan",
+	"You stand at the beginning of your most important journey, Hooshang jaan.",
 	"A journey? I just wanted to make it to my car.",
-	"Do not turn away now. The way out is the way through, and the way through is inward.",
-	"You have knocked on this door your whole life, from the inside.",
-	"Walk toward the light. You need not see the whole road, only the next step of it.",
-	"One step. Okay. One step I can probably do.",
+	"You will not reach the parking lot from here. This is not that building. It is the one you carry inside you.",
+	"...Inside me?",
+	"Inside you. Your mind has built its own rooms, and you must go down through every one.",
+	"The office that swallowed your years. Your childhood. And beneath them the places and things you have never let go of.",
+	"And I'm supposed to just — walk through my own head. On purpose.",
+	"Not walk through. You have done that your whole life.",
+	"To pass, you must meet what waits in each room.",
+	"The grief you swallowed. The dreams you set down \"for later.\" The thoughts that still circle you in the dark.",
+	"They are not memories, jaan. They are still alive. And they will not let you by until you face them.",
+	"Look — this really isn't a good time. I just lost my job. I'll get to all that. Later.",
+	"...Later. Yes. That is the word, isn't it.",
+	"You have knocked on this door your whole life, from the inside. Now it opens.",
+	"You need not see the whole road, only the next step of it.",
+	"One step. OK. One step I can probably do...",
 ]
 const MEETING_SPEAKERS: Array[String] = [
 	"Hooshang", "Hooshang", "Hooshang", "Hooshang",
 	"Rumi",
+	"Hooshang",
+	"Rumi",
+	"Hooshang",
+	"Rumi", "Rumi",
+	"Hooshang",
+	"Rumi", "Rumi", "Rumi", "Rumi",
 	"Hooshang",
 	"Rumi", "Rumi", "Rumi",
 	"Hooshang",
@@ -48,10 +64,24 @@ const MEETING_EMOTES: Array[String] = ["!", "...", "..."]
 ## something the code can infer, so it is pinned here. Rumi's lines are "" —
 ## he has no portrait art yet, only the tinted stand-in.
 const WAKING_FACES: Array[String] = ["dazed", "confused"]
+## Three of these are read back as a state the beat did not name. The meeting
+## asks for "wary", "unconvinced" and "deflecting", and Act1Beats.FACES currently
+## points all three at drawings that already exist — the first two at skeptical,
+## the third at hesitant — because they have no art of their own yet. What is
+## observable here is the TEXTURE, so that is what is pinned: the test cannot
+## tell two states apart while they share a picture, and pretending otherwise
+## would be an assertion that passes on a lie. Give them their own faces and
+## these three entries change with the art, not with the script.
 const MEETING_FACES: Array[String] = [
 	"hesitant", "skeptical", "annoyed", "vulnerable",
 	"",
 	"skeptical",
+	"",
+	"skeptical",   # "wary"
+	"", "",
+	"skeptical",   # "unconvinced"
+	"", "", "", "",
+	"hesitant",    # "deflecting"
 	"", "", "",
 	"hesitant",
 ]
@@ -73,11 +103,14 @@ const GIFT_HAS_DASH: Array[bool] = [false, true]
 const TILES: Array[String] = [
 	"I can't see a thing.",
 	"You show up right before the parts I'm going to hate, don't you?",
-	"Something's ahead of you. You think you've lost your rhythm. You haven't.",
-	"The tiles will light as you cross them, and the music will carry you through the dark.",
+	"Something waits ahead of you, in the dark. You think you've lost your rhythm. You haven't. It's only sleeping — here, in these tiles.",
+	"Wake the notes in their order, one after the next, until they join into a melody. Complete it, and its light will gather on you — enough to carry you through the dark ahead.",
+	"So I play the tune, I get a light. ...Fine.",
 ]
-const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi"]
-const TILES_FACES: Array[String] = ["confused", "annoyed", "", ""]
+const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi", "Hooshang"]
+## The last entry is "flat" in the beat — read back as skeptical, which is the
+## drawing that state currently points at. Same aliasing as MEETING_FACES.
+const TILES_FACES: Array[String] = ["confused", "annoyed", "", "", "skeptical"]
 
 var failures: Array[String] = []
 var world: LdtkWorld
@@ -108,6 +141,12 @@ var _speeds: Array[float] = []
 ## Which end of the banner each line's portrait sat at. A speaker's face belongs
 ## on the side they are standing on, and Rumi materialises to Hooshang's right.
 var sides: Array[String] = []
+## Which screen edge the banner sat flush against for each line: "top" or
+## "bottom". A director's choice per room (DialogueBox.VSide, act1_beats.gd's
+## `_dialogue_vside`) — pinned here so a future scene that forgets to set it, or
+## a room whose staging changes underneath a stale choice, fails loudly instead
+## of quietly covering the thing the player is meant to be looking at.
+var vsides: Array[String] = []
 ## 1 if Rumi materialised to Hooshang's right this beat, 0 if left, -1 unknown.
 var _rumi_on_right := -1
 ## Brightest his aura, and his own body glow, got this beat — both sampled while
@@ -135,6 +174,10 @@ func _ready() -> void:
 	_check(not world.player.has_dash, "Hooshang starts DASHLESS — the gift has to mean something")
 	_check(lines == WAKING, "waking lines, in order  [got %s]" % str(lines))
 	_check(faces == WAKING_FACES, "waking portraits: dazed then confused  [got %s]" % str(faces))
+	# He wakes near mid-room, well clear of the ceiling — the banner sits at the
+	# TOP of the screen, flush with it, not floating with a gap.
+	_check(vsides.all(func(v: String) -> bool: return v == "top"),
+		"room 1's banner sits flush at the TOP of the screen  [got %s]" % str(vsides))
 
 	var trigger := _find_trigger(world.rooms[0])
 	_check(trigger != null, "room 1 has a Rumi trigger")
@@ -146,6 +189,7 @@ func _ready() -> void:
 	faces.clear()
 	emotes.clear()
 	sides.clear()
+	vsides.clear()
 	dash_when_said.clear()
 	_watch = trigger
 	world.player.global_position = trigger.global_position + Vector2(0, 16)
@@ -166,6 +210,8 @@ func _ready() -> void:
 	_check(sides == _sides_for(MEETING_SPEAKERS, _rumi_on_right == 1),
 		"each face sits on the side that speaker is standing on  [Rumi %s, got %s]" % [
 			"right" if _rumi_on_right == 1 else "left", str(sides)])
+	_check(vsides.all(func(v: String) -> bool: return v == "top"),
+		"room 1's banner stays at the TOP through the meeting too  [got %s]" % str(vsides))
 	_check(not world.player.has_dash,
 		"room 1 grants NO dash — the first meeting is an introduction, not a gift")
 	_check(not world.player.input_locked, "control is returned after the meeting")
@@ -186,6 +232,7 @@ func _ready() -> void:
 	speakers.clear()
 	faces.clear()
 	sides.clear()
+	vsides.clear()
 	dash_when_said.clear()
 	_gap_on_arrival = -1.0
 	_gap_at_touch = -1.0
@@ -210,6 +257,9 @@ func _ready() -> void:
 	_check(sides == _sides_for(["Rumi", "Rumi"], _rumi_on_right == 1),
 		"his face is on his side of the screen here too  [Rumi %s, got %s]" % [
 			"right" if _rumi_on_right == 1 else "left", str(sides)])
+	_check(vsides.all(func(v: String) -> bool: return v == "top"),
+		"room 2's banner sits at the TOP too — he is at floor height here  [got %s]"
+			% str(vsides))
 	_check(world.player.has_dash, "the SECOND encounter grants the dash")
 	_check(not world.player.input_locked, "control is returned after the gift")
 	_check(_rumi_alpha(gift_trigger) < 0.01, "Rumi has faded out again")
@@ -220,6 +270,7 @@ func _ready() -> void:
 	speakers.clear()
 	faces.clear()
 	sides.clear()
+	vsides.clear()
 	dash_when_said.clear()
 	_gap_on_arrival = -1.0
 	_gap_at_touch = -1.0
@@ -254,6 +305,12 @@ func _ready() -> void:
 		_check(sides == _sides_for(TILES_SPEAKERS, _rumi_on_right == 1),
 			"each face sits on the side that speaker is standing on  [Rumi %s, got %s]" % [
 				"right" if _rumi_on_right == 1 else "left", str(sides)])
+		# The one room where he and Rumi are both up near the ceiling, not the
+		# floor — a TOP banner would sit right on top of them. This is the
+		# concrete case the vside rule exists for.
+		_check(vsides.all(func(v: String) -> bool: return v == "bottom"),
+			"room 5's banner sits flush at the BOTTOM — he and Rumi are up near the ceiling here  [got %s]"
+				% str(vsides))
 		# The beat is about crossing what you cannot see. A Rumi who arrives at his
 		# usual brightness answers that himself, so this pins the dim entrance —
 		# including the breath, which used to swell to a fixed 1.9 and would have
@@ -353,6 +410,22 @@ func _portrait_side() -> String:
 	return "right" if box.portrait_frame.offset_left >= middle else "left"
 
 
+## Which screen edge the banner is CURRENTLY flush against, read off the live
+## layout rather than off the vside that was passed in — the same reasoning as
+## _portrait_side(): this catches the placement math being wrong, not just the
+## wrong choice being asked for. Flush top and flush bottom are unambiguous
+## (0.0 and CANVAS_HEIGHT exactly, from a uniform shift with nothing to round);
+## anything else is neither and reads as its own failure downstream rather than
+## silently passing as one side or the other.
+func _vside_name() -> String:
+	var box: DialogueBox = Dialogue
+	if is_zero_approx(box.banner.offset_top):
+		return "top"
+	if is_equal_approx(box.banner.offset_bottom, DialogueBox.CANVAS_HEIGHT):
+		return "bottom"
+	return "neither  [top=%.1f bottom=%.1f]" % [box.banner.offset_top, box.banner.offset_bottom]
+
+
 ## Record each reaction bubble once, by instance — two identical "..." beats in
 ## one scene are two events, and comparing kinds alone would merge them.
 func _sample_emote() -> void:
@@ -412,6 +485,7 @@ func _run_scene(max_frames: int) -> void:
 			speakers.append(name_label.text if name_label.visible else "")
 			faces.append(_face_name())
 			sides.append(_portrait_side())
+			vsides.append(_vside_name())
 			dash_when_said.append(world.player.has_dash)
 			# The first line after he finishes arriving — how long the scene held
 			# on him with nobody talking.

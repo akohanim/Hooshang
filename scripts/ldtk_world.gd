@@ -70,12 +70,18 @@ signal room_changed(room: Node2D)
 ## Delay between death and respawn. Kept tiny for a Celeste-fast retry loop.
 @export var respawn_delay := 0.15
 
-## Debug hook: name of the room to open in, instead of the first one. Lets the
-## level picker drop straight into any room without playing up to it. A static
-## var survives change_scene_to_file (it lives on the class, not the instance),
-## which is exactly why the picker can set it and then load the world scene.
-## Callers should always set it — "" for a normal run — since a stale value
-## would otherwise carry into the next launch.
+## Name of the room to open in, instead of the first one.
+##
+## Named for the debug picker, which is what first needed it, but it is now the
+## project's ONE answer to "which room does this world open in": the picker drops
+## straight into a room without playing up to it, SaveGame.resume() names the room
+## a slot left off in, the level select names the room being replayed, and the
+## tests name the room under test. A static var survives a scene load (it lives on
+## the class, not the instance), which is exactly why a caller can set it and then
+## load the world.
+##
+## Callers should ALWAYS set it — "" for a normal run — since a stale value would
+## otherwise carry into the next launch.
 static var debug_start_room := ""
 
 var player: Player
@@ -95,6 +101,10 @@ var _return_zone: Area2D
 var _return_room: Node2D
 var _return_pos := Vector2.ZERO
 var _return_armed := false
+
+# Rooms whose way back the story has re-pointed: room name -> the room walking
+# back out of it actually leads to. See set_way_back().
+var _way_back := {}
 
 
 func _enter_tree() -> void:
@@ -131,11 +141,68 @@ func _ready() -> void:
 		push_error("LdtkWorld: the world scene has no rooms.")
 		return
 	_clamp_exit_signs()
+	_restore_state()
 	_enter_room(_start_room(), true)
 
 
-## The rooms of an ALREADY INSTANTIATED LDtk world scene, in play order: left to
-## right, then top to bottom, which is how they read on the LDtk world grid.
+## What this world contributes to a save slot (see systems/save_game.gd).
+##
+## Three things, and every one of them is invisible when it goes missing. The
+## ROOM is what a slot is nominally about. `_way_back` is the Darkshang re-route
+## and is the reason a save cannot be "which room" alone: lose it and the doorway
+## out of the boss room silently points back at the room he already cleared,
+## undoing a story beat in a save that otherwise looks perfect. `has_dash` is
+## here because Hooshang.tscn ships with the dash ON and only the waking scene
+## takes it away — so a load that says nothing about it gets whatever the prefab
+## happened to have, which is "yes" no matter where the run actually was.
+func save_state() -> Dictionary:
+	return {
+		"room": current_room.name if current_room != null else "",
+		"way_back": _way_back.duplicate(),
+		"has_dash": player != null and player.has_dash,
+	}
+
+
+## Take that state back, from whatever slot SaveGame has staged.
+##
+## PULLED here rather than pushed in from outside, because the two things being
+## restored are created by this very _ready — there is no moment after the load
+## when they exist and nothing has used them yet. Empty state (a new game, the
+## debug picker, a test) restores nothing and leaves every default alone.
+##
+## Which room to open in is deliberately NOT read from here: that comes through
+## `debug_start_room` like every other "start me there" in the project, so there
+## is one answer rather than two that can disagree.
+func _restore_state() -> void:
+	var state := SaveGame.state_for("world_state")
+	if state.is_empty():
+		return
+	var routes: Variant = state.get("way_back", {})
+	if typeof(routes) == TYPE_DICTIONARY:
+		for from in (routes as Dictionary):
+			_way_back[str(from)] = str((routes as Dictionary)[from])
+	if state.has("has_dash") and player != null:
+		player.has_dash = bool(state["has_dash"])
+
+
+## The rooms of an ALREADY INSTANTIATED LDtk world scene, in PLAY order.
+##
+## Play order is the LEVEL IDENTIFIER — `Level_0`, `Level_1`, `Level_2` — which
+## is the rule the whole project already runs on (CLAUDE.md: "Level identifiers
+## ARE the play order"), and is why inserting a room means renumbering the ones
+## after it.
+##
+## This used to sort by world POSITION, left to right then top to bottom. That
+## agreed with the identifiers exactly as long as the world was one left-to-right
+## row, and stopped the moment the escape row was added: rooms 12-21 run RIGHT to
+## left across the bottom of the grid, so position order reads them 21, 20, 19 …
+## 13, 12 — precisely backwards. Every fallback in this file is "the next room in
+## this array", so walking out of Level_13's Exit sent you to Level_12, the room
+## you had just come from.
+##
+## Position is kept as the tiebreak, so a room whose name carries no number (or
+## two rooms sharing one) still lands somewhere stable rather than in whatever
+## order the scene tree happened to hold them.
 ##
 ## Static, and taking the world as an argument, so the debug picker can list the
 ## rooms of a world without standing up a whole LdtkWorld (player, lights,
@@ -147,10 +214,34 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 		if child is Node2D and child.has_node("Entities"):
 			found.append(child)
 	found.sort_custom(func(a: Node2D, b: Node2D) -> bool:
+		var na := play_index(a)
+		var nb := play_index(b)
+		if na != nb:
+			return na < nb
 		if is_equal_approx(a.position.y, b.position.y):
 			return a.position.x < b.position.x
 		return a.position.y < b.position.y)
 	return found
+
+
+## The number in a room's identifier — the 13 in `Level_13`. Rooms without one
+## sort last, together, so they cannot silently displace the numbered sequence.
+static func play_index(room: Node) -> int:
+	return index_in_name(str(room.name))
+
+
+## The same, from a name alone. Split out because a save slot remembers the room
+## it left off in as a STRING — there is no node to ask when the menu is drawing
+## a card for a world it hasn't loaded — and two copies of "which digits count"
+## is exactly how a menu ends up numbering rooms differently from the game.
+static func index_in_name(name: String) -> int:
+	var digits := ""
+	for i in range(name.length() - 1, -1, -1):
+		var c := name[i]
+		if c < "0" or c > "9":
+			break
+		digits = c + digits
+	return int(digits) if digits != "" else 1 << 30
 
 
 ## Room to open in: the first, unless the debug picker asked for another one.
@@ -318,8 +409,14 @@ func _on_checkpoint_activated(cp: Checkpoint) -> void:
 ## maxf, not either number alone: `death_time` belongs to dying and is the same
 ## everywhere, `respawn_delay` belongs to this level and may want to be longer.
 ## Taking the larger means a level can never cut the burst off half way.
+##
+## process_always = false so the hold STOPS while the game is paused. A
+## SceneTreeTimer keeps counting through a pause by default, which would respawn
+## him behind the pause menu and hand back a different world than the one that
+## was paused (see scenes/ui/pause_menu.gd).
 func _on_player_died() -> void:
-	await get_tree().create_timer(maxf(respawn_delay, player.death_time)).timeout
+	await get_tree().create_timer(
+		maxf(respawn_delay, player.death_time), false).timeout
 	player.respawn(_checkpoint)
 
 
@@ -401,19 +498,26 @@ func _build_return_zone() -> void:
 ## on the spot. The strip covers the room's full height so falling out that
 ## side counts too.
 func _arm_return(from_room: Node2D) -> void:
-	# Nothing behind the first room — leave no door rather than a dangling one.
-	if from_room == null:
+	_return_room = from_room
+	if from_room != null:
+		var exit := _exit_in(from_room)
+		_return_pos = (exit.global_position + Vector2(-back_entry_offset, -10.0)) \
+			if exit != null else spawn_point_for(from_room)
+	_apply_way_back()
+	# Nothing behind the first room and no re-route either — leave no door rather
+	# than a dangling one.
+	if _return_room == null:
 		_clear_return()
 		return
-	_return_room = from_room
-	var exit := _exit_in(from_room)
-	_return_pos = (exit.global_position + Vector2(-back_entry_offset, -10.0)) \
-		if exit != null else spawn_point_for(from_room)
 
 	var rect := room_rect(current_room)
 	var shape: CollisionShape2D = _return_zone.get_child(0)
 	(shape.shape as RectangleShape2D).size = Vector2(16, rect.size.y)
-	var on_left := from_room.position.x < current_room.position.x
+	# Which edge the door hangs on comes from where it LEADS, not from where you
+	# came in. Those are the same room in the ordinary case; when the story has
+	# re-pointed the way back they can differ, and it is the destination that has
+	# to be on the far side of the doorway you walk into.
+	var on_left := _return_room.position.x < current_room.position.x
 	var x := (rect.position.x + 6.0) if on_left else (rect.end.x - 6.0)
 	_return_zone.global_position = Vector2(x, rect.get_center().y)
 	_return_zone.monitoring = true
@@ -425,6 +529,66 @@ func _arm_return(from_room: Node2D) -> void:
 	await get_tree().physics_frame
 	if _return_room != null and not _return_zone.overlaps_body(player):
 		_return_armed = true
+
+
+## Point the doorway you came IN through at a different room, permanently.
+##
+## The way back out of a room is normally the room behind it, which is right for
+## every room that is walked through once in one direction. The Darkshang
+## encounter breaks that: Level_11 is entered from the left and the reveal turns
+## Hooshang round, so walking back out of it is the escape CONTINUING — into
+## Level_12, which hangs below the row and is itself authored right to left — and
+## not an undo of the room he just arrived in.
+##
+## Kept as a room -> room map rather than a one-off overwrite of `_return_room`
+## because that door is rebuilt every time it is used (see _arm_return): a single
+## assignment would hold only until the first time the player walked back INTO
+## the room, and the route would then quietly revert to the layout order. A room
+## with no entry here is untouched, so this changes nothing anywhere it has not
+## been asked for.
+##
+## Called from the story script rather than from an entity — which room the
+## chase spills into is Act I's business, not the room manager's.
+func set_way_back(room: Node2D, to_room_name: String) -> void:
+	if room == null:
+		return
+	_way_back[room.name] = to_room_name
+	# Reciprocal, because a re-routed door is still a two-way door — the rule the
+	# whole room manager is built on. Without the return half, the room you land
+	# in falls back to layout order for what is behind IT, and layout order is the
+	# one thing already known to be wrong here: Level_12 is reached from Level_11
+	# but sits between Level_13 and the world's edge on the grid, so _room_before
+	# would hang its way back on Level_13 — forward, onto the same edge its own
+	# Exit already occupies.
+	_way_back[to_room_name] = room.name
+	# Re-hang the door that is already up. Without this the re-route would only
+	# take effect the next time the player entered the room, i.e. never — the
+	# encounter happens while he is standing in it. Re-arming rather than patching
+	# the destination in place also moves the strip to the right edge and covers
+	# the case where there was no door at all (a re-routed room with nothing
+	# behind it), which a bare assignment would leave unmonitored.
+	if room == current_room:
+		_arm_return(_return_room)
+
+
+## Swap the story's destination in for the current room's way back, if it has one.
+##
+## Arrival is at that room's PlayerStart — its entrance — rather than beside its
+## Exit the way an ordinary backtrack lands. A re-routed door is a way ONWARD, so
+## it puts you where the room begins.
+func _apply_way_back() -> void:
+	if current_room == null:
+		return
+	var named := str(_way_back.get(current_room.name, ""))
+	if named == "":
+		return
+	for room in rooms:
+		if room.name == named:
+			_return_room = room
+			_return_pos = spawn_point_for(room)
+			return
+	push_warning("LdtkWorld: way back from '%s' names no room '%s'."
+		% [current_room.name, named])
 
 
 func _clear_return() -> void:

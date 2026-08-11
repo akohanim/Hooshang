@@ -10,7 +10,7 @@ extends Node2D
 ## nested scene instances (like the player, which has its own children) into
 ## the saved file. Keeping the spawn at runtime sidesteps that entirely.
 
-const LEVEL_SCENE := preload("res://ldtk/levels/Level_1_Office.scn")
+const LEVEL_SCENE := preload("res://ldtk/levels/Level_0.scn")
 const PLAYER_SCENE := preload("res://scenes/characters/hooshang/Hooshang.tscn")
 
 

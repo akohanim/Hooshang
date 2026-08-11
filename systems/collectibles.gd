@@ -24,7 +24,12 @@ var _taken := {}
 ## laid out at 1280x720 and scaled down by 4 — the trick DialogueBox uses to get
 ## type that isn't a magnified pixel grid (see systems/screen.gd).
 const HUD_SCALE := 0.25
-const ICON := 52.0
+## Icon box in HUD px. A WHOLE multiple of the art it draws (20px dense frame x
+## 2), the same rule deaths.gd follows: this layer is scaled by 0.25 onto the
+## window, and a fractional upscale is what chewed the skull's eye sockets. It
+## was 52 against a 16px frame — 3.25x — which is why the fruit up here always
+## looked softer than the one in the room.
+const ICON := 40.0
 
 ## The fruit's flight from where it was picked up to the counter.
 const FLIGHT_TIME := 0.55
@@ -54,6 +59,8 @@ var _shown := 0
 
 func _ready() -> void:
 	_build_hud()
+	# Nothing to count with no world up (the title screen), so nothing to draw.
+	Screen.scene_loaded.connect(func(scene: Node) -> void: _hud.visible = scene != null)
 
 
 ## Identifies the world a fruit belongs to, so two Acts can't collide on
@@ -87,12 +94,36 @@ func collect(id: String, amount := 1, source: CanvasItem = null) -> void:
 		_land(amount)
 
 
-## Wipe the run — a fresh game, not a respawn. Nothing calls this yet; it is the
-## hook for a proper new-game flow.
+## Wipe the run — a fresh game, not a respawn. SaveGame.start_new() calls this.
 func reset() -> void:
 	total = 0
 	_taken.clear()
 	_shown = 0
+	changed.emit(total)
+	_refresh()
+
+
+## This much of a save slot (see systems/save_game.gd). The taken SET goes with
+## the total, not just the number: restoring "you have 7" without "and these are
+## the seven" puts every banked fruit back in the world to be picked up again,
+## which is the same farming hole `_taken` exists to close within a session.
+func save_state() -> Dictionary:
+	return {"total": total, "taken": _taken.keys()}
+
+
+## Put a slot's fruit back. Must run BEFORE the world loads: each pomegranate
+## asks is_taken() in its own _ready and shows itself if the answer is no.
+func load_state(state: Dictionary) -> void:
+	total = int(state.get("total", 0))
+	_taken.clear()
+	var taken: Variant = state.get("taken", [])
+	if typeof(taken) == TYPE_ARRAY:
+		for id in taken as Array:
+			_taken[str(id)] = true
+	# Straight to the number rather than through a flight: nothing was picked up,
+	# a save was opened, and a fruit sailing in from the corner would be a lie
+	# about where it came from.
+	_shown = total
 	changed.emit(total)
 	_refresh()
 
@@ -117,7 +148,10 @@ func _build_hud() -> void:
 	_hud.add_child(_root)
 
 	_icon = TextureRect.new()
-	_icon.texture = load("res://assets/props/pomegranate/frame_000.png")
+	# The DENSE frame, not the world one. This layer draws at the window's own
+	# resolution (see the 0.25 scale above), so it can show the finer art — the
+	# same reason the dialogue box gets real type on a 180-line screen.
+	_icon.texture = load("res://assets/props/pomegranate/dense/frame_000.png")
 	_icon.size = Vector2(ICON, ICON)
 	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -135,6 +169,9 @@ func _build_hud() -> void:
 	_label.add_theme_constant_override("shadow_offset_y", 2)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_label)
+	# Hidden until a world is up: the game boots to the title screen, and a
+	# counter floating over the menu belongs to no run at all.
+	_hud.visible = Screen.current != null
 	_refresh()
 
 

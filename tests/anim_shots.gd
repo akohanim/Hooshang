@@ -55,7 +55,7 @@ func _shoot_tiles(player: Node2D) -> void:
 func _shoot_gift(player: Node2D) -> void:
 	var room: Node2D = null
 	for r in world.rooms:
-		if r.name == "Level_1_Office":
+		if r.name == "Level_0":
 			room = r
 	var trigger := _find_trigger(room)
 	if trigger == null:

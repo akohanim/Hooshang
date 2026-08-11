@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/characters/darkshang/darkshang_visual.gd" id="1_visual"]
+[ext_resource type="Texture2D" path="res://assets/light_radial.png" id="2_light"]
+
+[node name="DarkshangVisual" type="Node2D"]
+z_index = 60
+z_as_relative = false
+
+script = ExtResource("1_visual")
+
+[node name="Body" type="Node2D" parent="."]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Body"]
+offset = Vector2(0, -22)
+
+[node name="Void" type="PointLight2D" parent="."]
+position = Vector2(0, -22)
+enabled = false
+blend_mode = 1
+color = Color(0.76, 0.76, 0.76, 1)
+energy = 0.0
+texture = ExtResource("2_light")
+texture_scale = 0.6

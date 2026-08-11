@@ -11,7 +11,8 @@ the target grid.
 ## Running things
 
 - Godot binary (this machine): `/Users/ari/Downloads/Godot.app/Contents/MacOS/Godot`
-- Main scene: `scenes/levels/act1_office/Level1Office.tscn` (Level 1: The Office)
+- Main scene: `scenes/ui/MainMenu.tscn` (the title screen — NOT the debug
+  picker any more, and not a level; it hands worlds to `Screen.load_scene`)
 - Movement test gym: `scenes/levels/TestLevel.tscn` (8 labeled sections, one per mechanic)
 - Headless tests (run after any player/level change, exit code 0 = pass):
   - `Godot --headless --path . res://tests/smoke_test.tscn` — movement physics
@@ -38,6 +39,36 @@ the target grid.
   - `Godot --headless --path . res://tests/conveyor_test.tscn` — ConveyorBelt:
     carries a rider at `speed` in `direction`, never touches his velocity, and
     lets go the moment he is airborne
+  - `Godot --headless --path . res://tests/chase_route_test.tscn` — meeting
+    Darkshang re-points Level_11's ENTRANCE at Level_12 (not back at Level_10),
+    it holds however many times that doorway is used, and no other room moves
+  - `Godot --headless --path . res://tests/route_order_test.tscn` — play order is
+    the level IDENTIFIER, not world position: the escape row (12-21) runs right
+    to left across the grid, so position order reads it backwards
+  - `Godot --headless --path . res://tests/collapse_test.tscn` — RoomCollapse:
+    every prop hanging in the air lands ON the floor, props already down and
+    markers/triggers are left alone, and the landing squash springs back
+  - `Godot --headless --path . res://tests/save_test.tscn` — the three save
+    slots: a full round trip (save, wipe in memory, load, every owner's state
+    back), the slots staying independent, a truncated/corrupt/unknown-schema
+    file reading as an EMPTY slot rather than crashing the title screen, the
+    Darkshang re-route surviving a save and load (walked, not just compared),
+    a level-select run writing nothing, and the pause menu's QUIT banking the
+    run and handing it to the title screen
+  - `Godot --headless --path . res://tests/dialogue_placement_test.tscn` — the
+    dialogue box's TOP/BOTTOM placement: flush against whichever screen edge is
+    asked for, grows AWAY from that edge as the line gets longer, and switching
+    edges between lines leaves nothing behind from the one before
+  - `Godot --headless --path . res://tests/intro_video_test.tscn` — the opening
+    film: the stream is Ogg Theora (the ONLY container Godot plays — an MP4
+    loads as a silent null), it plays on a NEW run, and CONTINUE skips it
+  - `Godot --headless --path . res://tests/menu_nav_test.tscn` — menu navigation
+    on a CONTROLLER: a stick resting past the walking deadzone moves nothing,
+    one push moves exactly one row, a held direction repeats only after a delay
+  - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
+    the world stops and comes back in exactly the state it stopped in,
+    `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
+    while `input_locked` or when the loaded scene has no player
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -45,6 +76,19 @@ the target grid.
   hook that builds its entities changes — so a newly handled (or renamed)
   entity stays raw data in `ldtk/levels/*.scn` and simply never appears, with
   no error anywhere. `touch ldtk/hooshang_claude.ldtk` then `--import`.
+- **Level identifiers ARE the play order**, and `LdtkWorld.rooms` is sorted by
+  them. `Level_0` is the opening room. The world is no longer one left-to-right
+  row: rooms 12-21 are the escape and run RIGHT to left along the bottom of the
+  grid, retracing rooms 9-1 (room N pairs with room 22-N). Sorting by world
+  position — which this used to do — reads that row backwards, and every "next
+  room" fallback then hands you the room you just left. Renumber when you insert
+  a room, and re-letter that room's lights with it (`LIGHTING.md`).
+- **A renamed level needs the import CACHE cleared, not just a re-import.**
+  Deleting `ldtk/levels/*.scn` is not enough — the world scene itself is cached
+  in `.godot/imported/hooshang_claude.ldtk-*`, and a stale one loaded two rooms
+  on top of each other at the same world x while every name looked right.
+  `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
+  `--import`.
 - **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after
@@ -119,6 +163,24 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `Player.die()` calls `Deaths.record()` — the player reports its own death
   rather than the counter hunting for a player, which would race every level's
   different build order.
+- `systems/save_game.gd` — `SaveGame` autoload: three slots in
+  `user://saves/slot_N.json`, versioned by a `schema` field and written
+  tmp-then-rename so an alt-F4 mid-write costs the newest save and not the slot.
+  Missing/truncated/corrupt/unknown-schema all read back as `{}` — an empty
+  slot — so no file on disk can crash the menu. **Progress here is not "which
+  room"**: it is spread across owners that each restore WRONG by default, so
+  every one of them exposes `save_state()`/`load_state()` and this only composes
+  them (Collectibles' total AND taken set, Deaths, `Game.current_index`,
+  LdtkWorld's `_way_back` + `has_dash` + room, Act1Beats' `_opening_played` +
+  `_collapsed` + whether Darkshang has been met). The two autoload counters are
+  PUSHED before the world loads (a pomegranate checks `is_taken` in its own
+  `_ready`); the world's own state is PULLED by LdtkWorld and Act1Beats in their
+  `_ready` via `SaveGame.state_for(key)`, because those nodes are created by the
+  load itself. Autosaves on every room transition (deferred a frame, so
+  everything else listening to `room_changed` has reacted first) and once more
+  when you quit to the title. `SaveGame.slot == -1` means "write nothing" — the
+  debug picker, level-select practice runs and every test run unbound, so
+  nothing they do can touch a player's save.
 - `systems/game.gd` — `Game` autoload: level progression + Celeste-style fade
   transitions. `Game.LEVELS` is the ordered scene list; reaching a level's exit
   sign fades out, loads the next, fades in. The loaded level is the running
@@ -128,6 +190,28 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint, face,
   side)`), `EmoteBubble.tscn` (world-space reaction bubble) and
   `DebugOverlay.tscn` (F3). See the dialogue rules below before writing a scene.
+  `MainMenu.tscn` is the game's entry point (`run/main_scene`) — same
+  1280x720-scaled-by-0.25 CanvasLayer arrangement as the pause menu, on layer
+  110. Continue / New Game / Load Game / Level Select / Quit, navigated with the
+  pause menu's keys exactly (no mouse). It HIDES rather than frees itself on
+  handing over, so the pause menu's QUIT — which now returns here instead of
+  ending the process — is a boolean and not a scene load; `MainMenu.open(tree)`
+  is the way back and clears the world first, which is also what makes the title
+  screen unpausable (`can_pause()` needs a world). The player-facing level
+  select offers only rooms a slot has actually stood in and binds no slot;
+  the debug picker still lists everything and stays reachable from a DEBUG
+  PICKER row in debug builds.
+  `PauseMenu.tscn` is the `Pause` autoload — Escape / Start / Select opens it,
+  the same button closes it, and it is the ONLY node set to
+  `PROCESS_MODE_ALWAYS`, so `get_tree().paused` freezes everything else exactly
+  where it stood. It refuses to open unless a world is loaded and its player has
+  his controls, which makes `input_locked` the single gate covering dialogue
+  beats, story doors, room slides and Game's level fade. Opening it also puts
+  `Engine.time_scale` back to 1.0, so a pause taken inside Juice's hitstop can
+  never resume in slow motion. A respawn hold is therefore a PAUSABLE
+  `SceneTreeTimer` (`create_timer(t, false)`) in both `level_base.gd` and
+  `ldtk_world.gd` — the default keeps counting through a pause and would respawn
+  him behind the menu.
 - `scenes/props/` — `Checkpoint.tscn`, `hazards/Hazard.tscn` (both @tool,
   size-exported), `lighting/LampFixture.tscn` (reusable lamp; joins `lights`).
   `hazards/GlassSpikes.tscn` EXTENDS `Hazard`, so layer, mask and the kill are

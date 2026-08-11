@@ -15,6 +15,10 @@ const HAZARD_SCENE := preload("res://scenes/props/hazards/Hazard.tscn")
 const GLASS_SPIKES_SCENE := preload("res://scenes/props/hazards/GlassSpikes.tscn")
 const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
 const CONVEYOR_BELT_SCENE := preload("res://scenes/props/zones/ConveyorBelt.tscn")
+const DARKSHANG_SCENE := preload("res://scenes/props/chase/Darkshang.tscn")
+const SURGE_POINT_SCENE := preload("res://scenes/props/chase/SurgePointTrigger.tscn")
+const SAFE_ZONE_SCENE := preload("res://scenes/props/chase/SafeZoneTrigger.tscn")
+const DARKSHANG_TRIGGER_SCENE := preload("res://scenes/props/chase/DarkshangTrigger.tscn")
 const RUMI_TRIGGER_SCRIPT := preload("res://scripts/ldtk_rumi_trigger.gd")
 const LDTK_DOOR_SCRIPT := preload("res://scripts/ldtk_door.gd")
 const EXIT_SIGN_SCENE := preload("res://scenes/props/ExitSign.tscn")
@@ -89,6 +93,16 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			"ConveyorBelt_Left":
 				entity_layer.add_child(
 					_build_conveyor_belt(data, ConveyorBelt.Direction.LEFT))
+			# The boss chase (Level_11). Three entities: where the shadow starts,
+			# where he lunges, and where it ends.
+			"DarkshangSpawn":
+				entity_layer.add_child(_build_darkshang(data))
+			"SurgePoint":
+				entity_layer.add_child(_build_surge_point(data))
+			"SafeZone":
+				entity_layer.add_child(_build_safe_zone(data))
+			"DarkshangTrigger":
+				entity_layer.add_child(_build_darkshang_trigger(data))
 			"RumiTrigger":
 				entity_layer.add_child(_build_rumi_trigger(data))
 			"Exit":
@@ -172,6 +186,66 @@ func _build_conveyor_belt(data: Dictionary, direction: ConveyorBelt.Direction) -
 	belt.speed = absf(_field_float(data, "speed", belt.speed))
 	return belt
 
+
+
+## Where the shadow is standing when the chase starts. A point entity with no
+## fields: everything about how he behaves is tuning on the prefab, and tuning
+## that differs per instance is tuning for a mechanic that has more than one
+## instance — there is one Darkshang.
+func _build_darkshang(data: Dictionary) -> Area2D:
+	var shadow: Area2D = DARKSHANG_SCENE.instantiate()
+	shadow.position = data.position
+	return shadow
+
+
+## The threshold that starts the chase: he appears, a beat plays, he begins to
+## move. Separate entity from DarkshangSpawn because where he comes FROM and when
+## he comes are different questions — see darkshang_trigger.gd.
+func _build_darkshang_trigger(data: Dictionary) -> Area2D:
+	var trigger: Area2D = DARKSHANG_TRIGGER_SCENE.instantiate()
+	trigger.position = data.position
+	trigger.size = Vector2(data.size)
+	# Empty (or absent) keeps the prefab's own beat rather than silencing it —
+	# _field_str has no fallback of its own, and a trigger placed before the
+	# field existed should still play the reveal.
+	var beat := _field_str(data, "dialogue_id")
+	if beat != "":
+		trigger.dialogue_id = beat
+	return trigger
+
+
+## The line in a chase where the shadow lunges. Stretch the entity across the
+## corridor it should cover — a surge point the player can jump over is one he
+## will jump over, so it usually wants to be full height.
+##
+## Both fields are tuning and therefore per-instance: two surge points in one
+## room can legitimately want different lengths and different bites, which is the
+## case an entity-per-variant cannot serve. Each falls back to the prefab's own
+## default, so a point placed before the fields were added to the LDtk definition
+## still surges rather than surging for zero seconds at zero intensity — which
+## would look configured and do nothing.
+func _build_surge_point(data: Dictionary) -> Area2D:
+	var point: Area2D = SURGE_POINT_SCENE.instantiate()
+	point.position = data.position
+	var drawn := Vector2(data.size)
+	point.size = drawn if drawn != Vector2.ZERO else point.size
+	point.surge_duration = maxf(
+		_field_float(data, "surge_duration", point.surge_duration), 0.0)
+	point.surge_intensity = clampf(
+		_field_float(data, "surge_intensity", point.surge_intensity), 0.0, 1.0)
+	return point
+
+
+## Where the chase ends. `end_dialogue_id` names the beat that plays; an empty
+## one is legitimate (the signal still fires), so unlike the numbers above there
+## is nothing to fall back to.
+func _build_safe_zone(data: Dictionary) -> Area2D:
+	var zone: Area2D = SAFE_ZONE_SCENE.instantiate()
+	zone.position = data.position
+	var drawn := Vector2(data.size)
+	zone.size = drawn if drawn != Vector2.ZERO else zone.size
+	zone.end_dialogue_id = _field_str(data, "end_dialogue_id")
+	return zone
 
 
 ## The room's finish line: an ExitSign to look at plus an invisible Area2D

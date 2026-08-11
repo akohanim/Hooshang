@@ -58,7 +58,7 @@ const SHARD_SHAPES := 3
 ## on purpose — the burst should be over and the screen still for a beat before
 ## he comes back, which is what makes the respawn feel like a new attempt
 ## rather than a bounce.
-@export var death_shard_time := 0.5
+@export var death_shard_time := 0.32
 ## How big a shard starts and ends, as a multiple of the 8px art. They shrink as
 ## they fly, which is what sells them as debris losing energy.
 @export var death_shard_scale := 0.75
@@ -262,6 +262,45 @@ func hitstop(duration: float) -> void:
 	# ignore_time_scale=true so this timer counts real seconds, not slowed ones.
 	get_tree().create_timer(duration, true, false, true).timeout.connect(
 		func() -> void: Engine.time_scale = 1.0)
+
+
+## Bounce the camera for something that isn't a landing — an impact nearby, a
+## single hard jolt. Same dip-and-spring as a hard landing so a one-off knock
+## always reads the same way; only the reason differs.
+func shake(strength: float, duration: float) -> void:
+	_camera_shake(strength, duration)
+
+
+## A sustained tremor: the building coming down, not a thing landing on it.
+##
+## Deliberately NOT _camera_shake repeated. That is one smooth dip and a spring
+## back — weighty, and completely wrong here, because a collapse is not an impact
+## with a direction. This is a rattle: short random steps in both axes, which is
+## the difference between "something hit the floor" and "the floor is failing".
+##
+## It DECAYS across the duration, so the shaking stops because the building
+## settles rather than because a tween ran out — a rumble cut off at full
+## strength reads as a bug in the effect.
+func rumble(strength: float, duration: float) -> void:
+	if strength <= 0.0 or duration <= 0.0:
+		return
+	if _shake_tween and _shake_tween.is_valid():
+		_shake_tween.kill()
+	_camera.offset = Vector2.ZERO
+	_shake_tween = create_tween()
+	# Short enough to read as a rattle rather than a sway. Much below this and
+	# the camera is moving less than one screen pixel per step at 320x180, so the
+	# tremor quietly stops being visible at all.
+	const STEP := 0.045
+	var steps := maxi(int(duration / STEP), 2)
+	var rng := RandomNumberGenerator.new()
+	for i in steps:
+		var fade := 1.0 - float(i) / float(steps)
+		var to := Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) \
+			* strength * fade
+		_shake_tween.tween_property(_camera, "offset", to, STEP) \
+			.set_trans(Tween.TRANS_SINE)
+	_shake_tween.tween_property(_camera, "offset", Vector2.ZERO, STEP * 2.0)
 
 
 ## Celeste-style landing bounce: not random jitter — a single smooth dip

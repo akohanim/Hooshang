@@ -31,6 +31,8 @@ var _punch: Tween
 
 func _ready() -> void:
 	_build_hud()
+	# Nothing to count with no world up (the title screen), so nothing to draw.
+	Screen.scene_loaded.connect(func(scene: Node) -> void: _hud.visible = scene != null)
 
 
 ## One death. Called by Player.die(), which already guards against re-entry, so
@@ -42,10 +44,23 @@ func record() -> void:
 	_punch_counter()
 
 
-## Wipe the run — a fresh game, not a respawn. Nothing calls this yet; it is the
-## hook for a proper new-game flow, alongside Collectibles.reset().
+## Wipe the run — a fresh game, not a respawn. SaveGame.start_new() calls this
+## alongside Collectibles.reset().
 func reset() -> void:
 	total = 0
+	changed.emit(total)
+	_refresh()
+
+
+## This much of a save slot (see systems/save_game.gd). A death count is the one
+## number in this game a player might actually be proud of, so it is carried
+## rather than recomputed — and there is nothing to recompute it from.
+func save_state() -> Dictionary:
+	return {"total": total}
+
+
+func load_state(state: Dictionary) -> void:
+	total = int(state.get("total", 0))
 	changed.emit(total)
 	_refresh()
 
@@ -95,6 +110,9 @@ func _build_hud() -> void:
 	_label.add_theme_constant_override("shadow_offset_y", 2)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_label)
+	# Hidden until a world is up: the game boots to the title screen, and a
+	# counter floating over the menu belongs to no run at all.
+	_hud.visible = Screen.current != null
 	_refresh()
 
 

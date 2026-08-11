@@ -9,6 +9,16 @@ extends Area2D
 ##
 ## Physics: layer 4 "triggers", masking the player ONLY — the same rule every
 ## other trigger follows, so a future enemy can never vacuum up the fruit.
+##
+## WHERE IT IS DRAWN. The fruit is a TOKEN, and tokens are drawn on Screen's
+## high-density surface rather than in the world (see systems/screen.gd). The
+## trigger, the light and the bob all stay here in the world; only the picture
+## moves. A world sprite can never be finer than the 320x180 the world is
+## rasterised at, and this fruit is meant to be looked at.
+##
+## The token surface uses the same world coordinates, so the copy over there
+## just mirrors this node's sprite each frame — one line, and nothing about the
+## pickup or the flight to the counter changes.
 
 ## Bob height in px, and how long one up-down cycle takes.
 @export var bob_height := 2.0
@@ -20,7 +30,13 @@ extends Area2D
 ## Small warm light so the fruit is findable in the dark rooms. 0 disables it.
 @export var light_energy := 0.55
 
+## Frames drawn at Screen.TOKEN_DENSITY x, for the token surface.
+const DENSE_FRAMES := preload("res://assets/props/pomegranate/dense/pomegranate_frames.tres")
+
 var _taken := false
+## The copy on the token surface, if there is one. Null means no Screen (a test
+## that built the world by hand), and then the world sprite is shown instead.
+var _token: AnimatedSprite2D
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
 
@@ -38,6 +54,7 @@ func _ready() -> void:
 		return
 
 	_sprite.play("spin")
+	_make_token()
 	var bob := create_tween().set_loops()
 	bob.tween_property(_sprite, "position:y", -bob_height, bob_time * 0.5) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
@@ -47,6 +64,39 @@ func _ready() -> void:
 		$Glow.queue_free()
 	elif has_node("Glow"):
 		$Glow.energy = light_energy
+
+
+## Hand the picture to the token surface, and hide the world one.
+##
+## Scaled by 1/density under a density-times zoom, which nets out to the same
+## world footprint the 20px sprite had — Godot's zoom scales the DRAWING, not
+## just the framing, so without the scale the fruit comes out twice the size of
+## everything around it.
+func _make_token() -> void:
+	var copy := AnimatedSprite2D.new()
+	copy.sprite_frames = DENSE_FRAMES
+	copy.animation = "spin"
+	copy.scale = Vector2.ONE / float(Screen.TOKEN_DENSITY)
+	copy.global_position = _sprite.global_position
+	if not Screen.add_token(copy):
+		copy.free()          # no token surface: the world sprite stays visible
+		return
+	copy.play("spin")
+	_token = copy
+	_sprite.visible = false
+
+
+## Keep the copy where the real fruit is — including the bob, which is tweened
+## on the world sprite and read from it here rather than being run twice.
+func _process(_delta: float) -> void:
+	if _token != null and is_instance_valid(_token):
+		_token.global_position = _sprite.global_position
+		_token.modulate = _sprite.modulate * modulate
+
+
+func _exit_tree() -> void:
+	if _token != null and is_instance_valid(_token):
+		_token.queue_free()
 
 
 ## Stable identity for "this particular fruit", so reloading the world cannot

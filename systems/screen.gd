@@ -33,8 +33,31 @@ signal scene_loaded(scene: Node)
 ## project.godot, which is what the whole window's design space is sized to.
 const GAME_SIZE := Vector2i(320, 180)
 
+## How many times denser the token surface is than the world. A whole number, so
+## its texels land on whole output pixels and the composite never resamples —
+## which would undo the entire exercise.
+const TOKEN_DENSITY := 2
+
 var container: SubViewportContainer
 var viewport: SubViewport
+
+## The token surface: a THIRD surface, between the world and the UI.
+##
+## Collectibles are drawn here instead of in the world. The world is rasterised
+## at 320x180 and nothing in it can be finer than that — not a different node
+## type, not a different z band, not a Parallax2D; density is a property of the
+## render target. This viewport is 640x360 framing the SAME world rectangle, so
+## a token drawn in it occupies the same screen space out of four times as many
+## texels.
+##
+## Tokens and not scenery, deliberately. The two objections to a high-density
+## layer are camera sync and lighting: anything here is outside the world's
+## CanvasModulate and Light2Ds, so it ignores the room's darkness. For a wall
+## that would be fatal. For a collectible it is close to what you want — it
+## stays legible in a black cave, the way a Celeste strawberry does.
+var token_container: SubViewportContainer
+var token_viewport: SubViewport
+var token_camera: Camera2D
 
 ## The world scene currently loaded, or null. Mirrors get_tree().current_scene
 ## for anything running inside the sub-viewport.
@@ -58,6 +81,67 @@ func _ready() -> void:
 	# actually contains the AudioStreamPlayer2Ds, or they play silently.
 	viewport.audio_listener_enable_2d = true
 	container.add_child(viewport)
+
+	# In front of the world (a later sibling on the same layer), behind every UI
+	# CanvasLayer — the dialogue box is 95, the counters 92.
+	token_container = SubViewportContainer.new()
+	token_container.name = "TokenView"
+	# stretch OFF: it would drag this viewport back down to the container's size
+	# and there would be no density left. Instead the container is its full
+	# 640x360 and scaled by 1/density, so it covers the same design rect.
+	token_container.stretch = false
+	token_container.size = Vector2(GAME_SIZE * TOKEN_DENSITY)
+	token_container.scale = Vector2.ONE / float(TOKEN_DENSITY)
+	token_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(token_container)
+
+	token_viewport = SubViewport.new()
+	token_viewport.name = "TokenViewport"
+	token_viewport.size = GAME_SIZE * TOKEN_DENSITY
+	token_viewport.transparent_bg = true     # the world shows through
+	token_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	token_viewport.canvas_item_default_texture_filter = \
+		Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
+	token_container.add_child(token_viewport)
+
+	token_camera = Camera2D.new()
+	token_camera.name = "TokenCamera"
+	# Zoom = density, so this viewport frames exactly the world rectangle the
+	# game viewport does: 640px at 2x covers the same 320 world units.
+	token_camera.zoom = Vector2(TOKEN_DENSITY, TOKEN_DENSITY)
+	token_viewport.add_child(token_camera)
+	# After everything else, so the sync below reads a camera that has already
+	# finished smoothing and clamping this frame rather than last frame's.
+	process_priority = 100
+
+
+## Keep the token surface framed on exactly what the world surface is showing.
+##
+## Mirrors the game camera's SCREEN CENTRE, not its position: the player's
+## Camera2D smooths and is clamped to the room's limits, so its `position` is
+## where it is heading and `get_screen_center_position()` is where it actually
+## ended up. Using the first makes every token swim against the wall behind it
+## while the camera settles.
+func _process(_delta: float) -> void:
+	if token_camera == null or viewport == null:
+		return
+	var cam := viewport.get_camera_2d()
+	if cam != null:
+		token_camera.global_position = cam.get_screen_center_position()
+
+
+## Put a visual on the token surface. World coordinates carry across unchanged —
+## both viewports frame the same rectangle — so a node added here appears exactly
+## where its global_position says, at density x the resolution.
+##
+## Returns false if there is no token surface (a test that built the world by
+## hand rather than through Screen), so callers can fall back to drawing
+## themselves in the world.
+func add_token(node: Node2D) -> bool:
+	if token_viewport == null:
+		return false
+	token_viewport.add_child(node)
+	return true
 
 
 ## Hand the world any input the UI didn't want.
@@ -85,9 +169,21 @@ func set_scene(scene: Node) -> Node:
 		viewport.remove_child(child)
 		child.queue_free()
 	current = scene
-	viewport.add_child(scene)
+	if scene != null:
+		viewport.add_child(scene)
 	scene_loaded.emit(scene)
 	return scene
+
+
+## Take the world down without putting another one up — leaving a level for the
+## title screen, which is the only thing that ever wants an empty game viewport.
+##
+## `current` going null is the signal the rest of the game already reads: the
+## pause menu refuses to open with no world (see PauseMenu.can_pause), and the
+## two HUD counters take themselves off screen, so the menu is not drawn over a
+## death count from a run that is no longer loaded.
+func clear() -> void:
+	set_scene(null)
 
 
 ## Path of the loaded world, for code that used to read

@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/dialogue_placement_test.gd" id="1"]
+[node name="DialoguePlacementTest" type="Node"]
+script = ExtResource("1")

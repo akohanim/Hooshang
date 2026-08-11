@@ -1,65 +1,49 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://rm3kk2lr82dl"]
 
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_000.png" id="30_idle0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_001.png" id="31_idle1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_002.png" id="32_idle2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_003.png" id="33_idle3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_000.png" id="40_run0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_001.png" id="41_run1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_002.png" id="42_run2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_003.png" id="43_run3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_004.png" id="44_run4"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Running/east/frame_005.png" id="45_run5"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_000.png" id="50_jump0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_001.png" id="51_jump1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_002.png" id="52_jump2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_003.png" id="53_jump3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_004.png" id="54_jump4"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_005.png" id="55_jump5"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_006.png" id="56_jump6"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_007.png" id="57_jump7"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_008.png" id="58_jump8"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_000.png" id="60_fall0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_001.png" id="61_fall1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_002.png" id="62_fall2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_003.png" id="63_fall3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_004.png" id="64_fall4"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_005.png" id="65_fall5"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_006.png" id="66_fall6"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_000.png" id="70_slide0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_001.png" id="71_slide1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_002.png" id="72_slide2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_003.png" id="73_slide3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_004.png" id="74_slide4"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Slide/east/frame_005.png" id="75_slide5"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_000.png" id="80_wj0"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_001.png" id="80_wj1"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_002.png" id="80_wj2"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_003.png" id="80_wj3"]
-[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_004.png" id="80_wj4"]
+[ext_resource type="Texture2D" uid="uid://te56dmsbt2ol" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_000.png" id="30_idle0"]
+[ext_resource type="Texture2D" uid="uid://ckeik7yv3byt5" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_001.png" id="31_idle1"]
+[ext_resource type="Texture2D" uid="uid://ceo0cvfrykrsx" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_002.png" id="32_idle2"]
+[ext_resource type="Texture2D" uid="uid://dq2chcd3wcovt" path="res://assets/hooshang_sprites/animations/Breathing_Idle/east/frame_003.png" id="33_idle3"]
+[ext_resource type="Texture2D" uid="uid://ba0gr36kpbehb" path="res://assets/hooshang_sprites/animations/Running/east/frame_000.png" id="40_run0"]
+[ext_resource type="Texture2D" uid="uid://vkdk0d1wxeo0" path="res://assets/hooshang_sprites/animations/Running/east/frame_001.png" id="41_run1"]
+[ext_resource type="Texture2D" uid="uid://dawi8rfc7ob57" path="res://assets/hooshang_sprites/animations/Running/east/frame_002.png" id="42_run2"]
+[ext_resource type="Texture2D" uid="uid://ce4tn2lfk6yv6" path="res://assets/hooshang_sprites/animations/Running/east/frame_003.png" id="43_run3"]
+[ext_resource type="Texture2D" uid="uid://cfhbjqe5664ex" path="res://assets/hooshang_sprites/animations/Running/east/frame_004.png" id="44_run4"]
+[ext_resource type="Texture2D" uid="uid://bphks3jhtvw72" path="res://assets/hooshang_sprites/animations/Running/east/frame_005.png" id="45_run5"]
+[ext_resource type="Texture2D" uid="uid://c2qdlfybe22va" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_000.png" id="50_jump0"]
+[ext_resource type="Texture2D" uid="uid://d2i6sa26fd6cr" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_001.png" id="51_jump1"]
+[ext_resource type="Texture2D" uid="uid://dfqhufesqmwcj" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_002.png" id="52_jump2"]
+[ext_resource type="Texture2D" uid="uid://b1blvo5g3nhqp" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_003.png" id="53_jump3"]
+[ext_resource type="Texture2D" uid="uid://cbej50cccol74" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_004.png" id="54_jump4"]
+[ext_resource type="Texture2D" uid="uid://byv3tpm013eab" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_005.png" id="55_jump5"]
+[ext_resource type="Texture2D" uid="uid://dyynr2j3m7rfg" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_006.png" id="56_jump6"]
+[ext_resource type="Texture2D" uid="uid://doh3am43bqxf1" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_007.png" id="57_jump7"]
+[ext_resource type="Texture2D" uid="uid://j80t7l207imy" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_008.png" id="58_jump8"]
+[ext_resource type="Texture2D" uid="uid://da3qq07rfq17k" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_000.png" id="60_fall0"]
+[ext_resource type="Texture2D" uid="uid://dk1hy3infup3t" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_001.png" id="61_fall1"]
+[ext_resource type="Texture2D" uid="uid://cpmvvyjplpsas" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_002.png" id="62_fall2"]
+[ext_resource type="Texture2D" uid="uid://c8tdyeiwdyyw1" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_003.png" id="63_fall3"]
+[ext_resource type="Texture2D" uid="uid://dhfpob2t4570u" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_004.png" id="64_fall4"]
+[ext_resource type="Texture2D" uid="uid://ql785vglxv3g" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_005.png" id="65_fall5"]
+[ext_resource type="Texture2D" uid="uid://ce58yroppkt5u" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_006.png" id="66_fall6"]
+[ext_resource type="Texture2D" uid="uid://dile0qtoae4sl" path="res://assets/hooshang_sprites/animations/Slide/east/frame_000.png" id="70_slide0"]
+[ext_resource type="Texture2D" uid="uid://dxbmcmdryu01m" path="res://assets/hooshang_sprites/animations/Slide/east/frame_001.png" id="71_slide1"]
+[ext_resource type="Texture2D" uid="uid://0sd3nq7c07ae" path="res://assets/hooshang_sprites/animations/Slide/east/frame_002.png" id="72_slide2"]
+[ext_resource type="Texture2D" uid="uid://dgicbh1ll3cq1" path="res://assets/hooshang_sprites/animations/Slide/east/frame_003.png" id="73_slide3"]
+[ext_resource type="Texture2D" uid="uid://c0v16ialj7bje" path="res://assets/hooshang_sprites/animations/Slide/east/frame_004.png" id="74_slide4"]
+[ext_resource type="Texture2D" uid="uid://cb2g24anpb88a" path="res://assets/hooshang_sprites/animations/Slide/east/frame_005.png" id="75_slide5"]
+[ext_resource type="Texture2D" uid="uid://b7cvoa308og3v" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_000.png" id="80_wj0"]
+[ext_resource type="Texture2D" uid="uid://fxtdgt0oyky3" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_001.png" id="80_wj1"]
+[ext_resource type="Texture2D" uid="uid://clv1je24wo71q" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_002.png" id="80_wj2"]
+[ext_resource type="Texture2D" uid="uid://b8yrq4w8w7o7h" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_003.png" id="80_wj3"]
+[ext_resource type="Texture2D" uid="uid://bn14ygtjfeqxs" path="res://assets/hooshang_sprites/animations/Wall_Jump/east/frame_004.png" id="80_wj4"]
+[ext_resource type="Texture2D" uid="uid://chnq4o6jt8w6d" path="res://assets/hooshang_sprites/animations/Wall_Slide/east/frame_000.png" id="90_ws0"]
+[ext_resource type="Texture2D" uid="uid://baotkx6av6i66" path="res://assets/hooshang_sprites/animations/Wall_Slide/east/frame_001.png" id="91_ws1"]
+[ext_resource type="Texture2D" uid="uid://civx8y3v2pxox" path="res://assets/hooshang_sprites/animations/Wall_Slide/east/frame_002.png" id="92_ws2"]
+[ext_resource type="Texture2D" uid="uid://dvxeybf865ocm" path="res://assets/hooshang_sprites/animations/Wall_Land/east/frame_000.png" id="95_wl0"]
 
 [resource]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("80_wj0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj4")
-}],
-"loop": false,
-"name": &"wall_jump",
-"speed": 14.0
-}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("70_slide0")
@@ -183,24 +167,46 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("70_slide0")
+"texture": ExtResource("80_wj0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("71_slide1")
+"texture": ExtResource("80_wj1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("72_slide2")
+"texture": ExtResource("80_wj2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("73_slide3")
+"texture": ExtResource("80_wj3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("74_slide4")
+"texture": ExtResource("80_wj4")
+}],
+"loop": false,
+"name": &"wall_jump",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("95_wl0")
+}],
+"loop": false,
+"name": &"wall_land",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("90_ws0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("75_slide5")
+"texture": ExtResource("91_ws1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_ws2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_ws1")
 }],
 "loop": true,
 "name": &"wall_slide",
-"speed": 10.0
+"speed": 8.0
 }]

@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/intro_video.gd" id="1_intro"]
+[ext_resource type="VideoStream" path="res://assets/video/intro.ogv" id="2_ogv"]
+
+[node name="IntroVideo" type="CanvasLayer"]
+layer = 130
+script = ExtResource("1_intro")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="Video" type="VideoStreamPlayer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+expand = true
+stream = ExtResource("2_ogv")
+mouse_filter = 2

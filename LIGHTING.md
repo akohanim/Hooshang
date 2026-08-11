@@ -109,14 +109,61 @@ Lights are positioned in **world coordinates**, not per room, so you need these:
 
 | Room | LDtk name | World X | Notes |
 | --- | --- | --- | --- |
-| 1 | `Level_1_Office` | 0 – 320 | Dim on purpose — the cubicle is a prison |
-| 2 | `Level_1` | 320 – 640 | |
-| 3 | `Level_2` | 608 – 928 | |
-| 4 | `Level_3` | 928 – 1248 | |
-| 5 | `Level_4` | 1248 – 1568 | **Cave** — lit at the musical tiles, dark after |
-| 6 | `Level_5` | 1568 – 1888 | |
+| 0 | `Level_0` | 0 – 320 | Dim on purpose — the cubicle is a prison |
+| 1 | `Level_1` | 320 – 640 |  |
+| 2 | `Level_2` | 608 – 928 |  |
+| 3 | `Level_3` | 928 – 1248 |  |
+| 4 | `Level_4` | 1248 – 1568 | **Cave** — lit at the musical tiles, dark after |
+| 5 | `Level_5` | 1568 – 1888 |  |
+| 6 | `Level_6` | 1888 – 2208 |  |
+| 7 | `Level_7` | 2208 – 2528 |  |
+| 8 | `Level_8` | 2528 – 3136 |  |
+| 9 | `Level_9` | 3136 – 3744 |  |
+| 10 | `Level_10` | 3744 – 4352 |  |
+| 11 | `Level_11` | 4352 – 4672 | The Darkshang encounter |
 
 Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
+
+### The return row (world Y 800 – 992)
+
+Rooms 12 – 21 are the escape: Hooshang runs the office back the way he came,
+with Darkshang behind him. They sit on a **second row 640px below the first**,
+and they are laid out so each mirrors its outbound twin at very nearly the same
+world X — **room N pairs with room 22 − N** (9↔13, 8↔14, … 1↔21).
+
+| Room | LDtk name | World X | Mirrors |
+| --- | --- | --- | --- |
+| 12 | `Level_12` | 3728 – 4336 | — (entered from room 11) |
+| 13 | `Level_13` | 3120 – 3728 | room 9 |
+| 14 | `Level_14` | 2512 – 3120 | room 8 |
+| 15 | `Level_15` | 2192 – 2512 | room 7 |
+| 16 | `Level_16` | 1872 – 2192 | room 6 |
+| 17 | `Level_17` | 1552 – 1872 | room 5 |
+| 18 | `Level_18` | 1232 – 1552 | room 4 — **dark**, like its twin |
+| 19 | `Level_19` | 912 – 1232 | room 3 |
+| 20 | `Level_20` | 592 – 912 | room 2 |
+| 21 | `Level_21` | 272 – 592 | room 1 |
+
+Its lighting was **duplicated from the outbound row**: same X, same
+colour/energy/scale/cable, `y + 640`. So the return trip is lit exactly like the
+way in, which is the point — you are meant to recognise the rooms. Ceiling
+fixtures, moon glows and moon windows all came across; rooms 12 and 13 were lit
+by hand first and were left alone.
+
+A moon window is **two nodes that must stay together**: `MoonWindowRoom<N>` is
+the window art under `Backdrop`, and `MoonGlowRoom<N>` is its light under
+`Lights`. They share an X — the glow is the moonlight coming through that
+window, so moving one without the other lights a blank wall.
+
+Two things to know before editing them:
+
+- **The pairing is off by 16px** (48px for room 1 ↔ 21), because the return row
+  is not perfectly aligned with the outbound one. The copies kept their X, so
+  they sit a few pixels further into the room than their twins do. Under a tile
+  everywhere but room 21.
+- **Twenty of the thirty reach past a room seam**, exactly as their originals
+  do. That is inherited, not a mistake — but it means the trap below applies
+  when you retune one.
 
 > These shift whenever you add or move a room in LDtk. Re-check them before
 > placing anything — see *When you add a room* below.
@@ -181,11 +228,33 @@ Useful landmarks in room 1 (the opening scene):
 7. Run it — pick the room straight from the debug picker (F5), no need to play
    up to it.
 
-**Name it for the room it serves.** The convention in the scene is
-`CeilingRoomNa` / `CeilingRoomNb` for room fixtures, and a descriptive name for
-anything else (`CubicleBulb`, `MoonGlowRoom2`, `TileLampRoom5`,
-`SpawnMonitorRoom6`). When rooms shift, these names are how you tell what is now
-in the wrong place.
+**Name it for the room it serves**, and number it the way the room is numbered.
+Every fixture is `<Kind>Room<N><letter>`, where N is the LDtk level number and
+the letters run left to right across the room: `CeilingRoom8a`, `CeilingRoom8b`,
+`CeilingRoom8c`. Ceiling fixtures always carry a letter even when there is only
+one of them, because they are the ones that come in runs. Other kinds take a
+letter only when a room has more than one to tell apart — `MoonGlowRoom7`,
+`TileLampRoom4`, `SpawnMonitorRoom5`, `CubicleBulbRoom0`.
+
+These names are how you tell what is now in the wrong place, which only works if
+they agree with the rooms. **Rooms get renumbered when you insert one** — the
+level identifiers are the play order — so re-letter the lights in that room at
+the same time, or the next person reads `CeilingRoom9d` and looks in room 9.
+
+That has already happened once, and it is worth knowing what it cost. Eight
+ceiling fixtures in the outbound row still carry a name from before a renumber —
+`CeilingRoom7a2` sits in room 8, `CeilingRoom8b2`…`8g2` sit in room 9,
+`CeilingRoom8c3`/`8g3` in room 10. **Every top-row moon window is worse**: they
+are named one room too high across the board (`MoonWindowRoom2` is in room 1,
+`Room6` in room 5, `Room8` in room 7, `Room9` in room 8, `Room10` in room 9)
+while the glows beside them are named correctly — so the two halves of the same
+window disagree about which room they are in.
+
+Nothing is broken by it: a light is placed in world coordinates and does not
+care what it is called. But it made duplicating the row into the return trip a
+job that had to group the lights **by position**, because grouping them by name
+would have copied the drift into ten new rooms. Trust the coordinates over the
+name, and fix the name when you find one lying.
 
 ### How a hanging fixture is positioned
 
