@@ -698,4 +698,4 @@ autoplay = true
 [node name="Act1Beats" type="Node" parent="." unique_id=1256093015]
 script = ExtResource("7_beats")
 
-[node name="EditorPreview" parent="." unique_id=1487623347 instance=ExtResource("2_ldtk")]
+[node name="EditorPreview" parent="." unique_id=1727179610 instance=ExtResource("2_ldtk")]

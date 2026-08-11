@@ -81,7 +81,20 @@ func _go_forward() -> void:
 	var from: Node2D = world.current_room
 	var door := world._door_in(from)
 	if door != null:
-		door._walk_through(world.player)
+		# Through the door's OWN detection — walk him to the opening and let it
+		# notice — rather than calling _walk_through() directly, which is what
+		# this used to do. Poking that method never exercised the path a player
+		# takes, so the test passed happily while the real door was spent after
+		# one use and room 1 had no way forward at all.
+		door.arm()                              # what Rumi does when she leaves
+		await _frames(40)                       # the swing (Door.open_time)
+		# Step clear of the opening first: a door re-armed on arrival makes him
+		# leave it once before it will fire again (LdtkDoor.rearm), so dropping
+		# him straight onto it would wait forever.
+		var y := world.player.global_position.y
+		world.player.global_position = Vector2(door.doorway_centre_x() - 60.0, y)
+		await _frames(10)
+		world.player.global_position = Vector2(door.doorway_centre_x(), y)
 	else:
 		var ex := world._exit_in(from)
 		world.player.global_position = ex.global_position + Vector2(0, -8)

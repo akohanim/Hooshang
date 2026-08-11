@@ -353,9 +353,9 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 	await _hooshang("!", "confused")
 	await _hooshang("Hello??", "hesitant")
-	await _hooshang("...", "hesitant")
+	#await _hooshang("...", "hesitant")
 	await _hooshang(
-		"Who are you? I've worked in this office fifteen years. I've never seen you once.",
+		"Who are you? [p] I've worked in this office fifteen years. I've never seen you once.",
 		"skeptical")
 
 	# He says nothing yet. He only stands there, unhurried, the light along his
@@ -366,8 +366,8 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _hooshang(
 		"Are you going to say something, or just stand there glowing at me...",
 		"annoyed")
-	await _hooshang("...", "vulnerable")
-	await _hooshang("I think I hit my head harder than I thought...", "vulnerable")
+	#await _hooshang("...", "vulnerable")
+	await _hooshang("...[p] I think I hit my head harder than I thought.", "vulnerable")
 
 	await _hold(before_rumi_speaks)
 	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan.")
@@ -384,9 +384,9 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# it is drawn, so it costs the reader nothing and paces the delivery.
 	await _rumi("You will not reach the parking lot from here. This is not that building.[p] It is the one you carry inside you.")
 	await _hooshang("...Inside me?", "wary")
-	await _rumi("Inside you. Your mind has built its own rooms, and you must go down through every one.")
+	await _rumi("Your mind has built its own rooms, and you must go down through every one.")
 	await _rumi("The office that swallowed your years.[p] Your childhood.[p] And beneath them the places and things you have never let go of.")
-	await _hooshang("And I'm supposed to just — walk through my own head. On purpose.", "unconvinced")
+	await _hooshang("And I'm supposed to just walk through my own head.", "unconvinced")
 	# One thought per banner. These four were a single line, and at ~310
 	# characters it grew the box to eight rows and most of the screen — the
 	# banner is built to grow (DialogueBox._fit_banner) so nothing was clipped,
@@ -394,14 +394,14 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# other line in this scene is under 110; these now are too.
 	await _rumi("Not walk through. You have done that your whole life.")
 	await _rumi("To pass, you must meet what waits in each room.")
-	await _rumi("The grief you swallowed.[p] The dreams you set down \"for later.\"[p] The thoughts that still circle you in the dark.")
+	#await _rumi("The grief you swallowed.[p] The dreams you set down \"for later.\"[p] The thoughts that still circle you in the dark.")
 	await _rumi("They are not memories, jaan. They are still alive.[p] And they will not let you by until you face them.")
 
 	# He asks for an extension, in the exact words he has used his whole life —
 	# and Rumi does not argue, he just repeats the word back. That is the beat
 	# the scene is built around, so nothing else happens on top of it.
-	await _hooshang("Look — this really isn't a good time. I just lost my job.[p] I'll get to all that.[p] Later.", "deflecting")
-	await _rumi("...Later.[p] Yes. That is the word, isn't it.")
+	await _hooshang("Look this really isn't a good time. I just lost my job.[p] I'll get to all that[p] ...Later.", "deflecting")
+	await _rumi("...Later.[p] Yes, it's always later isn't it.")
 
 	await _rumi("You have knocked on this door your whole life, from the inside.[p] Now it opens.")
 	await _rumi("You need not see the whole road, only the next step of it.")

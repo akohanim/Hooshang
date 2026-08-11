@@ -377,6 +377,13 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	if snap:
 		player.global_position = _checkpoint
 		player.camera.reset_smoothing()
+	# A story door is walked through once per VISIT, not once per game. Doing it
+	# here covers every way back into a room — the return strip, a re-route, a
+	# save resumed into it — rather than only the one path that happened to be
+	# tested. Harmless on a door the story has not opened yet, which stays shut.
+	var door := _door_in(room)
+	if door != null:
+		door.rearm()
 	room_changed.emit(room)
 
 

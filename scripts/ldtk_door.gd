@@ -22,6 +22,9 @@ signal walked_through
 
 var _armed := false
 var _walking := false
+## Set when the door is re-armed with the player already standing in it. He has
+## to step clear once before it will fire again — see rearm().
+var _needs_clear := false
 
 @onready var _void: ColorRect = $Void
 
@@ -43,24 +46,59 @@ func arm() -> void:
 		set_physics_process(true)
 
 
+## Make an already-opened door walkable again.
+##
+## OPENING the door is a one-time story beat. WALKING THROUGH it is not: the room
+## manager hangs a return door behind you (LdtkWorld._arm_return), so room 1 can
+## be walked back into — and when it is, this doorway has to work a second time.
+## Without this the door stayed spent after one use, and because a room holding a
+## story door has its Exit deliberately stood down (LdtkWorld._on_exit_reached
+## lets the door own that doorway), the room was left with no way forward at all.
+##
+## A door the story has not opened yet is left shut, so coming back into room 1
+## before meeting Rumi cannot walk out through it.
+func rearm() -> void:
+	if not _armed:
+		return
+	_walking = false
+	# He may be standing in the opening already — the way back into a room can
+	# land him near it. Make him step clear once first, the same guard
+	# LdtkWorld._arm_return puts on its return strip, or arriving in the room
+	# would immediately walk him straight back out of it.
+	_needs_clear = true
+	set_physics_process(true)
+
+
 func _physics_process(_delta: float) -> void:
 	if _walking:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player == null:
 		return
-	# You WALK through a door. Requiring both feet on the ground and a position
-	# inside the opening matters because the doorway column is open all the way
-	# to the ceiling: an x-only test (what this used to be) fired when the
-	# player jump-dashed to the top corner far above the door, dissolving him
-	# into the wall.
-	if not player.is_on_floor():
+	var lined_up := _lined_up(player)
+	if _needs_clear:
+		# Only counts as clear once he is actually off the doorway.
+		if not lined_up:
+			_needs_clear = false
 		return
+	if lined_up:
+		_walk_through(player)
+
+
+## Whether the player is standing squarely in the opening, on his feet.
+##
+## You WALK through a door. Requiring both feet on the ground and a position
+## inside the opening matters because the doorway column is open all the way
+## to the ceiling: an x-only test (what this used to be) fired when the
+## player jump-dashed to the top corner far above the door, dissolving him
+## into the wall.
+func _lined_up(player: Player) -> bool:
+	if not player.is_on_floor():
+		return false
 	var top := _void.global_position.y
 	if player.global_position.y < top or player.global_position.y > top + _void.size.y:
-		return
-	if absf(player.global_position.x - doorway_centre_x()) <= centre_tolerance:
-		_walk_through(player)
+		return false
+	return absf(player.global_position.x - doorway_centre_x()) <= centre_tolerance
 
 
 ## World-space x of the middle of the opening, derived from the void panel so
