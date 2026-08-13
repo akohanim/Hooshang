@@ -52,10 +52,6 @@ const SCENE := "res://scenes/ui/MainMenu.tscn"
 @export var repeat_rate := 0.12
 
 const PICKER := "res://scenes/debug_level_picker.tscn"
-## The same list opened as a finished player — dash granted and the escape route
-## already re-routed, which is the only way the back half of Act I is walkable.
-## See scenes/debug_picker_v2.gd.
-const PICKER_V2 := "res://scenes/debug_picker_v2.tscn"
 
 ## How long the screen takes to fade in, seconds. Short: a title screen that
 ## makes you wait for it is one you resent by the fifth launch.
@@ -172,16 +168,18 @@ func show_root() -> void:
 			func() -> void: _show_slots(SlotMode.LOAD)))
 		built.append(_row("LEVEL SELECT", "replay a room you have reached — nothing is saved",
 			func() -> void: _show_slots(SlotMode.PRACTICE)))
-	if OS.is_debug_build():
-		built.append(_row("DEBUG PICKER", "every room and every scene, dev only",
-			func() -> void: _start(func() -> void:
-				LdtkWorld.debug_start_room = ""
-				get_tree().change_scene_to_file(PICKER))))
-		built.append(_row("DEBUG PICKER V2",
-			"every room, opened as a player who has finished the game",
-			func() -> void: _start(func() -> void:
-				LdtkWorld.debug_start_room = ""
-				get_tree().change_scene_to_file(PICKER_V2))))
+	# Shown in EXPORTED builds too, not just debug ones. It used to be gated on
+	# OS.is_debug_build(), which is false in a release export — so the row was
+	# missing from the itch.io build, which is the one build anybody other than
+	# the developer ever sees. That is now deliberate: this game ships with its
+	# room list open, so a player can jump straight to anything.
+	#
+	# It still writes to no save slot (see scenes/debug_level_picker.gd), so an
+	# afternoon spent in here cannot touch a real run.
+	built.append(_row("DEBUG PICKER", "jump straight to any room or scene",
+		func() -> void: _start(func() -> void:
+			LdtkWorld.debug_start_room = ""
+			get_tree().change_scene_to_file(PICKER))))
 	built.append(_row("QUIT", "leave the office the other way",
 		func() -> void: get_tree().quit()))
 	_populate(built)

@@ -15,7 +15,7 @@ extends LevelBase
 
 const RUMI_INTRO_LINE := "You have knocked on this door your whole life — from the inside."
 const RUMI_DASH_LINE := "Some walls will not yield to a jump. Take this — and dash."
-const DASH_HINT := "Press X or SHIFT to dash."
+const DASH_HINT := "Press the X key to dash."
 ## Rumi's portrait tint in the dialogue box (alpha > 0 = show a portrait).
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ## Where Rumi stands for beat 2 — on the floor just left of the tall pillar.

@@ -30,7 +30,16 @@ class_name RoomCollapse
 ## decision each prefab would have to remember to make and the failure is silent:
 ## a new hazard that forgot would simply hang in the air through the whole beat
 ## with nothing to point at. Adding a kind here is one line and is visible.
-const FALLS_UNDER := "Hazard, ConveyorBelt, SlideZone, NoteTile, Pomegranate"
+##
+## NOT NoteTile, deliberately. A sounding pad is the one prop in these rooms that
+## lights itself and is meant to be looked at, and it stays where it was put:
+## rooms 16, 17 and 18 each keep a pad layout you can recognise from its twin on
+## the way out, and a collapse that rearranges them throws that away for a
+## clatter. They also make the surrounding physics honest — a pad is a solid body
+## that is NOT coming down, so props above one can measure their landing on it
+## like any other floor. Room 18 used to end its collapse with four props still
+## hanging in the air for exactly the opposite reason.
+const FALLS_UNDER := "Hazard, ConveyorBelt, SlideZone, Pomegranate"
 
 ## Free-fall acceleration used to time the drops, px/s². Deliberately heavier
 ## than the player's own gravity — he falls with air under him and a jump to
@@ -90,6 +99,11 @@ static func drop(room: Node2D, host: Node) -> Array[Node2D]:
 		# Quadratic ease-in IS free fall — distance goes with the square of time.
 		tween.tween_property(prop, "global_position:y", drop_to, fall_time) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		# The opt-in twin of collapse_anchored(): a prop that wants to change what
+		# it looks like on impact (GlassSpikes flipping a ceiling strip to a floor
+		# one) gets the chance right as it lands, before the squash sells the hit.
+		if prop.has_method("collapse_landed"):
+			tween.tween_callback(prop.collapse_landed)
 		tween.tween_property(prop, "scale", prop.scale * LAND_SQUASH, LAND_TIME) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tween.tween_property(prop, "scale", prop.scale, LAND_TIME * 2.0) \
@@ -154,10 +168,23 @@ static func _props_in(node: Node) -> Array[Node2D]:
 	return found
 
 
-## Whether this node is one of the kinds that take part. String comparison
-## against FALLS_UNDER rather than a chain of `is` checks so the list stays one
-## readable line — the classes are all globals, so the name is exact.
+## Whether this node is one of the kinds that take part, AND has not opted out.
+##
+## THE OPT-OUT is `collapse_anchored()`, and a prop that answers true is not part
+## of the collapse at all: it does not fall, and — because it is not in the
+## falling set — it goes on counting as solid ground for whatever is above it.
+## That second half matters as much as the first (see _airborne_in).
+##
+## Duck-typed rather than a second type list, so a prop can decide PER INSTANCE.
+## GlassSpikes is the case that needs it: the same class is a floor strip, a
+## ceiling strip and two wall strips, and only the floor one is ever "hanging".
+##
+## String comparison against FALLS_UNDER rather than a chain of `is` checks so
+## the list stays one readable line — the classes are all globals, so the name
+## is exact.
 static func _falls(node: Node) -> bool:
+	if node.has_method("collapse_anchored") and node.collapse_anchored():
+		return false
 	for kind in FALLS_UNDER.split(", "):
 		if node.is_class(kind) or _script_is(node, kind):
 			return true

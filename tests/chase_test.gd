@@ -516,10 +516,10 @@ func _test_triggers() -> void:
 
 	# --- the threshold that starts it all ---
 	# The reveal order is the whole reason this entity is separate from the
-	# spawn: he has to be VISIBLE and STILL while the two lines play. A chase
-	# that started with the dialogue would spend it closing the gap on a player
-	# who cannot move, which is a boss fight that opens by killing you for
-	# reading.
+	# spawn: he has to be VISIBLE and STILL for the whole beat, however many
+	# lines it grows to. A chase that started with the dialogue would spend it
+	# closing the gap on a player who cannot move, which is a boss fight that
+	# opens by killing you for reading.
 	await _settle()
 	shadow.stop_chase()
 	shadow.visible = false
@@ -545,7 +545,9 @@ func _test_triggers() -> void:
 		"but he is not hunting yet — the beat plays first  [state %d]" % shadow.state)
 	_check(player.input_locked, "and the player is held for it")
 
-	# Dismiss the two lines the way a player would.
+	# Dismiss the beat the way a player would: two presses per line — one to
+	# finish the typewriter, one to close the banner. The cap is generous on
+	# purpose so re-cutting the script cannot quietly turn this into a timeout.
 	for i in 30:
 		_press_jump()
 		await _frames(4)

@@ -63,7 +63,11 @@ const MEETING_EMOTES: Array[String] = ["!", "...", "..."]
 ## Hooshang's face per line, in order. The mapping is a directing choice, not
 ## something the code can infer, so it is pinned here. Rumi's lines are "" —
 ## he has no portrait art yet, only the tinted stand-in.
-const WAKING_FACES: Array[String] = ["dazed", "confused"]
+##
+## The second line names "confused", which reads back as HESITANT: the painted
+## portrait set has a `shocked` where the old pixel-art sheet had a `confused`,
+## so that state is now aliased. Same rule as the meeting's three, below.
+const WAKING_FACES: Array[String] = ["dazed", "hesitant"]
 ## Three of these are read back as a state the beat did not name. The meeting
 ## asks for "wary", "unconvinced" and "deflecting", and Act1Beats.FACES currently
 ## points all three at drawings that already exist — the first two at skeptical,
@@ -91,7 +95,7 @@ const MEETING_FACES: Array[String] = [
 ## button is taught to someone who already has the thing it operates.
 const GIFT: Array[String] = [
 	"Some walls won't yield to a jump. Take this, and dash.",
-	"Press the SHIFT key to dash.",
+	"Press the X key to dash.",
 ]
 ## Whether Hooshang already had the dash as each GIFT line went up. This is what
 ## pins the gift to the MIDDLE of the exchange rather than either end of it.
@@ -108,9 +112,9 @@ const TILES: Array[String] = [
 	"So I play the tune, I get a light. ...Fine.",
 ]
 const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi", "Hooshang"]
-## The last entry is "flat" in the beat — read back as skeptical, which is the
-## drawing that state currently points at. Same aliasing as MEETING_FACES.
-const TILES_FACES: Array[String] = ["confused", "annoyed", "", "", "skeptical"]
+## The first entry is "confused" in the beat and the last is "flat" — both read
+## back as the drawing their state points at. Same aliasing as MEETING_FACES.
+const TILES_FACES: Array[String] = ["hesitant", "annoyed", "", "", "skeptical"]
 
 var failures: Array[String] = []
 var world: LdtkWorld

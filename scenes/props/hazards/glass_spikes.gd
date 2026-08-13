@@ -47,6 +47,43 @@ enum Tile { SINGLE, FIRST, MIDDLE_A, MIDDLE_B, LAST }
 		facing = value
 		_update_extents()
 
+
+## A strip BOLTED to a WALL does not come down when the room does — a ceiling
+## strip does, same as a floor one.
+##
+## Two reasons a wall strip stays put, and the second is the one that mattered
+## in play:
+##
+##   1. It looks wrong. RoomCollapse drops a prop straight down and leaves its
+##      art alone, so a wall strip that falls ends up lying on the floor with its
+##      points aimed sideways — spikes growing out of nothing.
+##   2. It breaks rooms. Room 16 is a vertical gauntlet built out of two 112px
+##      wall strips facing each other; dropping them piled the whole hazard onto
+##      the floor across the only route through, and the room became impossible.
+##
+## A ceiling strip does not have either problem: it runs the same axis a floor
+## strip does, so `collapse_landed()` below only has to flip its facing, not
+## rebuild its layout, and there is no gauntlet built out of ceiling strips
+## facing anything. Its mount lets go and it crashes to the floor like anything
+## else hanging in the room.
+##
+## See RoomCollapse._falls — an anchored prop is not in the collapse at all, so
+## it also goes on counting as ground for anything resting on it.
+func collapse_anchored() -> bool:
+	return facing == Facing.LEFT or facing == Facing.RIGHT
+
+
+## Called by RoomCollapse the instant a falling strip reaches the floor. A
+## ceiling strip's points aim down; landed on the floor that way they'd be
+## drawn burrowing into it rather than threatening whatever stands on them, so
+## it becomes a floor strip on impact — the mount is gone either way, and what
+## is left is a spike strip lying on the ground. Re-assigning `facing` reruns
+## `_update_extents()` through its own setter, which re-skins it and slides the
+## kill box the couple of px a floor strip's offset differs by.
+func collapse_landed() -> void:
+	if facing == Facing.DOWN:
+		facing = Facing.UP
+
 var _row: Node2D
 
 

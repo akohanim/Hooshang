@@ -48,22 +48,44 @@ signal chase_begun()
 ## the two entities are halves of one event.
 const EDITOR_TINT := Color(0.61, 0.30, 1.0, 0.22)
 
-## Hooshang's face for his line. Named, not a file, so re-cutting the portrait
-## sheet never touches this script (CLAUDE.md, dialogue rules).
-const HOOSHANG_FACE := preload("res://assets/portraits/hooshang_vulnerable.png")
+## A face per state, per speaker — the same convention Act1Beats.FACES uses, and
+## kept separate per speaker for the same reason: a beat names the STATE it wants
+## and never a file, so re-cutting the portrait sheet never touches this script
+## (CLAUDE.md, dialogue rules). Two maps rather than one so the two of them can
+## both own a "sorrowful" later without colliding.
+const FACES := {
+	"shocked": preload("res://assets/portraits/hooshang_shocked.png"),
+	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
+}
+const RUMI_FACES := {
+	"wistful": preload("res://assets/portraits/rumi_wistful.png"),
+	"sorrowful": preload("res://assets/portraits/rumi_sorrowful.png"),
+	"urgent": preload("res://assets/portraits/rumi_urgent.png"),
+}
 const HOOSHANG_PALE := Color(1.0, 1.0, 1.0, 1.0)
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 
 ## The beats this trigger knows how to play, by `dialogue_id`.
+## Each line is [speaker, text, portrait state].
 ##
 ## Written out in full here rather than as an id handed to a story script,
 ## because the chase is self-contained: a room with these four nodes in it plays
 ## the whole sequence with no cutscene wiring at all. If Act I later grows a
 ## script that owns every beat, this is one dictionary to move.
+##
+## THE SHAPE OF THE SCENE. He asks what it is; Rumi does not answer with a name,
+## he answers with what it IS — a seed Hooshang sowed and kept watering himself.
+## Hooshang works out the trap in his own words, which is what makes the last
+## three lines land: it cannot be fought for him, because he is the one growing
+## it. Only then the warning, and only then does the shadow move.
 const BEATS := {
 	"darkshang_appears": [
-		["Hooshang", "What is that?"],
-		["Rumi", "That is total darkness. Don't let it absorb you."],
+		["Hooshang", "What is that??", "shocked"],
+		["Rumi", "That is the seed you have sown and watered, jaan. Water a bad thought faithfully enough, and it grows tall enough to shut out the light.", "wistful"],
+		["Hooshang", "Meaning... every time the thought came, I fed it. And it grew.", "vulnerable"],
+		["Rumi", "Yes. It wears the face of total darkness.", "sorrowful"],
+		["Rumi", "No one can fight this for you. Not even me.", "sorrowful"],
+		["Rumi", "Don't let it absorb you.", "urgent"],
 	],
 }
 
@@ -120,9 +142,13 @@ func _on_body_entered(body: Node2D) -> void:
 ## starts moving.
 ##
 ## The order matters and is the whole point of the trigger. Starting the chase
-## first would have him closing the gap through two lines of dialogue the player
-## cannot move during — a boss fight that begins by killing you for reading. He
-## is visible for all of it; only his movement waits.
+## first would have him closing the gap through the whole exchange while the
+## player cannot move — a boss fight that begins by killing you for reading. He
+## is visible for all of it; only his movement waits, however long the beat runs.
+##
+## The banner sits at its default TOP. Both of them are on the floor here — the
+## shadow spawns at the bottom-right of the room and Hooshang is looking at him —
+## so the top of the screen is the clear half (CLAUDE.md, dialogue rules).
 func _play(player: Player) -> void:
 	triggered.emit(player)
 	var shadow := _shadow()
@@ -140,9 +166,10 @@ func _play(player: Player) -> void:
 			# here — he is a voice over Hooshang's shoulder. RIGHT because the
 			# shadow comes from the right and Hooshang is looking at it, so the
 			# two speakers still read as being on opposite sides.
-			await Dialogue.say("Rumi", line[1], RUMI_GOLD, null, DialogueBox.Side.RIGHT)
+			await Dialogue.say("Rumi", line[1], RUMI_GOLD, RUMI_FACES.get(line[2]),
+				DialogueBox.Side.RIGHT)
 		else:
-			await Dialogue.say("Hooshang", line[1], HOOSHANG_PALE, HOOSHANG_FACE)
+			await Dialogue.say("Hooshang", line[1], HOOSHANG_PALE, FACES.get(line[2]))
 	player.input_locked = locked
 	if shadow != null:
 		shadow.start_chase()

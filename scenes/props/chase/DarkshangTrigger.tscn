@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://5lyp1iqbo4xf"]
 
-[ext_resource type="Script" path="res://scenes/props/chase/darkshang_trigger.gd" id="1_trigger"]
+[ext_resource type="Script" uid="uid://cfalsools5qxu" path="res://scenes/props/chase/darkshang_trigger.gd" id="1_trigger"]
 
-[node name="DarkshangTrigger" type="Area2D" groups=["darkshang_trigger"]]
+[node name="DarkshangTrigger" type="Area2D" unique_id=796548599 groups=["darkshang_trigger"]]
+collision_layer = 8
+collision_mask = 2
 script = ExtResource("1_trigger")

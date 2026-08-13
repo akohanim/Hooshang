@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/lighting/sun_shaft.gd" id="1_shaft"]
+[ext_resource type="Texture2D" path="res://assets/props/light_shaft.png" id="2_beam"]
+[ext_resource type="Texture2D" path="res://assets/props/light_mote.png" id="3_mote"]
+
+[sub_resource type="Gradient" id="Gradient_mote"]
+offsets = PackedFloat32Array(0, 0.18, 0.78, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[node name="SunShaft" type="Node2D"]
+script = ExtResource("1_shaft")
+
+[node name="Beam1" type="PointLight2D" parent="."]
+color = Color(1, 0.78, 0.5, 1)
+energy = 1.9
+texture = ExtResource("2_beam")
+
+[node name="Beam2" type="PointLight2D" parent="."]
+color = Color(1, 0.78, 0.5, 1)
+energy = 1.5
+texture = ExtResource("2_beam")
+
+[node name="Beam3" type="PointLight2D" parent="."]
+visible = false
+color = Color(1, 0.78, 0.5, 1)
+energy = 1.2
+texture = ExtResource("2_beam")
+
+[node name="Motes" type="CPUParticles2D" parent="."]
+amount = 44
+lifetime = 7.0
+preprocess = 7.0
+texture = ExtResource("3_mote")
+emission_shape = 3
+emission_rect_extents = Vector2(24, 54)
+spread = 55.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 5.0
+scale_amount_min = 0.3
+scale_amount_max = 0.62
+color_ramp = SubResource("Gradient_mote")

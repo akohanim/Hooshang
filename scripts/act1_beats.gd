@@ -36,16 +36,24 @@ const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ## file, so re-cutting the portrait sheet never touches the dialogue.
 const FACES := {
 	"dazed": preload("res://assets/portraits/hooshang_dazed.png"),
-	"confused": preload("res://assets/portraits/hooshang_confused.png"),
 	"hesitant": preload("res://assets/portraits/hooshang_hesitant.png"),
 	"skeptical": preload("res://assets/portraits/hooshang_skeptical.png"),
 	"annoyed": preload("res://assets/portraits/hooshang_annoyed.png"),
 	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
-	# Three states the meeting asks for that have no drawing of their own yet,
-	# pointed at the nearest one that does. They are listed as their own states
-	# rather than the beats just saying "skeptical" twice, because the beat is
-	# where the ACTING is described — when the sheet is re-cut these get their
-	# own faces and not one line of dialogue moves.
+	"shocked": preload("res://assets/portraits/hooshang_shocked.png"),
+	# Four states the beats ask for that have no drawing of their own, pointed at
+	# the nearest one that does. They are listed as their own states rather than
+	# the beats just saying "skeptical" twice, because the beat is where the
+	# ACTING is described — when the sheet is re-cut these get their own faces
+	# and not one line of dialogue moves.
+	#
+	# "confused" HAD its own drawing and lost it: the painted set that replaced
+	# the pixel-art heads has a `shocked` where the old sheet had a `confused`.
+	# It points at hesitant rather than shocked because both lines it serves are
+	# quiet ones — "This doesn't feel like my cubicle..." and "I can't see a
+	# thing." — and shocked is a startle, mouth open. Aliasing beat the
+	# alternative, which was one 8-bit head in the middle of six paintings.
+	"confused": preload("res://assets/portraits/hooshang_hesitant.png"),
 	"wary": preload("res://assets/portraits/hooshang_skeptical.png"),
 	"unconvinced": preload("res://assets/portraits/hooshang_skeptical.png"),
 	"deflecting": preload("res://assets/portraits/hooshang_hesitant.png"),
@@ -55,25 +63,15 @@ const FACES := {
 	"flat": preload("res://assets/portraits/hooshang_skeptical.png"),
 }
 
-## Rumi's two lines at the second encounter, with the gift between them. He names
-## the need and hands the ability over first; the control comes after, once
-## Hooshang actually has the thing the key operates. Teaching the button before
-## the ability exists is an instruction; teaching it after is a use.
-const DASH_OFFER_LINE := "Some walls won't yield to a jump. Take this, and dash."
-## The key here has to match the `dash` action in project.godot — SHIFT, with X
-## and the gamepad face buttons bound alongside it.
-const DASH_CONTROL_LINE := "Press the SHIFT key to dash."
-
-## Rumi's lines at the third encounter, over the sounding tiles. He grants
-## nothing here — the room itself is the gift, and what he hands over is
-## permission to trust it.
-const RHYTHM_LINE := "Something waits ahead of you, in the dark. You think you've lost your rhythm.[p] You haven't. It's only sleeping — here, in these tiles."
-## The actual RULE of the room, said out loud: all five pads, each once, IN
-## ORDER, and the reward is the glow (scenes/props/note_tile.gd and
-## scripts/note_sequence.gd). It is the only tutorial the puzzle gets — the
-## stretch is unlit and there is nothing to read the mechanic off — so if the
-## sequence rule ever changes, this line is part of the change.
-const MUSIC_LINE := "Wake the notes in their order, one after the next, until they join into a melody.[p] Complete it, and its light will gather on you — enough to carry you through the dark ahead."
+## Rumi's face per line, same convention as Hooshang's: a beat names the state
+## it wants rather than a file.
+const RUMI_FACES := {
+	"serene": preload("res://assets/portraits/rumi_serene.png"),
+	"sorrowful": preload("res://assets/portraits/rumi_sorrowful.png"),
+	"urgent": preload("res://assets/portraits/rumi_urgent.png"),
+	"warm_open": preload("res://assets/portraits/rumi_warm_open.png"),
+	"wistful": preload("res://assets/portraits/rumi_wistful.png"),
+}
 
 const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
 ## Script lines that are nothing but punctuation. These are reactions, not
@@ -113,6 +111,114 @@ const EMOTE_LINES := {
 ## The single hard jolt on the frame it lets go, before the rattle settles in.
 ## Bigger than collapse_shake — this one is the crack, not the tremor.
 @export var collapse_jolt := 2.4
+
+@export_group("The dark rooms")
+## Rooms of the escape that are unlit, by level number. Walking into one grants
+## the glow outright — he earned it at the sounding tiles and this is the same
+## reward, given rather than played for. The alternative was a note puzzle in
+## every dark room of a chase, which is a reading test in the middle of a sprint.
+##
+## Re-granted rather than made permanent because NoteSequence deliberately takes
+## the glow back on every room change and on every death (it owns that reward's
+## lifetime, scoped to one room and one life). Fighting that would break the
+## tiles puzzle; re-granting on arrival costs one line and leaves it intact.
+@export var glow_rooms: Array[int] = [12, 16, 17, 18]
+
+@export_group("The collapsing building")
+## Ambient shudder and falling debris across the escape, ramping from the first
+## room to the last. This is the BACKGROUND of the collapse — the building
+## groaning the whole way out — under the per-room RoomCollapse event above.
+##
+## Rooms outside first..last get nothing at all, so the outbound half of the Act
+## is untouched.
+@export var ambience_first_room := 12
+@export var ambience_last_room := 21
+## Strength in the first room and in the last, 0..1 (see CollapseAmbience).
+## Starts gentle rather than at zero: room 12 is where he has just met Darkshang
+## and the building should already feel wrong. Not lower than this — at 320x180
+## the camera offset a weaker room 12 asks for rounds away to no movement at all,
+## so the bottom of the ramp would be indistinguishable from the Act's first half.
+@export var ambience_first_strength := 0.25
+@export var ambience_last_strength := 1.0
+## Brick and mortar coming out of the walls, as its own ramp over its own rooms.
+##
+## Starts a room LATER than the dust and the shaking, and that gap is the point:
+## room 12 is where he meets the shadow and the building only groans at him, and
+## 13 is the first room that actually comes apart — it is where RoomCollapse
+## starts dropping the level's own props (`collapse_first_room`), so it is where
+## the walls should start losing pieces too. Ends with the rest of the ambience,
+## at `ambience_last_room`.
+@export var brick_first_room := 13
+@export var brick_first_strength := 0.3
+@export var brick_last_strength := 1.0
+## Shape of the ramp between them. 1.0 is a straight line; above it the early
+## rooms stay quiet longer and the last few get bad quickly, which is the
+## difference between a building that is failing and one that has been failing
+## at a constant rate for ten rooms. At 1.6 the halfway room (17) sits at about
+## half strength, and rooms 19-21 carry the whole top third of the range —
+## including the point where CollapseAmbience's constant tremor cuts in.
+@export var ambience_curve := 1.6
+
+@export_group("The moon turns")
+## The window that turns to blood the moment the shadow appears, and the light
+## paired with it. Room 11's, wired in ldtk/Act1World.tscn.
+##
+## The beat: Hooshang has walked past this same cold blue moon for eleven rooms.
+## He crosses the threshold, Darkshang is standing there, and while Rumi explains
+## what it is the moon behind them goes dark and comes back red — and it is still
+## red in room 12, and every room of the escape after it. The escape row's blood
+## moon is not a different moon. It is this one, after this.
+##
+## Paths rather than names looked up in script: the two nodes live under Backdrop
+## and Lights in the world scene, and this script has no business knowing that
+## layout (STYLE_GUIDE §9). "" on either turns the beat off.
+@export var blood_moon_window: NodePath
+@export var blood_moon_glow: NodePath
+## How long the turn takes. Tuned against the encounter's dialogue rather than
+## chosen: it starts on the threshold, before the first line, and should still be
+## finishing as Rumi says "Don't let it absorb you."
+@export var blood_moon_seconds := 8.0
+
+@export_group("The end of the chase")
+## Where Darkshang gives up, and the line in that room he gives up at. Once
+## Hooshang is past it the shadow stops dead where it stands — still there, still
+## visible in the doorway, no longer coming — and nothing can restart it.
+##
+## The line is the cubicle bulb's world x (`CubicleBulbRoom22`, x = 100). He
+## arrives at the right of room 22 at x = 200 and walks LEFT toward his desk, so
+## "past" is a smaller x: he crosses under the dead office light and that is the
+## moment it is over. Deliberately a NUMBER and not a lookup of the lamp — this
+## script has no business reaching into the Lights node by name — but move the
+## bulb and move this with it.
+##
+## Set HERE rather than as a SafeZone entity in LDtk only because room 22 has no
+## entities to spare and this is a fact about Act I's ending. A SafeZone dragged
+## across the same line would do the identical job; see safe_zone_trigger.gd.
+@export var chase_ends_room := "Level_22"
+@export var chase_ends_past_x := 100.0
+## How long the shadow takes to thin out to nothing, in seconds.
+@export var dissolve_time := 1.6
+## Silence after it, before Hooshang dares say anything. The beat where he is
+## alone in the room is what makes the question worth asking.
+@export var after_dissolve_pause := 1.2
+## Where Rumi stands, in px from Hooshang. POSITIVE — to his right, which in room
+## 22 puts him between Hooshang and the sunrise window, so he is already standing
+## in front of the light when he says "the ones that grew toward the light".
+@export var rumi_end_offset := 34.0
+
+@export_group("Act II")
+## Where Act I hands over. Empty until the Act II world exists, which returns to
+## the title screen with the run banked instead — see _play_act_two.
+@export_file("*.tscn") var act_two_scene := ""
+## The whirl of gold light that takes them: how bright Rumi's own glow swells,
+## how long it takes to swallow the screen, and what colour it goes.
+@export var whirl_energy := 9.0
+@export var whirl_time := 2.2
+@export var whirl_color := Color(1.0, 0.86, 0.55)
+## The card that lands on the other side of it.
+@export var act_card_text := "ACT II\n\nChildhood, Iran"
+@export var card_fade := 0.9
+@export var card_hold := 2.4
 
 @export_group("The way home")
 ## Last room of the escape, and where its Exit leads. The return trip ends where
@@ -187,6 +293,15 @@ var _rumi_trigger: LdtkRumiTrigger
 ## of each `_play_*` beat, from where the player and Rumi actually stand in that
 ## room — never guessed line by line. See DialogueBox.VSide.
 var _dialogue_vside: int = DialogueBox.VSide.TOP
+## The one ambience rig, moved from room to room rather than one per room.
+var _ambience: CollapseAmbience
+## Whether the room he is standing in is one of the dark ones — read on death,
+## to put the glow back after NoteSequence takes it.
+var _glow_here := false
+## Whether we are in the room the chase ends in and still waiting for the line to
+## be crossed. Set on arrival, cleared on leaving or on it happening, and the
+## only thing that makes this script process at all.
+var _watch_for_stand_down := false
 ## The chase room's threshold, held so a save can ask whether it has been crossed
 ## and tell it so on the way back in.
 var _chase: DarkshangTrigger
@@ -204,6 +319,9 @@ var _collapsed := {}
 
 
 func _ready() -> void:
+	# Off until a room asks for it — see _apply_room_mood. Defining _process at
+	# all turns it on by default, and it must not tick for the whole Act.
+	set_process(false)
 	_world = _find_world()
 	if _world == null:
 		push_error("Act1Beats: no LdtkWorld ancestor — put this inside the world scene.")
@@ -284,6 +402,10 @@ func _restore_state() -> void:
 	# encounter re-pointed and the fact that it is over.
 	if _chase != null and bool(state.get("chase_seen", false)):
 		_chase.spent = true
+		# And the sky stays as he left it. A resumed run that put the cold blue
+		# moon back over room 11 would be saying the encounter had not happened,
+		# in the one room where the whole point is that it did.
+		_turn_the_moon(false)
 
 
 ## Take a room's Rumi beat off its trigger and onto `handler(player, trigger)`.
@@ -370,7 +492,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _hooshang("...[p] I think I hit my head harder than I thought.", "vulnerable")
 
 	await _hold(before_rumi_speaks)
-	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan.")
+	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan.", "warm_open")
 	# "(muttering)" is carried by the wording and his face. It used to slow the
 	# typewriter down, but a line that types at its own rate reads as a different
 	# KIND of text rather than a quieter one — every line reveals at
@@ -382,29 +504,29 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# which is what keeps the exposition a scene instead of a briefing. Every
 	# "[p]" is a breath held mid-line (DialogueBox.PAUSE_MARK) — stripped before
 	# it is drawn, so it costs the reader nothing and paces the delivery.
-	await _rumi("You will not reach the parking lot from here. This is not that building.[p] It is the one you carry inside you.")
+	await _rumi("You will not reach the parking lot from here. This is not that building.[p] It is the one you carry inside you.", "serene")
 	await _hooshang("...Inside me?", "wary")
-	await _rumi("Your mind has built its own rooms, and you must go down through every one.")
-	await _rumi("The office that swallowed your years.[p] Your childhood.[p] And beneath them the places and things you have never let go of.")
+	await _rumi("Your mind has built its own rooms, and you must go down through every one.", "serene")
+	await _rumi("The office that swallowed your years.[p] Your childhood.[p] And beneath them the places and things you have never let go of.", "sorrowful")
 	await _hooshang("And I'm supposed to just walk through my own head.", "unconvinced")
 	# One thought per banner. These four were a single line, and at ~310
 	# characters it grew the box to eight rows and most of the screen — the
 	# banner is built to grow (DialogueBox._fit_banner) so nothing was clipped,
 	# it simply stopped reading as dialogue and started reading as a page. Every
 	# other line in this scene is under 110; these now are too.
-	await _rumi("Not walk through. You have done that your whole life.")
-	await _rumi("To pass, you must meet what waits in each room.")
+	await _rumi("Not walk through. You have done that your whole life.", "serene")
+	await _rumi("To pass, you must meet what waits in each room.", "serene")
 	#await _rumi("The grief you swallowed.[p] The dreams you set down \"for later.\"[p] The thoughts that still circle you in the dark.")
-	await _rumi("They are not memories, jaan. They are still alive.[p] And they will not let you by until you face them.")
+	await _rumi("They are not memories, jaan. They are still alive.[p] And they will not let you by until you face them.", "urgent")
 
 	# He asks for an extension, in the exact words he has used his whole life —
 	# and Rumi does not argue, he just repeats the word back. That is the beat
 	# the scene is built around, so nothing else happens on top of it.
 	await _hooshang("Look this really isn't a good time. I just lost my job.[p] I'll get to all that[p] ...Later.", "deflecting")
-	await _rumi("...Later.[p] Yes, it's always later isn't it.")
+	await _rumi("...Later.[p] Yes, it's always later isn't it.", "wistful")
 
-	await _rumi("You have knocked on this door your whole life, from the inside.[p] Now it opens.")
-	await _rumi("You need not see the whole road, only the next step of it.")
+	await _rumi("You have knocked on this door your whole life, from the inside.[p] Now it opens.", "warm_open")
+	await _rumi("You need not see the whole road, only the next step of it.", "serene")
 
 	# He reaches out — one hand, sleeve trailing light — and touches his chest.
 	# Something wrapped in cloth for fifty years comes loose. No ABILITY here,
@@ -442,7 +564,11 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.breathe(true)
 	await _hold(before_rumi_speaks)
 
-	await _rumi(DASH_OFFER_LINE)
+	# He names the need and hands the ability over first; the control comes
+	# after, once Hooshang actually has the thing the key operates. Teaching
+	# the button before the ability exists is an instruction; teaching it
+	# after is a use.
+	await _rumi("Some walls won't yield to a jump. Take this, and dash.", "warm_open")
 
 	# "take this" is the stage direction in that line, so it gets PLAYED: he
 	# closes the distance, the light swells, crosses the gap, and it's
@@ -455,7 +581,12 @@ func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _hold(0.5)
 
 	# Only now the button, with the dash already his to press it with.
-	await _rumi(DASH_CONTROL_LINE)
+	#
+	# THE KEY NAMED HERE IS THE ONE THE GAME IS PLAYED WITH, and it has to match
+	# the FIRST event of the `dash` action in project.godot. X is that key; Shift
+	# and the gamepad face buttons stay bound alongside it, unnamed, because a
+	# line that lists every alternative is a settings screen read aloud.
+	await _rumi("Press the X key to dash.", "serene")
 
 	await trigger.vanish()
 	player.input_locked = false
@@ -490,8 +621,15 @@ func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 	await _hooshang("You show up right before the parts I'm going to hate, don't you?",
 		"annoyed")
-	await _rumi(RHYTHM_LINE)
-	await _rumi(MUSIC_LINE)
+	# Rumi grants nothing here — the room itself is the gift, and what he
+	# hands over is permission to trust it.
+	await _rumi("The dark awaits you, you think you've lost your rhythm.[p] You haven't. It's only sleeping, here, in these tiles.", "serene")
+	# The actual RULE of the room, said out loud: all five pads, each once, IN
+	# ORDER, and the reward is the glow (scenes/props/note_tile.gd and
+	# scripts/note_sequence.gd). It is the only tutorial the puzzle gets — the
+	# stretch is unlit and there is nothing to read the mechanic off — so if
+	# the sequence rule ever changes, this line is part of the change.
+	await _rumi("Wake the notes in their order, one after the next, until they join into a melody.[p] Complete it, and its light will gather on you, enough to carry you through the dark ahead.", "serene")
 
 	# He answers with Rumi still standing there, same as the cubicle scene — the
 	# deadpan only lands if the person it is aimed at is still in the room.
@@ -538,10 +676,34 @@ func _wire_chase() -> void:
 		push_warning("Act1Beats: room '%s' has no DarkshangTrigger — its entrance still leads back."
 			% chase_room_name)
 		return
+	# Connected BEFORE the chase_way_back guard below, and separately from it.
+	# The moon turning and the doorway re-pointing are two unrelated things that
+	# happen on the same threshold, and folding them into one handler means
+	# blanking `chase_way_back` to leave a doorway alone silently takes the moon
+	# with it — the same trap `_wire_collapse` hit with `room_changed`.
+	_chase.triggered.connect(func(_player: Player) -> void: _turn_the_moon(true))
+
 	if chase_way_back == "":
 		return
 	_chase.triggered.connect(func(_player: Player) -> void:
 		_world.set_way_back(room, chase_way_back))
+
+
+## The moon goes dark and comes back red. See MoonWindow.eclipse() for the shape
+## of it, and the `blood_moon_*` exports above for why it belongs to this script.
+##
+## `animated` false snaps it, for a save resumed after the encounter: the turn
+## already happened, and replaying it on load would be a cutscene nobody asked
+## for playing over a player who has their controls.
+func _turn_the_moon(animated: bool) -> void:
+	if blood_moon_window.is_empty():
+		return
+	var window := get_node_or_null(blood_moon_window) as MoonWindow
+	if window == null:
+		push_warning("Act1Beats: blood_moon_window points at no MoonWindow — the moon never turns.")
+		return
+	var glow := get_node_or_null(blood_moon_glow) as LampFixture
+	window.eclipse(blood_moon_seconds if animated else 0.0, glow)
 
 
 ## The room's Darkshang trigger, wherever in the room it was dropped. Scoped to
@@ -571,6 +733,20 @@ func _find_chase_trigger(room: Node) -> DarkshangTrigger:
 ## placed in it — the beat belongs to ARRIVING, and there is no line across the
 ## doorway that arriving could miss.
 func _wire_collapse() -> void:
+	# Connected FIRST, and unconditionally. `room_changed` drives the escape's
+	# ambience and the dark rooms' glow as well as the collapse, and those must
+	# not stop working because the collapse's own rooms happen to be missing —
+	# the three used to share this one early return.
+	_last_room = _world.current_room
+	_world.room_changed.connect(_on_room_changed)
+	_build_ambience()
+	if _world.player != null:
+		_world.player.died.connect(_on_player_died)
+	# Whatever room the world opened in — the debug picker drops straight into
+	# room 16, and it should be lit and shaking on arrival like any other way in.
+	if _world.current_room != null:
+		_apply_room_mood(_world.current_room, LdtkWorld.play_index(_world.current_room))
+
 	if collapse_first_room > collapse_last_room:
 		return
 	var found := 0
@@ -583,20 +759,24 @@ func _wire_collapse() -> void:
 		# than every time the world loads.
 		print("Act1Beats: no rooms in %d-%d — the collapse is waiting on them."
 			% [collapse_first_room, collapse_last_room])
+
+
+## The single ambience rig, parented to the world so it is torn down with it.
+func _build_ambience() -> void:
+	if _ambience != null:
 		return
-	# Seed it with where he already is. room_changed has ALREADY fired for the
-	# opening room by now (LdtkWorld emits it from its own _ready, and this script
-	# waits for the rooms to exist before looking), so without this the very next
-	# transition reports that he came from nowhere — and the debug picker, which
-	# drops you straight into Level_12, could never reach the beat at all.
-	_last_room = _world.current_room
-	_world.room_changed.connect(_on_room_changed)
+	var scene: PackedScene = load("res://scenes/props/CollapseAmbience.tscn")
+	if scene == null:
+		return
+	_ambience = scene.instantiate()
+	_world.add_child(_ambience)
 
 
 func _on_room_changed(room: Node2D) -> void:
 	var arriving_from := _last_room
 	_last_room = room
 	var here := LdtkWorld.play_index(room)
+	_apply_room_mood(room, here)
 	if here < collapse_first_room or here > collapse_last_room:
 		return
 	if _collapsed.has(room.name):
@@ -608,6 +788,216 @@ func _on_room_changed(room: Node2D) -> void:
 		return
 	_collapsed[room.name] = true
 	_play_collapse(room)
+
+
+## Everything a room turns on just by being entered: the glow if it is one of the
+## dark ones, and the ambient shudder at this room's place on the ramp.
+##
+## Both are re-applied on EVERY arrival rather than once, because both can be
+## taken away while he is still in the room — NoteSequence revokes the glow on
+## death, and a room re-entered from the far side is a fresh arrival.
+func _apply_room_mood(room: Node2D, here: int) -> void:
+	_glow_here = glow_rooms.has(here)
+	_light_him(_glow_here)
+	_stir_building(room, here)
+	_watch_for_stand_down = chase_ends_room != "" and str(room.name) == chase_ends_room
+	set_process(_watch_for_stand_down)
+
+
+## The last thing the chase does. Once Hooshang is past the line, the shadow
+## stops where it stands and stays stopped — see Darkshang.stand_down(), and the
+## note on `chase_ends_past_x` for why the line is where it is.
+##
+## Polled rather than hung off an Area2D because room 22's entities live in LDtk
+## and that file cannot always be written to (it is held open by the editor); a
+## number on this script needs nothing placed. `set_process` is off everywhere
+## else, so this costs one comparison per frame in exactly one room.
+func _process(_delta: float) -> void:
+	if not _watch_for_stand_down:
+		return
+	var player := _world.player if _world != null else null
+	if player == null:
+		return
+	if player.global_position.x > chase_ends_past_x:
+		return
+	_watch_for_stand_down = false
+	set_process(false)
+	_play_chase_end()
+
+
+## The end of Act I: the shadow goes out, Rumi comes back, and the light takes
+## them both somewhere else.
+##
+## THE ONE THING HE HAD TO DO WAS STOP. The reveal in room 11 named Darkshang as
+## a seed Hooshang sowed and kept watering; this pays that off — it is not beaten,
+## it is left unwatered, and the roots stay in the ground. So the shadow is gone
+## before the first line, and Hooshang's question is asked to an empty room.
+##
+## Rumi is STAGED here rather than triggered. Room 22 has no entities to spare
+## (LdtkRumiTrigger.staged), and he stands between Hooshang and the sunrise
+## window on purpose: his last line points at the light, and he is already in
+## front of it when he says so.
+func _play_chase_end() -> void:
+	var player := _world.player
+	if player == null:
+		return
+	player.input_locked = true
+	# Both of them end up on the floor of a five-tile room, so the top of the
+	# screen is the clear half (CLAUDE.md, dialogue rules).
+	_dialogue_vside = DialogueBox.VSide.TOP
+
+	var shadow := _shadow_in_play()
+	if shadow != null:
+		await shadow.dissolve(dissolve_time)
+	# The room with nothing in it. He does not speak into the moment the shadow
+	# vanishes — he speaks after enough silence to be sure of it.
+	await _hold(after_dissolve_pause)
+	await _hooshang("It's... gone?", "shocked")
+
+	_rumi_trigger = LdtkRumiTrigger.staged(
+		Vector2(player.global_position.x + rumi_end_offset, player.global_position.y))
+	_world.add_child(_rumi_trigger)
+	await get_tree().process_frame        # let its _ready build the glow
+	await _rumi_trigger.appear()
+	_rumi_trigger.breathe(true)
+	await _hold(arrival_pause)
+
+	await _rumi("No, jaan. A darkness grown this strong cannot be defeated overnight.[p] But stop watering it, and it stops growing.", "serene")
+	await _hooshang("So I never had to defeat it. I just had to stop feeding it.", "vulnerable")
+	await _rumi("Yes. The roots remain. It may green again someday, if ever you water it.[p] But you know the way of it now, you need only stop. Let the thought come, let it stand, let it go. Do not water it with your fear, and it withers on its own.", "wistful")
+	await _rumi("Come. Not every seed you carry grew into this.[p] Let me show you the ones that grew toward the light.", "warm_open")
+
+	await _play_act_two()
+
+
+## "The whirl of gold light takes them."
+##
+## Rumi's own glow blooms until it has swallowed the room, the screen goes to
+## GOLD rather than to black — this is not a scene ending, it is being carried
+## out of one — and the card names where they land.
+##
+## WHERE IT GOES. `act_two_scene` is empty because Act II is not built yet, and
+## an empty one returns to the title screen with the run banked. Point it at the
+## Act II world when it exists and this beat needs no other change; that is the
+## whole reason the hand-off is a path and not a call.
+func _play_act_two() -> void:
+	var bloom := create_tween().set_parallel()
+	if _rumi_trigger != null:
+		_rumi_trigger.breathe(false)
+		bloom.tween_property(_rumi_trigger.get_node("RumiLight"), "energy",
+			whirl_energy, whirl_time).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	_fade.color = Color(whirl_color, 0.0)
+	bloom.tween_property(_fade, "color:a", 1.0, whirl_time) \
+		.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN)
+	await bloom.finished
+
+	await _show_act_card()
+
+	SaveGame.save_now()
+
+	# DEFERRED, and with the tree captured first. Both hand-offs tear the current
+	# world down, and THIS NODE IS A CHILD OF THAT WORLD — calling either one
+	# inline frees the object whose coroutine is still running, and everything
+	# after the call is undefined. It showed up as `get_tree()` coming back null
+	# one line later, which is the polite version of the failure.
+	var tree := get_tree()
+	if act_two_scene != "" and ResourceLoader.exists(act_two_scene):
+		Screen.load_scene.bind(act_two_scene).call_deferred()
+		return
+	# Nothing to go to yet. Bank the run and hand back to the title screen, which
+	# is exactly what the pause menu's QUIT does — a finished Act should leave the
+	# game in a state you can start something else from, not sitting on a card.
+	MainMenu.open.bind(tree).call_deferred()
+
+
+## The Act II title card, over the gold. Held on a plain black plate so the words
+## are readable against a screen that is currently the colour of a light bulb.
+func _show_act_card() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 95
+	add_child(layer)
+	var plate := ColorRect.new()
+	plate.color = Color(0.03, 0.025, 0.035, 0.0)
+	plate.anchor_right = 1.0
+	plate.anchor_bottom = 1.0
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(plate)
+	var label := Label.new()
+	label.text = act_card_text
+	label.anchor_right = 1.0
+	label.anchor_bottom = 1.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color(1.0, 0.88, 0.62))
+	label.modulate.a = 0.0
+	layer.add_child(label)
+
+	var t := create_tween().set_parallel()
+	t.tween_property(plate, "color:a", 1.0, card_fade)
+	t.tween_property(label, "modulate:a", 1.0, card_fade).set_delay(card_fade * 0.5)
+	await t.finished
+	await _hold(card_hold)
+	var out := create_tween()
+	out.tween_property(layer, "visible", false, 0.0).set_delay(card_fade)
+	await _hold(card_fade)
+	layer.queue_free()
+
+
+## Grant or drop the glow, deferred a frame.
+##
+## The frame matters. NoteSequence is connected to the same `room_changed` signal
+## and revokes the glow from its handler; which of us runs first is connection
+## order, which is scene-tree order, which is not something either script should
+## be relying on. Waiting a frame means this always lands after the revoke,
+## whatever order they were wired in.
+func _light_him(on: bool) -> void:
+	await get_tree().process_frame
+	var player := _world.player if _world != null else null
+	if player == null:
+		return
+	if on:
+		player.grant_glow()
+	# Not revoked on the way out — NoteSequence already does that on every room
+	# change, and a second revoke here would be two owners for one flag.
+
+
+## Point the ambience at this room, at its strength on the ramp. Rooms off the
+## ramp get intensity 0, which stops the emitters and the shudder outright.
+func _stir_building(room: Node2D, here: int) -> void:
+	if _ambience == null or _world == null:
+		return
+	var strength := 0.0
+	if here >= ambience_first_room and here <= ambience_last_room:
+		# Across the row, bent by `ambience_curve`. `here` is the LEVEL NUMBER,
+		# which is play order (CLAUDE.md) — using the room's world position would
+		# read this row backwards, since the escape runs right to left across the
+		# grid, and the building would calm down as he ran.
+		var span := maxi(ambience_last_room - ambience_first_room, 1)
+		var t := float(here - ambience_first_room) / float(span)
+		strength = lerpf(ambience_first_strength, ambience_last_strength,
+			pow(t, maxf(ambience_curve, 0.01)))
+	# The wall's own ramp, over its own shorter stretch of rooms.
+	var masonry := 0.0
+	if here >= brick_first_room and here <= ambience_last_room:
+		var brick_span := maxi(ambience_last_room - brick_first_room, 1)
+		var bt := float(here - brick_first_room) / float(brick_span)
+		masonry = lerpf(brick_first_strength, brick_last_strength,
+			pow(bt, maxf(ambience_curve, 0.01)))
+	_ambience.play_in(_world.room_rect(room), strength, masonry)
+
+
+## The glow is taken back on death (NoteSequence again), and nothing fires
+## `room_changed` on a respawn — so without this he stands up in a dark room with
+## the lights off and no way to get them back short of leaving and returning.
+func _on_player_died() -> void:
+	if not _glow_here:
+		return
+	# Long enough to clear the respawn hold, so the grant lands on the player who
+	# is standing up rather than the one still coming apart.
+	await get_tree().create_timer(_world.respawn_delay + 0.25).timeout
+	if _glow_here and _world != null and _world.player != null:
+		_world.player.grant_glow()
 
 
 func _play_collapse(room: Node2D) -> void:
@@ -701,15 +1091,15 @@ func _emote(over: Node2D, kind: EmoteBubble.Kind) -> void:
 	bubble.queue_free()
 
 
-## One of Rumi's. He has no portrait art yet, so he gets the tinted stand-in.
+## One of Rumi's, with the face that goes with it.
 ##
 ## His face goes on whichever end of the banner he is actually standing at, so
 ## the two of them read as talking across a space rather than out of the same
 ## corner. Hooshang is always the other one, so his stays left.
-func _rumi(text: String) -> void:
+func _rumi(text: String, face: String) -> void:
 	var side: int = _rumi_trigger.portrait_side(_world.player) if _rumi_trigger != null \
 		else DialogueBox.Side.RIGHT
-	await Dialogue.say("Rumi", text, RUMI_GOLD, null, side, _dialogue_vside)
+	await Dialogue.say("Rumi", text, RUMI_GOLD, RUMI_FACES.get(face), side, _dialogue_vside)
 
 
 # -------------------------------------------------------------- plumbing ----

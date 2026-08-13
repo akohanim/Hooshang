@@ -50,6 +50,7 @@ func _ready() -> void:
 
 	# --- 1. walk the row, one room at a time ---------------------------------
 	var fell := {}
+	var pads_before := _pad_positions()
 	for n in range(13, 23):
 		var room := _room("Level_%d" % n)
 		if room == null:
@@ -72,6 +73,19 @@ func _ready() -> void:
 	_check(beats._collapsed.size() == fell.size(),
 		"each room collapsed exactly once  [%d rooms, %d marked]"
 			% [fell.size(), beats._collapsed.size()])
+
+	# The sounding pads are NOT scenery and do not come down with the room —
+	# rooms 16, 17 and 18 keep a layout you can recognise from its twin on the
+	# way out. This is one word in RoomCollapse.FALLS_UNDER and putting it back
+	# is silent in play until you notice a room rearranged itself.
+	var pads_after := _pad_positions()
+	var moved := []
+	for pad in pads_after:
+		if pads_before.get(pad, pads_after[pad]) != pads_after[pad]:
+			moved.append(pad)
+	_check(not pads_after.is_empty() and moved.is_empty(),
+		"the sounding pads stayed where they were  [%d pads, %d moved]"
+			% [pads_after.size(), moved.size()])
 
 	# --- 2. the outbound row is not part of this ----------------------------
 	var outbound := []
@@ -116,6 +130,17 @@ func _room(name: String) -> Node2D:
 		if r.name == name:
 			return r
 	return null
+
+
+## Where every sounding pad in the world is, keyed by node path. Taken from the
+## group rather than by walking the escape rooms, so a pad that somehow ended up
+## in the wrong room still gets watched.
+func _pad_positions() -> Dictionary:
+	var out := {}
+	for pad in get_tree().get_nodes_in_group("note_tile"):
+		if pad is Node2D:
+			out[str(pad.get_path())] = (pad as Node2D).global_position
+	return out
 
 
 func _frames(n: int) -> void:

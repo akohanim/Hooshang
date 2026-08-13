@@ -1924,7 +1924,7 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "5425" }
+			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "5436" }
 		},
 		{
 			"__cWid": 1,
@@ -1943,7 +1943,7 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "5731" }
+			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "5942" }
 		},
 		{
 			"__cWid": 1,
@@ -1962,7 +1962,7 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "8376" }
+			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "7487" }
 		},
 		{
 			"__cWid": 1,
@@ -6630,22 +6630,6 @@
 							"fieldInstances": [],
 							"__worldX": 2104,
 							"__worldY": 216
-						},
-						{
-							"__identifier": "GlassSpikesLeftWall",
-							"__grid": [19,4],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 60, "x": 0, "y": 32, "w": 16, "h": 16 },
-							"__smartColor": "#BFD8E6",
-							"iid": "947fdb70-6fc0-11f1-af61-81ca8ad555ca",
-							"width": 16,
-							"height": 16,
-							"defUid": 63,
-							"px": [312,72],
-							"fieldInstances": [],
-							"__worldX": 2200,
-							"__worldY": 232
 						}
 					]
 				},
@@ -7014,22 +6998,6 @@
 							"fieldInstances": [],
 							"__worldX": 2088,
 							"__worldY": 856
-						},
-						{
-							"__identifier": "GlassSpikesLeftWall",
-							"__grid": [19,4],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 60, "x": 0, "y": 32, "w": 16, "h": 16 },
-							"__smartColor": "#BFD8E6",
-							"iid": "d7e640d7-6fc0-11f1-b3c5-5f5be2388a4b",
-							"width": 16,
-							"height": 16,
-							"defUid": 63,
-							"px": [312,72],
-							"fieldInstances": [],
-							"__worldX": 2184,
-							"__worldY": 872
 						}
 					]
 				},
@@ -9183,22 +9151,6 @@
 							"__worldY": 888
 						},
 						{
-							"__identifier": "GlassSpikesLeftWall",
-							"__grid": [28,6],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 60, "x": 0, "y": 32, "w": 16, "h": 16 },
-							"__smartColor": "#BFD8E6",
-							"iid": "18434342-6fc0-11f1-b3c5-cf1d6b345c26",
-							"width": 16,
-							"height": 16,
-							"defUid": 63,
-							"px": [456,104],
-							"fieldInstances": [],
-							"__worldX": 2968,
-							"__worldY": 904
-						},
-						{
 							"__identifier": "GlassSpikesRightWall",
 							"__grid": [27,5],
 							"__pivot": [0.5,0.5],
@@ -9213,22 +9165,6 @@
 							"fieldInstances": [],
 							"__worldX": 2952,
 							"__worldY": 888
-						},
-						{
-							"__identifier": "GlassSpikesRightWall",
-							"__grid": [27,6],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 61, "x": 0, "y": 32, "w": 16, "h": 16 },
-							"__smartColor": "#BFD8E6",
-							"iid": "18434344-6fc0-11f1-b3c5-afe998ca9845",
-							"width": 16,
-							"height": 16,
-							"defUid": 64,
-							"px": [440,104],
-							"fieldInstances": [],
-							"__worldX": 2952,
-							"__worldY": 904
 						},
 						{
 							"__identifier": "GlassSpikesRightWall",
@@ -12002,7 +11938,7 @@
 							"height": 32,
 							"defUid": 39,
 							"px": [8,176],
-							"fieldInstances": [{ "__identifier": "NextRoom", "__type": "String", "__value": "Level_13", "__tile": null, "defUid": 40, "realEditorValues": [] }],
+							"fieldInstances": [{ "__identifier": "NextRoom", "__type": "String", "__value": null, "__tile": null, "defUid": 40, "realEditorValues": [] }],
 							"__worldX": 3736,
 							"__worldY": 976
 						},
@@ -12485,22 +12421,6 @@
 							"fieldInstances": [],
 							"__worldX": 4232,
 							"__worldY": 952
-						},
-						{
-							"__identifier": "GlassSpikesRightWall",
-							"__grid": [31,7],
-							"__pivot": [0.5,0.5],
-							"__tags": [],
-							"__tile": { "tilesetUid": 61, "x": 0, "y": 32, "w": 16, "h": 16 },
-							"__smartColor": "#BFD8E6",
-							"iid": "3673d1f2-6fc0-11f1-88a3-f9a5ff6c6273",
-							"width": 16,
-							"height": 16,
-							"defUid": 64,
-							"px": [504,120],
-							"fieldInstances": [],
-							"__worldX": 4232,
-							"__worldY": 920
 						},
 						{
 							"__identifier": "Checkpoint",

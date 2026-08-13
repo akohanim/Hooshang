@@ -3,8 +3,13 @@ extends CanvasLayer
 ## ROOMS of the LDtk world — without playing through the game.
 ##
 ## NOT the front door any more. `run/main_scene` is MainMenu.tscn; this is
-## reached from its DEBUG PICKER row, which only exists in a debug build. The
-## distinction is deliberate and is the whole reason both exist: this one lists
+## reached from its DEBUG PICKER row, which ships in EXPORTED builds too — the
+## gate on OS.is_debug_build() was removed on purpose, because it hid this from
+## the itch.io build, which is the only one most people play. The player-facing
+## LEVEL SELECT still exists alongside it and still shows only what a save has
+## reached; this is the unrestricted list. Both are on the menu deliberately.
+##
+## The distinction is the whole reason both exist: this one lists
 ## every room and every scene in the project including prototypes, with no notion
 ## of what a run has unlocked, because that is what a developer wants and exactly
 ## what a player must not have. The player-facing level select lives on the main

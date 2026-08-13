@@ -328,6 +328,57 @@ func stop_chase() -> void:
 	chase_ended.emit()
 
 
+## He stops, for good, exactly where he is standing.
+##
+## The difference from stop_chase() is `auto_start`, and it is not cosmetic.
+## stop_chase() puts him back to DORMANT — and DORMANT is also the state he sits
+## in BEFORE a chase, waiting to wake when the player comes within
+## `wake_distance`. So a stop_chase() on its own reads as "the chase is over"
+## and behaves as "the chase is armed again": in a 224px room the player is
+## inside 240px of him from the moment he arrives, and the shadow would come
+## back to life a second after standing down.
+##
+## He stays VISIBLE and stays PUT — no teleport to spawn_point, unlike
+## stand_by(). That is the whole point of the beat this exists for: Act I ends
+## with the thing that chased Hooshang across twenty rooms simply stopping in the
+## doorway of his cubicle, still there, no longer coming.
+func stand_down() -> void:
+	auto_start = false
+	stop_chase()
+	# Otherwise the art keeps the lean of whatever he was doing on the last frame
+	# he moved — he reads as paused mid-stride rather than as stopped.
+	_velocity = Vector2.ZERO
+	_push_visual()
+
+
+## He goes out — stops, thins, and is not there any more.
+##
+## The end of the chase rather than a pause in it: stand_down() leaves him
+## standing in the room to be talked to, and this is for the beat where there is
+## nothing left to talk to. Act I ends with Hooshang asking "It's... gone?" and
+## the honest answer has to already be on screen before he asks it.
+##
+## Stops FIRST and fades second, so nothing is still creeping toward the player
+## while it thins out — a shadow that keeps closing while it disappears reads as
+## a rendering bug rather than as an ending.
+##
+## `visible = false` at the end is what takes him out of `_shadow_in_play()`, so
+## a later beat looking for "the shadow currently chasing" correctly finds none.
+func dissolve(seconds: float) -> void:
+	stand_down()
+	if seconds <= 0.0:
+		modulate.a = 0.0
+		visible = false
+		return
+	var out := create_tween()
+	out.tween_property(self, "modulate:a", 0.0, seconds) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	await out.finished
+	if not is_inside_tree():
+		return
+	visible = false
+
+
 ## Telegraph a surge, then lunge. Called by a SurgePointTrigger the player walks
 ## into. `duration` and `intensity` come off the LDtk entity, so two surge points
 ## in one room can differ.

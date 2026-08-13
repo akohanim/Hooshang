@@ -199,8 +199,9 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   is the way back and clears the world first, which is also what makes the title
   screen unpausable (`can_pause()` needs a world). The player-facing level
   select offers only rooms a slot has actually stood in and binds no slot;
-  the debug picker still lists everything and stays reachable from a DEBUG
-  PICKER row in debug builds.
+  the debug picker still lists everything and is on the menu in EXPORTED builds
+  too (the `OS.is_debug_build()` gate was removed — it hid the row from the
+  itch.io build, which is the one most people play).
   `PauseMenu.tscn` is the `Pause` autoload — Escape / Start / Select opens it,
   the same button closes it, and it is the ONLY node set to
   `PROCESS_MODE_ALWAYS`, so `get_tree().paused` freezes everything else exactly
@@ -214,6 +215,14 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   him behind the menu.
 - `scenes/props/` — `Checkpoint.tscn`, `hazards/Hazard.tscn` (both @tool,
   size-exported), `lighting/LampFixture.tscn` (reusable lamp; joins `lights`).
+  `lighting/SunShaft.tscn` is the third light source after `LampFixture` and
+  `MonitorGlow`, and the only one you look AT: parallel bars of light falling
+  from a window with dust drifting in them. The bars are `PointLight2D`s, not
+  painted quads — `CanvasModulate` is 0.05 and would eat a painted one — and the
+  motes are ordinary sprites LIT by the bars, so they are bright inside a beam
+  and invisible between them with nothing masking them. Room 22 is the only
+  user; pair it with `backdrop/DawnWindow.tscn` (`MoonWindow`'s warm twin, same
+  frame art) and see `LIGHTING.md`.
   `hazards/GlassSpikes.tscn` EXTENDS `Hazard`, so layer, mask and the kill are
   inherited and can't drift from the greybox boxes — it only overrides
   `_build_visual()`/`_update_extents()`. One LDtk entity per surface —
@@ -229,6 +238,17 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   Place it in LDtk as a `SlideZone` and set the three fields per instance.
 - `assets/hooshang_frames.tres` = SpriteFrames from the samurai pack
   (`assets/FREE_Samurai .../Sprites`); Rumi reuses it tinted gold.
+- `tests/room_shot.tscn` — dev capture harness, not a pass/fail test. Stands the
+  player in a named room, photographs the 320x180 game surface and prints the
+  frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
+  Runs WINDOWED — 2D does not rasterise headless — and binds no save slot:
+  `Godot --path . res://tests/room_shot.tscn -- Level_22`
+- `tools/gen_dawn_window.py`, `gen_light_shaft.py`, `gen_light_mote.py` — the
+  room 22 sunrise art. `light_mote.png` is deliberately NOT `debris_dust.png`:
+  a mote must be radially symmetric and shapeless, because particles spin.
+- `tools/gen_eclipse_moon.py` — two white alpha masks (umbra + halo) sized to
+  `moon.png`'s own disc, which is how `MoonWindow` runs the escape row's blood
+  moon as a per-instance ramp instead of ten drawn moons (`LIGHTING.md`).
 - `tools/gen_level.py`, `tools/gen_level1.py` — regenerate the greybox levels
   (tilemap bytes + node layout, incl. prefab instances). Re-running OVERWRITES
   hand-edits to the generated `.tscn`. Levels are dark (CanvasModulate ~0.09) +
@@ -258,8 +278,13 @@ test rather than being noticed months later in play.
   player, so he is the other side.
 - **One portrait state per line.** Beats name a state (`"annoyed"`), not a file,
   so re-cutting the portrait sheet never touches the dialogue.
-- **Long lines are fine.** The banner grows to fit (`_fit_banner()`); do not
-  shrink the font, which is the thing that makes this read like Celeste.
+- **Long lines are fine, and they PAGE.** The banner grows to fit up to
+  `max_lines` (3) and no further; past that the line is broken into pages at
+  SENTENCE boundaries and shown a press at a time (`_paginate`). An ellipsis is
+  never treated as a sentence ending, so a held breath cannot become a page turn.
+  Do not shrink the font to fit more in — the type size is the thing that makes
+  this read like Celeste, and a six-row banner covers the room the scene is set
+  in, which is what the cap exists to stop.
 - Dialogue is drawn on the window's own surface at full resolution, the emote
   bubble inside the 320x180 game viewport with the sprites. That split is
   deliberate — see `systems/screen.gd`. Restyling one can never touch the other.

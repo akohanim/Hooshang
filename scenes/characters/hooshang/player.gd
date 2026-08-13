@@ -667,6 +667,18 @@ func rumble(strength := 1.6, duration := 1.0) -> void:
 	juice.rumble(strength, duration)
 
 
+## Hold the camera at a sustained rattle of `amplitude` px — the building groaning
+## around him — until something sets it again. 0 turns it off.
+##
+## A THIRD verb rather than a long rumble(), because it is a different KIND of
+## thing: shake() is one knock and rumble() is a run that ends, and those two
+## share a tween where each call kills the last. This is a level, held and
+## re-stated per frame by whoever is describing the room (CollapseAmbience), and
+## it stacks with the other two instead of replacing them — see Juice.set_tremor.
+func tremor(amplitude: float) -> void:
+	juice.set_tremor(amplitude)
+
+
 ## Freeze him mid-scene: no input, no gravity, no state machine, exactly where he
 ## stands. Comes back with velocity cleared, so a hold during a fall doesn't hand
 ## control back to a player who is suddenly moving at terminal speed.

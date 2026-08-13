@@ -16,8 +16,14 @@ extends CanvasLayer
 ## Nothing here writes to a save slot. The picker binds nothing, so an afternoon
 ## spent jumping between rooms cannot touch a real run.
 ##
-## Reached from the main menu's DEBUG PICKER V2 row in debug builds. Escape goes
-## back there.
+## NO LONGER ON THE MAIN MENU. It had a row of its own there and it was taken
+## off — two debug pickers side by side on a title screen is one more than that
+## screen should be explaining. Run it directly when you want it:
+##
+##     Godot --path . res://scenes/debug_picker_v2.tscn
+##
+## Escape still returns to the title screen, so it hands back the same way it
+## always did.
 ##
 ## Rows are Buttons in a VBoxContainer, so they work with the mouse AND with the
 ## keyboard/gamepad through Godot's own focus neighbours — the first row grabs

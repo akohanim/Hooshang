@@ -19,9 +19,19 @@ Practically that means:
 - A ceiling fixture is a `LampFixture` with `show_body = true`, so you see the
   cord and bulb.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
-  `show_body = false` — the window itself IS the visible source.
+  `show_body = false` — the window itself IS the visible source. On the escape
+  row that moon is eclipsed and recovering; see *The eclipse* below.
 - A screen is `MonitorGlow.tscn`.
 - If a corner needs light, ask what would be lighting it, and place that.
+
+**Room 22 is the one exception, and it is deliberate.** It is the last room of
+the Act and the only one lit by the sun, and sunlight in a small room genuinely
+*is* mostly bounce — so it carries two soft warm fills (`DawnSpillRoom22a/b`)
+with no fixture under them. They are still the window's light; they are named for
+it so nobody later mistakes them for the old style of anonymous mid-room fill,
+and they are kept dim (0.34–0.5) on purpose. The room's darkness is what the sun
+shafts are visible *against*: the first pass ran them at 1.15 and 0.85, and the
+whole room came up an even warm brown with the beams invisible inside it.
 
 Some props light themselves and need nothing placed next to them:
 
@@ -31,6 +41,10 @@ Some props light themselves and need nothing placed next to them:
   easing back down on the same curve as the pad's own flash. The colour is
   sampled from the pad's art and pushed up to full saturation, so re-colouring
   `assets/notes/note_N.png` re-colours its light too — don't set it by hand.
+- **Sun shafts** (`scenes/props/lighting/SunShaft.tscn`) are the third kind of
+  source, after `LampFixture` and `MonitorGlow`, and the only one you look AT
+  rather than by: visible bars of light hanging in the air with dust turning
+  over in them. Room 22 is the only user. See *Adding a sun shaft* below.
 - **Rumi's gift** (`scripts/ldtk_rumi_trigger.gd`) spawns a mote for the length
   of the beat and frees it. Worth knowing because it is the one case where a
   light was *not* enough: room 1's walls already sit at 255 in the red channel,
@@ -143,12 +157,88 @@ world X — **room N pairs with room 22 − N** (9↔13, 8↔14, … 1↔21).
 | 19 | `Level_19` | 912 – 1232 | room 3 |
 | 20 | `Level_20` | 592 – 912 | room 2 |
 | 21 | `Level_21` | 272 – 592 | room 1 |
+| 22 | `Level_22` | −48 – 272 | room 0 — **the cubicle**, and the only room in the Act lit by daylight |
+
+Room 22 is a byte-for-byte copy of room 0's geometry, one row down and 48px
+left: the same cubicle he woke up in, at the end of the night. Its open band is
+world **x 0 – 224, y 816 – 896** — five tiles tall, so there is much less room
+above the floor than the numbers for the top row suggest. Nothing lies to its
+LEFT (it is the leftmost room in the world), so the seam rule below only has to
+be satisfied on the right, against room 21 at x = 272.
 
 Its lighting was **duplicated from the outbound row**: same X, same
 colour/energy/scale/cable, `y + 640`. So the return trip is lit exactly like the
 way in, which is the point — you are meant to recognise the rooms. Ceiling
 fixtures, moon glows and moon windows all came across; rooms 12 and 13 were lit
 by hand first and were left alone.
+
+### The eclipse (rooms 12 – 21)
+
+The escape row runs a **total eclipse that recovers**. Room 12 is a blood moon
+with the umbra still across most of it and a cold violet halo; by room 21 the
+disc is clear and warm and its glow is the colour of the sunrise waiting in room
+22. The ramp is the visual spine of the escape — you should be able to tell
+roughly how far out you are by looking at the window.
+
+It is **six numbers per window**, not seven drawn moons. `MoonWindow` tints the
+one `moon.png` and lays two white alpha masks over it
+(`tools/gen_eclipse_moon.py`): `Shadow` is the umbra, `Halo` is the ring of lit
+air. Both take their colour from the instance, so the whole ramp reads as a
+column in `Act1World.tscn` instead of hiding in ten PNGs nobody can compare.
+
+| Room | `shadow_amount` | `halo_amount` | Moon | Glow colour | energy / scale |
+| --- | --- | --- | --- | --- | --- |
+| 12 | 0.85 | 0.75 | deep crimson | blood red | 1.9 / 2.8 |
+| 13 | 0.72 | 0.70 | crimson | | 1.9 / 3.0 |
+| 14 | 0.60 | 0.64 | red | | 2.2 / 3.2 |
+| 15 | 0.48 | 0.58 | red-orange | | 2.4 / 2.4 |
+| 17 | 0.30 | 0.48 | orange | | 1.6 / 1.8 |
+| 18 | 0.20 | 0.44 | warm orange | | 2.6 / 2.4 |
+| 21 | 0.05 | 0.38 | amber | warm amber | 3.2 / 3.0 |
+
+**Rooms 16, 19 and 20 have no moon window** and are untouched by this. The row
+was only ever given seven, and the ramp still reads across the gaps.
+
+Four things worth knowing before retuning it:
+
+- **The sky patch is not allowed to go black.** It started at `(0.055, 0.03,
+  0.105)`, which is darker than the brick wall outside the window — so sitting in
+  the same 1.9-energy light the wall came up red and the sky stayed at nothing,
+  and the window read as a hole punched in the wall rather than as a night sky
+  behind it. It now ramps `(0.125, 0.052, 0.125)` → `(0.205, 0.10, 0.13)`. The
+  band below the moon measures **min 23, mean 40** luminance against the moon's
+  **mean 79, peak 133** — dark enough to stay night, light enough to be sky, and
+  the moon still comfortably the brightest thing in the frame.
+
+- **`MoonWindow`'s defaults are the plain full moon**, so rooms 1 – 11 are
+  unaffected — still the same night seen on the way in, cold and blue. Keep it
+  that way: the eclipse only means anything because the outbound trip had none.
+- **Keep green well below red in `moon_color`.** `moon.png`'s craters are blue,
+  so a yellow tint (high green, low blue) turns them olive and the moon comes out
+  looking mouldy rather than warm. Room 21 is `(1, 0.62, 0.38)` for that reason
+  and not `(1, 0.76, 0.44)`, which was tried first and looked mossy.
+- **The glows used to be `3.0 / 5.0` across the board**, which is a 320px radius
+  in a 320px room — it floods wall to wall and leaves nothing dark for the moon
+  to be a light *in*. Room 12 was a flat red screen with no shadow anywhere and
+  the eclipse art was invisible inside it (mean 55.8, peak 173 — bright and
+  completely without contrast). They now ramp from a tight pool in room 12 to
+  something near the old flood in room 21, which is most of what makes the row
+  read as getting less gloomy.
+
+- **The halo is a bright RING plus a broad dim WASH**, and it needs both. The
+  ring alone hugged the limb and stopped, leaving the corners and the whole band
+  below the moon unlit — the other half of the same "hole in the wall" problem.
+  Its canvas is 96px rather than the shadow's 64 for that reason: at 64 it could
+  not reach past 16 window px from the moon's centre, and the sky patch extends
+  31px below it. `HALO_REACH` (42px, i.e. 21 window px) is a hard stop, because
+  the moon sits 3px right of the frame's middle and anything wider escapes the
+  frame and glows on the brick outside the window.
+
+`EclipseChillRoom12/13/14` are a cold violet rim right at the window, fading out
+over three rooms. The red of a blood moon is light bent through the Earth's
+atmosphere; this is the part of the shadow that stays cold, and it is what makes
+room 12 read as *wrong* rather than merely red. Small radius on purpose — each
+sits well inside its own room, unlike the moon glows underneath them.
 
 A moon window is **two nodes that must stay together**: `MoonWindowRoom<N>` is
 the window art under `Backdrop`, and `MoonGlowRoom<N>` is its light under
@@ -289,13 +379,24 @@ Cubicle bulb            energy 2.1   scale 2.2   cable 40   show_body true
   + flickers, warm Color(1, 0.87, 0.66) — deliberately the dimmest room
 
 Moonlight               energy 1.3   scale 1.6   show_body false
-  cold Color(0.62, 0.74, 1.0), placed on a MoonWindow
+  cold Color(0.62, 0.74, 1.0), placed on a MoonWindow — rooms 1-11
+
+Blood moon              energy 1.9   scale 2.8   show_body false
+  Color(0.86, 0.16, 0.26) + a violet EclipseChill on top — room 12, the
+  gloomiest end of the escape ramp; see The eclipse above
 
 Monitor (MonitorGlow)   energy 0.9-1.1   scale 1.0-1.2
   cold Color(0.55, 0.78, 0.95); glows/wanders slowly by default
 
 Feature light           energy 1.6   scale 1.3   show_body true
   e.g. over the musical tiles in the cave
+
+Dawn window             energy 2.6   scale 1.25  show_body false
+  warm Color(1, 0.72, 0.42), placed on a DawnWindow — room 22 only
+
+Dying fluorescent       energy 0.6   scale 1.3   cable 36   show_body true
+  cold Color(0.86, 0.92, 0.82) + flickers 0.55 at speed 11
+  the office light losing to the sunrise; room 22's twin of the cubicle bulb
 ```
 
 ---
@@ -332,6 +433,57 @@ setting `z_index = -1`, which would bury it behind the room's own backdrop.
 > glow barely registers, because the fill lights have already raised everything
 > around it.
 
+### The dawn window
+
+`scenes/props/backdrop/DawnWindow.tscn` is the same thing for room 22, and it is
+built to be interchangeable with `MoonWindow`: the same 48 × 64 `window_frame.png`
+over a 40 × 54 sky, so it reads as *the same window* he has walked past twenty
+times, with the night finished behind it. The sky is art
+(`tools/gen_dawn_window.py`) rather than a `ColorRect`, because a sunrise is a
+vertical ramp and flattening it to one colour is the difference between a sunrise
+and someone leaving an orange light on.
+
+Pair it the same way — a warm `LampFixture`, `show_body = false` — and see the
+Dawn window recipe above.
+
+---
+
+## Adding a sun shaft
+
+`scenes/props/lighting/SunShaft.tscn` draws the light itself: parallel bars
+falling from a window with dust drifting in them. Instance it under `Lights` and
+put it where the window is.
+
+**The beams are lights, not painted shapes**, and they have to be.
+`CanvasModulate` is 0.05 and multiplies every `CanvasItem`, so a translucent
+polygon laid over the room comes out at a twentieth of what you drew. A
+`PointLight2D` with a beam texture (`tools/gen_light_shaft.py`) is exempt for
+exactly the same reason every lamp is — and it lights the floor it lands on for
+free.
+
+**The motes are not lights**, and that is also the point. They are an ordinary
+particle sprite, lit by the beams like anything else in the room, so a mote is
+bright inside a beam and invisible between them with nothing masking or clipping
+it. The emitter is one plain box across the whole fan.
+
+| Export | What it does |
+| --- | --- |
+| `beam_color` / `beam_energy` | As a lamp. Runs hot (≈1.9–2.1) because it is doing two jobs: being visible as air, and lighting what it lands on |
+| `beam_scale` | Length **and** width together. The texture's beam is 128px, so reach = `128 × beam_scale` |
+| `angle_degrees` | Measured from straight down; positive tips the beams to the left. Set this rather than rotating the node, so the node's position stays "where the window is" |
+| `beam_count` / `beam_spacing` | How many bars and the gap across them. Match the window: the panes either side of a mullion make two |
+| `beam_falloff` | How much dimmer each bar is than the last. Identical bars read as a stencil |
+| `mote_*` | Count, lifetime and drift of the dust |
+
+Two things learned tuning room 22's, both worth not repeating:
+
+- **Beams merge.** The first beam texture was 9→22px half-width; at three bars
+  spaced 22px they overlapped into one broad wedge with no frame-shadow in it at
+  all. The texture is now 6→14, which is what makes the gaps read.
+- **A bright room eats them.** A shaft is additive, so it only shows against dark
+  air. If the beams look weak, turn the room's fill DOWN before turning the beam
+  up.
+
 ---
 
 ## When you add a room in LDtk
@@ -352,7 +504,16 @@ After adding or moving a room:
 
 ## Checking your work
 
-Eyeballing a dark room is unreliable. To measure, put the player at a point of
+Eyeballing a dark room is unreliable. `tests/room_shot.tscn` stands the player in
+a room, photographs the 320×180 game surface and prints the frame's mean and peak
+luminance — which is how room 22's dawn was balanced:
+
+```bash
+/Users/ari/Downloads/Godot.app/Contents/MacOS/Godot --path . res://tests/room_shot.tscn -- Level_22
+```
+
+It runs windowed (2D does not rasterise headless), binds no save slot, and writes
+to `user://shots/`. To measure by hand instead, put the player at a point of
 interest and sample a small patch of the rendered frame around it:
 
 - Use a **patch**, not a frame average. Rooms like the cave are mostly solid
@@ -368,7 +529,12 @@ Rough targets from the current build:
 | Well-lit room | 65 – 90 |
 | Feature light (musical tiles) | 55 – 125 |
 | Cubicle (deliberately dim) | ~17 |
+| Room 22 at dawn (whole frame) | ~36 |
 | Cave, unlit | 4 – 10 |
+
+Room 22 sits well under "well lit" on purpose. It is a *contrast* room, not a
+bright one: the number that matters there is the range between the dark air at
+the far end and the sun in the window, not the average.
 
 ---
 

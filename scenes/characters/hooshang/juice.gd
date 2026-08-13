@@ -3,6 +3,9 @@ extends Node
 ## Self-contained "game feel" component: squash & stretch, dash afterimages,
 ## camera shake, and hitstop.
 ##
+## The camera only ever moves for something that happens TO him — death, a
+## collapse, a scripted jolt. Jumping and landing are squash-and-stretch only.
+##
 ## HOW THIS WORKS: the player controller calls this node's public methods at
 ## the moments things happen (on_jump, on_land, on_dash_start, dash_tick) —
 ## this node never reaches into the player's state machine itself. That
@@ -26,7 +29,7 @@ extends Node
 ## How stretched the launch pose gets. Narrow and tall.
 @export var jump_squash_scale := Vector2(0.75, 1.25)
 ## Landing squash at the hardest possible impact (x,y multiplier). Softer
-## landings blend toward Vector2.ONE — see landing_shake_max_speed below.
+## landings blend toward Vector2.ONE — see landing_squash_max_speed below.
 @export var land_squash_scale := Vector2(1.3, 0.7)
 ## Time to ease back to normal scale after either a jump or a landing.
 @export var squash_ease_time := 0.13
@@ -68,21 +71,26 @@ const SHARD_SHAPES := 3
 ## The freeze on the frame he dies. Real seconds — the whole screen stops, which
 ## is the single biggest reason a Celeste death lands as an event.
 @export var death_hitstop := 0.08
+## How far the camera dips on the frame he dies, in pixels (a smooth dip and
+## spring-back, not random jitter). Death is the ONLY movement beat that moves
+## the camera — jumps and landings deliberately do not, so a shaking screen
+## always means something happened TO him.
+@export var death_shake_strength := 0.9
+@export var death_shake_time := 0.18
 
 @export_group("Camera")
-## Landings slower than this don't bounce the camera or squash much at all.
-@export var landing_shake_min_speed := 160.0
-## Landings at or above this speed give the FULL bounce/squash strength.
-@export var landing_shake_max_speed := 260.0
-## How far the camera dips down on impact, in pixels, at full strength
-## (Celeste-style smooth dip + spring-back, not random jitter).
-@export var landing_shake_max_strength := 0.9
-@export var landing_shake_time := 0.18
+## Landings slower than this barely squash at all.
+@export var landing_squash_min_speed := 160.0
+## Landings at or above this speed give the FULL squash.
+@export var landing_squash_max_speed := 260.0
 ## True "everything pauses" hitstop on dash start. Real seconds, not scaled.
 @export var hitstop_time := 0.04
 ## How slow time gets during hitstop. Not exactly 0 to dodge zero-delta edge
 ## cases elsewhere in the engine.
 @export_range(0.0, 1.0) var hitstop_time_scale := 0.05
+## How often the sustained tremor (set_tremor) picks a new point to drift to, in
+## seconds. Short enough to read as a rattle; lengthen it and it becomes a sway.
+@export var tremor_step := 0.05
 
 @onready var _player: Node2D = get_parent()
 @onready var _sprite_squash: Node2D = _player.get_node("SpriteSquash")
@@ -90,8 +98,26 @@ const SHARD_SHAPES := 3
 @onready var _camera: Camera2D = _player.get_node("Camera2D")
 
 var _squash_tween: Tween
-var _shake_tween: Tween
 var _trail_timer := 0.0
+
+# The camera has TWO independent shake channels, summed into Camera2D.offset once
+# a frame by _process. Nothing else in the project writes that offset.
+#
+# They are separate on purpose. shake() and rumble() share one tween and each new
+# call kills the last — right for one-off knocks (the second knock IS the current
+# state of the camera), useless for a background that has to keep running
+# underneath them. CollapseAmbience holds the tremor channel at a level for the
+# whole time he is in a room, so the building groaning can neither delete nor be
+# deleted by the jolt of a room actually giving way (Act1Beats._play_collapse).
+var _shake_tween: Tween
+## The tween channel: one-off knocks and runs. Written by shake()/rumble() only.
+var _shake_offset := Vector2.ZERO
+## The tremor channel: a level, held until it is changed. See set_tremor().
+var _tremor_amplitude := 0.0
+var _tremor_offset := Vector2.ZERO
+var _tremor_from := Vector2.ZERO
+var _tremor_to := Vector2.ZERO
+var _tremor_phase := 1.0
 
 
 func _exit_tree() -> void:
@@ -115,12 +141,18 @@ func on_jump() -> void:
 
 ## Call right after landing is detected, passing the vertical speed the
 ## player was falling at the instant of impact (velocity.y BEFORE
-## move_and_slide resolves the collision). Harder falls squash more and
-## shake the camera; soft landings barely register.
+## move_and_slide resolves the collision). Harder falls squash more; soft
+## landings barely register.
+##
+## The impact is carried entirely by the SPRITE, never the camera. A platformer
+## this jump-dense puts a landing on screen every second or so, and a camera
+## that answers each one leaves the view permanently unsettled — the shake stops
+## reading as impact and starts reading as noise. Squash says the same thing
+## without moving the frame the player is aiming with.
 func on_land(impact_speed: float) -> void:
 	var t := clampf(
-		(impact_speed - landing_shake_min_speed)
-			/ maxf(landing_shake_max_speed - landing_shake_min_speed, 1.0),
+		(impact_speed - landing_squash_min_speed)
+			/ maxf(landing_squash_max_speed - landing_squash_min_speed, 1.0),
 		0.0, 1.0)
 	if t <= 0.0:
 		return  # too soft a landing to bother with
@@ -129,7 +161,6 @@ func on_land(impact_speed: float) -> void:
 		[squash, 0.03],
 		[Vector2.ONE, squash_ease_time],
 	], Tween.EASE_OUT, Tween.TRANS_BACK)
-	_camera_shake(landing_shake_max_strength * t, landing_shake_time)
 
 
 func _play_squash_sequence(keys: Array, ease_mode: Tween.EaseType, trans_mode: Tween.TransitionType) -> void:
@@ -173,7 +204,7 @@ func dash_tick(delta: float) -> void:
 ## the pacing would mean retuning the feel every time the art changed.
 func on_death() -> void:
 	hitstop(death_hitstop)
-	_camera_shake(landing_shake_max_strength, landing_shake_time)
+	_camera_shake(death_shake_strength, death_shake_time)
 	var world := _player.get_parent()
 	if world == null:
 		return
@@ -264,9 +295,9 @@ func hitstop(duration: float) -> void:
 		func() -> void: Engine.time_scale = 1.0)
 
 
-## Bounce the camera for something that isn't a landing — an impact nearby, a
-## single hard jolt. Same dip-and-spring as a hard landing so a one-off knock
-## always reads the same way; only the reason differs.
+## Bounce the camera for a single hard jolt — a chunk of ceiling coming down
+## nearby, a room giving way. Ordinary movement never calls this: routine jumps
+## and landings leave the camera alone on purpose, so a knock stays an event.
 func shake(strength: float, duration: float) -> void:
 	_camera_shake(strength, duration)
 
@@ -286,7 +317,7 @@ func rumble(strength: float, duration: float) -> void:
 		return
 	if _shake_tween and _shake_tween.is_valid():
 		_shake_tween.kill()
-	_camera.offset = Vector2.ZERO
+	_shake_offset = Vector2.ZERO
 	_shake_tween = create_tween()
 	# Short enough to read as a rattle rather than a sway. Much below this and
 	# the camera is moving less than one screen pixel per step at 320x180, so the
@@ -298,9 +329,49 @@ func rumble(strength: float, duration: float) -> void:
 		var fade := 1.0 - float(i) / float(steps)
 		var to := Vector2(rng.randf_range(-1.0, 1.0), rng.randf_range(-1.0, 1.0)) \
 			* strength * fade
-		_shake_tween.tween_property(_camera, "offset", to, STEP) \
+		_shake_tween.tween_property(self, "_shake_offset", to, STEP) \
 			.set_trans(Tween.TRANS_SINE)
-	_shake_tween.tween_property(_camera, "offset", Vector2.ZERO, STEP * 2.0)
+	_shake_tween.tween_property(self, "_shake_offset", Vector2.ZERO, STEP * 2.0)
+
+
+## Hold the camera at a sustained rattle of `amplitude` px until it is changed
+## again — the building coming down around him for as long as he is in the room.
+## 0 turns it off (it eases home over one tremor_step rather than snapping).
+##
+## Not rumble() repeated. rumble is a run with an END, and it owns the tween that
+## shake() also owns; this is a LEVEL, driven per frame by whatever is describing
+## the room (CollapseAmbience), and it deliberately shares nothing with the two
+## above so a knock can land on top of a tremor without either one vanishing.
+func set_tremor(amplitude: float) -> void:
+	_tremor_amplitude = maxf(amplitude, 0.0)
+
+
+## Both channels, summed and written once. The only place Camera2D.offset is set.
+func _process(delta: float) -> void:
+	_advance_tremor(delta)
+	var want := _shake_offset + _tremor_offset
+	if _camera.offset != want:
+		_camera.offset = want
+
+
+## Step the tremor toward a fresh random point every tremor_step.
+##
+## Deliberately not new noise every frame: at 320x180 with pixel snapping, a
+## camera re-rolled at 60Hz strobes rather than shakes. Stepping and easing
+## between points is the same trick rumble() plays with its 0.045s tween steps.
+func _advance_tremor(delta: float) -> void:
+	if _tremor_amplitude <= 0.0 and _tremor_offset.is_zero_approx():
+		_tremor_offset = Vector2.ZERO
+		return
+	_tremor_phase += delta / maxf(tremor_step, 0.001)
+	if _tremor_phase >= 1.0:
+		_tremor_phase = 0.0
+		_tremor_from = _tremor_to
+		# A point anywhere INSIDE the amplitude, not on a ring — the camera has to
+		# pass through the middle sometimes, or the rattle reads as an orbit.
+		_tremor_to = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) \
+			* _tremor_amplitude
+	_tremor_offset = _tremor_from.lerp(_tremor_to, smoothstep(0.0, 1.0, _tremor_phase))
 
 
 ## Celeste-style landing bounce: not random jitter — a single smooth dip
@@ -311,9 +382,14 @@ func _camera_shake(strength: float, duration: float) -> void:
 		return
 	if _shake_tween and _shake_tween.is_valid():
 		_shake_tween.kill()
-	_camera.offset = Vector2.ZERO
+	_shake_offset = Vector2.ZERO
 	_shake_tween = create_tween()
-	_shake_tween.tween_property(_camera, "offset:y", strength, duration * 0.25) \
+	# The whole Vector2 rather than its `y` sub-path: x stays 0 throughout, so
+	# this is the identical dip, and tweening a plain script variable by sub-path
+	# is a subtlety this does not need to depend on.
+	_shake_tween.tween_property(self, "_shake_offset", Vector2(0.0, strength),
+			duration * 0.25) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
-	_shake_tween.tween_property(_camera, "offset:y", 0.0, duration * 0.75) \
+	_shake_tween.tween_property(self, "_shake_offset", Vector2.ZERO,
+			duration * 0.75) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)

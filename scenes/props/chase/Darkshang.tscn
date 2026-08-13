@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://cur7g877l2vsn"]
 
-[ext_resource type="Script" path="res://scenes/props/chase/darkshang.gd" id="1_darkshang"]
+[ext_resource type="Script" uid="uid://b4wgv3rtww3bx" path="res://scenes/props/chase/darkshang.gd" id="1_darkshang"]
 
-[node name="Darkshang" type="Area2D" groups=["darkshang"]]
+[node name="Darkshang" type="Area2D" unique_id=1507762186 groups=["darkshang"]]
 script = ExtResource("1_darkshang")

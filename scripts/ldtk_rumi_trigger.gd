@@ -112,6 +112,48 @@ var _breath: Tween
 var _feet_row_cache := -1.0
 
 
+## Rumi's own art, for the runtime factory below. The post-import script holds
+## the same two for the triggers it BAKES into ldtk/levels/*.scn.
+const RUMI_FRAMES := preload("res://assets/rumi_frames.tres")
+
+## A Rumi staged by a script, in a room LDtk never put a trigger in.
+##
+## Act I ends in room 22, which has no entities to spare and cannot be given any
+## while the LDtk project is open (CLAUDE.md) — so the last beat builds its own.
+## What comes back is a trigger that DETECTS NOTHING: `monitoring` is off, so it
+## is a Rumi and a light on a node that happens to carry the staging code, and the
+## beat drives appear()/breathe()/portrait_side() by hand.
+##
+## Assembled here and not by the post-import script even though that builds the
+## same children, because that one runs at IMPORT time and editing it does not
+## re-import anything (CLAUDE.md) — a runtime path must not depend on it.
+static func staged(at: Vector2) -> LdtkRumiTrigger:
+	var trigger := Area2D.new()
+	trigger.set_script(load("res://scripts/ldtk_rumi_trigger.gd"))
+	trigger.name = "StagedRumi"
+	trigger.position = at
+	trigger.monitoring = false
+
+	var rumi := AnimatedSprite2D.new()
+	rumi.name = "Rumi"
+	rumi.sprite_frames = RUMI_FRAMES
+	rumi.animation = "idle"
+	rumi.autoplay = "idle"
+	rumi.scale = Vector2(0.5, 0.5)
+	rumi.modulate = Color(RUMI_GOLD.r, RUMI_GOLD.g, RUMI_GOLD.b, 0.0)
+	trigger.add_child(rumi)
+
+	var light := PointLight2D.new()
+	light.name = "RumiLight"
+	light.texture = LIGHT_TEXTURE
+	light.texture_scale = 2.8
+	light.color = Color(1, 0.82, 0.45, 1)
+	light.energy = 0.0
+	light.position = Vector2(0, -19)
+	trigger.add_child(light)
+	return trigger
+
+
 func _ready() -> void:
 	collision_layer = 8  # layer 4 "triggers"
 	collision_mask = 2  # player only
