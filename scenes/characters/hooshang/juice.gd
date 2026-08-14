@@ -33,6 +33,26 @@ extends Node
 @export var land_squash_scale := Vector2(1.3, 0.7)
 ## Time to ease back to normal scale after either a jump or a landing.
 @export var squash_ease_time := 0.13
+## How squashed a hard direction flip on the ground gets. Narrow and tall — he
+## leans into the turn — which is the opposite of a landing and reads as one.
+@export var turn_squash_scale := Vector2(0.74, 1.16)
+@export var turn_squash_time := 0.06
+## Flips slower than this aren't worth a visual: shuffling on the spot at walking
+## pace would otherwise squash him on every tap of the stick.
+@export var turn_min_speed := 55.0
+## Lockout after a turn squash. _apply_run's reversal branch is true for every
+## frame the old velocity survives — three or four of them at ground_decel — so
+## without this the tween restarts each frame and the squash never gets past its
+## first frame.
+@export var turn_cooldown_time := 0.25
+## How far the sprite stretches ALONG the dash on the frame it starts (0 = off).
+## Applied to whichever axis the dash is mostly on; a pure diagonal gets none,
+## because there is no axis to stretch a square scale along.
+@export var dash_stretch := 0.3
+## ...and how much it compresses along that same axis when the dash drops to
+## dash_end_speed. The dash used to get afterimages and nothing else, so it began
+## and ended with no weight anywhere on the sprite.
+@export var dash_end_squash := 0.18
 
 @export_group("Dash Trail")
 @export var trail_enabled := true
@@ -48,6 +68,38 @@ extends Node
 const SHARD_SHEET := preload("res://assets/effects/death_shard.png")
 const SHARD_CELL := 8.0
 const SHARD_SHAPES := 3
+
+## Soft puffs kicked up under his feet — three sizes, 8px cells, drawn by
+## tools/gen_dust.py. Deliberately its own sheet and not SHARD_SHEET tinted: a
+## shard is hard-edged debris, and a landing that throws those looks like a small
+## death rather than like dust.
+const DUST_SHEET := preload("res://assets/effects/dust_puff.png")
+const DUST_CELL := 8.0
+const DUST_SHAPES := 3
+
+@export_group("Dust")
+@export var dust_enabled := true
+## Puffs a full-strength burst throws. Scaled down for gentler ones.
+@export var dust_count := 5
+## How fast a puff drifts away from his feet, px/s.
+@export var dust_speed := 26.0
+## Half-width of the spray around its axis, in degrees.
+@export var dust_spread_degrees := 32.0
+## How long one puff lives. Short — dust that hangs around reads as smoke.
+@export var dust_lifetime := 0.32
+## Size of a puff as a multiple of the 8px art, at spawn. They GROW as they fade,
+## which is what makes them read as dispersing rather than as shrinking sparks.
+@export var dust_scale := 0.38
+@export var dust_growth := 1.6
+## Pale warm grey. Alpha here is the starting opacity — office dust should be
+## barely there, not a white puff.
+@export var dust_color := Color(0.85, 0.83, 0.78, 0.45)
+## How far below his origin his feet are (8x12 hitbox, so 6px).
+@export var dust_foot_offset := 6.0
+## Fraction of a full burst a jump throws. A takeoff disturbs less than a landing.
+@export_range(0.0, 2.0) var dust_jump_strength := 0.6
+## ...and a dash, which scuffs off in one direction rather than puffing outward.
+@export_range(0.0, 2.0) var dust_dash_strength := 0.85
 
 @export_group("Death")
 ## How many shards the burst throws. Celeste's is a ring, not a spray: they go
@@ -99,6 +151,7 @@ const SHARD_SHAPES := 3
 
 var _squash_tween: Tween
 var _trail_timer := 0.0
+var _turn_cooldown := 0.0
 
 # The camera has TWO independent shake channels, summed into Camera2D.offset once
 # a frame by _process. Nothing else in the project writes that offset.
@@ -135,8 +188,12 @@ func on_jump() -> void:
 	_play_squash_sequence([
 		[jump_anticipation_scale, jump_anticipation_time],
 		[jump_squash_scale, jump_squash_time],
-		[Vector2.ONE, squash_ease_time],
+		# The settle overshoots and comes back, rather than easing flat onto 1.0.
+		# The landing already did this (TRANS_BACK) and the jump did not, so the
+		# same sprite sprang on the way down and deflated on the way up.
+		[Vector2.ONE, squash_ease_time, Tween.TRANS_BACK],
 	], Tween.EASE_OUT, Tween.TRANS_QUAD)
+	_spawn_dust(Vector2.ZERO, dust_jump_strength)
 
 
 ## Call right after landing is detected, passing the vertical speed the
@@ -161,24 +218,73 @@ func on_land(impact_speed: float) -> void:
 		[squash, 0.03],
 		[Vector2.ONE, squash_ease_time],
 	], Tween.EASE_OUT, Tween.TRANS_BACK)
+	# Same `t`: the puff is as big as the impact was, which is what ties the dust
+	# to the fall rather than making every landing throw the same cloud.
+	_spawn_dust(Vector2.ZERO, t)
 
 
+## Call when he flips direction on the ground at speed, passing the speed he was
+## still travelling at. A lean into the turn — the only bit of the run cycle with
+## any weight in it, since a reversal is the one ground move that isn't a
+## constant-velocity slide.
+func on_turn(speed: float) -> void:
+	if speed < turn_min_speed or _turn_cooldown > 0.0:
+		return
+	_turn_cooldown = turn_cooldown_time
+	_play_squash_sequence([
+		[turn_squash_scale, turn_squash_time],
+		[Vector2.ONE, squash_ease_time, Tween.TRANS_BACK],
+	], Tween.EASE_OUT, Tween.TRANS_QUAD)
+
+
+## Keys are [scale, seconds] or [scale, seconds, trans], the third entry
+## overriding `trans_mode` for that step alone — which is how one sequence can
+## stretch smoothly and then settle with a spring.
 func _play_squash_sequence(keys: Array, ease_mode: Tween.EaseType, trans_mode: Tween.TransitionType) -> void:
 	if _squash_tween and _squash_tween.is_valid():
 		_squash_tween.kill()
 	_sprite_squash.scale = Vector2.ONE
 	_squash_tween = create_tween()
-	for key in keys:
+	for key: Array in keys:
+		var trans: Tween.TransitionType = key[2] if key.size() > 2 else trans_mode
 		_squash_tween.tween_property(_sprite_squash, "scale", key[0], key[1]) \
-			.set_ease(ease_mode).set_trans(trans_mode)
+			.set_ease(ease_mode).set_trans(trans)
 
 
 # --------------------------------------------------------------- dashing ----
 
 ## Call once, the moment a dash successfully starts.
-func on_dash_start(_dash_dir: Vector2) -> void:
+func on_dash_start(dash_dir: Vector2) -> void:
 	_trail_timer = 0.0  # spawn the first afterimage immediately
 	hitstop(hitstop_time)
+	_play_squash_sequence([
+		[_along(dash_dir, dash_stretch), 0.04],
+		[Vector2.ONE, squash_ease_time * 1.4],
+	], Tween.EASE_OUT, Tween.TRANS_QUAD)
+	# Scuffed off BEHIND him, unlike the jump and landing puffs, which go outward
+	# from under his feet. A dash is a push against something.
+	_spawn_dust(-dash_dir, dust_dash_strength)
+
+
+## Call when the dash drops to dash_end_speed. The momentum carry-over is still
+## running, so this is the sprite catching up rather than a stop.
+func on_dash_end(dash_dir: Vector2) -> void:
+	_play_squash_sequence([
+		[_along(dash_dir, -dash_end_squash), 0.05],
+		[Vector2.ONE, squash_ease_time, Tween.TRANS_BACK],
+	], Tween.EASE_OUT, Tween.TRANS_QUAD)
+
+
+## A scale stretched by `amount` along whichever axis `dir` mostly points down,
+## and squeezed by the same on the other — the volume-preserving read that makes
+## squash & stretch look like a body rather than a resize.
+##
+## A pure diagonal cancels to Vector2.ONE, which is correct and not a gap: an
+## axis-aligned scale has no way to stretch along 45 degrees, and faking it by
+## picking one axis would make the same dash look different left and up.
+func _along(dir: Vector2, amount: float) -> Vector2:
+	var axis := Vector2(absf(dir.x), absf(dir.y))
+	return Vector2.ONE + (axis - Vector2(axis.y, axis.x)) * amount
 
 
 ## Call every physics frame while state == DASH, passing delta. Spawns
@@ -245,6 +351,69 @@ func _spawn_shard(world: Node, index: int) -> void:
 	t.tween_property(shard, "modulate:a", 0.0, death_shard_time) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	t.chain().tween_callback(shard.queue_free)
+
+
+# ----------------------------------------------------------------- dust ----
+
+## A puff at his feet. `direction` is the axis it sprays along; Vector2.ZERO
+## means "outward from under him", which is what a takeoff and a landing both
+## look like. `strength` (0-1ish) scales how many puffs and how far they go, so
+## the same call covers a scuff and a heavy landing.
+##
+## Hand-tweened sprites rather than a CPUParticles2D node, for the same two
+## reasons the dash trail and the death burst are: they have to be parented to
+## the ROOM (levels live in Screen's sub-viewport, so current_scene is the UI
+## surface) and pinned into the playable z band, and a particle node carried on
+## the player would drag its live particles along with him as he moves.
+func _spawn_dust(direction: Vector2, strength: float) -> void:
+	if not dust_enabled or strength <= 0.0:
+		return
+	var world := _player.get_parent()
+	if world == null:
+		return
+	var at := _player.global_position + Vector2(0.0, dust_foot_offset)
+	var count := maxi(int(round(dust_count * minf(strength, 1.0))), 1)
+	for i in count:
+		var away := direction
+		if away == Vector2.ZERO:
+			# Alternating sideways with a slight lift. A puff under his feet has
+			# to go somewhere, and sideways is the only direction that reads as
+			# air pushed out from under him — straight up reads as steam.
+			away = Vector2(1.0 if i % 2 == 0 else -1.0, -0.35)
+		var angle := away.angle() \
+			+ randf_range(-1.0, 1.0) * deg_to_rad(dust_spread_degrees)
+		_spawn_puff(world, at, Vector2.RIGHT.rotated(angle), strength, i)
+
+
+func _spawn_puff(world: Node, at: Vector2, away: Vector2, strength: float, index: int) -> void:
+	var puff := Sprite2D.new()
+	var tex := AtlasTexture.new()
+	tex.atlas = DUST_SHEET
+	# Cycled, not random: three random picks from three shapes reliably comes up
+	# all-the-same often enough to notice, and the point of the sheet is that one
+	# puff isn't three copies of a sprite.
+	tex.region = Rect2((index % DUST_SHAPES) * DUST_CELL, 0.0, DUST_CELL, DUST_CELL)
+	puff.texture = tex
+	puff.modulate = dust_color
+	puff.global_position = at
+	puff.scale = Vector2.ONE * dust_scale
+	puff.z_as_relative = false
+	puff.z_index = 0
+	world.add_child(puff)
+	# Behind him, unlike the afterimages: dust he kicked up should not be drawn
+	# over his boots.
+	world.move_child(puff, maxi(_player.get_index() - 1, 0))
+
+	var life := dust_lifetime * randf_range(0.8, 1.15)
+	var to := at + away * dust_speed * life * (0.6 + strength * 0.6)
+	var t := puff.create_tween().set_parallel()
+	t.tween_property(puff, "global_position", to, life) \
+		.set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+	t.tween_property(puff, "scale", Vector2.ONE * dust_scale * dust_growth, life) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	t.tween_property(puff, "modulate:a", 0.0, life) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t.chain().tween_callback(puff.queue_free)
 
 
 func _spawn_afterimage() -> void:
@@ -348,6 +517,7 @@ func set_tremor(amplitude: float) -> void:
 
 ## Both channels, summed and written once. The only place Camera2D.offset is set.
 func _process(delta: float) -> void:
+	_turn_cooldown = maxf(_turn_cooldown - delta, 0.0)
 	_advance_tremor(delta)
 	var want := _shake_offset + _tremor_offset
 	if _camera.offset != want:

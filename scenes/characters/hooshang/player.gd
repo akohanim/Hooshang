@@ -44,13 +44,38 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 @export_range(0.0, 1.0) var air_decel_mult := 0.6
 
 @export_group("Jump")
-## Initial upward speed. With rise_gravity 1400 (and the anti-gravity apex
-## below) this measures to a ~33px apex — just over a 2-cell pillar on the
-## 16px LDtk grid (32px), so a full-height jump BARELY clears it (~1px spare).
-## Measured, not derived: the apex modifier makes the closed-form v^2/2g wrong.
-@export var jump_speed := 290.0
-## Releasing jump early multiplies upward speed by this — that's the variable
-## jump height. ~0.45 means a tap gives roughly half the full height.
+## Initial upward speed. Retuned DOWN from 290 alongside the gravities and the
+## hold below, and the apex is held where it was — 34px, just over a 2-cell
+## pillar on the 16px LDtk grid (32px), so a full-height jump BARELY clears it.
+## Every room in ldtk/ is built against that number.
+##
+## Measured, not derived: the apex modifier and the hold both make the
+## closed-form v^2/2g wrong. tests/feel_measure.tscn prints the apex, the
+## airtime, the horizontal reach and the jump+dash sweep, which is how a retune
+## proves it moved the airtime WITHOUT moving the reach. Run it before and after.
+@export var jump_speed := 182.0
+## Variable jump height, Celeste-style: HOLDING jump sustains the launch speed
+## for up to this long, and letting go hands him straight to gravity.
+##
+## The old model was the opposite — a CUT, multiplying upward speed by
+## jump_cut_multiplier on release. Both give you a short hop, but they feel like
+## different moves: a cut makes the tap and the full jump two different ARCS
+## (one of them visibly braking mid-rise), where a hold makes them the same move
+## held for different lengths. The buoyancy people read as "Celeste-like" is
+## mostly this.
+##
+## It is also load-bearing on the apex now: `jump_speed * jump_hold_time` is 19
+## of the 34px, because the rise is exactly flat while the button is down.
+## Shortening the hold lowers the ceiling as surely as lowering jump_speed does —
+## retune the pair together, and re-measure.
+@export var jump_hold_time := 0.105
+## Which of the two models runs. Kept as a switch rather than deleting the cut
+## outright so the old feel is one export away for comparison; note that
+## jump_speed and the gravities are tuned for the HOLD, so flipping this off
+## gives a much shorter jump rather than the original one.
+@export var use_jump_hold := true
+## Releasing jump early multiplies upward speed by this — the OLD variable jump
+## height, live only while use_jump_hold is off.
 @export_range(0.0, 1.0) var jump_cut_multiplier := 0.45
 ## Pressing jump this long BEFORE landing still jumps on landing.
 @export var jump_buffer_time := 0.1
@@ -58,17 +83,34 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 @export var coyote_time := 0.1
 
 @export_group("Gravity")
-## Gravity while moving up. Lower than fall gravity so the rise feels powerful.
-@export var rise_gravity := 1400.0
-## Gravity while moving down. Higher = snappy, weighty falls (Celeste-like).
-@export var fall_gravity := 2200.0
+## Gravity while moving up.
+@export var rise_gravity := 1250.0
+## Gravity while moving down. Only a little heavier than the rise — the split
+## used to be 1400/2200, a 1.57x asymmetry, and that heavy fall was what ate the
+## airtime: the drop read as the arc being switched off at the top rather than
+## coming over it. Celeste runs ONE gravity with a half-strength band at the apex
+## and saves the fast fall for when you hold down; narrowing this to 1.2 and
+## letting the apex band below do the work is the same idea.
+@export var fall_gravity := 1500.0
 ## Terminal velocity. Caps fall speed so drops stay readable and survivable.
 @export var max_fall_speed := 220.0
 ## When |vertical speed| is under this, we're "at the apex" of a jump...
-@export var apex_threshold := 40.0
+@export var apex_threshold := 46.0
 ## ...and gravity is multiplied by this, giving a moment of float/control
 ## at the top of every jump ("anti-gravity apex").
-@export_range(0.0, 1.0) var apex_gravity_mult := 0.4
+##
+## Widened (40 -> 46) and deepened (0.4 -> 0.36) in the bounce retune. This pair
+## is the safest knob in the group for level geometry: it buys hang at the top of
+## the arc while barely touching the apex HEIGHT, because the band is only ever
+## entered at speeds too low to travel far under any gravity.
+##
+## HOW MUCH AIRTIME IS AVAILABLE IS NOT A FREE CHOICE. Airtime times
+## max_run_speed is horizontal reach, and Level 2's second gap is a dash GATE —
+## it is supposed to be uncrossable without one. At +26% airtime a plain running
+## jump cleared it and the level stopped teaching the dash (level2_test catches
+## this). +16% is what that gap allows with the margin it was built with; more
+## hang than this needs the gap widened first.
+@export_range(0.0, 1.0) var apex_gravity_mult := 0.36
 
 @export_group("Dash")
 ## Ability gate: Level 1 starts with this OFF and Rumi grants it mid-level.
@@ -171,6 +213,7 @@ var freeze_timer := 0.0         # dash hitstop: physics is skipped while > 0
 var wall_lock_timer := 0.0      # reduced air control after wall jump
 var wall_jump_timer := 0.0      # how long the wall-jump kick animation still has to run
 var boost_timer := 0.0          # while > 0, handed-over momentum decays gently
+var jump_hold_timer := 0.0      # how much sustained thrust the held jump has left
 
 var dash_dir := Vector2.RIGHT
 
@@ -262,6 +305,7 @@ func _tick_timers(delta: float) -> void:
 	dash_cooldown_timer = maxf(dash_cooldown_timer - delta, 0.0)
 	wall_lock_timer = maxf(wall_lock_timer - delta, 0.0)
 	wall_jump_timer = maxf(wall_jump_timer - delta, 0.0)
+	jump_hold_timer = maxf(jump_hold_timer - delta, 0.0)
 
 
 # ---------------------------------------------------------------- states ----
@@ -277,9 +321,7 @@ func _state_air(delta: float, input_x: float) -> void:
 	var control := wall_jump_control_mult if wall_lock_timer > 0.0 else 1.0
 	_apply_run(delta, input_x, control)
 	_apply_gravity(delta)
-	# Variable jump height: cutting the jump early kills most upward speed.
-	if state == State.JUMP and velocity.y < 0.0 and Input.is_action_just_released("jump"):
-		velocity.y *= jump_cut_multiplier
+	_apply_jump_hold()
 	if _try_buffered_jump():
 		return  # coyote jump
 	# Track nearby walls so a buffered jump can kick off them at any time —
@@ -302,6 +344,7 @@ func _state_dash(delta: float) -> void:
 	dash_timer -= delta
 	if dash_timer <= 0.0:
 		velocity = dash_dir * dash_end_speed  # keep some momentum
+		juice.on_dash_end(dash_dir)
 		# Landing in IDLE with the dash's UPWARD momentum still applied is what
 		# used to strand him mid-air (see the invariant in _post_move). Go to
 		# FALL whenever there is any rise left, so gravity owns him again; IDLE
@@ -327,6 +370,13 @@ func _apply_run(delta: float, input_x: float, control_mult: float) -> void:
 	var rate := ground_accel
 	if target == 0.0 or (velocity.x != 0.0 and signf(target) != signf(velocity.x)):
 		rate = ground_decel
+		# A deliberate FLIP at speed, not just letting go of the stick: only the
+		# flip gets a visual, because stopping is already read by the run cycle
+		# ending. Juice owns the speed threshold and the retrigger lockout — this
+		# branch is true for every frame the old velocity survives, which is
+		# three or four of them.
+		if target != 0.0 and is_on_floor():
+			juice.on_turn(absf(velocity.x))
 	if not is_on_floor():
 		rate *= air_accel_mult if target != 0.0 else air_decel_mult
 	# slide_control is 1.0 unless he is in a slide zone. Applied to the RATE, the
@@ -373,11 +423,37 @@ func _apply_gravity(delta: float) -> void:
 	velocity.y = minf(velocity.y + g * delta, max_fall_speed)
 
 
+## Variable jump height. Runs immediately AFTER gravity, which is the whole
+## trick of the hold model: gravity is applied as normal every frame and then
+## clamped back off while the button is down, so the rise is genuinely flat for
+## jump_hold_time and then continues from full speed the instant you let go.
+## Nothing special happens on release — there is no braking impulse to feel.
+##
+## `minf` rather than an assignment so the thrust can only ever hold him UP, and
+## never becomes a floor under a velocity something else has a better claim on
+## (a ceiling bonk, a hazard, a slide). The timer is cleared on a dash and on a
+## ceiling, the two ways he can stop rising with the button still held.
+func _apply_jump_hold() -> void:
+	if not use_jump_hold:
+		# The old model, kept switchable: cutting the jump early kills most of
+		# the upward speed rather than ending a thrust.
+		if state == State.JUMP and velocity.y < 0.0 and Input.is_action_just_released("jump"):
+			velocity.y *= jump_cut_multiplier
+		return
+	if jump_hold_timer <= 0.0:
+		return
+	if input_locked or not Input.is_action_pressed("jump"):
+		jump_hold_timer = 0.0
+		return
+	velocity.y = minf(velocity.y, -jump_speed)
+
+
 func _try_buffered_jump() -> bool:
 	if jump_buffer_timer > 0.0 and (is_on_floor() or coyote_timer > 0.0):
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
 		velocity.y = -jump_speed
+		jump_hold_timer = jump_hold_time
 		state = State.JUMP
 		juice.on_jump()
 		return true
@@ -397,6 +473,7 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 	jump_buffer_timer = 0.0
 	wall_coyote_timer = 0.0
 	velocity = Vector2(-from_wall_dir * wall_jump_speed_x, -jump_speed)
+	jump_hold_timer = jump_hold_time
 	wall_lock_timer = wall_jump_lock_time
 	wall_jump_timer = wall_jump_anim_time
 	state = State.JUMP
@@ -426,6 +503,9 @@ func _try_dash() -> bool:
 	# dash off a conveyor carry further than the same dash anywhere else, and a
 	# dash has to be the same move everywhere it is used.
 	boost_timer = 0.0
+	# The dash takes over from the jump entirely: a thrust still running when it
+	# ends would re-launch him out of the top of it with the button still held.
+	jump_hold_timer = 0.0
 	dash_available = false
 	dash_timer = dash_time
 	dash_cooldown_timer = dash_time + dash_cooldown
@@ -437,6 +517,11 @@ func _try_dash() -> bool:
 
 ## Transitions that depend on what move_and_slide() just discovered.
 func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> void:
+	# Hitting a ceiling ends the jump's thrust. Without this the hold keeps
+	# re-asserting -jump_speed against a collision that keeps zeroing it, and he
+	# sticks to the underside of the platform for the rest of jump_hold_time.
+	if is_on_ceiling():
+		jump_hold_timer = 0.0
 	if state == State.DASH or state == State.DEAD:
 		return
 	if is_on_floor():
@@ -556,6 +641,7 @@ func respawn(at: Vector2) -> void:
 	freeze_timer = 0.0
 	wall_lock_timer = 0.0
 	wall_jump_timer = 0.0
+	jump_hold_timer = 0.0
 	# Respawning outside a zone he died in still fires its body_exited, since he
 	# is never removed from collision (see above) — but a checkpoint INSIDE the
 	# same zone would not, and he would come back sliding with no zone to blame.

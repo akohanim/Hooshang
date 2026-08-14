@@ -243,6 +243,19 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
   Runs WINDOWED — 2D does not rasterise headless — and binds no save slot:
   `Godot --path . res://tests/room_shot.tscn -- Level_22`
+- `tests/feel_measure.tscn` — the same idea for MOVEMENT, and also not pass/fail.
+  Prints the jump apex, the airtime, the horizontal reach of a running jump and
+  a 20-timing sweep of the jump+up-dash. Run it before and after touching
+  anything in player.gd's Jump/Gravity groups: those numbers are what the level
+  geometry is built against, and "floatier" is very easy to ship as "the 2-cell
+  pillars no longer stop anybody". Runs headless:
+  `Godot --headless --path . res://tests/feel_measure.tscn`
+  **Airtime is capped by Level 2's second gap**, which is a dash GATE — airtime
+  times max_run_speed is horizontal reach, and past about +16% a plain running
+  jump clears a gap that exists to teach the dash (`level2_test` catches it).
+- `tools/gen_dust.py` — the puffs kicked up on a jump, a landing and a dash
+  start. Its own sheet rather than `death_shard.png` tinted: shards are
+  hard-edged debris, and a landing that throws those reads as a small death.
 - `tools/gen_dawn_window.py`, `gen_light_shaft.py`, `gen_light_mote.py` — the
   room 22 sunrise art. `light_mote.png` is deliberately NOT `debris_dust.png`:
   a mote must be radially symmetric and shapeless, because particles spin.
