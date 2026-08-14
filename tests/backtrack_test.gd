@@ -60,6 +60,35 @@ func _ready() -> void:
 		"forward again after backtracking: %s -> %s" % [
 			from_first.name, world.current_room.name])
 
+	# Every room's re-entry point has to be INSIDE that room, and clear of its own
+	# Exit. Checked over the whole world rather than only the rooms this test
+	# happened to walk, because the failure is per-room geometry and it hid in the
+	# ten rooms a forward walk never backtracks through.
+	#
+	# The offset used to be subtracted flat, which assumed left-to-right travel.
+	# The escape row runs right to left with its Exits on the LEFT wall, so all
+	# ten of rooms 12-21 put a returning player through that wall and into the
+	# next room along — outside the room the manager thought he was in, and in
+	# reach of triggers belonging to a room he was not in.
+	var stranded: Array[String] = []
+	var on_the_trigger: Array[String] = []
+	for room in world.rooms:
+		var exit := world._exit_in(room)
+		if exit == null:
+			continue
+		var at := world._re_entry_point(room)
+		var rect := world.room_rect(room)
+		if not rect.has_point(at):
+			stranded.append("%s at x=%.0f, room %.0f-%.0f"
+				% [room.name, at.x, rect.position.x, rect.end.x])
+		# 16px trigger, so anything inside 8px of its centre is standing on it.
+		if absf(at.x - exit.global_position.x) < 8.0:
+			on_the_trigger.append(str(room.name))
+	_check(stranded.is_empty(),
+		"every room re-enters INSIDE itself  [%s]" % ", ".join(stranded))
+	_check(on_the_trigger.is_empty(),
+		"and clear of its own Exit, not on top of it  [%s]" % ", ".join(on_the_trigger))
+
 	print("  route out : %s" % " -> ".join(forward))
 	print("  route back: %s" % " -> ".join(back))
 	if failures.is_empty():

@@ -507,9 +507,7 @@ func _build_return_zone() -> void:
 func _arm_return(from_room: Node2D) -> void:
 	_return_room = from_room
 	if from_room != null:
-		var exit := _exit_in(from_room)
-		_return_pos = (exit.global_position + Vector2(-back_entry_offset, -10.0)) \
-			if exit != null else spawn_point_for(from_room)
+		_return_pos = _re_entry_point(from_room)
 	_apply_way_back()
 	# Nothing behind the first room and no re-route either — leave no door rather
 	# than a dangling one.
@@ -536,6 +534,35 @@ func _arm_return(from_room: Node2D) -> void:
 	await get_tree().physics_frame
 	if _return_room != null and not _return_zone.overlaps_body(player):
 		_return_armed = true
+
+
+## Where to stand a player who has just walked BACK into `room`:
+## `back_entry_offset` px to the INSIDE of that room's own Exit, so he lands
+## clear of the trigger instead of on top of it.
+##
+## WHICH SIDE IS "INSIDE" HAS TO BE DERIVED. This used to subtract the offset
+## flat, which silently assumed every room is walked left to right — true of the
+## outbound rooms 0-11, whose Exits sit on their right-hand wall, and wrong for
+## every single room of the escape. Rooms 12-21 run RIGHT TO LEFT across the grid
+## (CLAUDE.md: level identifiers are play order, not world position) and their
+## Exits are on their LEFT wall, so subtracting pushed the returning player out
+## through that wall and into the NEXT room along.
+##
+## That is both halves of the bug it caused. He was placed outside the room the
+## manager had just decided he was in — standing in the seam, in another room's
+## geometry — and one step from there put him inside triggers belonging to a room
+## he was not in, which bounced him somewhere else again.
+##
+## Reading it off the geometry fixes both rows at once and needs no per-room
+## data: an Exit in the left half of its room has its room's interior to the
+## right, and vice versa.
+func _re_entry_point(room: Node2D) -> Vector2:
+	var exit := _exit_in(room)
+	if exit == null:
+		return spawn_point_for(room)
+	var rect := room_rect(room)
+	var inward := 1.0 if exit.global_position.x < rect.get_center().x else -1.0
+	return exit.global_position + Vector2(inward * back_entry_offset, -10.0)
 
 
 ## Point the doorway you came IN through at a different room, permanently.

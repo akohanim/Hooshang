@@ -121,20 +121,27 @@ radius you need (see *How a hanging fixture is positioned*).
 
 Lights are positioned in **world coordinates**, not per room, so you need these:
 
+> **Rooms 1 – 11 were moved +320px right** to open a slot for a new room after
+> room 0. The Godot-side nodes in `Act1World.tscn` were moved with them (53 of
+> them, x only), so lights still sit over the geometry they were placed on. The
+> figures below are the intended layout AFTER the LDtk rooms are moved to match —
+> re-measure if the new room ends up a different width than one screen.
+
 | Room | LDtk name | World X | Notes |
 | --- | --- | --- | --- |
 | 0 | `Level_0` | 0 – 320 | Dim on purpose — the cubicle is a prison |
-| 1 | `Level_1` | 320 – 640 |  |
-| 2 | `Level_2` | 608 – 928 |  |
-| 3 | `Level_3` | 928 – 1248 |  |
-| 4 | `Level_4` | 1248 – 1568 | **Cave** — lit at the musical tiles, dark after |
-| 5 | `Level_5` | 1568 – 1888 |  |
-| 6 | `Level_6` | 1888 – 2208 |  |
-| 7 | `Level_7` | 2208 – 2528 |  |
-| 8 | `Level_8` | 2528 – 3136 |  |
-| 9 | `Level_9` | 3136 – 3744 |  |
-| 10 | `Level_10` | 3744 – 4352 |  |
-| 11 | `Level_11` | 4352 – 4672 | The Darkshang encounter |
+| — | *(new room)* | 320 – 640 | The slot this move opened up |
+| 1 | `Level_1` | 640 – 960 |  |
+| 2 | `Level_2` | 928 – 1248 |  |
+| 3 | `Level_3` | 1248 – 1568 |  |
+| 4 | `Level_4` | 1568 – 1888 | **Cave** — lit at the musical tiles, dark after |
+| 5 | `Level_5` | 1888 – 2208 |  |
+| 6 | `Level_6` | 2208 – 2528 |  |
+| 7 | `Level_7` | 2528 – 2848 |  |
+| 8 | `Level_8` | 2848 – 3456 |  |
+| 9 | `Level_9` | 3456 – 4064 |  |
+| 10 | `Level_10` | 4064 – 4672 |  |
+| 11 | `Level_11` | 4672 – 4992 | The Darkshang encounter |
 
 Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 
