@@ -294,6 +294,11 @@ func _add_backdrop(room: Node2D) -> void:
 	# Background band. Sibling order (move_child below) is what keeps it behind
 	# the room's own Background tile layer, which shares this z-index.
 	panel.z_index = -1
+	# The wall carries a SECOND light-mask bit that nothing else in the room has,
+	# which is what lets WallPattern aim a light at the wall alone. Bit 1 is kept
+	# so every ordinary lamp still lights it exactly as before — a light's
+	# range_item_cull_mask defaults to bit 1 and this is an OR, not a swap.
+	panel.light_mask = 1 | WallPattern.BACKDROP_MASK
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	room.add_child(panel)
 	room.move_child(panel, 0)

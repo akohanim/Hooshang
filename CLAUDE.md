@@ -234,6 +234,13 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   to; the other axis is forced to one cell on import. Art:
   `tools/gen_glass_spikes.py` draws the floor sheet and transforms the other
   three, keeping the light in the upper left rather than rotating it.
+  `backdrop/WallPattern.tscn` is the Persian rosette that blooms on the office
+  walls. A LIGHT, not paint — `CanvasModulate` 0.05 would eat a painted one, the
+  same trap `SunShaft` documents — with the ornament in the cookie's alpha so one
+  texture covers the palette it cycles. `range_item_cull_mask` 2 is the part
+  worth knowing: only the room backdrop carries that bit, so the pattern cannot
+  wash over the bricks, the props or Hooshang, which is what makes it read as
+  being IN the wall. See `LIGHTING.md`.
   `zones/SlideZone.tscn` is a volume, not a prop: inside it Hooshang's steering
   drops to `control_strength`, a drag builds along `angle`, and jump and dash
   are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the
@@ -268,6 +275,10 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `tools/gen_bricks_8px.py` — the four 8px wall tiles (fill, top, left,
   corner). Four is the WHOLE tileset: no tile in the world is hand-placed, and
   the four auto-rules never ask for anything else.
+- `tools/gen_persian_trim.py`, `gen_persian_glyph.py` — the Persian polish. The
+  trim is UI art authored in the dialogue box's own 1280x720 space (a quarter of
+  a design pixel each), the glyph is a light COOKIE and therefore white with the
+  shape in its alpha.
 - `tools/gen_dust.py` — the puffs kicked up on a jump, a landing and a dash
   start. Its own sheet rather than `death_shard.png` tinted: shards are
   hard-edged debris, and a landing that throws those reads as a small death.
@@ -313,6 +324,14 @@ test rather than being noticed months later in play.
   Do not shrink the font to fit more in — the type size is the thing that makes
   this read like Celeste, and a six-row banner covers the room the scene is set
   in, which is what the cap exists to stop.
+- **The banner is closed top and bottom by a Persian khatam border**
+  (`tools/gen_persian_trim.py`). It is TILED, so it does not care how wide the
+  banner is — but it does care how tall: the bands hang off the banner's own two
+  edges, so `TRIM_HEIGHT`, the name label's y and `_fit_banner`'s arithmetic are
+  one set of numbers and have to move together. `dialogue_placement_test` checks
+  both bands stay on the banner's edges through mirroring, BOTTOM placement and
+  pagination growth — the bottom one is POSITIONED rather than shifted, so it is
+  the one that gets left behind.
 - Dialogue is drawn on the window's own surface at full resolution, the emote
   bubble inside the 320x180 game viewport with the sprites. That split is
   deliberate — see `systems/screen.gd`. Restyling one can never touch the other.

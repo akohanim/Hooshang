@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/furniture/Cubicle.tscn" id="10_cube"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/DawnWindow.tscn" id="11_dawn"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/SunShaft.tscn" id="12_shaft"]
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/WallPattern.tscn" id="13_wallpat"]
 
 [node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
@@ -102,6 +103,36 @@ halo_amount = 0.44
 
 [node name="DawnWindowRoom22" parent="Backdrop" unique_id=39210986 instance=ExtResource("11_dawn")]
 position = Vector2(176, 848)
+
+[node name="WallPatternRoom1" parent="Backdrop" instance=ExtResource("13_wallpat")]
+pattern_scale = 0.9
+position = Vector2(700, 250)
+phase = 0.0
+
+[node name="WallPatternRoom5" parent="Backdrop" instance=ExtResource("13_wallpat")]
+pattern_scale = 0.9
+position = Vector2(1975, 250)
+phase = 4.3
+
+[node name="WallPatternRoom9" parent="Backdrop" instance=ExtResource("13_wallpat")]
+pattern_scale = 0.9
+position = Vector2(3980, 248)
+phase = 9.1
+
+[node name="WallPatternRoom14" parent="Backdrop" instance=ExtResource("13_wallpat")]
+pattern_scale = 0.9
+position = Vector2(2960, 888)
+phase = 2.7
+
+[node name="WallPatternRoom18" parent="Backdrop" instance=ExtResource("13_wallpat")]
+pattern_scale = 0.9
+position = Vector2(1492, 884)
+phase = 11.5
+
+[node name="WallPatternRoom21" parent="Backdrop" instance=ExtResource("13_wallpat")]
+pattern_scale = 0.9
+position = Vector2(340, 890)
+phase = 6.9
 
 [node name="Props" type="Node2D" parent="." unique_id=1481885276]
 

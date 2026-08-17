@@ -1,7 +1,13 @@
 class_name DialogueBox
 extends CanvasLayer
 ## Celeste-style dialogue box: a dark banner across the top of the screen with a
-## framed portrait on the LEFT and large centred typewriter text.
+## framed portrait on the LEFT and large centred typewriter text, closed top and
+## bottom by a Persian khatam border (tools/gen_persian_trim.py).
+##
+## The border is TILED, not stretched, so it does not care how wide the banner
+## is. It does care how TALL: the bands hang off the banner's two edges, so
+## TRIM_HEIGHT, the name label's y, and _fit_banner's arithmetic are one set of
+## numbers. Retune them together.
 ## Usage (from any cutscene code):
 ##     await Dialogue.say("Rumi", "Some line.", RUMI_GOLD)            # tinted stand-in
 ##     await Dialogue.say("Hooshang", "...I fell.", Color.WHITE, tex)  # real portrait
@@ -102,6 +108,10 @@ const MIN_TEXT_HEIGHT := 146.0
 ## Gap under the text, and the arrow's own box.
 const BANNER_PAD := 8.0
 const ARROW_HEIGHT := 44.0
+## Height of one Persian border band, matching assets/ui/persian_trim.png. The
+## art and this have to agree: the texture is TILED, not stretched, so a mismatch
+## clips the band rather than resizing it.
+const TRIM_HEIGHT := 16.0
 
 ## Extra pixels between glyphs, in the box's own 1280x720 space. Celeste's type
 ## is noticeably tracked-out; without this it reads cramped at this size.
@@ -115,7 +125,11 @@ var _pause_at := -1
 var _pause_left := 0.0
 
 @onready var banner: ColorRect = $Banner
-@onready var accent: ColorRect = $Accent
+## The Persian border bands. TrimTop hugs the banner's leading edge and never
+## moves; TrimBottom is repositioned by _fit_banner, because the banner's height
+## is whatever this line needs.
+@onready var trim_top: TextureRect = $TrimTop
+@onready var trim_bottom: TextureRect = $TrimBottom
 @onready var name_label: Label = $NameLabel
 @onready var text_label: Label = $TextLabel
 @onready var arrow: Label = $Arrow
@@ -141,7 +155,7 @@ func _ready() -> void:
 	visible = false
 	for node in _mirrored():
 		_authored[node] = Vector2(node.offset_left, node.offset_right)
-	for node in [banner, accent, portrait_frame, portrait_back, portrait, name_label, text_label]:
+	for node in [banner, trim_top, trim_bottom, portrait_frame, portrait_back, portrait, name_label, text_label]:
 		_authored_v[node] = Vector2(node.offset_top, node.offset_bottom)
 	_apply_font()
 
@@ -193,10 +207,10 @@ func _reset_vertical() -> void:
 ## after _fit_banner has grown it to this line's actual height.
 ##
 ## Not a mirror. Every element keeps its position RELATIVE TO THE BANNER — the
-## accent trim stays hugging the banner's own top edge (where the name label
-## starts, the "beginning" of the box regardless of where the box sits on
-## screen) and the arrow stays hugging the banner's own bottom edge (the "end"
-## of the box, where "press to continue" belongs). A uniform downward shift by
+## border bands stay hugging the banner's own two edges, and the arrow stays just
+## inside the trailing one (the "end" of the box, where "press to continue"
+## belongs). Flipping the box vertically instead would put the arrow above the
+## name and stand the ornament on its head. A uniform downward shift by
 ## (CANVAS_HEIGHT - banner.offset_bottom) is all that is needed: at that point
 ## banner.offset_top is 0 (the TOP-anchored baseline _reset_vertical restored),
 ## so the shift lands the block's bottom edge exactly on CANVAS_HEIGHT.
@@ -204,8 +218,8 @@ func _place_vside(vside: int) -> void:
 	if vside != VSide.BOTTOM:
 		return
 	var shift := CANVAS_HEIGHT - banner.offset_bottom
-	for node in [banner, accent, portrait_frame, portrait_back, portrait,
-			name_label, text_label, arrow]:
+	for node in [banner, trim_top, trim_bottom, portrait_frame, portrait_back,
+			portrait, name_label, text_label, arrow]:
 		node.offset_top += shift
 		node.offset_bottom += shift
 
@@ -406,8 +420,14 @@ func _fit_banner(rows: int) -> void:
 		+ float(text_label.get_theme_constant("line_spacing")) * (rows - 1)
 	text_label.offset_bottom = text_label.offset_top \
 		+ maxf(needed + BANNER_PAD, MIN_TEXT_HEIGHT)
-	banner.offset_bottom = text_label.offset_bottom + BANNER_PAD
-	arrow.offset_bottom = banner.offset_bottom - BANNER_PAD
+	# The banner carries a band on its trailing edge as well as its leading one,
+	# so it owes TRIM_HEIGHT of height that is not text. Everything below is
+	# measured off the band rather than off the banner, or the arrow draws on
+	# top of the ornament.
+	banner.offset_bottom = text_label.offset_bottom + BANNER_PAD + TRIM_HEIGHT
+	trim_bottom.offset_bottom = banner.offset_bottom
+	trim_bottom.offset_top = banner.offset_bottom - TRIM_HEIGHT
+	arrow.offset_bottom = trim_bottom.offset_top - 2.0
 	arrow.offset_top = arrow.offset_bottom - ARROW_HEIGHT
 
 

@@ -493,6 +493,44 @@ Two things learned tuning room 22's, both worth not repeating:
 
 ---
 
+## Adding a Persian wall pattern
+
+`scenes/props/backdrop/WallPattern.tscn` is a rosette that surfaces out of the
+wall, drifts through a colour and sinks back. Instance it under `Backdrop` in
+`ldtk/Act1World.tscn`, at the point on the wall you want it.
+
+**It is a light, like everything else here.** `CanvasModulate` is 0.05 and
+multiplies every CanvasItem, so a pattern painted on the backdrop would arrive at
+a twentieth of what was drawn — the same reason the sun shafts are lights
+(above). The cookie is white with the ornament in its ALPHA
+(`tools/gen_persian_glyph.py`), so the colour is the light's own and one texture
+covers the whole palette it cycles.
+
+**It only touches the wall, and that is what makes it read as being IN the
+wall.** `range_item_cull_mask` is 2, a bit that only the room backdrop carries
+(`LdtkWorld._add_backdrop` sets `light_mask = 1 | 2`, an OR, so ordinary lamps
+still light the backdrop through bit 1). Without the filter it washes over the
+brickwork, the props and Hooshang himself, and reads as a coloured spotlight
+somebody left on.
+
+**Place it clear of the room's window.** The first pass put five of six directly
+behind a `MoonWindow` and the frame ate the middle of every rosette. The glyph
+spans `128 x pattern_scale` px — about 115 at the default — so leave that much
+between it and anything drawn on top of the wall.
+
+| Export | What it does |
+| --- | --- |
+| `hues` | The palette, one per appearance. It drifts toward the next WHILE it is up, so the rosette changes colour as you watch rather than between visits |
+| `peak_energy` | Brightness at the top. 0.62 default, and low on purpose — this is scenery, not a fixture |
+| `pattern_scale` | Size. 0.9 in the placed instances |
+| `bloom_time` / `hold_time` / `fade_time` / `rest_time` | The cycle. `rest_time` is the honest knob for "how often is this on screen" — reach for it before `peak_energy`, which is what stops it reading as a wall |
+| `spin_speed` | Degrees per second. Eightfold symmetry returns every 45 degrees, so a crawl is plenty |
+| `phase` | Seconds to start this instance into its cycle. **Set it per instance** or neighbouring rooms breathe in step |
+
+Six are placed, spread across the Act: rooms 1, 5, 9 on the way down and 14, 18,
+21 on the way out, with phases that are not multiples of each other so no two
+ever come up together.
+
 ## When you add a room in LDtk
 
 Lights are placed at fixed world coordinates in `Act1World.tscn`, but rooms move

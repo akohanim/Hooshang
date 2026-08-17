@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/backdrop/wall_pattern.gd" id="1_wallpat"]
+[ext_resource type="Texture2D" path="res://assets/effects/persian_glyph.png" id="2_glyph"]
+
+[node name="WallPattern" type="PointLight2D"]
+texture = ExtResource("2_glyph")
+texture_scale = 1.1
+energy = 0.62
+range_item_cull_mask = 2
+script = ExtResource("1_wallpat")

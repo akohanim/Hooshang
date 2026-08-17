@@ -12,7 +12,8 @@ extends Node
 ##   - switching from BOTTOM back to TOP does not leave the previous line's
 ##     shift behind — the one bug this design had to be built to specifically
 ##     avoid (see DialogueBox._reset_vertical)
-##   - the accent trim and the arrow stay anchored to the BANNER's own edges
+##   - both Persian border bands and the arrow stay anchored to the BANNER's
+##     own edges, including as it grows
 ##     (start of the box, end of the box) rather than swapping screen edges,
 ##     so "press to continue" always reads at the visual bottom of the box
 ##   - horizontal (Side) and vertical (VSide) placement are independent — one
@@ -33,8 +34,11 @@ func _ready() -> void:
 	_check(box.banner.offset_bottom < DialogueBox.CANVAS_HEIGHT,
 		"TOP: and does not reach all the way to the bottom  [bottom=%.1f]"
 			% box.banner.offset_bottom)
-	_check(is_zero_approx(box.accent.offset_top),
-		"TOP: the accent trim hugs the banner's OWN top edge  [%.1f]" % box.accent.offset_top)
+	_check(is_zero_approx(box.trim_top.offset_top),
+		"TOP: the border band hugs the banner's OWN top edge  [%.1f]" % box.trim_top.offset_top)
+	_check(is_equal_approx(box.trim_bottom.offset_bottom, box.banner.offset_bottom),
+		"TOP: and the other band hugs its bottom edge  [trim=%.1f banner=%.1f]"
+			% [box.trim_bottom.offset_bottom, box.banner.offset_bottom])
 	_check(is_zero_approx(box.portrait_frame.offset_top),
 		"TOP: the portrait frame is flush with the banner's top too  [%.1f]"
 			% box.portrait_frame.offset_top)
@@ -55,13 +59,16 @@ func _ready() -> void:
 		"BOTTOM: an identical line makes an identical-height banner  [%.1f vs %.1f]"
 			% [bottom_short_height, top_short_height])
 	# The trim and the arrow are positioned RELATIVE TO THE BANNER, not mirrored
-	# to the opposite screen edge — the accent still marks where the box's own
+	# to the opposite screen edge — the leading band still marks where the box's own
 	# reading order starts (name label sits just under it), the arrow still
 	# marks where it ends ("press to continue" belongs at the box's own bottom,
 	# not wherever that lands on screen).
-	_check(is_equal_approx(box.accent.offset_top, box.banner.offset_top),
-		"BOTTOM: the accent trim still hugs the banner's OWN top edge  [accent=%.1f banner=%.1f]"
-			% [box.accent.offset_top, box.banner.offset_top])
+	_check(is_equal_approx(box.trim_top.offset_top, box.banner.offset_top),
+		"BOTTOM: the border band still hugs the banner's OWN top edge  [trim=%.1f banner=%.1f]"
+			% [box.trim_top.offset_top, box.banner.offset_top])
+	_check(is_equal_approx(box.trim_bottom.offset_bottom, box.banner.offset_bottom),
+		"BOTTOM: and the other still hugs its bottom edge  [trim=%.1f banner=%.1f]"
+			% [box.trim_bottom.offset_bottom, box.banner.offset_bottom])
 	_check(box.arrow.offset_bottom > box.banner.offset_top
 			and box.arrow.offset_bottom <= box.banner.offset_bottom,
 		"BOTTOM: the arrow sits near the banner's OWN bottom edge, press-to-continue  [arrow=%.1f banner %.1f-%.1f]"
@@ -77,6 +84,15 @@ func _ready() -> void:
 	_check(box.banner.offset_top < DialogueBox.CANVAS_HEIGHT - bottom_short_height,
 		"BOTTOM+long: grew UPWARD — its top moved up, not its bottom off-screen  [top=%.1f, short-line top was %.1f]"
 			% [box.banner.offset_top, DialogueBox.CANVAS_HEIGHT - bottom_short_height])
+	# The bottom band is POSITIONED by _fit_banner, not shifted wholesale like
+	# everything else, so a banner that grows is exactly where it can be left
+	# behind — sitting across the middle of the text instead of closing the box.
+	_check(is_equal_approx(box.trim_bottom.offset_bottom, box.banner.offset_bottom),
+		"BOTTOM+long: the bottom band followed the banner as it grew  [trim=%.1f banner=%.1f]"
+			% [box.trim_bottom.offset_bottom, box.banner.offset_bottom])
+	_check(box.arrow.offset_bottom <= box.trim_bottom.offset_top,
+		"BOTTOM+long: the arrow clears the band rather than drawing over it  [arrow=%.1f band=%.1f]"
+			% [box.arrow.offset_bottom, box.trim_bottom.offset_top])
 	await _close(box)
 
 	# --- switching back to TOP leaves nothing behind --------------------------
