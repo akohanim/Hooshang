@@ -30,9 +30,14 @@ func _ready() -> void:
 
 	print("\n=== JUMP ARC ===")
 	await _plain_jump("full jump   (held)", 60)
-	await _plain_jump("short hop   (2f tap)", 2)
-	await _plain_jump("medium hop  (5f tap)", 5)
-	await _plain_jump("medium hop  (9f tap)", 9)
+
+	# The whole point of a hold-style variable jump is that how long you press
+	# for picks the height, so the useful measurement is the WHOLE ladder rather
+	# than three samples off it. A window that saturates after five frames has
+	# two heights in it however the exports read.
+	print("\n=== HOLD LADDER  (apex by frames held) ===")
+	for held in [1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18]:
+		await _plain_jump("hold %2df" % held, held)
 
 	print("\n=== RUNNING JUMP ===")
 	await _running_jump()

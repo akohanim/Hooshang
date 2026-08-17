@@ -44,16 +44,25 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 @export_range(0.0, 1.0) var air_decel_mult := 0.6
 
 @export_group("Jump")
-## Initial upward speed. Retuned DOWN from 290 alongside the gravities and the
-## hold below, and the apex is held where it was — 34px, just over a 2-cell
-## pillar on the 16px LDtk grid (32px), so a full-height jump BARELY clears it.
-## Every room in ldtk/ is built against that number.
+## Initial upward speed, and while the button is held this is the rise rate
+## exactly — so read it together with jump_hold_time, not on its own.
+##
+## Low (135, from 290 before the hold existed) because the hold now carries most
+## of the height: 135 x 0.2s = 27 of the 34px apex, leaving 7px of ballistic
+## coast after release. That 20/80 split is Celeste's own — its 105 and 0.2s put
+## 21 of a 28px apex in the hold — and it is what makes the hold LADDER wide
+## enough to aim at instead of a switch between "hop" and "jump".
+##
+## The apex itself is unchanged at 34px, just over a 32px pillar — 4 cells on
+## the 8px LDtk grid — so a full-height jump BARELY clears one. Every room in
+## ldtk/ is built against that number IN PIXELS, which is why halving the grid
+## did not touch it: the rooms did not move, they were only re-cut finer.
 ##
 ## Measured, not derived: the apex modifier and the hold both make the
-## closed-form v^2/2g wrong. tests/feel_measure.tscn prints the apex, the
-## airtime, the horizontal reach and the jump+dash sweep, which is how a retune
-## proves it moved the airtime WITHOUT moving the reach. Run it before and after.
-@export var jump_speed := 182.0
+## closed-form v^2/2g wrong. tests/feel_measure.tscn prints the apex, the whole
+## hold ladder, the airtime, the horizontal reach and the jump+dash sweep, which
+## is how a retune proves what it moved. Run it before and after.
+@export var jump_speed := 135.0
 ## Variable jump height, Celeste-style: HOLDING jump sustains the launch speed
 ## for up to this long, and letting go hands him straight to gravity.
 ##
@@ -64,11 +73,23 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## held for different lengths. The buoyancy people read as "Celeste-like" is
 ## mostly this.
 ##
-## It is also load-bearing on the apex now: `jump_speed * jump_hold_time` is 19
-## of the 34px, because the rise is exactly flat while the button is down.
+## 0.2s is Celeste's VarJumpTime verbatim, and the width of this window IS the
+## number of distinct jump heights you can ask for. It was 0.105 first, and that
+## saturated after six frames: past a light tap every press gave the same jump,
+## so the variable height was real in the physics and unreachable with a thumb.
+## At 0.2s the ladder measures (tests/feel_measure.tscn):
+##
+##     held   1f    2f    4f    6f    8f   10f   12f   14f+
+##     apex  7.3   9.6  14.1  18.6  23.1  27.6  32.1  34.3 px
+##
+## — 13 frames of usable travel, so a short push, a medium hold and a full press
+## are three heights you can actually aim at.
+##
+## It is also load-bearing on the apex: `jump_speed * jump_hold_time` is 27 of
+## the 34px, because the rise is exactly flat while the button is down.
 ## Shortening the hold lowers the ceiling as surely as lowering jump_speed does —
 ## retune the pair together, and re-measure.
-@export var jump_hold_time := 0.105
+@export var jump_hold_time := 0.2
 ## Which of the two models runs. Kept as a switch rather than deleting the cut
 ## outright so the old feel is one export away for comparison; note that
 ## jump_speed and the gravities are tuned for the HOLD, so flipping this off
@@ -84,14 +105,14 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 
 @export_group("Gravity")
 ## Gravity while moving up.
-@export var rise_gravity := 1250.0
+@export var rise_gravity := 1600.0
 ## Gravity while moving down. Only a little heavier than the rise — the split
 ## used to be 1400/2200, a 1.57x asymmetry, and that heavy fall was what ate the
 ## airtime: the drop read as the arc being switched off at the top rather than
 ## coming over it. Celeste runs ONE gravity with a half-strength band at the apex
 ## and saves the fast fall for when you hold down; narrowing this to 1.2 and
 ## letting the apex band below do the work is the same idea.
-@export var fall_gravity := 1500.0
+@export var fall_gravity := 1900.0
 ## Terminal velocity. Caps fall speed so drops stay readable and survivable.
 @export var max_fall_speed := 220.0
 ## When |vertical speed| is under this, we're "at the apex" of a jump...
@@ -116,13 +137,19 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## Ability gate: Level 1 starts with this OFF and Rumi grants it mid-level.
 ## The test level leaves it on. (Future abilities should follow this pattern.)
 @export var has_dash := true
-## Dash speed. Sized so a full jump + upward dash clears a 4-cell platform on
-## the 16px LDtk grid (64px) RELIABLY rather than frame-perfectly: measured
-## apex runs 54-82px depending on when you dash, clearing 64px on 17 of 20
-## tested timings. Tuning this down to a "barely clears" ~1px margin was tried
-## and is wrong — that margin only exists at the single best dash timing, so
-## in play the platform reads as impossible (it cleared on just 6 of 20).
-## Vertical clearance needs a WINDOW, not a knife edge.
+## Dash speed. Sized so a full jump + upward dash clears a 64px platform (8
+## cells on the 8px LDtk grid) RELIABLY rather than frame-perfectly. Tuning this
+## down to a "barely clears" ~1px margin was tried and is wrong — that margin
+## only exists at the single best dash timing, so in play the platform reads as
+## impossible (it cleared on just 6 of 20). Vertical clearance needs a WINDOW.
+##
+## That window narrowed when the jump became a hold, and it is worth knowing why
+## rather than re-tuning this to chase it. The sweep now clears 64px on 13 of 20
+## timings (49-83px apex) where it used to clear on 16, and the ones it lost are
+## all at the FRONT: a hold rises flat at jump_speed instead of front-loading the
+## whole impulse, so four frames into a jump he is 9px up rather than 19px, and a
+## dash thrown that early simply starts lower. What is left is 13 contiguous
+## frames — 0.22s — which is still a window and not a knife edge.
 @export var dash_speed := 260.0
 ## How long the dash lasts. Distance = dash_speed * dash_time.
 @export var dash_time := 0.15
@@ -137,14 +164,15 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## Ability gate, same pattern as has_dash: OFF until earned. The musical-tile
 ## sequence grants it (see scripts/note_sequence.gd).
 @export var has_glow := false
-## How far the glow reaches, in CELLS of the 16px LDtk grid. The falloff comes
+## How far the glow reaches, in CELLS of the 8px LDtk grid. The falloff comes
 ## from the radial texture, so it fades out toward this edge rather than
 ## ending at a hard rim.
 ##
-## 5.2 = 83px, a third of the 320px room's width. Widened from 4.0 by request:
+## 10.4 = 83px, a third of the 320px room's width. Widened from 4.0 cells (of
+## the old 16px grid) by request:
 ## the reward for playing the tune is being able to SEE, and at 4 cells the lit
 ## pool barely reached past his own body in the rooms the puzzle unlocks.
-@export var glow_radius_cells := 5.2
+@export var glow_radius_cells := 10.4
 ## Brightness at full strength.
 @export var glow_energy := 1.25
 ## Warm yellow, to read as "Hooshang's own light" against the cold office.
@@ -822,7 +850,7 @@ func _apply_glow(on: bool) -> void:
 	glow_light.color = glow_color
 	glow_light.energy = glow_energy if on else 0.0
 	const TEXTURE_RADIUS := 64.0
-	glow_light.texture_scale = (glow_radius_cells * 16.0) / TEXTURE_RADIUS
+	glow_light.texture_scale = (glow_radius_cells * 8.0) / TEXTURE_RADIUS
 
 
 ## Clamp the follow-camera to a level's bounds (pixels). Called by LevelBase.
