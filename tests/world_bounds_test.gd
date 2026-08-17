@@ -33,11 +33,11 @@ var world: LdtkWorld
 var _reached := 0.0
 
 ## Clear cells needed above a tile before it counts as standable. His hitbox is
-## 12px on a 16px grid, so one is enough to stand in; two keeps him out of the
-## slots where the ceiling is a tile away and the jump is not a jump.
-const HEADROOM_CELLS := 2
+## 12px on an 8px grid, so he needs two cells just to fit; three keeps him out
+## of the slots where the ceiling is a tile away and the jump is not a jump.
+const HEADROOM_CELLS := 3
 ## The LDtk grid.
-const CELL := 16.0
+const CELL := 8.0
 
 
 func _ready() -> void:

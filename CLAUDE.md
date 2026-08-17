@@ -4,9 +4,10 @@ A 2D precision platformer in the spirit of Celeste. Hooshang, an elderly office
 worker, escapes a dark corporate office; Rumi (a golden guide figure) grants
 abilities at story beats. Godot 4.6, GDScript. **Art direction: modern detailed
 pixel art** (Celeste / Hollow Knight/ Super Mario) — see the Art direction
-section below. The current greybox still runs at 320×180 with 8px placeholder
-tiles (viewport stretch, integer scale, nearest filtering); real art migrates to
-the target grid.
+section below. Everything runs at 320×180 on an **8px tile grid** (viewport
+stretch, integer scale, nearest filtering) — the LDtk world was 16px until the
+migration described under Art direction, and the greybox levels always were 8px,
+so the two agree now. The tiles are still placeholder art.
 
 ## Running things
 
@@ -103,7 +104,9 @@ Lighting a room by hand (fixtures, the moon window, seam spill): `LIGHTING.md`.
 "8-bit" direction. Design doc §7 (Visual & Audio Style) is the source of truth.
 
 Target specs (real art migrates the greybox toward these):
-- Character canvas ~32×48 px; base tile grid 16×16 px.
+- Character canvas ~32×48 px; base tile grid **8×8 px**. The LDtk world was
+  converted from 16px to 8px (`tools/ldtk_to_8px.py`) — nothing moved in pixels,
+  every cell was cut into four. Rooms are 40×24 cells.
 - In-engine scale 2×–3× with pixel snapping (nearest filtering, transforms
   snapped to whole pixels) so detail stays crisp.
 - Extended palette **per Act (~32–64 colors)**; soft gradients/dithering — not
@@ -117,7 +120,7 @@ depth.
 Tooling:
 - **Pixellab MCP prompts:** always request *"detailed pixel art, soft shading,
   dynamic lighting, NOT 8-bit/NES"* and state the canvas size (e.g. 32×48
-  character, 16×16 tile) — default prompts skew retro.
+  character, 8×8 tile) — default prompts skew retro.
 - **Godot Light2D:** prototype new lighting in an isolated test scene first;
   it's finicky on the first pass (blend modes, masks, normal maps, energy/range).
 
@@ -253,6 +256,18 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   **Airtime is capped by Level 2's second gap**, which is a dash GATE — airtime
   times max_run_speed is horizontal reach, and past about +16% a plain running
   jump clears a gap that exists to teach the dash (`level2_test` catches it).
+- `tools/ldtk_to_8px.py` — the one-shot 16px -> 8px grid migration, kept for the
+  record because it documents what the conversion had to get right. It
+  REGENERATES the auto-layer tiles rather than leaving that to LDtk (they live
+  in the `.ldtk` and the importer reads them straight out of it), and its
+  `--verify` mode repaints the world from the rules and diffs it against what
+  LDtk stored — that came back 0/1893 mismatches before anything was written,
+  which is the only reason it was trusted. Two non-guessable details it had to
+  match: `outOfBoundsValue` is 2, so past a room's edge counts AS brick, and
+  every rule also matches its X/Y/XY-mirrored self.
+- `tools/gen_bricks_8px.py` — the four 8px wall tiles (fill, top, left,
+  corner). Four is the WHOLE tileset: no tile in the world is hand-placed, and
+  the four auto-rules never ask for anything else.
 - `tools/gen_dust.py` — the puffs kicked up on a jump, a landing and a dash
   start. Its own sheet rather than `death_shard.png` tinted: shards are
   hard-edged debris, and a landing that throws those reads as a small death.
@@ -308,7 +323,11 @@ test rather than being noticed months later in play.
   collide with mask 2 only.
 - Every tunable is an `@export` with a one-line comment saying what tweaking
   it changes. Feel timers count down as plain floats in `_tick_timers()`.
-- Player hitbox 8x12; interiors: 3 tiles = claustrophobic, walkable min is a
-  2-tile (16px) slot. Jump reaches ~3.5 tiles, dash ~5, jump+dash gap ~10.
+- Player hitbox 8x12 — one cell wide, one and a half tall on the 8px grid.
+  Interiors: 6 cells = claustrophobic, walkable min is a 2-cell (16px) slot.
+  Jump reaches 34px (~4 cells), dash ~39px (~5), jump+dash ~85px (~10).
+  **These are pixel figures first.** The grid halving did not move any of them,
+  and a future grid change should not either — level geometry is built against
+  the pixels, and the cell count is just how it reads on the current grid.
 - Checkpoints are silent Area2Ds; death is instant respawn, no penalty.
 
