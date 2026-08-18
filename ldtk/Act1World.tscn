@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/DawnWindow.tscn" id="11_dawn"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/SunShaft.tscn" id="12_shaft"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/WallPattern.tscn" id="13_wallpat"]
+[ext_resource type="Script" path="res://scripts/dash_tutorial.gd" id="14_dashtut"]
 
 [node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
@@ -104,34 +105,45 @@ halo_amount = 0.44
 [node name="DawnWindowRoom22" parent="Backdrop" unique_id=39210986 instance=ExtResource("11_dawn")]
 position = Vector2(176, 848)
 
-[node name="WallPatternRoom1" parent="Backdrop" instance=ExtResource("13_wallpat")]
-pattern_scale = 0.9
+[node name="WallPatternRoom1" parent="Backdrop" unique_id=121778928 instance=ExtResource("13_wallpat")]
 position = Vector2(700, 250)
-phase = 0.0
-
-[node name="WallPatternRoom5" parent="Backdrop" instance=ExtResource("13_wallpat")]
+color = Color(0.78, 0.3, 0.95, 1)
+texture_scale = 0.9
 pattern_scale = 0.9
+
+[node name="WallPatternRoom5" parent="Backdrop" unique_id=78019596 instance=ExtResource("13_wallpat")]
 position = Vector2(1975, 250)
+color = Color(0.78, 0.3, 0.95, 1)
+texture_scale = 0.9
+pattern_scale = 0.9
 phase = 4.3
 
-[node name="WallPatternRoom9" parent="Backdrop" instance=ExtResource("13_wallpat")]
-pattern_scale = 0.9
+[node name="WallPatternRoom9" parent="Backdrop" unique_id=2142124590 instance=ExtResource("13_wallpat")]
 position = Vector2(3980, 248)
+color = Color(0.78, 0.3, 0.95, 1)
+texture_scale = 0.9
+pattern_scale = 0.9
 phase = 9.1
 
-[node name="WallPatternRoom14" parent="Backdrop" instance=ExtResource("13_wallpat")]
-pattern_scale = 0.9
+[node name="WallPatternRoom14" parent="Backdrop" unique_id=1354074499 instance=ExtResource("13_wallpat")]
 position = Vector2(2960, 888)
+color = Color(0.78, 0.3, 0.95, 1)
+texture_scale = 0.9
+pattern_scale = 0.9
 phase = 2.7
 
-[node name="WallPatternRoom18" parent="Backdrop" instance=ExtResource("13_wallpat")]
-pattern_scale = 0.9
+[node name="WallPatternRoom18" parent="Backdrop" unique_id=756527122 instance=ExtResource("13_wallpat")]
 position = Vector2(1492, 884)
+color = Color(0.78, 0.3, 0.95, 1)
+texture_scale = 0.9
+pattern_scale = 0.9
 phase = 11.5
 
-[node name="WallPatternRoom21" parent="Backdrop" instance=ExtResource("13_wallpat")]
-pattern_scale = 0.9
+[node name="WallPatternRoom21" parent="Backdrop" unique_id=1296203881 instance=ExtResource("13_wallpat")]
 position = Vector2(340, 890)
+color = Color(0.78, 0.3, 0.95, 1)
+texture_scale = 0.9
+pattern_scale = 0.9
 phase = 6.9
 
 [node name="Props" type="Node2D" parent="." unique_id=1481885276]
@@ -799,6 +811,27 @@ light_energy = 3.2
 light_scale = 3.0
 show_body = false
 
+[node name="MoonGlowRoom25" parent="Lights" unique_id=984246068 instance=ExtResource("3_lamp")]
+position = Vector2(480, 1500)
+light_color = Color(1, 0.72, 0.44, 1)
+light_energy = 3.2
+light_scale = 5.0
+show_body = false
+
+[node name="MoonGlowRoom27" parent="Lights" unique_id=2003042257 instance=ExtResource("3_lamp")]
+position = Vector2(700, 1500)
+light_color = Color(1, 0.72, 0.44, 1)
+light_energy = 3.2
+light_scale = 5.0
+show_body = false
+
+[node name="MoonGlowRoom26" parent="Lights" unique_id=1844831374 instance=ExtResource("3_lamp")]
+position = Vector2(150, 1500)
+light_color = Color(1, 0.72, 0.44, 1)
+light_energy = 4.2
+light_scale = 5.0
+show_body = false
+
 [node name="MoonGlowRoom15" parent="Lights" unique_id=2025521353 instance=ExtResource("3_lamp")]
 position = Vector2(2300, 864)
 light_color = Color(0.93, 0.44, 0.35, 1)
@@ -905,4 +938,7 @@ script = ExtResource("7_beats")
 blood_moon_window = NodePath("../Backdrop/MoonWindowRoom11")
 blood_moon_glow = NodePath("../Lights/MoonGlowRoom11")
 
-[node name="EditorPreview" parent="." unique_id=182526785 instance=ExtResource("2_ldtk")]
+[node name="EditorPreview" parent="." unique_id=1112016726 instance=ExtResource("2_ldtk")]
+
+[node name="DashTutorial" type="Node" parent="."]
+script = ExtResource("14_dashtut")

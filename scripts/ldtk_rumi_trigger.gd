@@ -115,6 +115,45 @@ var _feet_row_cache := -1.0
 ## Rumi's own art, for the runtime factory below. The post-import script holds
 ## the same two for the triggers it BAKES into ldtk/levels/*.scn.
 const RUMI_FRAMES := preload("res://assets/rumi_frames.tres")
+const RUMI_LIGHT_TEXTURE := preload("res://assets/light_radial.png")
+
+
+## Build a Rumi trigger with the children `appear()` needs.
+##
+## A FACTORY, because `LdtkRumiTrigger.new()` is not enough and fails in a way
+## that does not say so: `_rumi` and `_rumi_light` are @onready lookups of
+## $Rumi and $RumiLight, so a bare node reaches _ready with both null and dies
+## inside _build_glow on "light_mask on a base object of type null instance".
+## The LDtk importer built these three by hand; anything else that wants a Rumi
+## (scripts/dash_tutorial.gd calls him down mid-room) needs the same three, and
+## two copies of that list is one copy too many.
+static func make(width := 16.0, height := 320.0) -> LdtkRumiTrigger:
+	var trigger := LdtkRumiTrigger.new()
+	trigger.name = "RumiTrigger"
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(width, height)
+	shape.shape = rect
+	trigger.add_child(shape)
+
+	var rumi := AnimatedSprite2D.new()
+	rumi.name = "Rumi"
+	rumi.sprite_frames = RUMI_FRAMES
+	rumi.animation = "idle"
+	rumi.autoplay = "idle"
+	rumi.scale = Vector2(0.5, 0.5)
+	rumi.modulate = Color(RUMI_GOLD.r, RUMI_GOLD.g, RUMI_GOLD.b, 0.0)
+	trigger.add_child(rumi)
+
+	var rumi_light := PointLight2D.new()
+	rumi_light.name = "RumiLight"
+	rumi_light.texture = RUMI_LIGHT_TEXTURE
+	rumi_light.texture_scale = 2.8
+	rumi_light.color = Color(1, 0.82, 0.45, 1)
+	rumi_light.energy = 0.0
+	rumi_light.position = Vector2(0, -19)
+	trigger.add_child(rumi_light)
+	return trigger
 
 ## A Rumi staged by a script, in a room LDtk never put a trigger in.
 ##

@@ -67,6 +67,10 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/menu_nav_test.tscn` — menu navigation
     on a CONTROLLER: a stick resting past the walking deadzone moves nothing,
     one push moves exactly one row, a held direction repeats only after a delay
+  - `Godot --headless --path . res://tests/dash_tutorial_test.tscn` — Level_24's
+    diagonal-dash lesson: the prompt arrives at the dash point, a FLAT dash
+    does not clear it and an up-forward one does, and only that room's
+    crumbling panels are relaxed
   - `Godot --headless --path . res://tests/platform_test.tscn` — the two office
     ceiling platforms: the solid one holds, the crumbling one gives way in
     under a second and comes BACK on reset (collision, art and its spent flag)
