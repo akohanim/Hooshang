@@ -31,7 +31,7 @@ const LEVELS := {
 	"Level2": "res://scenes/levels/act1_office/Level2.tscn",
 	"LDtkOffice": "res://ldtk/Level_1_Office_Test.tscn",
 	"Act1World": WORLD_SCENE,
-	# Rendering prototype, not a level: a pomegranate drawn on a 640x360 layer
+	# Rendering prototype, not a level: a lemon drawn on a 640x360 layer
 	# over the 320x180 world. See tests/token_density.gd.
 	"TokenDensity": "res://tests/token_density.tscn",
 }

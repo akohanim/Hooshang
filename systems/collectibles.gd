@@ -1,5 +1,5 @@
 extends Node
-## Running total of pomegranates (autoload "Collectibles").
+## Running total of lemons (autoload "Collectibles").
 ##
 ## Lives here rather than on the player or a level because the count has to
 ## survive everything that throws those away: room changes inside an Act, death
@@ -111,7 +111,7 @@ func save_state() -> Dictionary:
 	return {"total": total, "taken": _taken.keys()}
 
 
-## Put a slot's fruit back. Must run BEFORE the world loads: each pomegranate
+## Put a slot's fruit back. Must run BEFORE the world loads: each lemon
 ## asks is_taken() in its own _ready and shows itself if the answer is no.
 func load_state(state: Dictionary) -> void:
 	total = int(state.get("total", 0))
@@ -151,7 +151,7 @@ func _build_hud() -> void:
 	# The DENSE frame, not the world one. This layer draws at the window's own
 	# resolution (see the 0.25 scale above), so it can show the finer art — the
 	# same reason the dialogue box gets real type on a 180-line screen.
-	_icon.texture = load("res://assets/props/pomegranate/dense/frame_000.png")
+	_icon.texture = load("res://assets/props/lemon/dense/frame_000.png")
 	_icon.size = Vector2(ICON, ICON)
 	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

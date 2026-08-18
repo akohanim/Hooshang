@@ -1,6 +1,6 @@
 extends Node
 ## Dev capture harness for the two HUD counters: the death count top-right, and
-## the pomegranate's flight from where it was picked up into the counter on the
+## the lemon's flight from where it was picked up into the counter on the
 ## left. Runs WINDOWED so 2D actually rasterises.
 ##
 ## Captures the ROOT viewport, not Screen.viewport — the counters deliberately
@@ -47,9 +47,9 @@ func _shoot_deaths(player: Node2D) -> void:
 
 
 func _shoot_fruit(player: Node2D) -> void:
-	var fruit := get_tree().get_first_node_in_group("pomegranate") as Node2D
+	var fruit := get_tree().get_first_node_in_group("lemon") as Node2D
 	if fruit == null:
-		print("no pomegranate in the world")
+		print("no lemon in the world")
 		return
 	Collectibles.reset()
 	# Stand in its room so the camera is actually looking at it — but off to one

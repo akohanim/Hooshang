@@ -21,7 +21,7 @@ extends Node
 ##
 ## PUSH vs PULL, and why both. The two counters are autoloads that already exist
 ## when a slot is chosen, so their state is pushed into them before the world
-## loads — it has to be, or a pomegranate's _ready would check an empty "already
+## loads — it has to be, or a lemon's _ready would check an empty "already
 ## taken" set and re-spawn fruit you had banked. The world's own state cannot be
 ## pushed: the nodes that own it are created by the load itself, and a parent's
 ## _ready runs after its children's, so there is no moment afterwards that is
@@ -178,7 +178,7 @@ func summary(i: int) -> Dictionary:
 		# +1 because Level_0 is the first room; the debug picker counts the same
 		# way, so a room named in one menu means the same room in the other.
 		"room_number": LdtkWorld.index_in_name(room) + 1,
-		"pomegranates": int(collectibles.get("total", 0)),
+		"lemons": int(collectibles.get("total", 0)),
 		"deaths": int(deaths.get("total", 0)),
 		"play_seconds": float(payload.get("play_seconds", 0.0)),
 		"visited": _names(payload.get("visited", [])),
@@ -357,7 +357,7 @@ func _bind(i: int) -> void:
 
 
 ## Push the parts that live in autoloads, BEFORE the world is loaded. Order is
-## load-bearing: a pomegranate asks Collectibles whether it has been taken in its
+## load-bearing: a lemon asks Collectibles whether it has been taken in its
 ## own _ready, so a fruit banked an hour ago comes back on screen if this runs
 ## even one frame late.
 func _apply(payload: Dictionary) -> void:

@@ -16,7 +16,7 @@ extends Node
 
 const BELT := preload("res://scenes/props/zones/ConveyorBelt.tscn")
 const SPIKES := preload("res://scenes/props/hazards/GlassSpikes.tscn")
-const POM := preload("res://scenes/props/Pomegranate.tscn")
+const POM := preload("res://scenes/props/Lemon.tscn")
 
 ## Top of the floor everything lands on.
 const FLOOR_Y := 200.0

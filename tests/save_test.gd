@@ -18,7 +18,7 @@ extends Node
 ##     the way it FAILS is worse: the fade lifts inside that scene, so an early
 ##     return past it leaves the player looking at a black screen.
 ##   - the taken-fruit set, because a total without it re-spawns every banked
-##     pomegranate to be collected again.
+##     lemon to be collected again.
 ##
 ## Slots are written to a throwaway directory, not user://saves — a suite run
 ## must never be able to eat a real player's progress.
@@ -100,9 +100,9 @@ func _check_round_trip() -> void:
 		"the card names the room he was in  [%s]" % card.get("room", ""))
 	_check(int(card.get("room_number", 0)) == 8,
 		"numbered the way the pickers number it  [%s]" % card.get("room_number", 0))
-	_check(int(card.get("pomegranates", -1)) == 2 and int(card.get("deaths", -1)) == 3,
+	_check(int(card.get("lemons", -1)) == 2 and int(card.get("deaths", -1)) == 3,
 		"with the two counters on it  [%s / %s]"
-			% [card.get("pomegranates"), card.get("deaths")])
+			% [card.get("lemons"), card.get("deaths")])
 	_check(SaveGame.unlocked_rooms(0).has("Level_7"),
 		"and Level_7 is unlocked for the level select  %s" % str(SaveGame.unlocked_rooms(0)))
 
@@ -117,7 +117,7 @@ func _check_round_trip() -> void:
 	_check(SaveGame.resume(0), "slot 1 loads")
 	await _settle()
 
-	_check(Collectibles.total == 2, "pomegranate total restored  [%d]" % Collectibles.total)
+	_check(Collectibles.total == 2, "lemon total restored  [%d]" % Collectibles.total)
 	_check(Collectibles.is_taken("fruit:a") and Collectibles.is_taken("fruit:b"),
 		"and WHICH fruit were taken, so none of them come back")
 	_check(Collectibles.shown() == 2,

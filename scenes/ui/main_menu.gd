@@ -284,8 +284,8 @@ func _describe(i: int, when_empty: String) -> String:
 	var card := SaveGame.summary(i)
 	if card.get("empty", true):
 		return "%s  —  empty" % when_empty
-	return "ROOM %d   %d POMEGRANATES   %d DEATHS   %s" % [
-		card["room_number"], card["pomegranates"], card["deaths"],
+	return "ROOM %d   %d LEMONS   %d DEATHS   %s" % [
+		card["room_number"], card["lemons"], card["deaths"],
 		_clock(card["play_seconds"])]
 
 

@@ -28,7 +28,7 @@ so the two agree now. The tiles are still placeholder art.
     dialogue order, dashless start, room 1 grants nothing, room 2 grants dash
   - `Godot --headless --path . res://tests/screen_test.tscn` — UI and world stay
     on separate render surfaces (restyling dialogue can't touch the game)
-  - `Godot --headless --path . res://tests/pomegranate_test.tscn` — collectibles:
+  - `Godot --headless --path . res://tests/lemon_test.tscn` — collectibles:
     pickup, and the total surviving level changes and death
   - `Godot --headless --path . res://tests/death_test.tscn` — exactly one death
     counted per respawn, from a hazard and from the kill plane alike
@@ -155,7 +155,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   full-resolution surface in front of it. **Load levels with
   `Screen.load_scene()`, not `get_tree().change_scene_to_file()`**, or they land
   outside the game viewport; `Screen.current` replaces `current_scene`.
-- `systems/collectibles.gd` — `Collectibles` autoload: the pomegranate ("coin")
+- `systems/collectibles.gd` — `Collectibles` autoload: the lemon ("coin")
   total, which carries across rooms, deaths and Act -> Act loads. Also remembers
   WHICH fruit were taken, so reloading a world can't re-spawn banked ones. Owns
   the small on-screen counter, top-left (built in code, CanvasLayer 92). On
@@ -176,7 +176,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   them (Collectibles' total AND taken set, Deaths, `Game.current_index`,
   LdtkWorld's `_way_back` + `has_dash` + room, Act1Beats' `_opening_played` +
   `_collapsed` + whether Darkshang has been met). The two autoload counters are
-  PUSHED before the world loads (a pomegranate checks `is_taken` in its own
+  PUSHED before the world loads (a lemon checks `is_taken` in its own
   `_ready`); the world's own state is PULLED by LdtkWorld and Act1Beats in their
   `_ready` via `SaveGame.state_for(key)`, because those nodes are created by the
   load itself. Autosaves on every room transition (deferred a frame, so
@@ -275,6 +275,18 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `tools/gen_bricks_8px.py` — the four 8px wall tiles (fill, top, left,
   corner). Four is the WHOLE tileset: no tile in the world is hand-placed, and
   the four auto-rules never ask for anything else.
+- `tools/gen_lemon.py` — the lemon collectible, cut from a generated bounce
+  sheet. Two things it has to do that a crop-and-resize does not. The source is
+  a JPEG with the **transparency checkerboard baked in as pixels**, and JPEG
+  ringing defeats a colour key (77% background at the tightest usable tolerance,
+  noise in every column) — so the key is SATURATION, since the fruit is strongly
+  coloured and the checkerboard is grey. And the frames are cut by CONNECTIVITY,
+  not by row density: the leaf is thin, so a density test reads it as a motion
+  swoosh and silently deletes it, which is how the first pass came out as yellow
+  blobs. The bounce in the sheet travels more than a body-height, so the offsets
+  are kept but SCALED — which is why `Lemon.tscn` sets `bob_height = 0`, or the
+  prop's own tween hovers it a second time and the squash drifts out of step.
+  Sizes: `10` world, `20 dense`, `16 icon` (writes `ldtk/art/lemon.png`).
 - `tools/gen_persian_trim.py`, `gen_persian_glyph.py` — the Persian polish. The
   trim is UI art authored in the dialogue box's own 1280x720 space (a quarter of
   a design pixel each), the glyph is a light COOKIE and therefore white with the

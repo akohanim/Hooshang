@@ -1,5 +1,5 @@
 extends Node
-## PROTOTYPE — can a pomegranate token be drawn at higher pixel density than the
+## PROTOTYPE — can a lemon token be drawn at higher pixel density than the
 ## room it sits in? Throwaway; wired into nothing.
 ##
 ## THE PROBLEM. The world renders into a 320x180 SubViewport and is then
@@ -37,8 +37,8 @@ const GAME := Vector2i(320, 180)
 const DENSITY := 2
 const WINDOW_SCALE := 4          # game px -> window px, as the real game runs
 
-const NORMAL_TEX := preload("res://assets/props/pomegranate/frame_000.png")
-const DENSE_TEX := preload("res://assets/props/pomegranate/dense/frame_000.png")
+const NORMAL_TEX := preload("res://assets/props/lemon/frame_000.png")
+const DENSE_TEX := preload("res://assets/props/lemon/dense/frame_000.png")
 
 var world_cam: Camera2D
 var token_cam: Camera2D
@@ -139,7 +139,7 @@ func _ready() -> void:
 	# The scale is not optional and it is the easy thing to get wrong: Godot's
 	# `zoom` scales the DRAWING, not just the framing, so a 40px sprite at zoom 2
 	# covers 40 world units. The first capture of this looked like a triumph and
-	# was really just a bigger pomegranate.
+	# was really just a bigger lemon.
 	var dense := Sprite2D.new()
 	dense.texture = DENSE_TEX
 	dense.scale = Vector2.ONE / float(DENSITY)

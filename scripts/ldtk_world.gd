@@ -317,7 +317,7 @@ func _add_backdrop(room: Node2D) -> void:
 ## _enter_tree rather than _ready deliberately: a node's _enter_tree runs BEFORE
 ## its children enter the tree, so the preview's contents are freed without their
 ## _ready ever firing. Do it later and the preview's triggers, note tiles and
-## pomegranates all register themselves in groups first — the musical-tile puzzle
+## lemons all register themselves in groups first — the musical-tile puzzle
 ## would count ten tiles instead of five.
 func _drop_editor_preview() -> void:
 	var preview := get_node_or_null("EditorPreview")

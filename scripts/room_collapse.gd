@@ -39,7 +39,7 @@ class_name RoomCollapse
 ## that is NOT coming down, so props above one can measure their landing on it
 ## like any other floor. Room 18 used to end its collapse with four props still
 ## hanging in the air for exactly the opposite reason.
-const FALLS_UNDER := "Hazard, ConveyorBelt, SlideZone, Pomegranate"
+const FALLS_UNDER := "Hazard, ConveyorBelt, SlideZone, Lemon"
 
 ## Free-fall acceleration used to time the drops, px/s². Deliberately heavier
 ## than the player's own gravity — he falls with air under him and a jump to
@@ -74,7 +74,7 @@ const LAND_TIME := 0.09
 ## can hang sound or dust off the same list.
 ##
 ## `host` owns the tweens: they have to live on a node that outlives the fall,
-## and the props themselves are the wrong choice — a Pomegranate freeing itself
+## and the props themselves are the wrong choice — a Lemon freeing itself
 ## mid-collapse (the player can be standing in it) would take its own tween with
 ## it and leave the beat half played.
 static func drop(room: Node2D, host: Node) -> Array[Node2D]:

@@ -21,7 +21,7 @@ Three things here are not a resize, and each is a way the frame goes wrong:
   is also mixed into every antialiased edge, so a hard alpha cut alone leaves a
   grey halo tracing him. The key recovers the mixing fraction, un-mixes the
   edge colour back out of it (C = a*F + (1-a)*BG, solved for F), and only THEN
-  cuts alpha hard on the way down — the same order gen_pomegranate.py uses on
+  cuts alpha hard on the way down — the same order gen_lemon.py uses on
   its painted rim, for the same reason.
 - **The wall is dropped.** Each slide cell draws the wall he is sliding on as a
   vertical line, and the level already draws that. Kept, it would put a second
@@ -70,7 +70,7 @@ KEY_LO = 6                       # measured backdrop noise never exceeds 4
 KEY_HI = 44
 
 ## Alpha below this is cut away entirely once the frame is small. Same job as
-## gen_pomegranate.py's cut: a painted edge fades out over several source
+## gen_lemon.py's cut: a painted edge fades out over several source
 ## pixels and at 88px that becomes a fringe of half-transparent grey.
 ALPHA_CUT = 116
 ## Colours kept after the downscale. The coat, trousers, skin and hair each
@@ -262,7 +262,7 @@ def shrink(img, size):
 
     Premultiplying before the resample is what stops the transparent pixels'
     colour bleeding inward; going via 4x the target and sharpening in between
-    is gen_pomegranate.py's trick for keeping structure that a single
+    is gen_lemon.py's trick for keeping structure that a single
     12x reduction would average away — here it is the difference between a
     face and a beige smudge.
     """

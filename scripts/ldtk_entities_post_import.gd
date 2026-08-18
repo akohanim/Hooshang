@@ -23,7 +23,7 @@ const RUMI_TRIGGER_SCRIPT := preload("res://scripts/ldtk_rumi_trigger.gd")
 const LDTK_DOOR_SCRIPT := preload("res://scripts/ldtk_door.gd")
 const EXIT_SIGN_SCENE := preload("res://scenes/props/ExitSign.tscn")
 const NOTE_TILE_SCENE := preload("res://scenes/props/NoteTile.tscn")
-const POMEGRANATE_SCENE := preload("res://scenes/props/Pomegranate.tscn")
+const LEMON_SCENE := preload("res://scenes/props/Lemon.tscn")
 const RUMI_FRAMES := preload("res://assets/rumi_frames.tres")
 const RUMI_LIGHT_TEXTURE := preload("res://assets/light_radial.png")
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
@@ -110,8 +110,8 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			# Hand-placed collectible. Nothing to configure — the prefab owns its
 			# own art, pickup rule and pop; the running total lives in the
 			# Collectibles autoload so it survives the room and the level.
-			"Pomegranate":
-				var pom: Area2D = POMEGRANATE_SCENE.instantiate()
+			"Lemon":
+				var pom: Area2D = LEMON_SCENE.instantiate()
 				pom.position = data.position
 				entity_layer.add_child(pom)
 			# Five separate entities (MusicNote1..MusicNote5) rather than one

@@ -14,7 +14,7 @@ Entities that Godot expects (see scripts/ldtk_entities_post_import.gd):
     PlayerStart  Door  Checkpoint  RumiTrigger  Hazard   (authored by hand)
     Exit         -> room exit / two-way door
     MusicNote    -> solid musical tile, NoteIndex 1-5
-    Pomegranate  -> collectable fruit ("coin"); drop as many as you like
+    Lemon  -> collectable fruit ("coin"); drop as many as you like
 """
 import json
 import os
@@ -120,16 +120,16 @@ def note_entities(uid, tileset_uid):
     return out
 
 
-def ensure_pomegranate_tileset(d, uid):
+def ensure_lemon_tileset(d, uid):
     """Tileset holding the fruit icon, so LDtk draws the real art in the editor
     instead of a coloured box."""
     for t in d["defs"]["tilesets"]:
-        if t["identifier"] == "Pomegranate":
+        if t["identifier"] == "Lemon":
             return t["uid"], uid
     d["defs"]["tilesets"].append({
         "__cWid": 1, "__cHei": 1,
-        "identifier": "Pomegranate", "uid": uid,
-        "relPath": "art/pomegranate.png",
+        "identifier": "Lemon", "uid": uid,
+        "relPath": "art/lemon.png",
         "embedAtlas": None, "pxWid": 16, "pxHei": 16,
         "tileGridSize": 16, "spacing": 0, "padding": 0, "tags": [],
         "tagsSourceEnumUid": None, "enumTags": [], "customData": [],
@@ -193,13 +193,13 @@ def migrate_legacy_notes(d):
     return moved
 
 
-def pomegranate_entity(uid, tileset_uid):
+def lemon_entity(uid, tileset_uid):
     """The collectable. One cell, centred, no fields — placement is the whole
     authoring step, which is the point: drop them wherever they should be."""
     def make(u):
         e = entity(
-            "Pomegranate", u, 16, 16, "#C0392B", (0.5, 0.5),
-            "Collectable pomegranate. Adds 1 to the run total, which carries "
+            "Lemon", u, 16, 16, "#C0392B", (0.5, 0.5),
+            "Collectable lemon. Adds 1 to the run total, which carries "
             "across rooms and levels. Place as many as you like.",
             [])
         if tileset_uid is not None:
@@ -209,7 +209,7 @@ def pomegranate_entity(uid, tileset_uid):
             e["tileRect"] = rect
             e["uiTileRect"] = rect
         return e, 1
-    return {"Pomegranate": make}
+    return {"Lemon": make}
 
 
 def main():
@@ -225,11 +225,11 @@ def main():
     if tileset_uid == uid - 1:
         changed = True
 
-    pom_tileset_uid, uid = ensure_pomegranate_tileset(d, uid)
+    pom_tileset_uid, uid = ensure_lemon_tileset(d, uid)
 
     wanted = build(uid)
     wanted.update(note_entities(uid, tileset_uid))
-    wanted.update(pomegranate_entity(uid, pom_tileset_uid))
+    wanted.update(lemon_entity(uid, pom_tileset_uid))
     for name, make in wanted.items():
         if name in {e["identifier"] for e in d["defs"]["entities"]}:
             print("  ok      %s (already present)" % name)

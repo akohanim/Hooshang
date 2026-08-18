@@ -14,7 +14,7 @@ extends CanvasLayer
 ## WHAT KEEPS RUNNING. `get_tree().paused = true` stops every node whose
 ## process_mode is inherited, which is all of them — the world in the
 ## sub-viewport, Screen's input forwarding, the HUD counters' tweens, a
-## pomegranate still in flight. That is the whole point: they all freeze mid-air
+## lemon still in flight. That is the whole point: they all freeze mid-air
 ## and carry on from the same place. This node is the one exception
 ## (PROCESS_MODE_ALWAYS, set in _ready), because a pause menu that pauses itself
 ## can never be dismissed.
