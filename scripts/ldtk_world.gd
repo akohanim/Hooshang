@@ -389,6 +389,9 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	var door := _door_in(room)
 	if door != null:
 		door.rearm()
+	# Same rule as the door above: a room is restored per VISIT, so walking back
+	# into one finds its floor the way it was first seen.
+	CrumblingPlatform.reset_all(get_tree())
 	room_changed.emit(room)
 
 
@@ -430,6 +433,12 @@ func _on_player_died() -> void:
 	await get_tree().create_timer(
 		maxf(respawn_delay, player.death_time), false).timeout
 	player.respawn(_checkpoint)
+	# Put the room's crumbling platforms back BEFORE he lands, not after: a
+	# retry that starts with the floor already missing is a room that gets
+	# harder every time you fail it, which turns a retry loop into a restart.
+	# Covers R-to-retry too — that route calls player.die() rather than
+	# respawning directly, exactly so there is one path through here.
+	CrumblingPlatform.reset_all(get_tree())
 
 
 ## A story door in a room OWNS that room's doorway: you leave by walking

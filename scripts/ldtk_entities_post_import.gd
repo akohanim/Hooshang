@@ -13,6 +13,8 @@ const DOOR_SCENE := preload("res://scenes/props/Door.tscn")
 const CHECKPOINT_SCENE := preload("res://scenes/props/Checkpoint.tscn")
 const HAZARD_SCENE := preload("res://scenes/props/hazards/Hazard.tscn")
 const GLASS_SPIKES_SCENE := preload("res://scenes/props/hazards/GlassSpikes.tscn")
+const PLATFORM_SCENE := preload("res://scenes/props/platforms/Platform.tscn")
+const CRUMBLING_SCENE := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
 const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
 const CONVEYOR_BELT_SCENE := preload("res://scenes/props/zones/ConveyorBelt.tscn")
 const DARKSHANG_SCENE := preload("res://scenes/props/chase/Darkshang.tscn")
@@ -72,6 +74,13 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(hazard)
 			# One entity per surface, so which way the points aim is chosen by
 			# picking the right entity rather than by remembering a field.
+			# Both platforms are dragged out to a WIDTH in LDtk; the height is
+			# forced to one cell by the prop itself, so an author who drags the
+			# handle diagonally still gets a ledge rather than a wall.
+			"Platform":
+				entity_layer.add_child(_build_platform(data, PLATFORM_SCENE))
+			"CrumblingPlatform":
+				entity_layer.add_child(_build_platform(data, CRUMBLING_SCENE))
 			"GlassSpikes":
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.UP))
 			"GlassSpikesCeiling":
@@ -138,6 +147,17 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 ## Its own function rather than four inline branches because the length is the
 ## whole point of these entities, and Vector2(data.size) quietly carrying the
 ## across-axis through would put the kill box somewhere nobody asked for.
+## A platform, at the width it was dragged to.
+##
+## `position` is the entity's CENTRE, the same as every other sized entity here
+## (see _build_glass_spikes), and Platform centres its box and art to match.
+func _build_platform(data: Dictionary, scene: PackedScene) -> StaticBody2D:
+	var plat: StaticBody2D = scene.instantiate()
+	plat.position = data.position
+	plat.size = Vector2(Vector2(data.size).x, Platform.CELL)
+	return plat
+
+
 func _build_glass_spikes(data: Dictionary, facing: GlassSpikes.Facing) -> Area2D:
 	var spikes: Area2D = GLASS_SPIKES_SCENE.instantiate()
 	spikes.position = data.position

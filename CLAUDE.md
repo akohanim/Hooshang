@@ -67,6 +67,9 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/menu_nav_test.tscn` — menu navigation
     on a CONTROLLER: a stick resting past the walking deadzone moves nothing,
     one push moves exactly one row, a held direction repeats only after a delay
+  - `Godot --headless --path . res://tests/platform_test.tscn` — the two office
+    ceiling platforms: the solid one holds, the crumbling one gives way in
+    under a second and comes BACK on reset (collision, art and its spent flag)
   - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
@@ -292,6 +295,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   trim is UI art authored in the dialogue box's own 1280x720 space (a quarter of
   a design pixel each), the glyph is a light COOKIE and therefore white with the
   shape in its alpha.
+- `tools/gen_platforms.py` — the two office-ceiling platforms, cut from a pair
+  of renders. The repeating unit is 24x8 (3 cells by 1) because the source's
+  seam period lands at ~11px once the band is 8px tall, and 24 keeps roughly
+  two diagonals per tile; at 16 it reads as corrugation. The crumbling
+  platform's three damage frames are the SOLID tile with holes stamped on,
+  not cuts from the deteriorated render — eight pixels of height turns that
+  render's cracks into speckle, and the worst window came back a black bar.
+  `tools/ldtk_add_platforms.py` adds the two LDtk entities (LDtk must be
+  CLOSED; it refuses to run otherwise).
 - `tools/gen_dust.py` — the puffs kicked up on a jump, a landing and a dash
   start. Its own sheet rather than `death_shard.png` tinted: shards are
   hard-edged debris, and a landing that throws those reads as a small death.
