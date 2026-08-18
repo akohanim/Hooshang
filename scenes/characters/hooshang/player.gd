@@ -16,6 +16,12 @@ signal died
 
 enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 
+## Half of the 8x12 hitbox in Hooshang.tscn. Kept here because the footing check
+## has to probe at the box's own edges; if the shape is ever resized, these move
+## with it or he loses his footing at the wrong place.
+const HALF_WIDTH := 4.0
+const HALF_HEIGHT := 6.0
+
 @export_group("Run")
 ## Top horizontal speed. 90 px/s (Celeste's run speed) reads well at 8px tiles.
 @export var max_run_speed := 90.0
@@ -200,6 +206,32 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 ## Sized to the clip (5 frames at 14fps = 0.36s) so it reads fully before the
 ## normal jump/fall pose takes over; shorten it to cut the kick short.
 @export var wall_jump_anim_time := 0.36
+
+@export_group("Footing")
+## How much solid ground he needs under his MIDDLE to keep standing, in px
+## either side of his centre. 0 disables the check.
+##
+## This exists because the hitbox is much wider than the man. The box is 8px
+## across; the drawn body is 4.7 (1.95 left of centre, 2.73 right — he leans).
+## Godot keeps a body standing while ANY part of its shape overlaps the floor,
+## so before this he could walk until his centre was a full 4px past a ledge —
+## measured — which put his visible body from edge+2.05 to edge+6.73. Every
+## drawn pixel of him was over air, with a 2px gap between his feet and the
+## ledge he was apparently standing on.
+##
+## Narrowing the hitbox does not fix it and is worth knowing why: for any part
+## of him to still be over the platform the overhang has to be under 1.95px, so
+## the box would have to be under 4px wide — narrower than he is drawn — and it
+## would stop being the 1-cell-wide body the 8px grid is built around.
+@export var footing_width := 1.0
+## How fast he slides off a ledge he has lost his footing on, px/s.
+##
+## A slide rather than an instant drop, because his box still overlaps the ledge
+## when his centre passes the edge and Godot will keep resolving that as solid
+## ground however he is flagged. He has to be moved clear. At this speed that
+## takes about three frames, which reads as losing his footing rather than as
+## being teleported off.
+@export var ledge_slip_speed := 55.0
 
 @export_group("Death")
 ## How long the death animation owns the screen before he respawns, in seconds.
@@ -557,6 +589,7 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		if state == State.FALL or state == State.JUMP or state == State.WALL_SLIDE:
 			juice.on_land(incoming_vel_y)
 			state = State.RUN if input_x != 0.0 else State.IDLE
+		_keep_footing()
 		return
 
 	# Just walked off a ledge (didn't jump): start coyote time.
@@ -595,6 +628,50 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 				wall_dir = int(wd)
 				state = State.WALL_SLIDE
 				velocity.y = minf(velocity.y, wall_slide_max_speed)
+
+
+## Slide him off a ledge he no longer has his footing on.
+##
+## Called only while he is on the floor. If there is ground within footing_width
+## of his centre he is standing properly and nothing happens; otherwise he is
+## overhanging and gets nudged the way he is already falling, until his hitbox
+## clears the ledge and ordinary gravity takes him.
+##
+## Position is moved directly rather than through velocity. The slide is not
+## something he is doing, so it must not be steerable, must not survive into the
+## fall as momentum, and must not be scrubbed by his own ground deceleration on
+## the frame it is applied — all three of which happen if it goes into velocity.x.
+func _keep_footing() -> void:
+	if footing_width <= 0.0 or _ground_under(0.0):
+		return
+	# Which side is still holding him up. Probed just BEYOND the hitbox rather
+	# than at its edge: at maximum overhang his box meets the ledge along a
+	# single line, and a probe sitting exactly on that line is asking whether a
+	# tile boundary counts as solid — which it does not, reliably. A pixel
+	# further out is unambiguously over the ledge or over open air, and without
+	# that this whole check found no supported side and did nothing at all.
+	var slip := 0.0
+	if _ground_under(-(HALF_WIDTH + 1.0)):
+		slip = 1.0            # ground behind on the left: he is going off to the right
+	elif _ground_under(HALF_WIDTH + 1.0):
+		slip = -1.0
+	if slip == 0.0:
+		return                # nothing under him at all; gravity has this
+	global_position.x += slip * ledge_slip_speed * get_physics_process_delta_time()
+
+
+## Is there solid ground just below his feet, `dx` px to the side of his centre?
+##
+## A ray rather than test_move, because test_move uses the whole 8px-wide body
+## and the whole point here is to ask about a narrower footprint than the one
+## Godot supports him on.
+func _ground_under(dx: float) -> bool:
+	var space := get_world_2d().direct_space_state
+	var from := global_position + Vector2(dx, HALF_HEIGHT - 1.0)
+	var query := PhysicsRayQueryParameters2D.create(
+		from, from + Vector2(0.0, footing_width + 2.0), collision_mask)
+	query.exclude = [get_rid()]
+	return not space.intersect_ray(query).is_empty()
 
 
 ## The ONE place player visuals are decided (future palette/power-mode hook).

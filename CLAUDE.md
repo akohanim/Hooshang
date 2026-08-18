@@ -21,7 +21,8 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/level2_test.tscn` — Level 2 jumps
   - `Godot --headless --path . res://tests/flow_test.tscn` — Level 1→2 transition
   - `Godot --headless --path . res://tests/world_bounds_test.tscn` — LDtk rooms
-    are sealed at the top (a jump+dash can't leave through the ceiling)
+    are sealed at the top (a jump+dash can't leave through the ceiling), and
+    he cannot STAND out over a drop (`Player.footing_width`)
   - `Godot --headless --path . res://tests/backtrack_test.tscn` — Exits work
     both ways all the way back, not just one room deep
   - `Godot --headless --path . res://tests/intro_test.tscn` — Act I's beats:
@@ -355,6 +356,12 @@ test rather than being noticed months later in play.
 - Every tunable is an `@export` with a one-line comment saying what tweaking
   it changes. Feel timers count down as plain floats in `_tick_timers()`.
 - Player hitbox 8x12 — one cell wide, one and a half tall on the 8px grid.
+  **It is wider than he is drawn** (4.7px), which is why `Player.footing_width`
+  exists: Godot keeps a body standing while any part of its shape overlaps the
+  floor, so without it he rests with his centre 4px past a ledge and every
+  drawn pixel over air. Narrowing the hitbox cannot fix that — it would have
+  to go under 4px, narrower than the sprite and no longer the one-cell body
+  the grid is built around.
   Interiors: 6 cells = claustrophobic, walkable min is a 2-cell (16px) slot.
   Jump reaches 34px (~4 cells), dash ~39px (~5), jump+dash ~85px (~10).
   **These are pixel figures first.** The grid halving did not move any of them,

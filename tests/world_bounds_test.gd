@@ -38,6 +38,8 @@ var _reached := 0.0
 const HEADROOM_CELLS := 3
 ## The LDtk grid.
 const CELL := 8.0
+## Half his 8x12 hitbox, for reading his feet off his origin.
+const HALF_HEIGHT := 6.0
 
 
 func _ready() -> void:
@@ -52,6 +54,7 @@ func _ready() -> void:
 		"found a standable launch point in %d of %d rooms" % [checked, world.rooms.size()])
 	_check(_reached >= 40.0,
 		"the launches actually left the ground  [best reach %.0fpx]" % _reached)
+	await _check_footing()
 	if failures.is_empty():
 		print("WORLD BOUNDS TEST: ALL PASS")
 	else:
@@ -116,6 +119,75 @@ func _check_room(room: Node2D) -> bool:
 		"%s — jump+dash stays under the ceiling  [head %.1f, ceiling %.0f, %.0fpx of reach]"
 			% [room.name, head, top, launch_y - peak])
 	return true
+
+
+## Regression: he must not be able to STAND with his whole body over open air.
+##
+## Godot keeps a body standing while any part of its shape overlaps the floor,
+## and his hitbox is 8px across against a drawn body of 4.7 — so before
+## Player.footing_width he could come to rest with his centre a full 4px past a
+## ledge, which put every drawn pixel of him past the edge with a 2px gap
+## between his feet and the ledge he appeared to be standing on.
+##
+## Measured by where he comes to REST, not by the overhang seen on any one
+## frame: he slides off over about three frames, so an instantaneous reading
+## still shows 4px while the resting position is 0.
+func _check_footing() -> void:
+	var found := _a_ledge()
+	if found == Vector2.INF:
+		_check(false, "found a ledge to test footing on")
+		return
+	var edge_x := found.x
+	var top_y := found.y
+	var p := world.player
+	p.input_locked = false
+	var rest := -99.0
+	for step in 12:
+		var over := -2.0 + step * 0.5
+		p.respawn(Vector2(edge_x + over, top_y - 10.0))
+		for i in 45:
+			await _frames(1)
+		if p.is_on_floor() and absf(p.global_position.y + HALF_HEIGHT - top_y) < 1.0:
+			rest = maxf(rest, p.global_position.x - edge_x)
+	# His centre may reach the edge; it may not go past it. Half a pixel of slack
+	# for the physics margin, not for a policy.
+	_check(rest <= 0.5,
+		"he cannot stand out over the drop  [rests at most %+.2fpx past the edge, body %+.2f..%+.2f]"
+			% [rest, rest - 1.95, rest + 2.73])
+
+
+## A ledge with a genuine drop to its right, away from a room seam.
+## Returns (right face x, top surface y), or INF.
+func _a_ledge() -> Vector2:
+	for room: Node2D in world.rooms:
+		var layer: TileMapLayer = room.get_node_or_null("Collisions")
+		if layer == null:
+			continue
+		var solid := {}
+		for c: Vector2i in layer.get_used_cells():
+			solid[c] = true
+		var rect := world.room_rect(room)
+		for c: Vector2i in solid:
+			if solid.has(c + Vector2i(0, -1)):
+				continue                                  # not a top surface
+			if not solid.has(c + Vector2i(-1, 0)):
+				continue                                  # nowhere to stand behind it
+			if solid.has(c + Vector2i(-1, -1)):
+				continue                                  # up against a wall
+			var open := true
+			for k in range(1, 5):
+				if solid.has(c + Vector2i(k, 0)) or solid.has(c + Vector2i(k, 1)):
+					open = false
+			if not open:
+				continue                                  # a real drop, not a step
+			var centre := layer.to_global(layer.map_to_local(c))
+			# Off the room seam: the next room's floor begins there and he would
+			# simply walk onto it, which measures nothing.
+			if not rect.grow(-24.0).has_point(centre):
+				continue
+			world.current_room = room
+			return Vector2(centre.x + CELL * 0.5, centre.y - CELL * 0.5)
+	return Vector2.INF
 
 
 ## The highest place in `room` a player could stand.
