@@ -170,7 +170,7 @@ offset_right = 252.0
 offset_bottom = 130.0
 theme_override_colors/font_color = Color(0.8, 0.8, 0.85, 1)
 theme_override_font_sizes/font_size = 8
-text = "Z / SPACE  jump"
+text = "C / Z  jump"
 
 [node name="Door" parent="." instance=ExtResource("21_door")]
 position = Vector2(109, 122)

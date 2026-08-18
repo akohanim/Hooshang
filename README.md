@@ -323,7 +323,7 @@ Before shipping, point `application/run/main_scene` at the real first level.
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
 | Move | WASD / Arrows | D-pad / L-stick |
-| Jump | Z / Space | A (bottom) |
+| Jump | C / Z | A (bottom) |
 | Dash | X / Shift | X (left) / RB |
 | Retry | R | — |
 | Debug overlay | F3 | — |
