@@ -29,11 +29,14 @@ Those three are the SOLID tile with damage stamped onto it, and are the one
 thing here not cut from a render. Cutting them was the first attempt and it does
 not survive the scale: the deteriorated image's cracks and rubble are fine
 detail, and eight pixels of height turns them into speckle — the most damaged
-window came back as a nearly black bar with no readable shape. Damage that reads
-at this size has to be a few deliberate notches, so the holes and cracks are
-stamped, and only their COLOURS are sampled from the deteriorated render. It is
-seeded, so a re-run gives the same tile rather than reshuffling every platform
-in the game.
+window came back as a nearly black bar with no readable shape.
+
+The stamping itself then took two goes. Opaque near-black rectangles with the
+top lip left straight read as boxes stuck under an undamaged panel; what makes
+it look broken is that the damage is TRANSPARENT (a hole in a ceiling is the
+room behind it) and that it comes out of the SILHOUETTE. Cracks are few and
+near-vertical for the same reason — a scatter of 45-degree dashes fights the
+panel's own shallow seams and reads as dirt.
 
 Re-run after editing: python3 tools/gen_platforms.py
 """
@@ -120,36 +123,63 @@ print("solid      plain x=%d (hot %.3f)   lit x=%d (hot %.3f)"
 rot = band("deteriorated")
 rot_px = np.array(rot).reshape(-1, 3)
 rot_lum = rot_px.mean(axis=1)
-HOLE = tuple(int(v) for v in rot_px[rot_lum < 40].mean(axis=0))      # through to nothing
 CRACK = tuple(int(v) for v in rot_px[(rot_lum > 55) & (rot_lum < 95)].mean(axis=0))
-print("sampled from the deteriorated render: hole %s  crack %s" % (HOLE, CRACK))
+print("sampled crack colour from the deteriorated render: %s" % (CRACK,))
 
-base = edge(cut(solid, plain_x, TILE_W, TILE_H))
+base = edge(cut(solid, plain_x, TILE_W, TILE_H)).convert("RGBA")
 
-# (x, y, w, h) notches bitten out of the tile, and (x, y) crack pixels. Written
-# out rather than randomised: at 24x8 there are 192 pixels and where each one
-# goes is the difference between "cracked ceiling" and "dirty smudge".
+# DAMAGE IS TRANSPARENT, not painted. The first version stamped near-black
+# rectangles and they read as boxes stuck under the panel rather than as missing
+# material — a hole in a ceiling is the dark room behind it, which is what alpha
+# gives for free over whatever the platform happens to be in front of.
+#
+# And it comes out of the SILHOUETTE. Damage that leaves the top lip perfectly
+# straight does not look broken however much texture is scribbled on it, so
+# every stage past the first bites the outline, top and bottom.
+#
+# GAPS are (x, width) slits taken out of the full height — the panel coming
+# apart into pieces. BITES are (x, y, w, h) rectangles out of an edge. CRACKS
+# are single darkened pixels, kept few and near-vertical: the first version
+# scattered 45-degree dashes that fought the panel's own shallow seams and read
+# as dirt.
+# ONE break that opens up, and almost nothing else. Everything busier than this
+# was tried and read worse at 24x8: scattered dashes look like dirt, and a dark
+# rim either side of a gap turns the gap into a thick bar, so the panel ends up
+# looking barred rather than broken.
+#
+# GAPS are (x, width) slits through the full height — the panel coming apart.
+# BITES are (x, y, w, h) out of an edge, which is what actually sells damage:
+# a straight top lip reads as undamaged however much texture is scribbled on it.
+# CRACKS are single darkened pixels.
 STAGES = [
-    {"holes": [(5, 6, 2, 2)],
-     "cracks": [(4, 2), (5, 3), (6, 3), (7, 4), (16, 2), (17, 3), (18, 3)]},
-    {"holes": [(5, 5, 3, 3), (16, 6, 3, 2)],
-     "cracks": [(3, 1), (4, 2), (5, 3), (6, 3), (7, 4), (8, 5),
-                (14, 1), (15, 2), (16, 3), (17, 3), (18, 4), (11, 2), (12, 3)]},
-    {"holes": [(4, 4, 5, 4), (14, 5, 6, 3), (0, 6, 2, 2)],
-     "cracks": [(2, 1), (3, 2), (4, 3), (9, 1), (10, 2), (11, 3), (12, 4),
-                (13, 1), (20, 2), (21, 3), (22, 4), (22, 1)]},
+    {"gaps": [], "bites": [],
+     "cracks": [(11, 1), (11, 2), (12, 3)]},
+    {"gaps": [(11, 1)],
+     "bites": [(4, 7, 3, 1), (18, 7, 2, 1)],
+     "cracks": [(5, 2), (5, 3), (18, 2), (18, 3)]},
+    {"gaps": [(11, 2)],
+     "bites": [(2, 7, 4, 1), (16, 7, 5, 1), (9, 0, 2, 1), (13, 0, 2, 1),
+               (0, 6, 2, 2)],
+     "cracks": [(4, 2), (4, 3), (5, 4), (17, 2), (17, 3), (18, 4)]},
 ]
+## Each stage loses a little light, so a panel about to go is visibly duller
+## than one that is merely cracked even where it is still whole.
+DIM = [0.97, 0.91, 0.84]
+
 for i, stage in enumerate(STAGES):
     a = np.array(base).astype(int)
-    for (hx, hy, hw, hh) in stage["holes"]:
-        a[hy:hy + hh, hx:hx + hw] = HOLE
+    a[..., :3] = np.clip(a[..., :3] * DIM[i], 0, 255)
     for (cx, cy) in stage["cracks"]:
         if 0 <= cy < TILE_H and 0 <= cx < TILE_W:
-            a[cy, cx] = CRACK
-    Image.fromarray(a.astype(np.uint8)).save(os.path.join(OUT, "crumble_%d.png" % i))
-    print("crumble %d  %d holes, %d cracks"
-          % (i, len(stage["holes"]), len(stage["cracks"])))
-picks = [0, 0, 0]
+            a[cy, cx, :3] = CRACK
+    for (gx, gw) in stage["gaps"]:
+        a[:, gx:gx + gw, 3] = 0
+    for (bx, by, bw, bh) in stage["bites"]:
+        a[by:by + bh, bx:bx + bw, 3] = 0
+    Image.fromarray(a.astype(np.uint8), "RGBA").save(
+        os.path.join(OUT, "crumble_%d.png" % i))
+    print("crumble %d  %d gaps, %d bites, %d cracks"
+          % (i, len(stage["gaps"]), len(stage["bites"]), len(stage["cracks"])))
 
 # ---- LDtk icons -----------------------------------------------------------
 # Square, so the entity reads as a thing rather than as a sliver in the editor.
