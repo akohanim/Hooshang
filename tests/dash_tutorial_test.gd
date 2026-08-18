@@ -48,38 +48,58 @@ func _ready() -> void:
 		"the ledge sits above the panels  [ledge %.0f, panels %.0f]"
 			% [tut.ledge_top_y, rect.position.y + 15 * 8.0])
 
-	# --- the prompt arrives -------------------------------------------------
-	var p := world.player
-	p.input_locked = false
-	p.has_dash = true
-	p.respawn(Vector2(tut.arm_at_x + 6.0, tut.ledge_top_y - 20.0))
+	# --- he is CAUGHT when the floor goes, not left to fall -----------------
+	#
 	# Rumi's lines are emptied for the run rather than pressed through. The box
-	# waits on the JUMP key, and driving it from here makes him jump off the
-	# platform mid-beat — the test ends up measuring the fight between the two
-	# instead of the thing it is about. What the lines say is asserted below;
-	# that they play is the game's job, not this assertion's.
+	# waits on the JUMP key, and driving it from here makes him jump mid-beat —
+	# the test ends up measuring the fight between the two instead of the thing
+	# it is about. What the lines say is asserted here; that they play is the
+	# game's job.
 	_check(not tut.lines.is_empty(), "Rumi has something to say  [%d lines]"
 		% tut.lines.size())
 	tut.lines = []
-	var shown := false
+
+	var p := world.player
+	p.input_locked = false
+	p.has_dash = true
+	# Dropped in ABOVE the panels, past the dash point, already falling.
+	p.respawn(Vector2(tut.arm_at_x + 10.0, tut.ledge_top_y - 40.0))
+	var caught := false
 	for i in 240:
 		await _frames(1)
 		if tut._prompt != null:
-			shown = true
+			caught = true
 			break
-	_check(shown, "the prompt arrives once he reaches the dash point")
+	_check(caught, "he is caught mid-fall and the prompt arrives")
 
-	# --- and a DIAGONAL dash clears it, where a flat one does not -----------
-	#
-	# Driven through the input system, not by assigning state = DASH: the player
-	# owns that state in _physics_process and ends a forced dash on the next
-	# tick (dash_timer is already 0), so the assignment is gone before anything
-	# reading it on a render frame ever sees it.
-	if shown:
+	if caught:
+		var at := p.global_position
+		_check(at.distance_to(tut._hang) < 2.0,
+			"...held at the hang point  [%s vs %s]" % [at, tut._hang])
+		# FROZEN: a second later he is still there, not sliding or sinking.
+		await _frames(60)
+		_check(p.global_position.distance_to(tut._hang) < 2.0,
+			"and he is still there a second later  [%s]" % p.global_position)
+		# Not zero — ONE frame of gravity. The pin runs after his physics, so he
+		# is always carrying whatever gravity added since it last fired; what
+		# matters is that it never accumulates into a fall, which the position
+		# checks either side of this already say. A whole frame at rise_gravity
+		# is ~27, so anything under 40 is that and nothing more.
+		_check(p.velocity.length() < 40.0,
+			"and gravity never builds on him  [%s]" % p.velocity)
+
+		# A flat dash is not the lesson: it plays out, and the pin takes him back.
 		await _dash(false)
 		_check(tut._prompt != null,
 			"a flat dash does not count as having learned it")
-		await _land()
+		for i in 90:
+			await _frames(1)
+			if p.global_position.distance_to(tut._hang) < 2.0:
+				break
+		_check(p.global_position.distance_to(tut._hang) < 2.0,
+			"and he is put back where he was  [%s]" % p.global_position)
+
+		# The diagonal releases him.
 		await _dash(true)
 		var cleared := false
 		for i in 90:
@@ -88,6 +108,10 @@ func _ready() -> void:
 				cleared = true
 				break
 		_check(cleared, "the diagonal dash clears the prompt")
+		_check(not tut._held, "and lets go of him")
+		await _frames(30)
+		_check(p.global_position.distance_to(tut._hang) > 8.0,
+			"so he actually leaves the spot  [%s]" % p.global_position)
 	_finish()
 
 
@@ -114,16 +138,6 @@ func _dash(diagonal: bool) -> void:
 	await _frames(8)
 	Input.action_release("move_right")
 	Input.action_release("move_up")
-
-
-## Back onto the panels, so the next dash starts from the ground.
-func _land() -> void:
-	var p := world.player
-	p.respawn(Vector2(tut.arm_at_x + 6.0, tut.ledge_top_y - 20.0))
-	for i in 120:
-		await _frames(1)
-		if p.is_on_floor():
-			return
 
 
 func _frames(n: int) -> void:

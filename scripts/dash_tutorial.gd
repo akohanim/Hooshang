@@ -35,6 +35,12 @@ const ROOM := "Level_24"
 @export var ledge_x := 744.0
 @export var ledge_top_y := 1496.0
 
+## Where he is caught, relative to the ledge's bottom-left corner. Left of it
+## and a little below, so an up-forward dash carries him over the lip and a flat
+## one plainly cannot: the dash covers 39px, which from here clears the 36px
+## rise only if some of it is spent going up.
+@export var hang_offset := Vector2(-30.0, 16.0)
+
 @export_group("The beat")
 ## What every crumbling panel in this room gets instead of its own timing.
 @export var hold_time := 2.4
@@ -51,6 +57,9 @@ var _armed := false
 var _done := false
 var _prompt: InputPrompt
 var _rumi: LdtkRumiTrigger
+## Where he is pinned while the lesson is up, and whether the pin is live.
+var _hang := Vector2.ZERO
+var _held := false
 
 
 func _ready() -> void:
@@ -60,6 +69,9 @@ func _ready() -> void:
 		set_process(false)
 		return
 	_world.room_changed.connect(_on_room_changed)
+	# After the player, so the pin below is the last word on his position each
+	# frame rather than something _apply_run overwrites a moment later.
+	process_priority = 100
 
 
 func _on_room_changed(room: Node2D) -> void:
@@ -67,6 +79,9 @@ func _on_room_changed(room: Node2D) -> void:
 		_teardown()
 		return
 	_player = _world.player
+	# It is the dash tutorial; he has a dash in it whatever a save slot says.
+	_player.has_dash = true
+	_hang = Vector2(ledge_x, ledge_top_y) + hang_offset
 	_relax_panels()
 	# Re-armed on every entry, so a retry teaches the same lesson rather than
 	# dropping him into a room whose prompt has already been spent.
@@ -85,22 +100,45 @@ func _relax_panels() -> void:
 			p.crumble_time = hold_time
 
 
-func _process(_delta: float) -> void:
-	# `_armed` gates the ARRIVAL watch only, and is cleared the moment the beat
-	# starts so it cannot re-enter while Rumi is talking. It deliberately does
-	# NOT gate the rest: guarding the whole function with it meant the prompt
-	# went up and the dash that answers it was never watched for.
+## The pin, and the two things that end it.
+##
+## In _physics_process, not _process: it writes velocity and position, and doing
+## that on render frames fights move_and_slide for who moved him last.
+##
+## `_armed` gates the CATCH only, and is cleared the moment the beat starts so it
+## cannot re-enter while Rumi is talking. It deliberately does NOT gate the rest:
+## guarding the whole function with it meant the prompt went up and the dash that
+## answers it was never watched for.
+func _physics_process(_delta: float) -> void:
 	if _done or _player == null:
 		return
-	if _prompt == null:
-		if _armed and _player.global_position.x >= arm_at_x and _player.is_on_floor():
-			_begin()
+	if _prompt == null and not _held:
+		# Caught the moment the floor stops being there. Standing on a panel that
+		# has not given way yet is not the lesson — the lesson is the drop.
+		if _armed and _player.global_position.x >= arm_at_x \
+				and not _player.is_on_floor() and _player.velocity.y > 0.0:
+			_catch()
 		return
 	# The move itself: a dash with BOTH axes in it, aimed upward. A flat dash is
 	# the move he already has, so only the diagonal counts as having learned it.
-	if _player.state == Player.State.DASH \
-			and _player.dash_dir.y < -0.3 and absf(_player.dash_dir.x) > 0.3:
-		_finish()
+	if _player.state == Player.State.DASH:
+		if _player.dash_dir.y < -0.3 and absf(_player.dash_dir.x) > 0.3:
+			_finish()
+		return          # let a wrong dash play out; the pin takes him back after
+	if _held:
+		_pin()
+
+
+## Hold him exactly where he was caught, with the dash still in his hands.
+##
+## Not Player.hold(): that takes his controls away and stops his physics, which
+## is right for a cutscene and wrong here — the whole point is that he can still
+## press something. Velocity is zeroed rather than gravity disabled so nothing in
+## player.gd has to know this beat exists.
+func _pin() -> void:
+	_player.velocity = Vector2.ZERO
+	_player.global_position = _hang
+	_player.dash_available = true
 
 
 ## Rumi speaks FIRST, then the prompt goes up.
@@ -108,8 +146,16 @@ func _process(_delta: float) -> void:
 ## Not for pacing — the dialogue box consumes the jump key to advance a line
 ## (it calls set_input_as_handled), so a prompt shown underneath one is telling
 ## him to press a button the box is holding. He reads, then he tries.
+## Catch him mid-fall and start the lesson.
+func _catch() -> void:
+	_held = true
+	_player.state = Player.State.FALL
+	_pin()
+	_begin()
+
+
 func _begin() -> void:
-	_armed = false          # so _process stops re-entering while this runs
+	_armed = false          # so the catch stops re-entering while this runs
 	await _call_rumi()
 	if _done or not is_instance_valid(_player):
 		return
@@ -132,6 +178,7 @@ func _call_rumi() -> void:
 
 func _finish() -> void:
 	_done = true
+	_held = false
 	if _prompt != null:
 		_prompt.dismiss()
 		_prompt = null
@@ -142,6 +189,7 @@ func _finish() -> void:
 
 func _teardown() -> void:
 	_armed = false
+	_held = false
 	if _prompt != null:
 		_prompt.dismiss()
 		_prompt = null
