@@ -44,14 +44,14 @@ var arm_at_x := 0.0
 ## chosen. An up-forward dash from a standstill rises a flat 33px whatever
 ## height it starts from, and he has to finish 6px above the ledge's surface to
 ## stand on it — so every pixel he is caught lower comes straight off a 33px
-## budget. He STANDS on the panels 26px below the ledge; 20 is the deepest catch
-## that still lands him when the direction is let go early, which is how a
-## player answering a prompt actually presses it. 22 and 24 both put him in the
-## pit.
+## budget, and the room has no slack to spend. With the run raised level with
+## the ledge he now FALLS these 20px rather than being placed at the bottom of
+## them, and 20 is the deepest line he can still answer from when the direction
+## is let go early, which is how a player reading a prompt actually presses it.
+## 22 was measured: it clips the lip and drops him down the gap.
 ##
-## It was 16, which caught him 10px ABOVE the floor that had just gone — the
-## freeze pulled him upward instead of dropping him. Anything deeper than this
-## needs the LEDGE lowered; there is no number here that buys it.
+## Deeper than this needs the LEDGE lowered. There is no number here that buys
+## it.
 @export var hang_offset := Vector2(-30.0, 20.0)
 
 @export_group("The beat")
@@ -79,6 +79,10 @@ var _rumi: LdtkRumiTrigger
 var _hang := Vector2.ZERO
 var _held := false
 var _pulled := false
+## Whether the lock on his controls is OURS to lift. The fall is not his to
+## steer, but this beat is not the only thing that ever locks him, so it only
+## puts back what it took.
+var _locked_fall := false
 
 
 func _ready() -> void:
@@ -100,6 +104,11 @@ func _on_room_changed(room: Node2D) -> void:
 	_player = _world.player
 	# It is the dash tutorial; he has a dash in it whatever a save slot says.
 	_player.has_dash = true
+	# A dash that comes up short drops him down the gap, and a death is not a
+	# room change — without this the retry starts with the floor already pulled
+	# and the lesson already spent, which is a room that only teaches once.
+	if not _player.died.is_connected(_on_player_died):
+		_player.died.connect(_on_player_died)
 	_hang = Vector2(ledge_x, ledge_top_y) + hang_offset
 	arm_at_x = _hang.x
 	_relax_panels()
@@ -164,8 +173,16 @@ func _physics_process(_delta: float) -> void:
 		# and he goes with it.
 		if not _pulled:
 			_pull_the_floor()
+			_player.input_locked = true
+			_locked_fall = true
 			return
-		if not _player.is_on_floor() and _player.velocity.y > 0.0:
+		# AND HE FALLS THERE, rather than being put there. The catch used to fire
+		# on the first frame he was airborne and teleport him to the hang point,
+		# which is a jump of however far apart the two happened to be — it read as
+		# the room glitching, not as the floor giving way. Gravity does it now and
+		# the pin only stops him, so the only correction left is the part of a
+		# frame he overshoots the line by.
+		if not _player.is_on_floor() and _player.global_position.y >= _hang.y:
 			_catch()
 		return
 	# The move itself: a dash with BOTH axes in it, aimed upward. A flat dash is
@@ -199,8 +216,37 @@ func _pin() -> void:
 func _catch() -> void:
 	_held = true
 	_player.state = Player.State.FALL
+	# Held where the fall actually put him horizontally, not where the arithmetic
+	# said it would be: his controls are gone but the run he was in is not, so he
+	# carries a few pixels to the right on the way down. Pulling that back is the
+	# same snap this beat just got rid of. Only the HEIGHT is fixed, because the
+	# height is the part the dash has to answer — and he is kept far enough from
+	# the lip that drifting into it cannot make the lesson free.
+	_hang.x = clampf(_player.global_position.x, arm_at_x, ledge_x - 24.0)
+	_unlock()
 	_pin()
 	_begin()
+
+
+## Give his controls back, if this beat is what took them.
+func _unlock() -> void:
+	if _locked_fall and is_instance_valid(_player):
+		_player.input_locked = false
+	_locked_fall = false
+
+
+## Put the lesson back after a fall down the gap.
+func _on_player_died() -> void:
+	if _world == null or str(_world.current_room.name) != ROOM:
+		return
+	_unlock()
+	_teardown()
+	_hang = Vector2(ledge_x, ledge_top_y) + hang_offset
+	arm_at_x = _hang.x
+	_relax_panels()
+	_armed = true
+	_done = false
+	_pulled = false
 
 
 func _begin() -> void:
@@ -228,6 +274,7 @@ func _call_rumi() -> void:
 func _finish() -> void:
 	_done = true
 	_held = false
+	_unlock()
 	if _prompt != null:
 		_prompt.dismiss()
 		_prompt = null
@@ -237,6 +284,7 @@ func _finish() -> void:
 
 
 func _teardown() -> void:
+	_unlock()
 	_armed = false
 	_held = false
 	_pulled = false

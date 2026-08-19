@@ -42,11 +42,23 @@ func _ready() -> void:
 	_check(elsewhere == 0,
 		"and no panel outside it was touched  [%d were]" % elsewhere)
 
-	# The ledge really is out of reach of a plain jump, or there is no lesson.
-	var rise: float = (rect.position.y + 15 * 8.0) - tut.ledge_top_y + 8.0
-	_check(tut.ledge_top_y < rect.position.y + 15 * 8.0,
-		"the ledge sits above the panels  [ledge %.0f, panels %.0f]"
-			% [tut.ledge_top_y, rect.position.y + 15 * 8.0])
+	# The lesson needs him to end up BELOW what he has to reach, and this used to
+	# ask that of a hardcoded tile row rather than of the panels — so when the run
+	# was raised level with the ledge, the check went on passing against a row
+	# nothing stands on any more. It reads the panels themselves now.
+	var panel_top := INF
+	for n in get_tree().get_nodes_in_group("crumbling"):
+		var pl := n as CrumblingPlatform
+		if pl != null and rect.has_point(pl.global_position):
+			panel_top = minf(panel_top, pl.top_y())
+	var hang_y: float = tut.ledge_top_y + tut.hang_offset.y
+	_check(hang_y > tut.ledge_top_y + 8.0,
+		"he is caught below the ledge he has to reach  [hang %.0f, ledge %.0f, panels %.0f]"
+			% [hang_y, tut.ledge_top_y, panel_top])
+	# ...and he FALLS there rather than being put there: the catch line has to be
+	# below the floor he was walking on, or the freeze is a teleport again.
+	_check(hang_y > panel_top - 6.0,
+		"and the fall to it is a fall  [%.0fpx below the run]" % (hang_y - (panel_top - 6.0)))
 
 	# --- he is CAUGHT when the floor goes, not left to fall -----------------
 	#
@@ -65,12 +77,20 @@ func _ready() -> void:
 	# Dropped in ABOVE the panels, past the dash point, already falling.
 	p.respawn(Vector2(tut.arm_at_x + 10.0, tut.ledge_top_y - 40.0))
 	var caught := false
+	var locked_falling := false
 	for i in 240:
 		await _frames(1)
+		# THE FALL IS NOT HIS. His controls go the moment the floor does, so he
+		# cannot steer or dash out of the drop the lesson is about — and they come
+		# back with the prompt, or there is nothing he can press to answer it.
+		if tut._pulled and not tut._held and p.input_locked:
+			locked_falling = true
 		if tut._prompt != null:
 			caught = true
 			break
 	_check(caught, "he is caught mid-fall and the prompt arrives")
+	_check(locked_falling, "his controls are gone for the fall")
+	_check(not p.input_locked, "and back in his hands at the hang point")
 
 	# THE FLOOR IS TAKEN, not waited for. Relaxed enough to hold while he crosses,
 	# the panels also held long enough to walk the whole run and never need the
