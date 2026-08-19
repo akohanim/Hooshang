@@ -32,9 +32,18 @@ const ROOM := "Level_24"
 ## other than where he is standing means teleporting him there, and the 24px
 ## that used to be between them is a visible jump.
 var arm_at_x := 0.0
-## The ledge he is being asked to reach, for the check that he made it.
-@export var ledge_x := 744.0
-@export var ledge_top_y := 1496.0
+## The ledge he is being asked to reach, as its bottom-left corner MEASURED FROM
+## THE ROOM'S OWN ORIGIN — not as a world coordinate.
+##
+## It was a world coordinate, and that is a number that silently rots: the room
+## it describes can be picked up and put down somewhere else in the LDtk world
+## (this one was, when the lesson was moved into the run), and every check here
+## then measures a spot in whatever room now happens to sit at those pixels. The
+## room is the only thing the ledge is fixed relative to.
+@export var ledge_offset := Vector2(736.0, 88.0)
+## The same corner in world space, resolved when he walks in.
+var ledge_x := 0.0
+var ledge_top_y := 0.0
 
 ## Where he is caught, relative to the ledge's bottom-left corner. Left of it
 ## and below, so an up-forward dash carries him over the lip and a flat one
@@ -109,6 +118,9 @@ func _on_room_changed(room: Node2D) -> void:
 	# and the lesson already spent, which is a room that only teaches once.
 	if not _player.died.is_connected(_on_player_died):
 		_player.died.connect(_on_player_died)
+	var origin := _world.room_rect(room).position
+	ledge_x = origin.x + ledge_offset.x
+	ledge_top_y = origin.y + ledge_offset.y
 	_hang = Vector2(ledge_x, ledge_top_y) + hang_offset
 	arm_at_x = _hang.x
 	_relax_panels()
