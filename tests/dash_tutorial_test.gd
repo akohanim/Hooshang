@@ -137,6 +137,20 @@ func _ready() -> void:
 		await _frames(30)
 		_check(p.global_position.distance_to(tut._hang) > 8.0,
 			"so he actually leaves the spot  [%s]" % p.global_position)
+		# AND IT HAS TO REACH. "He left the spot" also describes falling into the
+		# pit, which is what the room does to a dash that comes up short — so the
+		# lesson is only taught if the move that answers it lands him on the ledge.
+		# The catch depth is set against this: the dash rises a flat 33px and he
+		# has to finish 6px above the surface, so every pixel he is caught lower
+		# comes straight off the margin.
+		for i in 120:
+			await _frames(1)
+			if p.is_on_floor():
+				break
+		_check(p.is_on_floor() and p.global_position.y < tut.ledge_top_y - 2.0
+				and p.global_position.x > tut.ledge_x,
+			"and the dash puts him on the ledge  [%s, ledge top %.0f x %.0f]"
+				% [p.global_position, tut.ledge_top_y, tut.ledge_x])
 	_finish()
 
 

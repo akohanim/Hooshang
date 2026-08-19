@@ -37,10 +37,22 @@ var arm_at_x := 0.0
 @export var ledge_top_y := 1496.0
 
 ## Where he is caught, relative to the ledge's bottom-left corner. Left of it
-## and a little below, so an up-forward dash carries him over the lip and a flat
-## one plainly cannot: the dash covers 39px, which from here clears the 36px
-## rise only if some of it is spent going up.
-@export var hang_offset := Vector2(-30.0, 16.0)
+## and below, so an up-forward dash carries him over the lip and a flat one
+## plainly cannot.
+##
+## THE DEPTH IS AGAINST THE CEILING OF THE ROOM, and it is measured rather than
+## chosen. An up-forward dash from a standstill rises a flat 33px whatever
+## height it starts from, and he has to finish 6px above the ledge's surface to
+## stand on it — so every pixel he is caught lower comes straight off a 33px
+## budget. He STANDS on the panels 26px below the ledge; 20 is the deepest catch
+## that still lands him when the direction is let go early, which is how a
+## player answering a prompt actually presses it. 22 and 24 both put him in the
+## pit.
+##
+## It was 16, which caught him 10px ABOVE the floor that had just gone — the
+## freeze pulled him upward instead of dropping him. Anything deeper than this
+## needs the LEDGE lowered; there is no number here that buys it.
+@export var hang_offset := Vector2(-30.0, 20.0)
 
 @export_group("The beat")
 ## What every crumbling panel in this room gets instead of its own timing, while
