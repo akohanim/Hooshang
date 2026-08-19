@@ -42,7 +42,7 @@ signal room_changed(room: Node2D)
 ## Cap every room with an invisible ceiling sitting just above its top edge.
 ##
 ## A room is only meant to be left through an Exit or a Door, but nothing was
-## stopping a jump + up-dash from leaving through the TOP. Level_2's ceiling row
+## stopping a jump + up-dash from leaving through the TOP. Level_3's ceiling row
 ## is unpainted above the ledge that holds its Exit, and a measured jump-dash
 ## from that ledge peaks 44px above the room — the camera stays clamped to the
 ## room, so the player simply vanishes off the top of the screen before falling
@@ -187,7 +187,7 @@ func _restore_state() -> void:
 
 ## The rooms of an ALREADY INSTANTIATED LDtk world scene, in PLAY order.
 ##
-## Play order is the LEVEL IDENTIFIER — `Level_0`, `Level_1`, `Level_2` — which
+## Play order is the LEVEL IDENTIFIER — `Level_0`, `Level_2`, `Level_3` — which
 ## is the rule the whole project already runs on (CLAUDE.md: "Level identifiers
 ## ARE the play order"), and is why inserting a room means renumbering the ones
 ## after it.
@@ -197,7 +197,7 @@ func _restore_state() -> void:
 ## row, and stopped the moment the escape row was added: rooms 12-21 run RIGHT to
 ## left across the bottom of the grid, so position order reads them 21, 20, 19 …
 ## 13, 12 — precisely backwards. Every fallback in this file is "the next room in
-## this array", so walking out of Level_13's Exit sent you to Level_12, the room
+## this array", so walking out of Level_14's Exit sent you to Level_13, the room
 ## you had just come from.
 ##
 ## Position is kept as the tiebreak, so a room whose name carries no number (or
@@ -224,7 +224,7 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 	return found
 
 
-## The number in a room's identifier — the 13 in `Level_13`. Rooms without one
+## The number in a room's identifier — the 13 in `Level_14`. Rooms without one
 ## sort last, together, so they cannot silently displace the numbered sequence.
 static func play_index(room: Node) -> int:
 	return index_in_name(str(room.name))
@@ -583,9 +583,9 @@ func _re_entry_point(room: Node2D) -> Vector2:
 ##
 ## The way back out of a room is normally the room behind it, which is right for
 ## every room that is walked through once in one direction. The Darkshang
-## encounter breaks that: Level_11 is entered from the left and the reveal turns
+## encounter breaks that: Level_12 is entered from the left and the reveal turns
 ## Hooshang round, so walking back out of it is the escape CONTINUING — into
-## Level_12, which hangs below the row and is itself authored right to left — and
+## Level_13, which hangs below the row and is itself authored right to left — and
 ## not an undo of the room he just arrived in.
 ##
 ## Kept as a room -> room map rather than a one-off overwrite of `_return_room`
@@ -604,9 +604,9 @@ func set_way_back(room: Node2D, to_room_name: String) -> void:
 	# Reciprocal, because a re-routed door is still a two-way door — the rule the
 	# whole room manager is built on. Without the return half, the room you land
 	# in falls back to layout order for what is behind IT, and layout order is the
-	# one thing already known to be wrong here: Level_12 is reached from Level_11
-	# but sits between Level_13 and the world's edge on the grid, so _room_before
-	# would hang its way back on Level_13 — forward, onto the same edge its own
+	# one thing already known to be wrong here: Level_13 is reached from Level_12
+	# but sits between Level_14 and the world's edge on the grid, so _room_before
+	# would hang its way back on Level_14 — forward, onto the same edge its own
 	# Exit already occupies.
 	_way_back[to_room_name] = room.name
 	# Re-hang the door that is already up. Without this the re-route would only

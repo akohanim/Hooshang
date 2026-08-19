@@ -269,7 +269,7 @@ func _show_levels(i: int) -> void:
 	for room_name in SaveGame.unlocked_rooms(i):
 		var number := LdtkWorld.index_in_name(room_name) + 1
 		# The detail says what a level-select run IS rather than naming the LDtk
-		# level: "ROOM 5 / Level_4" reads as an off-by-one bug report, and the
+		# level: "ROOM 5 / Level_5" reads as an off-by-one bug report, and the
 		# thing a player needs told here is that this trip does not count.
 		built.append(_row("ROOM %d" % number, "practice run  —  nothing is saved",
 			func() -> void: _start(func() -> void: SaveGame.practice(i, room_name))))

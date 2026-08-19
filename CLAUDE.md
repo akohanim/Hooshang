@@ -42,10 +42,10 @@ so the two agree now. The tiles are still placeholder art.
     carries a rider at `speed` in `direction`, never touches his velocity, and
     lets go the moment he is airborne
   - `Godot --headless --path . res://tests/chase_route_test.tscn` — meeting
-    Darkshang re-points Level_11's ENTRANCE at Level_12 (not back at Level_10),
+    Darkshang re-points Level_12's ENTRANCE at Level_13 (not back at Level_11),
     it holds however many times that doorway is used, and no other room moves
   - `Godot --headless --path . res://tests/route_order_test.tscn` — play order is
-    the level IDENTIFIER, not world position: the escape row (12-21) runs right
+    the level IDENTIFIER, not world position: the escape row (13-22) runs right
     to left across the grid, so position order reads it backwards
   - `Godot --headless --path . res://tests/collapse_test.tscn` — RoomCollapse:
     every prop hanging in the air lands ON the floor, props already down and
@@ -87,8 +87,8 @@ so the two agree now. The tiles are still placeholder art.
   no error anywhere. `touch ldtk/hooshang_claude.ldtk` then `--import`.
 - **Level identifiers ARE the play order**, and `LdtkWorld.rooms` is sorted by
   them. `Level_0` is the opening room. The world is no longer one left-to-right
-  row: rooms 12-21 are the escape and run RIGHT to left along the bottom of the
-  grid, retracing rooms 9-1 (room N pairs with room 22-N). Sorting by world
+  row: rooms 13-22 are the escape and run RIGHT to left along the bottom of the
+  grid, retracing rooms 10-2 (room N pairs with room 24-N). Sorting by world
   position — which this used to do — reads that row backwards, and every "next
   room" fallback then hands you the room you just left. Renumber when you insert
   a room, and re-letter that room's lights with it (`LIGHTING.md`).
@@ -260,7 +260,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   player in a named room, photographs the 320x180 game surface and prints the
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
   Runs WINDOWED — 2D does not rasterise headless — and binds no save slot:
-  `Godot --path . res://tests/room_shot.tscn -- Level_22`
+  `Godot --path . res://tests/room_shot.tscn -- Level_23`
 - `tests/feel_measure.tscn` — the same idea for MOVEMENT, and also not pass/fail.
   Prints the jump apex, the airtime, the horizontal reach of a running jump and
   a 20-timing sweep of the jump+up-dash. Run it before and after touching
@@ -312,7 +312,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   start. Its own sheet rather than `death_shard.png` tinted: shards are
   hard-edged debris, and a landing that throws those reads as a small death.
 - `tools/gen_dawn_window.py`, `gen_light_shaft.py`, `gen_light_mote.py` — the
-  room 22 sunrise art. `light_mote.png` is deliberately NOT `debris_dust.png`:
+  room 23 sunrise art. `light_mote.png` is deliberately NOT `debris_dust.png`:
   a mote must be radially symmetric and shapeless, because particles spin.
 - `tools/gen_eclipse_moon.py` — two white alpha masks (umbra + halo) sized to
   `moon.png`'s own disc, which is how `MoonWindow` runs the escape row's blood

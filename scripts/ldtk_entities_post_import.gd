@@ -102,7 +102,7 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			"ConveyorBelt_Left":
 				entity_layer.add_child(
 					_build_conveyor_belt(data, ConveyorBelt.Direction.LEFT))
-			# The boss chase (Level_11). Three entities: where the shadow starts,
+			# The boss chase (Level_12). Three entities: where the shadow starts,
 			# where he lunges, and where it ends.
 			"DarkshangSpawn":
 				entity_layer.add_child(_build_darkshang(data))

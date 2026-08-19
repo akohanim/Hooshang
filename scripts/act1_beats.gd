@@ -87,22 +87,22 @@ const EMOTE_LINES := {
 ## Room holding the waking scene and the first meeting (LDtk level identifier).
 @export var room_name := "Level_0"
 ## Room holding the second encounter, where the dash is granted.
-@export var dash_room_name := "Level_1"
+@export var dash_room_name := "Level_2"
 ## Room holding the third encounter, at the mouth of the sounding tiles.
-@export var music_room_name := "Level_4"
+@export var music_room_name := "Level_5"
 ## Room holding the Darkshang encounter.
-@export var chase_room_name := "Level_11"
+@export var chase_room_name := "Level_12"
 ## Where that room's entrance leads once the shadow has been seen — the escape
 ## continuing, not the room he arrived from. "" leaves the doorway alone.
-@export var chase_way_back := "Level_12"
+@export var chase_way_back := "Level_13"
 
 @export_group("The collapse")
 ## First and last room of the escape that comes apart as he walks into it, by
 ## level number. The whole return row: the building is failing behind him the
 ## entire way home, not just once. Set them equal to collapse a single room, or
 ## first > last to turn the beat off.
-@export var collapse_first_room := 13
-@export var collapse_last_room := 22
+@export var collapse_first_room := 14
+@export var collapse_last_room := 23
 ## Beat of stillness before anything moves. He walks in, and for a moment nothing
 ## happens — the drop lands harder for having been waited for.
 @export var collapse_lead_in := 0.6
@@ -122,7 +122,7 @@ const EMOTE_LINES := {
 ## the glow back on every room change and on every death (it owns that reward's
 ## lifetime, scoped to one room and one life). Fighting that would break the
 ## tiles puzzle; re-granting on arrival costs one line and leaves it intact.
-@export var glow_rooms: Array[int] = [12, 16, 17, 18]
+@export var glow_rooms: Array[int] = [13, 17, 18, 19]
 
 @export_group("The collapsing building")
 ## Ambient shudder and falling debris across the escape, ramping from the first
@@ -131,8 +131,8 @@ const EMOTE_LINES := {
 ##
 ## Rooms outside first..last get nothing at all, so the outbound half of the Act
 ## is untouched.
-@export var ambience_first_room := 12
-@export var ambience_last_room := 21
+@export var ambience_first_room := 13
+@export var ambience_last_room := 22
 ## Strength in the first room and in the last, 0..1 (see CollapseAmbience).
 ## Starts gentle rather than at zero: room 12 is where he has just met Darkshang
 ## and the building should already feel wrong. Not lower than this — at 320x180
@@ -148,7 +148,7 @@ const EMOTE_LINES := {
 ## starts dropping the level's own props (`collapse_first_room`), so it is where
 ## the walls should start losing pieces too. Ends with the rest of the ambience,
 ## at `ambience_last_room`.
-@export var brick_first_room := 13
+@export var brick_first_room := 14
 @export var brick_first_strength := 0.3
 @export var brick_last_strength := 1.0
 ## Shape of the ramp between them. 1.0 is a straight line; above it the early
@@ -194,7 +194,7 @@ const EMOTE_LINES := {
 ## Set HERE rather than as a SafeZone entity in LDtk only because room 22 has no
 ## entities to spare and this is a fact about Act I's ending. A SafeZone dragged
 ## across the same line would do the identical job; see safe_zone_trigger.gd.
-@export var chase_ends_room := "Level_22"
+@export var chase_ends_room := "Level_23"
 @export var chase_ends_past_x := 100.0
 ## How long the shadow takes to thin out to nothing, in seconds.
 @export var dissolve_time := 1.6
@@ -228,7 +228,7 @@ const EMOTE_LINES := {
 ## a story fact about Act I rather than a fact about that room — moving it into
 ## LDtk would work identically, and this writes the same metadata the importer
 ## would have. "" leaves the Exit to the normal play order.
-@export var loop_room_name := "Level_22"
+@export var loop_room_name := "Level_23"
 @export var loop_to_room_name := "Level_0"
 
 @export_group("Waking")
@@ -644,12 +644,12 @@ func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 ## Meeting Darkshang re-points the room's entrance.
 ##
-## Level_11 is walked into from the left and the reveal turns Hooshang round, so
+## Level_12 is walked into from the left and the reveal turns Hooshang round, so
 ## the way out is the way he came — but the room behind him is not where the
-## escape goes. Level_12 hangs below the row and is authored right to left (its
+## escape goes. Level_13 hangs below the row and is authored right to left (its
 ## PlayerStart is at its right end, its Exit at its left), which is the chase
 ## continuing. Without this, running back out of the boss room undoes the room
-## you just entered and drops you in Level_10 with a shadow behind you.
+## you just entered and drops you in Level_11 with a shadow behind you.
 ##
 ## Hung off the encounter rather than set at load, because before it there is
 ## nothing to run from: the doorway is ordinary backtracking then and should stay

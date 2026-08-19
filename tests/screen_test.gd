@@ -14,7 +14,7 @@ var world: LdtkWorld
 
 
 func _ready() -> void:
-	LdtkWorld.debug_start_room = "Level_3"
+	LdtkWorld.debug_start_room = "Level_4"
 	world = Screen.load_scene("res://ldtk/Act1World.tscn")
 	await _frames(60)
 	world.player.input_locked = false

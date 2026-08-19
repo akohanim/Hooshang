@@ -18,7 +18,7 @@ var player: Player
 func _ready() -> void:
 	# The test itself has to outlive the pauses it creates.
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	LdtkWorld.debug_start_room = "Level_3"
+	LdtkWorld.debug_start_room = "Level_4"
 	world = Screen.load_scene("res://ldtk/Act1World.tscn")
 	await _frames(60)
 	player = world.player

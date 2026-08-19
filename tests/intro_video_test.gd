@@ -163,7 +163,7 @@ func _write_slot(i: int) -> void:
 	f.store_string(JSON.stringify({
 		"schema": 1,
 		"world": "res://ldtk/Act1World.tscn",
-		"world_state": {"room": "Level_2", "has_dash": true},
+		"world_state": {"room": "Level_3", "has_dash": true},
 	}))
 	f.close()
 

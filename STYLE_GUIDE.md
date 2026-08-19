@@ -333,7 +333,7 @@ asserts the game viewport and the player's sprite are untouched.
   backwards arms `_room_before()` of the room you land in.
 - **Rooms are sealed at the top by `LdtkWorld`, not by tiles you paint.** An
   unpainted cell in a room's ceiling row is a hole the player can leave through:
-  a jump + up-dash out of Level_2's ceiling gap measured 44px above the room,
+  a jump + up-dash out of Level_3's ceiling gap measured 44px above the room,
   and since the camera stays clamped to the room, he just vanished off the top
   of the screen. `seal_room_ceilings` caps every room with an invisible lid
   sitting *outside* the room rect (so it costs no playable space and, because

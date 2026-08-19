@@ -1,6 +1,6 @@
 extends Node
 ## Regression: a jump + up-dash must never take the player out of the top of a
-## room. Level_2's ceiling row is unpainted above the ledge that holds its Exit,
+## room. Level_3's ceiling row is unpainted above the ledge that holds its Exit,
 ## and an up-dash from there used to peak 44px above the room — the camera stays
 ## clamped, so the player vanished off the top of the screen. LdtkWorld's
 ## seal_room_ceilings caps every room; this checks the cap holds.
@@ -10,8 +10,8 @@ extends Node
 ## this file was rewritten. It used to carry three hand-measured coordinates:
 ##
 ##     0: Vector2(72, 240),     # Level_1_Office, cubicle floor
-##     2: Vector2(912, 180),    # Level_2, the Exit ledge under the ceiling gap
-##     3: Vector2(984, 180),    # Level_3, top-left shelf by the PlayerStart
+##     2: Vector2(912, 180),    # Level_3, the Exit ledge under the ceiling gap
+##     3: Vector2(984, 180),    # Level_4, top-left shelf by the PlayerStart
 ##
 ## Rooms then moved — every room from 1 on shifted right, and a new room was
 ## inserted at the front — and all three landed in empty space in the wrong room.

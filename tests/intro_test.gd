@@ -183,7 +183,7 @@ func _ready() -> void:
 	_check(vsides.all(func(v: String) -> bool: return v == "top"),
 		"room 1's banner sits flush at the TOP of the screen  [got %s]" % str(vsides))
 
-	var trigger := _find_trigger(world.rooms[0])
+	var trigger := _find_trigger(_room_named(_beats().room_name))
 	_check(trigger != null, "room 1 has a Rumi trigger")
 	_check(trigger != null and trigger.defer_to_cutscene,
 		"the trigger defers its beat to the cutscene (no stray one-liner)")
@@ -243,12 +243,23 @@ func _ready() -> void:
 	_rumi_on_right = -1
 	_mote_first = Vector2.INF
 	_mote_last = Vector2.INF
-	world._enter_room(world.rooms[1], true)
+	# BY NAME, from Act1Beats' own export, not world.rooms[1]. A positional index
+	# says "the second room in the world", and the second room stopped being the
+	# room with this beat in it the moment one was inserted ahead of it — the
+	# test then reports that the dash beat has no Rumi trigger, when what has
+	# actually happened is that it is looking at a different room. Same trap the
+	# world itself hit ordering rooms by position instead of by identifier.
+	var dash_room := _room_named(_beats().dash_room_name)
+	_check(dash_room != null,
+		"the world has the dash room  [%s]" % _beats().dash_room_name)
+	if dash_room == null:
+		return
+	world._enter_room(dash_room, true)
 	await _frames(10)
-	var gift_trigger := _find_trigger(world.rooms[1])
-	_check(gift_trigger != null, "room 2 has a Rumi trigger")
+	var gift_trigger := _find_trigger(dash_room)
+	_check(gift_trigger != null, "the dash room (%s) has a Rumi trigger" % _beats().dash_room_name)
 	_check(gift_trigger != null and gift_trigger.defer_to_cutscene,
-		"room 2's trigger defers to the cutscene too")
+		"...and its trigger defers to the cutscene too")
 	_watch = gift_trigger
 	world.player.global_position = gift_trigger.global_position + Vector2(0, 16)
 	await _run_scene(900)
@@ -285,8 +296,8 @@ func _ready() -> void:
 	_glow_peak = 0.0
 	_arrival_msec = 0
 	_arrival_gap = -1.0
-	var tile_room := _room_named("Level_4")
-	_check(tile_room != null, "the world has room 5 (Level_4)")
+	var tile_room := _room_named("Level_5")
+	_check(tile_room != null, "the world has room 5 (Level_5)")
 	if tile_room != null:
 		world._enter_room(tile_room, true)
 		await _frames(10)
@@ -566,6 +577,12 @@ func _fade_alpha() -> float:
 			if cc is ColorRect:
 				return (cc as ColorRect).color.a
 	return -1.0
+
+
+## The Act1Beats node — where every "which room is this beat in" answer lives,
+## so the test asks it rather than counting rooms.
+func _beats() -> Act1Beats:
+	return world.get_node("Act1Beats") as Act1Beats
 
 
 ## The room node with this LDtk identifier, or null.
