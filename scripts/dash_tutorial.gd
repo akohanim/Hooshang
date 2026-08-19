@@ -51,10 +51,9 @@ var arm_at_x := 0.0
 @export var collapse_time := 0.35
 ## Seconds between one panel going and the next, left to right.
 @export var collapse_stagger := 0.035
-## Rumi's lines. Two, because a tutorial that talks longer than the move takes
+## Rumi's lines. One, because a tutorial that talks longer than the move takes
 ## is a tutorial nobody reads twice.
 @export var lines: Array[String] = [
-	"The floor here has been falling for years. You just never stood on it.",
 	"Hold the way you want to go — up and onward — and dash.",
 ]
 
