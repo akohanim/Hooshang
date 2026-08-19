@@ -27,10 +27,11 @@ extends Node
 const ROOM := "Level_24"
 
 @export_group("Where")
-## How far along the last run of panels the prompt is armed, as world x. Read off
-## the level: the panels end at 792 and the ledge starts at 744, so this is a few
-## body-widths before he runs out of floor.
-@export var arm_at_x := 690.0
+## Where the floor is taken away and he is caught. NOT an independent number:
+## it is set to the hang point's x at room entry, because catching him anywhere
+## other than where he is standing means teleporting him there, and the 24px
+## that used to be between them is a visible jump.
+var arm_at_x := 0.0
 ## The ledge he is being asked to reach, for the check that he made it.
 @export var ledge_x := 744.0
 @export var ledge_top_y := 1496.0
@@ -42,8 +43,14 @@ const ROOM := "Level_24"
 @export var hang_offset := Vector2(-30.0, 16.0)
 
 @export_group("The beat")
-## What every crumbling panel in this room gets instead of its own timing.
+## What every crumbling panel in this room gets instead of its own timing, while
+## he is crossing.
 @export var hold_time := 2.4
+## ...and what they get once the floor is pulled. Short: this is the drop, not a
+## warning.
+@export var collapse_time := 0.35
+## Seconds between one panel going and the next, left to right.
+@export var collapse_stagger := 0.035
 ## Rumi's lines. Two, because a tutorial that talks longer than the move takes
 ## is a tutorial nobody reads twice.
 @export var lines: Array[String] = [
@@ -60,6 +67,7 @@ var _rumi: LdtkRumiTrigger
 ## Where he is pinned while the lesson is up, and whether the pin is live.
 var _hang := Vector2.ZERO
 var _held := false
+var _pulled := false
 
 
 func _ready() -> void:
@@ -82,11 +90,35 @@ func _on_room_changed(room: Node2D) -> void:
 	# It is the dash tutorial; he has a dash in it whatever a save slot says.
 	_player.has_dash = true
 	_hang = Vector2(ledge_x, ledge_top_y) + hang_offset
+	arm_at_x = _hang.x
 	_relax_panels()
 	# Re-armed on every entry, so a retry teaches the same lesson rather than
 	# dropping him into a room whose prompt has already been spent.
 	_armed = true
 	_done = false
+	_pulled = false
+
+
+## Collapse what is left of the run, left to right.
+##
+## Staggered rather than all at once: a whole floor vanishing on one frame reads
+## as the level being switched off, where a run of panels going in sequence reads
+## as the thing he is standing on failing — and it puts the last one under his
+## feet, which is the one that drops him.
+func _pull_the_floor() -> void:
+	_pulled = true
+	var rect := _world.room_rect(_world.current_room)
+	var panels: Array = []
+	for node in get_tree().get_nodes_in_group("crumbling"):
+		var p := node as CrumblingPlatform
+		if p != null and rect.has_point(p.global_position):
+			panels.append(p)
+	panels.sort_custom(func(a: CrumblingPlatform, b: CrumblingPlatform) -> bool:
+		return a.global_position.x < b.global_position.x)
+	for i in panels.size():
+		var p: CrumblingPlatform = panels[i]
+		p.crumble_time = collapse_time
+		p.give_way(collapse_time - float(i) * collapse_stagger)
 
 
 ## Give this room's panels a gentler timer. Found by group and filtered by
@@ -113,10 +145,16 @@ func _physics_process(_delta: float) -> void:
 	if _done or _player == null:
 		return
 	if _prompt == null and not _held:
-		# Caught the moment the floor stops being there. Standing on a panel that
-		# has not given way yet is not the lesson — the lesson is the drop.
-		if _armed and _player.global_position.x >= arm_at_x \
-				and not _player.is_on_floor() and _player.velocity.y > 0.0:
+		if not _armed or _player.global_position.x < arm_at_x:
+			return
+		# THE FLOOR IS TAKEN, not waited for. Relaxed to hold long enough to
+		# cross, the panels also hold long enough to walk the whole run and never
+		# need the move — so reaching this point collapses what is left of them
+		# and he goes with it.
+		if not _pulled:
+			_pull_the_floor()
+			return
+		if not _player.is_on_floor() and _player.velocity.y > 0.0:
 			_catch()
 		return
 	# The move itself: a dash with BOTH axes in it, aimed upward. A flat dash is
@@ -190,6 +228,7 @@ func _finish() -> void:
 func _teardown() -> void:
 	_armed = false
 	_held = false
+	_pulled = false
 	if _prompt != null:
 		_prompt.dismiss()
 		_prompt = null

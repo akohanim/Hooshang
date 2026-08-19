@@ -131,6 +131,20 @@ func _drop() -> void:
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 
 
+## Take this panel away on purpose, `after` seconds from now.
+##
+## The tutorial needs the floor to GO at a chosen moment rather than whenever he
+## happens to have stood on something long enough — with a relaxed timer he can
+## simply walk the whole run and never learn anything. Routed through the same
+## countdown the footfall uses, so a forced collapse cracks and shudders exactly
+## like an earned one; only the moment it starts is different.
+func give_way(after := 0.0) -> void:
+	if _spent or _falling:
+		return
+	_spent = true
+	_timer = maxf(crumble_time - maxf(after, 0.0), 0.0)
+
+
 ## Put it back exactly as it was placed.
 func reset() -> void:
 	# The fall tween FIRST. It owns position and alpha for fall_time seconds, so

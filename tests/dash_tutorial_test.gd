@@ -72,6 +72,31 @@ func _ready() -> void:
 			break
 	_check(caught, "he is caught mid-fall and the prompt arrives")
 
+	# THE FLOOR IS TAKEN, not waited for. Relaxed enough to hold while he crosses,
+	# the panels also held long enough to walk the whole run and never need the
+	# move at all — so reaching the point pulls what is left of them.
+	#
+	# `bounds`, not `rect`: this scope already has a `rect` further up, and the
+	# redeclaration is a PARSE error, which does not fail the run — the script
+	# simply never loads, so quit() is never reached and the process hangs with
+	# its output still buffered. Silent, and it looks exactly like a deadlock.
+	_check(tut._pulled, "reaching the point pulls the floor")
+	# ...and given time to finish. The collapse is STAGGERED left to right, so a
+	# count taken on the frame he is caught finds most of the run still standing
+	# — which is the effect working, not failing.
+	var bounds := world.room_rect(world.current_room)
+	var span := tut.collapse_time + 19.0 * tut.collapse_stagger + 0.5
+	for i in int(span * 60.0):
+		await _frames(1)
+	var standing := 0
+	for n in get_tree().get_nodes_in_group("crumbling"):
+		var cp := n as CrumblingPlatform
+		if cp != null and bounds.has_point(cp.global_position) \
+				and cp.get_collision_layer_value(1):
+			standing += 1
+	_check(standing == 0,
+		"and every panel in the room is gone  [%d still solid]" % standing)
+
 	if caught:
 		var at := p.global_position
 		_check(at.distance_to(tut._hang) < 2.0,
