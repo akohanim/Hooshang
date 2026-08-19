@@ -1,42 +1,36 @@
 #!/usr/bin/env python3
-"""Move the dash tutorial out of its siding and into the run, as room 2.
+"""Put the dash tutorial into the run as room 2.
 
-  Level_24 (the standalone dash-tutorial room)  ->  Level_2
-  Level_2 .. Level_23                           ->  Level_3 .. Level_24
-  Level_0, Level_1                              unchanged
+  Level_24 (the dash-tutorial room)  ->  Level_2
+  Level_2 .. Level_23                ->  Level_3 .. Level_24
+  Level_0, Level_1                   unchanged
 
 ONE SIMULTANEOUS MAPPING, never a sequence of renames. Done step by step,
 Level_2 -> Level_3 overwrites the real Level_3 before it has moved.
 
-Level identifiers ARE the play order in this project (CLAUDE.md), so the rename
-is what actually puts the lesson second. But a rename ALONE leaves the room
-sitting where it was authored — 1248px below the world, in its own siding — and
-room transitions are a camera PAN across the gap between two rooms
-(`_slide_to_room`), not a cut. Walking out of room 1 would fly the view down and
-across the map. So this also moves pixels:
+THE LAYOUT IS ALREADY DONE, BY HAND, and this does not touch it. The room was
+authored off in a siding below the world and has been dragged into the top row
+in LDtk — rooms 0 and 1 moved 880px left to open the slot, and the tutorial now
+sits between room 1 and the rest of the row. That matters because a room
+transition is a camera PAN across the gap between two rooms (`_slide_to_room`),
+not a cut, so a room that plays second has to BE second in the world. This
+script only checks the layout still holds and does the parts a mouse cannot:
 
-  - the tutorial room itself, from (8, 1408) to (640, 160): into the top row,
-    hard against Level_1's right edge, where its 880px width now lives
-  - the rest of the top row (new Level_3..Level_13) right by that 880px, which
-    is what opens the slot. The escape row along the bottom does not move.
-  - EVERY hand-placed light, window and prop that stands over those rooms.
-    Act1World.tscn positions them in WORLD space, so a room that moves without
-    them is a room lit by the lamps of whatever used to be there — including
-    the tutorial's own three moon glows, which travel with it.
+  - the rename, which is what actually sets the play order. Level identifiers
+    ARE the order in this project (CLAUDE.md) and `LdtkWorld.rooms` is sorted by
+    them, so the room can sit anywhere on the grid and still play last.
+  - the Exit the tutorial has never had, on the ledge the dash lands him on.
+    Nothing led out of the room because nothing led into it.
+  - taking the Rumi trigger OUT of the room that used to grant the dash. That
+    beat has moved into the tutorial (scripts/dash_tutorial.gd hands the ability
+    over at the catch), so nothing claims that trigger any more — and an
+    unclaimed LdtkRumiTrigger is not inert: it locks the player, fades Rumi in,
+    and plays its own one-line version, which here is an EMPTY banner.
+  - the exports that name rooms by NUMBER, which a Level_N rewrite cannot see.
 
-Rooms are matched to their decorations by POSITION, not by name: the light node
-names carry a `RoomN` suffix that is an old INDEX and has been stale since the
-last insert (`CeilingRoom1a` stands over Level_2, `MoonGlowRoom1` over Level_3).
-Nothing reads those names, and this does not try to fix them.
-
-The tutorial room also has no Exit — nothing led out of it, because nothing led
-into it — so this adds one, on the ledge he dashes up to.
-
-And it takes the Rumi trigger OUT of the room that used to grant the dash. That
-beat has moved into the tutorial (scripts/dash_tutorial.gd hands the ability over
-at the catch), so nothing claims that trigger any more — and an unclaimed
-LdtkRumiTrigger is not inert: it locks the player, fades Rumi in and plays its own
-one-line version, which here is an EMPTY dialogue banner.
+The hand-placed lights, windows and props that stand over the rooms that moved
+were shifted with them in a separate pass — Act1World.tscn positions those in
+WORLD space and nothing links them to a room, so they do not follow it.
 
 LDtk MUST BE CLOSED. It holds the project in memory and writes it back whole, so
 a scripted edit under a running LDtk is reverted silently. This refuses to run.
@@ -53,7 +47,6 @@ import uuid
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LDTK = os.path.join(ROOT, "ldtk/hooshang_claude.ldtk")
-WORLD_SCENE = os.path.join(ROOT, "ldtk/Act1World.tscn")
 APPLY = "--apply" in sys.argv
 
 TUTORIAL_OLD = 24
@@ -63,24 +56,10 @@ MAP = {TUTORIAL_OLD: TUTORIAL_NEW}
 for n in range(TUTORIAL_NEW, TUTORIAL_OLD):
     MAP[n] = n + 1
 
-## Where the lesson lands, and what it displaces. Level_1 ends at x=640 and the
-## top row is contiguous from there, so the whole row after it moves by the
-## tutorial's own width.
-TUTORIAL_TO = (640, 160)
-ROW_SHIFT = 880
-
-## Which decorations belong to which row. The top row sits at y=160..352 and the
-## escape row at y=800..992; the tutorial was parked at y=1408. Generous bands,
-## because a lamp hangs above its room and a floor prop stands below it.
-TOP_ROW_MAX_Y = 600
-SIDING_MIN_Y = 1300
-## Only the part of the top row that the tutorial pushes: everything from the
-## left edge of the old Level_2 rightwards.
-ROW_SHIFT_MIN_X = 640
-
-## The Exit the tutorial never had, on the ledge the dash lands him on. Bottom
-## centre, one cell in from the room's right edge — the same placement every
-## other room uses, read off Level_1's [312, 176] in a 320-wide room.
+## The Exit the tutorial never had, in room-local pixels, on the ledge the dash
+## lands him on. Bottom centre, one cell in from the room's right edge — the
+## same placement every other room uses, read off Level_1's [312, 176] in a
+## 320-wide room.
 EXIT_PX = (872, 88)
 EXIT_DEF_UID = 39
 EXIT_FIELD_DEF_UID = 40
@@ -161,7 +140,7 @@ def remap(text):
 # file with LDtk's own inline compaction (`"defs": { "layers": [`, `"__grid":
 # [3,21]`), and a round trip through json.dump comes back 2.4x the size with
 # every line changed — functionally fine, unreviewable in a diff, and it would
-# bury the handful of numbers this actually changes.
+# bury the handful of things this actually changes.
 
 
 def level_spans(text):
@@ -175,21 +154,9 @@ def level_spans(text):
     return out
 
 
-def move_level(block, dx, dy):
-    """Shift one level object: its own worldX/worldY, and the cached world
-    position LDtk stores on every entity instance inside it."""
-    def bump(m):
-        return "%s%d%s%d" % (m.group(1), int(m.group(2)) + dx,
-                             m.group(3), int(m.group(4)) + dy)
-    block, n = re.subn(
-        r'(\t\t\t"worldX": )(-?\d+)(,\n\t\t\t"worldY": )(-?\d+)', bump, block)
-    if n != 1:
-        raise SystemExit("!! expected one worldX/worldY pair, found %d" % n)
-    block = re.sub(r'("__worldX": )(-?\d+)',
-                   lambda m: "%s%d" % (m.group(1), int(m.group(2)) + dx), block)
-    block = re.sub(r'("__worldY": )(-?\d+)',
-                   lambda m: "%s%d" % (m.group(1), int(m.group(2)) + dy), block)
-    return block
+def origin_of(block):
+    m = re.search(r'\t\t\t"worldX": (-?\d+),\n\t\t\t"worldY": (-?\d+)', block)
+    return int(m.group(1)), int(m.group(2))
 
 
 def exit_entity(px, grid, world):
@@ -224,12 +191,13 @@ def exit_entity(px, grid, world):
            EXIT_FIELD_DEF_UID, world[0], world[1]))
 
 
-def add_exit(block, px, origin):
+def add_exit(block, px):
     """Append an Exit to this level's Entities layer."""
+    origin = origin_of(block)
     i = block.index('"__identifier": "Entities"')
     j = block.index('"entityInstances": [', i) + len('"entityInstances": [')
-    grid = (px[0] // 8, px[1] // 8)
-    ent = exit_entity(px, grid, (origin[0] + px[0], origin[1] + px[1]))
+    ent = exit_entity(px, (px[0] // 8, px[1] // 8),
+                      (origin[0] + px[0], origin[1] + px[1]))
     # The layer already holds instances, so the new one is a continuation.
     return block[:j] + "\n" + ent + "," + block[j:]
 
@@ -247,103 +215,63 @@ def remove_entity(block, ident):
     close = "\n\t\t\t\t\t\t}"
     j = block.index(close, i) + len(close)
     if block[j:j + 1] == ",":
-        j += 1                      # it had a sibling after it
-        return block[:i] + block[j:].lstrip("\n")
-    # last in the list: take the newline and comma that led into it
-    k = block.rfind(",", 0, i)
-    return block[:k] + block[j:]
+        return block[:i] + block[j + 1:].lstrip("\n")
+    # last in the list: take the comma that led into it as well
+    return block[:block.rfind(",", 0, i)] + block[j:]
 
 
 def rewrite_ldtk(text):
-    """Rename, move, and give the tutorial a way out. Text in, text out."""
+    """Rename, and give the tutorial a way out. Text in, text out."""
     text = remap(text)
     spans = level_spans(text)
-    names = [n for n, _, _ in spans]
     tut = "Level_%d" % TUTORIAL_NEW
-    if tut not in names:
-        raise SystemExit("!! no %s after the rename — nothing to move" % tut)
+    if tut not in [n for n, _, _ in spans]:
+        raise SystemExit("!! no %s after the rename" % tut)
 
     out = []
-    moves = []
     for name, start, end in spans:
         block = text[start:end]
-        n = int(name.split("_")[1])
-        origin = None
         if name == tut:
-            m = re.search(r'\t\t\t"worldX": (-?\d+),\n\t\t\t"worldY": (-?\d+)', block)
-            was = (int(m.group(1)), int(m.group(2)))
-            dx, dy = TUTORIAL_TO[0] - was[0], TUTORIAL_TO[1] - was[1]
-            origin = TUTORIAL_TO
-        elif TUTORIAL_NEW < n <= MAP[12]:      # the rest of the old top row
-            dx, dy = ROW_SHIFT, 0
-        else:
-            dx, dy = 0, 0
-        if (dx, dy) != (0, 0):
-            block = move_level(block, dx, dy)
-            moves.append((name, dx, dy))
-        if origin is not None:
-            block = add_exit(block, EXIT_PX, origin)
+            block = add_exit(block, EXIT_PX)
         if name == STALE_TRIGGER_ROOM:
             block = remove_entity(block, STALE_TRIGGER)
         out.append(block)
-
-    head = text[:spans[0][1]]
-    return head + "".join(out), moves
+    return text[:spans[0][1]] + "".join(out)
 
 
 def check_ldtk(text):
-    """Parse it back and prove the rooms do not overlap."""
+    """Parse it back, and prove the world the mouse laid out still holds."""
     d = json.loads(text)
-    rects = []
-    for lv in d["levels"]:
-        rects.append((lv["identifier"], lv["worldX"], lv["worldY"],
-                      lv["pxWid"], lv["pxHei"]))
+    rects = [(lv["identifier"], lv["worldX"], lv["worldY"], lv["pxWid"], lv["pxHei"])
+             for lv in d["levels"]]
     for i in range(len(rects)):
         for j in range(i + 1, len(rects)):
             a, b = rects[i], rects[j]
             if (a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
                     and a[2] < b[2] + b[4] and b[2] < a[2] + a[4]):
                 raise SystemExit("!! %s overlaps %s" % (a[0], b[0]))
+
     def entities(name):
         lv = [l for l in d["levels"] if l["identifier"] == name][0]
         return [e["__identifier"] for l in lv["layerInstances"]
                 for e in l.get("entityInstances", [])]
     tut = "Level_%d" % TUTORIAL_NEW
-    if "Exit" not in entities(tut):
-        raise SystemExit("!! %s still has no Exit" % tut)
-    if "PlayerStart" not in entities(tut):
-        raise SystemExit("!! %s lost its PlayerStart" % tut)
+    for want in ("Exit", "PlayerStart"):
+        if want not in entities(tut):
+            raise SystemExit("!! %s has no %s" % (tut, want))
     if STALE_TRIGGER in entities(STALE_TRIGGER_ROOM):
         raise SystemExit("!! %s still holds the unclaimed %s"
                          % (STALE_TRIGGER_ROOM, STALE_TRIGGER))
-    return sorted(rects, key=lambda r: int(r[0].split("_")[1]))
 
-
-# ------------------------------------------------------ the world's furniture --
-
-
-def shift_world_scene(text):
-    """Move every hand-placed light, window and prop that stands over a room
-    that moved. Act1World.tscn positions them in world space and nothing links
-    them to a room, so this matches them by where they are."""
-    moved = []
-
-    def one(m):
-        x, y = float(m.group(1)), float(m.group(2))
-        if y >= SIDING_MIN_Y:                       # travels with the tutorial
-            dx, dy = TUTORIAL_TO[0] - 8, TUTORIAL_TO[1] - 1408
-        elif y < TOP_ROW_MAX_Y and x >= ROW_SHIFT_MIN_X:
-            dx, dy = ROW_SHIFT, 0
-        else:
-            return m.group(0)
-        moved.append((x, y, x + dx, y + dy))
-        return "position = Vector2(%s, %s)" % (_num(x + dx), _num(y + dy))
-
-    return re.sub(r'position = Vector2\(([-\d.]+), ([-\d.]+)\)', one, text), moved
-
-
-def _num(v):
-    return str(int(v)) if float(v).is_integer() else str(v)
+    # The rooms that play one after the other should also SIT one after the
+    # other, or their transition is a flight across the map. Reported rather
+    # than enforced: the escape row deliberately runs right to left.
+    order = sorted(rects, key=lambda r: int(r[0].split("_")[1]))
+    gaps = []
+    for a, b in zip(order, order[1:]):
+        if a[2] == b[2] and a[1] + a[3] != b[1]:
+            gaps.append("%s -> %s" % (a[0], b[0]))
+    return order, gaps
 
 
 def main():
@@ -372,19 +300,14 @@ def main():
         if os.path.abspath(path) != os.path.abspath(LDTK):
             edits[path] = out
 
-    print("\n== the world grid ==")
-    ldtk_out, moves = rewrite_ldtk(open(LDTK).read())
-    for name, dx, dy in moves:
-        print("  %-10s %+d, %+d" % (name, dx, dy))
-    for name, x, y, w, h in check_ldtk(ldtk_out):
+    print("\n== the .ldtk ==")
+    ldtk_out = rewrite_ldtk(open(LDTK).read())
+    order, gaps = check_ldtk(ldtk_out)
+    for name, x, y, w, h in order:
         print("  %-10s x=%6d y=%6d  %dx%d" % (name, x, y, w, h))
+    for g in gaps:
+        print("  !! not side by side: %s" % g)
     edits[LDTK] = ldtk_out
-
-    print("\n== lights, windows and props ==")
-    scene_out, moved = shift_world_scene(
-        edits.get(WORLD_SCENE) or open(WORLD_SCENE).read())
-    print("  %d nodes moved with their rooms" % len(moved))
-    edits[WORLD_SCENE] = scene_out
 
     print("\n== rooms named by number ==")
     for rel, old, new in NUMERIC:

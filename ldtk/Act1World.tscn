@@ -149,7 +149,7 @@ phase = 6.9
 [node name="Props" type="Node2D" parent="." unique_id=1481885276]
 
 [node name="HooshangCubicle" parent="Props" unique_id=1980069411 instance=ExtResource("10_cube")]
-position = Vector2(96, 256)
+position = Vector2(-784, 256)
 
 [node name="HooshangCubicleRoom22" parent="Props" unique_id=236443452 instance=ExtResource("10_cube")]
 position = Vector2(48, 896)
@@ -157,7 +157,7 @@ position = Vector2(48, 896)
 [node name="Lights" type="Node2D" parent="." unique_id=1945229334]
 
 [node name="CubicleBulbRoom0" parent="Lights" unique_id=703681485 instance=ExtResource("3_lamp")]
-position = Vector2(160, 216)
+position = Vector2(-720, 216)
 light_color = Color(1, 0.87, 0.66, 1)
 light_energy = 2.1
 light_scale = 3.2
@@ -167,7 +167,7 @@ flicker_amount = 0.1
 flicker_speed = 9.0
 
 [node name="CubicleMonitorRoom0" parent="Lights" unique_id=71436151 instance=ExtResource("9_mon")]
-position = Vector2(101, 239)
+position = Vector2(-779, 239)
 light_energy = 0.7
 light_scale = 0.9
 screen_size = Vector2(7, 6)
@@ -187,28 +187,28 @@ light_scale = 1.5
 cable_length = 84.0
 
 [node name="CeilingRoom1a2" parent="Lights" unique_id=2022522042 instance=ExtResource("3_lamp")]
-position = Vector2(400, 260)
+position = Vector2(-480, 260)
 light_color = Color(0.99215686, 0.95686275, 0.8627451, 1)
 light_energy = 1.5
 light_scale = 1.5
 cable_length = 84.0
 
 [node name="CeilingRoom1a3" parent="Lights" unique_id=1828583861 instance=ExtResource("3_lamp")]
-position = Vector2(450, 260)
+position = Vector2(-430, 260)
 light_color = Color(0.99215686, 0.95686275, 0.8627451, 1)
 light_energy = 1.5
 light_scale = 1.5
 cable_length = 84.0
 
 [node name="CeilingRoom1a4" parent="Lights" unique_id=212164267 instance=ExtResource("3_lamp")]
-position = Vector2(475, 260)
+position = Vector2(-405, 260)
 light_color = Color(0.99215686, 0.95686275, 0.8627451, 1)
 light_energy = 1.5
 light_scale = 1.5
 cable_length = 84.0
 
 [node name="CeilingRoom1a5" parent="Lights" unique_id=805525881 instance=ExtResource("3_lamp")]
-position = Vector2(525, 260)
+position = Vector2(-355, 260)
 light_color = Color(0.99215686, 0.95686275, 0.8627451, 1)
 light_energy = 1.5
 light_scale = 1.5
@@ -812,21 +812,21 @@ light_scale = 3.0
 show_body = false
 
 [node name="MoonGlowRoom25" parent="Lights" unique_id=984246068 instance=ExtResource("3_lamp")]
-position = Vector2(480, 1500)
+position = Vector2(232, 252)
 light_color = Color(1, 0.72, 0.44, 1)
 light_energy = 3.2
 light_scale = 5.0
 show_body = false
 
 [node name="MoonGlowRoom27" parent="Lights" unique_id=2003042257 instance=ExtResource("3_lamp")]
-position = Vector2(700, 1500)
+position = Vector2(452, 252)
 light_color = Color(1, 0.72, 0.44, 1)
 light_energy = 3.2
 light_scale = 5.0
 show_body = false
 
 [node name="MoonGlowRoom26" parent="Lights" unique_id=1844831374 instance=ExtResource("3_lamp")]
-position = Vector2(150, 1500)
+position = Vector2(-98, 252)
 light_color = Color(1, 0.72, 0.44, 1)
 light_energy = 4.2
 light_scale = 5.0
