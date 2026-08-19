@@ -69,11 +69,17 @@ func _ready() -> void:
 	# game's job.
 	_check(not tut.lines.is_empty(), "Rumi has something to say  [%d lines]"
 		% tut.lines.size())
+	_check(not tut.gift_lines.is_empty(), "...including the hand-over  [%d lines]"
+		% tut.gift_lines.size())
 	tut.lines = []
+	tut.gift_lines = []
 
 	var p := world.player
 	p.input_locked = false
-	p.has_dash = true
+	# DASHLESS. This room is where the dash comes from now — Rumi hands it over
+	# at the catch, in the breath before the lesson that needs it — so a test
+	# that grants the dash up front is a test of a room nobody plays.
+	p.has_dash = false
 	# Dropped in ABOVE the panels, past the dash point, already falling.
 	p.respawn(Vector2(tut.arm_at_x + 10.0, tut.ledge_top_y - 40.0))
 	var caught := false
@@ -89,6 +95,7 @@ func _ready() -> void:
 			caught = true
 			break
 	_check(caught, "he is caught mid-fall and the prompt arrives")
+	_check(p.has_dash, "and Rumi has handed him the dash he is about to need")
 	_check(locked_falling, "his controls are gone for the fall")
 	_check(not p.input_locked, "and back in his hands at the hang point")
 

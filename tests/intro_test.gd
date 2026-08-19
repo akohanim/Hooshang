@@ -254,30 +254,54 @@ func _ready() -> void:
 		"the world has the dash room  [%s]" % _beats().dash_room_name)
 	if dash_room == null:
 		return
+	# AND IT IS NOT A TRIGGER'S BEAT ANY MORE. The gift used to be a Rumi trigger
+	# in a room of its own, one room ahead of the room that teaches the diagonal
+	# dash — so the lesson arrived before the ability it is about. It is staged by
+	# the tutorial now, at the moment the floor goes and he has nothing else, so
+	# this drives the room the way the room is actually played: dropped in past
+	# the dash point, already falling.
+	var tut: DashTutorial = world.get_node_or_null("DashTutorial")
+	_check(tut != null, "the dash room's beat belongs to the tutorial")
+	if tut == null:
+		return
 	world._enter_room(dash_room, true)
 	await _frames(10)
-	var gift_trigger := _find_trigger(dash_room)
-	_check(gift_trigger != null, "the dash room (%s) has a Rumi trigger" % _beats().dash_room_name)
-	_check(gift_trigger != null and gift_trigger.defer_to_cutscene,
-		"...and its trigger defers to the cutscene too")
-	_watch = gift_trigger
-	world.player.global_position = gift_trigger.global_position + Vector2(0, 16)
+	_check(not world.player.has_dash,
+		"he still has no dash walking into the room that grants it")
+	world.player.input_locked = false
+	world.player.respawn(Vector2(tut.arm_at_x + 10.0, tut.ledge_top_y - 40.0))
+	# Rumi is built when the catch happens, so there is nothing to watch until
+	# then. Picked up before he speaks — appear() takes half a second — so the
+	# staging samples cover the whole beat.
+	for i in 600:
+		await _frames(1)
+		if tut._rumi != null:
+			break
+	_watch = tut._rumi
+	_check(_watch != null, "Rumi comes down for it")
+	if _watch == null:
+		return
 	await _run_scene(900)
 
-	_check(lines == GIFT, "the dash lines, in order  [got %s]" % str(lines))
-	_check(speakers == ["Rumi", "Rumi"], "both spoken by Rumi  [got %s]" % str(speakers))
-	_check(dash_when_said == GIFT_HAS_DASH,
-		"the gift lands BETWEEN the two lines — offer, touch, then the key  [got %s]"
+	var expect: Array[String] = GIFT.duplicate()
+	expect.append_array(tut.lines)
+	_check(lines == expect, "the dash lines, in order  [got %s]" % str(lines))
+	_check(speakers == ["Rumi", "Rumi", "Rumi"],
+		"all spoken by Rumi  [got %s]" % str(speakers))
+	_check(dash_when_said == [false, true, true],
+		"the gift lands BETWEEN the first two — offer, touch, then the key  [got %s]"
 			% str(dash_when_said))
-	_check(sides == _sides_for(["Rumi", "Rumi"], _rumi_on_right == 1),
+	_check(sides == _sides_for(speakers, _rumi_on_right == 1),
 		"his face is on his side of the screen here too  [Rumi %s, got %s]" % [
 			"right" if _rumi_on_right == 1 else "left", str(sides)])
 	_check(vsides.all(func(v: String) -> bool: return v == "top"),
-		"room 2's banner sits at the TOP too — he is at floor height here  [got %s]"
+		"the banner sits at the TOP — he is pinned low in the room  [got %s]"
 			% str(vsides))
-	_check(world.player.has_dash, "the SECOND encounter grants the dash")
+	_check(world.player.has_dash, "the second encounter grants the dash")
 	_check(not world.player.input_locked, "control is returned after the gift")
-	_check(_rumi_alpha(gift_trigger) < 0.01, "Rumi has faded out again")
+	# He does NOT leave. The old beat faded him out on its last line; here the
+	# lesson he came to teach has not been answered yet, and he stays for it.
+	_check(_rumi_alpha(_watch) > 0.5, "and Rumi stays for the move he is teaching")
 	_check_gift("the gift")
 
 	# --- third encounter, room 5: the sounding tiles ---

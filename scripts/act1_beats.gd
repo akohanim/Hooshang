@@ -86,8 +86,12 @@ const EMOTE_LINES := {
 
 ## Room holding the waking scene and the first meeting (LDtk level identifier).
 @export var room_name := "Level_0"
-## Room holding the second encounter, where the dash is granted.
-@export var dash_room_name := "Level_2"
+## Room where the dash is granted. NOT staged from here any more: it is the dash
+## tutorial's room, and scripts/dash_tutorial.gd hands the ability over at the
+## moment the floor goes, with the lesson that needs it following in the same
+## breath. The name stays because "where the dash comes from" is a story fact
+## worth being able to read off one export, and the tests ask for it here.
+@export var dash_room_name := "Level_24"
 ## Room holding the third encounter, at the mouth of the sounding tiles.
 @export var music_room_name := "Level_5"
 ## Room holding the Darkshang encounter.
@@ -307,7 +311,6 @@ var _watch_for_stand_down := false
 var _chase: DarkshangTrigger
 var _world: LdtkWorld
 var _room: Node2D
-var _dash_room: Node2D
 var _music_room: Node2D
 var _fade: ColorRect
 var _opening_played := false
@@ -343,12 +346,6 @@ func _ready() -> void:
 	# Claim both encounters BEFORE the player could reach either, or the trigger
 	# plays its own generic one-liner instead of the scripted beat.
 	_claim(_room, _play_meeting)
-	_dash_room = _find_room(dash_room_name)
-	if _dash_room != null:
-		_claim(_dash_room, _play_dash_gift)
-	else:
-		push_warning("Act1Beats: no room named '%s' — the dash is never granted."
-			% dash_room_name)
 	_music_room = _find_room(music_room_name)
 	if _music_room != null:
 		_claim(_music_room, _play_music_beat)
@@ -540,53 +537,6 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 	# He answers with Rumi still standing there, and only then does Rumi go.
 	await _hooshang("One step.[p] OK. One step I can probably do...", "hesitant")
-
-	await trigger.vanish()
-	player.input_locked = false
-	trigger.arm_room_door()
-
-
-# --------------------------------------------------------------- 3. gift ----
-
-## Second encounter: the dash, in the room whose gaps demand it.
-func _play_dash_gift(player: Player, trigger: LdtkRumiTrigger) -> void:
-	player.input_locked = true
-	_rumi_trigger = trigger
-	# PlayerStart and the trigger both sit on the room's floor, near the bottom
-	# of the screen. Top is clear.
-	_dialogue_vside = DialogueBox.VSide.TOP
-	player.look(1)
-
-	var ahead := signf(trigger.global_position.x - player.global_position.x)
-	if ahead == 0.0:
-		ahead = 1.0
-	await trigger.appear(ahead * rumi_stand_offset)
-	trigger.breathe(true)
-	await _hold(before_rumi_speaks)
-
-	# He names the need and hands the ability over first; the control comes
-	# after, once Hooshang actually has the thing the key operates. Teaching
-	# the button before the ability exists is an instruction; teaching it
-	# after is a use.
-	await _rumi("Some walls won't yield to a jump. Take this, and dash.", "warm_open")
-
-	# "take this" is the stage direction in that line, so it gets PLAYED: he
-	# closes the distance, the light swells, crosses the gap, and it's
-	# Hooshang's. The ability lands on the same frame the mote does.
-	await trigger.step_to(player.global_position.x)
-	await trigger.swell()
-	await trigger.give_to(player)
-	player.flash()
-	player.has_dash = true
-	await _hold(0.5)
-
-	# Only now the button, with the dash already his to press it with.
-	#
-	# THE KEY NAMED HERE IS THE ONE THE GAME IS PLAYED WITH, and it has to match
-	# the FIRST event of the `dash` action in project.godot. X is that key; Shift
-	# and the gamepad face buttons stay bound alongside it, unnamed, because a
-	# line that lists every alternative is a settings screen read aloud.
-	await _rumi("Press the X key to dash.", "serene")
 
 	await trigger.vanish()
 	player.input_locked = false

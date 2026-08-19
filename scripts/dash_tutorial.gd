@@ -72,8 +72,22 @@ var ledge_top_y := 0.0
 @export var collapse_time := 0.35
 ## Seconds between one panel going and the next, left to right.
 @export var collapse_stagger := 0.035
-## Rumi's lines. One, because a tutorial that talks longer than the move takes
-## is a tutorial nobody reads twice.
+## THE GIFT, which used to be a room of its own.
+##
+## Rumi handed the dash over one room earlier and this room then taught a move
+## with it — so the lesson arrived before the thing it is about, and the tutorial
+## had to force the dash on just to be playable. He gives it here instead, at the
+## moment the floor has gone and Hooshang has nothing else: the ability lands
+## where it is needed rather than being issued in advance.
+##
+## Skipped outright if he already has the dash, so a retry — or a level-select
+## drop-in — goes straight to the lesson instead of granting it twice.
+@export var gift_lines: Array[String] = [
+	"Some walls won't yield to a jump. Take this, and dash.",
+	"Press the X key to dash.",
+]
+## The lesson itself. One line, because a tutorial that talks longer than the
+## move takes is a tutorial nobody reads twice.
 @export var lines: Array[String] = [
 	"Hold the way you want to go — up and onward — and dash.",
 ]
@@ -111,8 +125,6 @@ func _on_room_changed(room: Node2D) -> void:
 		_teardown()
 		return
 	_player = _world.player
-	# It is the dash tutorial; he has a dash in it whatever a save slot says.
-	_player.has_dash = true
 	# A dash that comes up short drops him down the gap, and a death is not a
 	# room change — without this the retry starts with the floor already pulled
 	# and the lesson already spent, which is a room that only teaches once.
@@ -271,16 +283,44 @@ func _begin() -> void:
 	_prompt.show_at(_player.global_position + Vector2(0.0, -6.0))
 
 
-## Rumi drops in beside him, says his piece, and stays until the move is made.
+## Rumi drops in beside him, hands the dash over if he does not have it yet,
+## teaches the move, and stays until it is made.
 func _call_rumi() -> void:
 	_rumi = LdtkRumiTrigger.make()
 	_rumi.defer_to_cutscene = true
 	_rumi.global_position = _player.global_position + Vector2(-26.0, 0.0)
 	_world.add_child(_rumi)
-	_rumi.appear(_player.global_position.x - 26.0)
+	# appear() offsets him in TRIGGER-LOCAL pixels, not world ones. This passed a
+	# world x, which put him some 700px to the right — outside the room, with the
+	# beat playing to an empty screen. The trigger is already placed beside
+	# Hooshang, so the offset is nothing.
+	await _rumi.appear()
+	if not _player.has_dash:
+		await _give_the_dash()
 	for line in lines:
-		await Dialogue.say("Rumi", line, LdtkRumiTrigger.RUMI_GOLD, null,
-			_rumi.portrait_side(_player), DialogueBox.VSide.TOP)
+		await _say(line, "serene")
+
+
+## The hand-over. "Take this" is the stage direction in that line, so it gets
+## PLAYED: he closes the distance, the light swells, crosses the gap, and it is
+## Hooshang's — the ability lands on the same frame the mote does. The key is
+## named only afterwards, with the dash already his to press it with.
+func _give_the_dash() -> void:
+	if not gift_lines.is_empty():
+		await _say(gift_lines[0], "warm_open")
+	await _rumi.step_to(_player.global_position.x)
+	await _rumi.swell()
+	await _rumi.give_to(_player)
+	_player.flash()
+	_player.has_dash = true
+	for i in range(1, gift_lines.size()):
+		await _say(gift_lines[i], "serene")
+
+
+func _say(text: String, face: String) -> void:
+	await Dialogue.say("Rumi", text, LdtkRumiTrigger.RUMI_GOLD,
+		Act1Beats.RUMI_FACES.get(face), _rumi.portrait_side(_player),
+		DialogueBox.VSide.TOP)
 
 
 func _finish() -> void:

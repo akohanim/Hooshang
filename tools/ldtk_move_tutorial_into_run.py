@@ -32,6 +32,12 @@ Nothing reads those names, and this does not try to fix them.
 The tutorial room also has no Exit — nothing led out of it, because nothing led
 into it — so this adds one, on the ledge he dashes up to.
 
+And it takes the Rumi trigger OUT of the room that used to grant the dash. That
+beat has moved into the tutorial (scripts/dash_tutorial.gd hands the ability over
+at the catch), so nothing claims that trigger any more — and an unclaimed
+LdtkRumiTrigger is not inert: it locks the player, fades Rumi in and plays its own
+one-line version, which here is an EMPTY dialogue banner.
+
 LDtk MUST BE CLOSED. It holds the project in memory and writes it back whole, so
 a scripted edit under a running LDtk is reverted silently. This refuses to run.
 
@@ -78,6 +84,11 @@ ROW_SHIFT_MIN_X = 640
 EXIT_PX = (872, 88)
 EXIT_DEF_UID = 39
 EXIT_FIELD_DEF_UID = 40
+
+## The room the dash gift used to live in, by its name AFTER the rename, and the
+## entity in it that no longer has an owner.
+STALE_TRIGGER_ROOM = "Level_3"
+STALE_TRIGGER = "RumiTrigger"
 
 SKIP_DIRS = {".git", ".godot", "builds", "addons", "backups", "node_modules"}
 SUFFIXES = (".gd", ".tscn", ".tres", ".md", ".ldtk", ".py", ".cfg", ".json")
@@ -223,6 +234,26 @@ def add_exit(block, px, origin):
     return block[:j] + "\n" + ent + "," + block[j:]
 
 
+def remove_entity(block, ident):
+    """Drop one entity instance from a level.
+
+    Found by its opening brace at six tabs and closed at the first brace back at
+    that same indent — LDtk indents an entity's own fields deeper, so the first
+    six-tab `}` after the start is this entity's and not a field's."""
+    head = '\t\t\t\t\t\t{\n\t\t\t\t\t\t\t"__identifier": "%s",' % ident
+    i = block.find(head)
+    if i < 0:
+        raise SystemExit("!! no %s to remove" % ident)
+    close = "\n\t\t\t\t\t\t}"
+    j = block.index(close, i) + len(close)
+    if block[j:j + 1] == ",":
+        j += 1                      # it had a sibling after it
+        return block[:i] + block[j:].lstrip("\n")
+    # last in the list: take the newline and comma that led into it
+    k = block.rfind(",", 0, i)
+    return block[:k] + block[j:]
+
+
 def rewrite_ldtk(text):
     """Rename, move, and give the tutorial a way out. Text in, text out."""
     text = remap(text)
@@ -252,6 +283,8 @@ def rewrite_ldtk(text):
             moves.append((name, dx, dy))
         if origin is not None:
             block = add_exit(block, EXIT_PX, origin)
+        if name == STALE_TRIGGER_ROOM:
+            block = remove_entity(block, STALE_TRIGGER)
         out.append(block)
 
     head = text[:spans[0][1]]
@@ -271,12 +304,18 @@ def check_ldtk(text):
             if (a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
                     and a[2] < b[2] + b[4] and b[2] < a[2] + a[4]):
                 raise SystemExit("!! %s overlaps %s" % (a[0], b[0]))
+    def entities(name):
+        lv = [l for l in d["levels"] if l["identifier"] == name][0]
+        return [e["__identifier"] for l in lv["layerInstances"]
+                for e in l.get("entityInstances", [])]
     tut = "Level_%d" % TUTORIAL_NEW
-    lv = [l for l in d["levels"] if l["identifier"] == tut][0]
-    ents = [e["__identifier"] for l in lv["layerInstances"]
-            for e in l.get("entityInstances", [])]
-    if "Exit" not in ents:
+    if "Exit" not in entities(tut):
         raise SystemExit("!! %s still has no Exit" % tut)
+    if "PlayerStart" not in entities(tut):
+        raise SystemExit("!! %s lost its PlayerStart" % tut)
+    if STALE_TRIGGER in entities(STALE_TRIGGER_ROOM):
+        raise SystemExit("!! %s still holds the unclaimed %s"
+                         % (STALE_TRIGGER_ROOM, STALE_TRIGGER))
     return sorted(rects, key=lambda r: int(r[0].split("_")[1]))
 
 
