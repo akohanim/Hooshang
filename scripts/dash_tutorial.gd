@@ -1,8 +1,8 @@
 class_name DashTutorial
 extends Node
-## Level_24: the room that teaches the diagonal dash.
+## Level_2: the room that teaches the diagonal dash.
 ##
-## STANDALONE ON PURPOSE. Nothing exits into Level_24 and it is not in
+## STANDALONE ON PURPOSE. Nothing exits into Level_2 and it is not in
 ## Game.LEVELS, so it is only reachable from the debug picker / level select —
 ## it is a room to test the lesson in, not yet a room in the Act. Wiring it into
 ## the run is a one-line change to whichever room should lead to it, once the
@@ -24,7 +24,7 @@ extends Node
 ## other one has been handed over rather than announced.
 
 ## The room this belongs to. Everything here is inert in every other room.
-const ROOM := "Level_24"
+const ROOM := "Level_2"
 
 @export_group("Where")
 ## Where the floor is taken away and he is caught. NOT an independent number:

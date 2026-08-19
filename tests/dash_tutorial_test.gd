@@ -1,5 +1,5 @@
 extends Node
-## Level_24's dash lesson: the prompt arrives where the move becomes necessary,
+## Level_2's dash lesson: the prompt arrives where the move becomes necessary,
 ## and leaves when the move is made.
 ## Run:  godot --headless res://tests/dash_tutorial_test.tscn
 

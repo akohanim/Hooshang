@@ -131,17 +131,17 @@ Lights are positioned in **world coordinates**, not per room, so you need these:
 | --- | --- | --- | --- |
 | 0 | `Level_0` | 0 – 320 | Dim on purpose — the cubicle is a prison |
 | — | *(new room)* | 320 – 640 | The slot this move opened up |
-| 1 | `Level_2` | 640 – 960 |  |
-| 2 | `Level_3` | 928 – 1248 |  |
-| 3 | `Level_4` | 1248 – 1568 |  |
-| 4 | `Level_5` | 1568 – 1888 | **Cave** — lit at the musical tiles, dark after |
-| 5 | `Level_6` | 1888 – 2208 |  |
-| 6 | `Level_7` | 2208 – 2528 |  |
-| 7 | `Level_8` | 2528 – 2848 |  |
-| 8 | `Level_9` | 2848 – 3456 |  |
-| 9 | `Level_10` | 3456 – 4064 |  |
-| 10 | `Level_11` | 4064 – 4672 |  |
-| 11 | `Level_12` | 4672 – 4992 | The Darkshang encounter |
+| 1 | `Level_3` | 640 – 960 |  |
+| 2 | `Level_4` | 928 – 1248 |  |
+| 3 | `Level_5` | 1248 – 1568 |  |
+| 4 | `Level_6` | 1568 – 1888 | **Cave** — lit at the musical tiles, dark after |
+| 5 | `Level_7` | 1888 – 2208 |  |
+| 6 | `Level_8` | 2208 – 2528 |  |
+| 7 | `Level_9` | 2528 – 2848 |  |
+| 8 | `Level_10` | 2848 – 3456 |  |
+| 9 | `Level_11` | 3456 – 4064 |  |
+| 10 | `Level_12` | 4064 – 4672 |  |
+| 11 | `Level_13` | 4672 – 4992 | The Darkshang encounter |
 
 Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 
@@ -150,21 +150,21 @@ Floor level is around **y = 336**; hanging bulbs sit at **y = 250**.
 Rooms 12 – 21 are the escape: Hooshang runs the office back the way he came,
 with Darkshang behind him. They sit on a **second row 640px below the first**,
 and they are laid out so each mirrors its outbound twin at very nearly the same
-world X — **room N pairs with room 24 − N** (10↔14, 9↔15, … 2↔22).
+world X — **room N pairs with room 26 − N** (11↔15, 10↔16, … 3↔23).
 
 | Room | LDtk name | World X | Mirrors |
 | --- | --- | --- | --- |
-| 12 | `Level_13` | 3728 – 4336 | — (entered from room 11) |
-| 13 | `Level_14` | 3120 – 3728 | room 9 |
-| 14 | `Level_15` | 2512 – 3120 | room 8 |
-| 15 | `Level_16` | 2192 – 2512 | room 7 |
-| 16 | `Level_17` | 1872 – 2192 | room 6 |
-| 17 | `Level_18` | 1552 – 1872 | room 5 |
-| 18 | `Level_19` | 1232 – 1552 | room 4 — **dark**, like its twin |
-| 19 | `Level_20` | 912 – 1232 | room 3 |
-| 20 | `Level_21` | 592 – 912 | room 2 |
-| 21 | `Level_22` | 272 – 592 | room 1 |
-| 22 | `Level_23` | −48 – 272 | room 0 — **the cubicle**, and the only room in the Act lit by daylight |
+| 12 | `Level_14` | 3728 – 4336 | — (entered from room 11) |
+| 13 | `Level_15` | 3120 – 3728 | room 9 |
+| 14 | `Level_16` | 2512 – 3120 | room 8 |
+| 15 | `Level_17` | 2192 – 2512 | room 7 |
+| 16 | `Level_18` | 1872 – 2192 | room 6 |
+| 17 | `Level_19` | 1552 – 1872 | room 5 |
+| 18 | `Level_20` | 1232 – 1552 | room 4 — **dark**, like its twin |
+| 19 | `Level_21` | 912 – 1232 | room 3 |
+| 20 | `Level_22` | 592 – 912 | room 2 |
+| 21 | `Level_23` | 272 – 592 | room 1 |
+| 22 | `Level_24` | −48 – 272 | room 0 — **the cubicle**, and the only room in the Act lit by daylight |
 
 Room 22 is a byte-for-byte copy of room 0's geometry, one row down and 48px
 left: the same cubicle he woke up in, at the end of the night. Its open band is
@@ -554,7 +554,7 @@ a room, photographs the 320×180 game surface and prints the frame's mean and pe
 luminance — which is how room 22's dawn was balanced:
 
 ```bash
-/Users/ari/Downloads/Godot.app/Contents/MacOS/Godot --path . res://tests/room_shot.tscn -- Level_23
+/Users/ari/Downloads/Godot.app/Contents/MacOS/Godot --path . res://tests/room_shot.tscn -- Level_24
 ```
 
 It runs windowed (2D does not rasterise headless), binds no save slot, and writes

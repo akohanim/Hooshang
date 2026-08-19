@@ -77,7 +77,7 @@ signal chase_reset(at: Vector2)
 
 @export_group("Chase")
 ## How far behind the player he replays, in seconds. THE knob for how hard the
-## chase is. Level_12 is 320px — one screen — and the player runs at 90 px/s, so
+## chase is. Level_13 is 320px — one screen — and the player runs at 90 px/s, so
 ## 1.2s is a steady-state gap of ~108px: a third of the room, comfortably on
 ## screen at all times, and close enough that standing still for a second is
 ## fatal. Much above 2s and he is off the back of the screen in a room this size,

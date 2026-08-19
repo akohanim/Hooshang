@@ -1,7 +1,7 @@
 extends Node
 ## The Darkshang chase: a shadow that is a DELAYED ECHO of the player.
 ##
-## Driven by the real player, in the real world scene, in the real Level_12 —
+## Driven by the real player, in the real world scene, in the real Level_13 —
 ## the same reasoning as conveyor_test.gd. Every claim this mechanic makes is a
 ## claim about the relationship between two positions over time, and a test that
 ## wrote those positions by hand would be asserting its own arithmetic.
@@ -50,15 +50,15 @@ func _ready() -> void:
 	player.input_locked = false
 	player.has_dash = true
 
-	room = _room_named("Level_12")
-	_check(room != null, "Level_12 is in the world")
+	room = _room_named("Level_13")
+	_check(room != null, "Level_13 is in the world")
 	if room == null:
 		_finish()
 		return
 	world._enter_room(room, true)
 	await _frames(20)
 
-	# Level_12's OWN surge points and safe zone are stood down for the whole run.
+	# Level_13's OWN surge points and safe zone are stood down for the whole run.
 	# They are real, they are asserted on below, and they are also strewn across
 	# the only floor this test has to work with — a player driven 120 frames to
 	# the right walks through them, which turns "he retraces the path" into "he
@@ -66,7 +66,7 @@ func _ready() -> void:
 	# triggers further down are the ones under test; these are the room.
 	var room_surges := _in_room("surge_point")
 	var room_safes := _in_room("safe_zone")
-	print("  NOTE  Level_12 imported %d SurgePoint(s) and %d SafeZone(s) from LDtk"
+	print("  NOTE  Level_13 imported %d SurgePoint(s) and %d SafeZone(s) from LDtk"
 		% [room_surges.size(), room_safes.size()])
 	for t in room_surges + room_safes:
 		t.spent = true
@@ -78,7 +78,7 @@ func _ready() -> void:
 			"a placed SurgePoint arrives configured, not zeroed  [%.1fs at %.1f]" % [
 				sp.surge_duration, sp.surge_intensity])
 
-	# The chase lives in Level_12 and nowhere else. If the LDtk entity is already
+	# The chase lives in Level_13 and nowhere else. If the LDtk entity is already
 	# placed, that is the one under test; if the .ldtk has not caught up yet, one
 	# is instanced at the same spot, which is exactly what the importer branch
 	# does. Either way nothing outside this room gains a Darkshang.
@@ -91,22 +91,22 @@ func _ready() -> void:
 		room.get_node("Entities").add_child(shadow)
 		shadow.global_position = world.spawn_point_for(room)
 		print("  NOTE  no DarkshangSpawn in the .ldtk yet — instanced the prefab "
-			+ "into Level_12 at its PlayerStart")
+			+ "into Level_13 at its PlayerStart")
 	shadow.auto_start = false  # every section below starts the chase deliberately
 	await _frames(4)
 	_check(shadow.get_parent() != null and room.is_ancestor_of(shadow),
-		"and he is inside Level_12, not in a shared scene")
+		"and he is inside Level_13, not in a shared scene")
 	_check(_count_darkshang(world) == 1,
 		"exactly one shadow exists in the whole Act  [%d]" % _count_darkshang(world))
 
-	# Where he actually comes to rest on Level_12's floor. Measured, not guessed —
+	# Where he actually comes to rest on Level_13's floor. Measured, not guessed —
 	# the same trick conveyor_test uses, so nothing below depends on my reading of
 	# a tile row.
 	player.global_position = world.spawn_point_for(room)
 	player.velocity = Vector2.ZERO
 	await _frames(20)
 	floor_point = player.global_position
-	_check(player.is_on_floor(), "the player stands on Level_12's floor  [%s]" % floor_point)
+	_check(player.is_on_floor(), "the player stands on Level_13's floor  [%s]" % floor_point)
 
 	# --- he is not a body, and cannot become one ---
 	# Asked of the live object rather than written as `is not CharacterBody2D`,
@@ -662,11 +662,11 @@ func _test_importer() -> void:
 
 # ------------------------------------------------------------------ helpers ---
 
-## Player back on Level_12's floor, standing still, with the shadow parked out of
+## Player back on Level_13's floor, standing still, with the shadow parked out of
 ## reach so the next section starts from a known board.
 func _settle() -> void:
 	_release_all()
-	# Spend the room's OWN set pieces before every section. Level_12 holds a real
+	# Spend the room's OWN set pieces before every section. Level_13 holds a real
 	# DarkshangTrigger and two real SurgePoints, and the player start is a few
 	# dozen pixels from the first of them — so a section that runs him along the
 	# route trips one mid-measurement. That is what a 108px steady-state gap
@@ -693,7 +693,7 @@ func _settle() -> void:
 		shadow.start_chase()
 
 
-## Everything in `group` that belongs to Level_12. Scoped to the room on purpose:
+## Everything in `group` that belongs to Level_13. Scoped to the room on purpose:
 ## with the whole Act loaded at once, an unscoped get_nodes_in_group() reaches
 ## rooms the player has never visited (STYLE_GUIDE §9).
 func _in_room(group: String) -> Array[Node]:

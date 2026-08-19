@@ -5,7 +5,7 @@ extends CanvasLayer
 ## room cold — no dash, no re-routed doorways, no story flags — which is the
 ## right thing when you want to see a room in isolation. It is the wrong thing
 ## for almost everything in the back half of Act I, because that half only exists
-## once the story has changed the world: Level_12's entrance points at Level_13
+## once the story has changed the world: Level_13's entrance points at Level_14
 ## only after Darkshang has been met, and without it the escape route is not
 ## there to walk. A room opened cold is a room no player will ever stand in.
 ##

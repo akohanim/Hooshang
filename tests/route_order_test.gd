@@ -4,7 +4,7 @@ extends Node
 ## The escape row (12-21) runs RIGHT to left across the bottom of the LDtk grid,
 ## so sorting rooms by world position reads it 21, 20, 19 … 13, 12 — backwards.
 ## Every "next room" fallback in ldtk_world.gd is "the next entry in that array",
-## so walking out of Level_14's Exit handed you Level_13: the room you had just
+## so walking out of Level_15's Exit handed you Level_14: the room you had just
 ## come from. In play it looked like the exit was a door back.
 ##
 ## This asserts the ORDER itself rather than walking the rooms, because the order

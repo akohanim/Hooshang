@@ -7,7 +7,7 @@ extends Node
 ## numbers LIGHTING.md's targets are quoted in — eyeballing a dark room is
 ## unreliable, and this is how the room 22 dawn was balanced.
 ##
-## Usage: Godot --path . res://tests/room_shot.tscn -- Level_23 [x_offsets...]
+## Usage: Godot --path . res://tests/room_shot.tscn -- Level_24 [x_offsets...]
 ## Offsets are in pixels from the room's left edge; the default sweeps it.
 ## Shots land in user://shots/ — the absolute path is printed on the way out.
 
@@ -18,7 +18,7 @@ var world: LdtkWorld
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
-	var room_name: String = args[0] if args.size() > 0 else "Level_23"
+	var room_name: String = args[0] if args.size() > 0 else "Level_24"
 	var offsets: Array = []
 	for i in range(1, args.size()):
 		offsets.append(float(args[i]))

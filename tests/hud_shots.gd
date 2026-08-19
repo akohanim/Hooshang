@@ -17,7 +17,7 @@ func _ready() -> void:
 	# Start away from room 1. Act1Beats only plays the waking scene where he
 	# actually wakes, so this skips the black fade AND the dialogue banner —
 	# which sits across the top of the screen, exactly over both counters.
-	LdtkWorld.debug_start_room = "Level_3"
+	LdtkWorld.debug_start_room = "Level_4"
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	Screen.set_scene(world)
 	for i in 30:

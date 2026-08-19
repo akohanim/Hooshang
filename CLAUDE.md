@@ -42,10 +42,10 @@ so the two agree now. The tiles are still placeholder art.
     carries a rider at `speed` in `direction`, never touches his velocity, and
     lets go the moment he is airborne
   - `Godot --headless --path . res://tests/chase_route_test.tscn` — meeting
-    Darkshang re-points Level_12's ENTRANCE at Level_13 (not back at Level_11),
+    Darkshang re-points Level_13's ENTRANCE at Level_14 (not back at Level_12),
     it holds however many times that doorway is used, and no other room moves
   - `Godot --headless --path . res://tests/route_order_test.tscn` — play order is
-    the level IDENTIFIER, not world position: the escape row (13-22) runs right
+    the level IDENTIFIER, not world position: the escape row (14-23) runs right
     to left across the grid, so position order reads it backwards
   - `Godot --headless --path . res://tests/collapse_test.tscn` — RoomCollapse:
     every prop hanging in the air lands ON the floor, props already down and
@@ -67,7 +67,7 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/menu_nav_test.tscn` — menu navigation
     on a CONTROLLER: a stick resting past the walking deadzone moves nothing,
     one push moves exactly one row, a held direction repeats only after a delay
-  - `Godot --headless --path . res://tests/dash_tutorial_test.tscn` — Level_24's
+  - `Godot --headless --path . res://tests/dash_tutorial_test.tscn` — Level_2's
     diagonal-dash lesson: the prompt arrives at the dash point, a FLAT dash
     does not clear it and an up-forward one does, and only that room's
     crumbling panels are relaxed
@@ -87,8 +87,8 @@ so the two agree now. The tiles are still placeholder art.
   no error anywhere. `touch ldtk/hooshang_claude.ldtk` then `--import`.
 - **Level identifiers ARE the play order**, and `LdtkWorld.rooms` is sorted by
   them. `Level_0` is the opening room. The world is no longer one left-to-right
-  row: rooms 13-22 are the escape and run RIGHT to left along the bottom of the
-  grid, retracing rooms 10-2 (room N pairs with room 24-N). Sorting by world
+  row: rooms 14-23 are the escape and run RIGHT to left along the bottom of the
+  grid, retracing rooms 11-3 (room N pairs with room 26-N). Sorting by world
   position — which this used to do — reads that row backwards, and every "next
   room" fallback then hands you the room you just left. Renumber when you insert
   a room, and re-letter that room's lights with it (`LIGHTING.md`).
@@ -260,7 +260,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   player in a named room, photographs the 320x180 game surface and prints the
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
   Runs WINDOWED — 2D does not rasterise headless — and binds no save slot:
-  `Godot --path . res://tests/room_shot.tscn -- Level_23`
+  `Godot --path . res://tests/room_shot.tscn -- Level_24`
 - `tests/feel_measure.tscn` — the same idea for MOVEMENT, and also not pass/fail.
   Prints the jump apex, the airtime, the horizontal reach of a running jump and
   a 20-timing sweep of the jump+up-dash. Run it before and after touching

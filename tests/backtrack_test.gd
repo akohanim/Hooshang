@@ -21,11 +21,11 @@ func _ready() -> void:
 
 	# Forward through every room, so each return door is armed as it is in play.
 	#
-	# Stops at the first room with no way onward of its OWN. Level_12 is the boss
+	# Stops at the first room with no way onward of its OWN. Level_13 is the boss
 	# room: it has no Exit and no story door, because the Darkshang encounter
 	# re-points its entrance instead — a story beat this test has no way to play
 	# (see chase_route_test.gd, which owns that route). Before this guard the loop
-	# sat on Level_12 forever, failing the same assertion until the run was killed.
+	# sat on Level_13 forever, failing the same assertion until the run was killed.
 	var forward: Array[String] = [world.current_room.name]
 	while world._room_after(world.current_room) != null \
 			and _has_way_onward(world.current_room):
