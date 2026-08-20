@@ -117,6 +117,41 @@ const TRIM_HEIGHT := 16.0
 ## is noticeably tracked-out; without this it reads cramped at this size.
 @export var letter_spacing := 2
 
+# --- talking faces ---------------------------------------------------------
+#
+# A rigged portrait blinks on its own and moves its mouth while the typewriter
+# is running, which is how Celeste's dialogue heads work: not an animation drawn
+# per line, but a face with a few mouth positions cycled against the text as it
+# reveals. The frames are built by tools/gen_portrait_frames.py, which warps them
+# out of the paintings themselves — see that file for how, and for why one
+# portrait deliberately has no rig.
+#
+# The rig is looked up from the portrait TEXTURE's path rather than passed in, so
+# no caller changed: scripts/act1_beats.gd still hands over a face and knows
+# nothing about any of this. An unrigged face (Rumi's, the tinted stand-in, the
+# 3/4 waking shot) simply finds no entry and holds still, which is the behaviour
+# every portrait had before this existed.
+const ANIM_DIR := "res://assets/portraits/anim/"
+
+## Seconds each mouth position is held while he is speaking. Roughly two
+## positions per syllable at `chars_per_second`; much slower reads as chewing.
+const MOUTH_FRAME_TIME := 0.075
+## How long a blink takes end to end, and the gap between them. The gap is
+## randomised inside this range because a blink on a fixed metronome is the one
+## thing that makes a face look mechanical.
+const BLINK_TIME := 0.14
+const BLINK_GAP := Vector2(2.4, 6.5)
+
+## portrait basename ("hooshang_annoyed") -> its rect/frame data, read once from
+## the generator's manifest.
+var _rigs := {}
+## The rig showing right now, or {} when this face has none.
+var _rig := {}
+var _mouth_left := 0.0
+var _blink_left := 0.0
+## How far into a blink we are, or -1 when the eyes are simply open.
+var _blink_t := -1.0
+
 var _active := false
 var _revealing := false
 var _reveal_accum := 0.0
@@ -136,6 +171,13 @@ var _pause_left := 0.0
 @onready var portrait: TextureRect = $Portrait
 @onready var portrait_frame: ColorRect = $PortraitFrame
 @onready var portrait_back: ColorRect = $PortraitBack
+## The two moving parts of a rigged face, drawn over the still painting. They are
+## CHILDREN of Portrait and positioned by anchor rather than by offset, which is
+## what makes them free: _place() mirrors the portrait for a right-hand speaker
+## and _place_vside/_fit_banner move it down the screen, and both carry these
+## along without knowing they exist.
+@onready var portrait_mouth: TextureRect = $Portrait/Mouth
+@onready var portrait_eyes: TextureRect = $Portrait/Eyes
 ## The scene's built-in stand-in, kept so a tinted speaker can go back to it
 ## after a line that supplied real art.
 @onready var _default_portrait: Texture2D = $Portrait.texture
@@ -155,6 +197,7 @@ func _ready() -> void:
 	visible = false
 	for node in _mirrored():
 		_authored[node] = Vector2(node.offset_left, node.offset_right)
+	_load_rigs()
 	for node in [banner, trim_top, trim_bottom, portrait_frame, portrait_back, portrait, name_label, text_label]:
 		_authored_v[node] = Vector2(node.offset_top, node.offset_bottom)
 	_apply_font()

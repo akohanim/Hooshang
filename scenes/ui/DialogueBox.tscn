@@ -63,6 +63,18 @@ expand_mode = 1
 stretch_mode = 5
 mouse_filter = 2
 
+[node name="Mouth" type="TextureRect" parent="Portrait"]
+texture_filter = 3
+visible = false
+expand_mode = 1
+mouse_filter = 2
+
+[node name="Eyes" type="TextureRect" parent="Portrait"]
+texture_filter = 3
+visible = false
+expand_mode = 1
+mouse_filter = 2
+
 [node name="NameLabel" type="Label" parent="."]
 offset_left = 256.0
 offset_top = 20.0

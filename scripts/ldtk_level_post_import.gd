@@ -26,6 +26,38 @@
 
 const VALUES_LAYER_SUFFIX := "-values"
 
+## The layer the world's geometry is painted on, and the atlas coordinate of the
+## ceiling PANEL tile on its sheet. The sheet's tile order is fixed and
+## documented in tools/gen_bricks_8px.py ("Order on the sheet IS the tile id the
+## rules use, so do not reorder") — this is tile 5.
+const GEOMETRY_LAYER := "Collisions"
+const PANEL_TILE := Vector2i(5, 0)
+
+## What a painted panel emits.
+##
+## A TILE CANNOT GLOW. `CanvasModulate` is 0.05 in Act I and multiplies every
+## CanvasItem, so the panel drawn into the tile arrives at 5% of what was drawn —
+## the trap SunShaft, WallPattern and CeilingPanel all document. Painting the
+## ceiling therefore gets you the architecture and nothing else, unless something
+## hangs a light on it, and hanging one by hand on every cell of every painted
+## run is not a thing anybody would keep up. So the import does it.
+##
+## Two lights per cell, because they are two different jobs: the PANEL is how
+## bright the fitting looks, drawn to the shape of the tile's own panel, and the
+## POOL is the light that actually falls into the room under it. The pool is kept
+## deliberately weak — panels land every third cell, so a run of them stacks, and
+## anything stronger turns a corridor into an even wash with nothing dark left.
+const PANEL_GLOW := preload("res://assets/props/ceiling/ceiling_tile_glow.png")
+const POOL_TEXTURE := preload("res://assets/light_radial.png")
+const PANEL_COLOR := Color(0.83, 0.9, 0.95)
+const PANEL_ENERGY := 1.4
+const POOL_ENERGY := 0.5
+## 64px of radius per 1.0 — see LIGHTING.md.
+const POOL_SCALE := 1.0
+## How far below the cell the pool is centred. A ceiling lights the room beneath
+## it, so the pool hangs under the tile rather than sitting inside it.
+const POOL_DROP := 18.0
+
 
 ## Draw bands, applied by LDtk layer name so the ordering is explicit rather
 ## than an accident of sibling order: -1 is scenery the player walks IN FRONT of,
@@ -44,4 +76,41 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 			layer.collision_enabled = false
 		elif Z_BANDS.has(layer.name):
 			layer.z_index = Z_BANDS[layer.name]
+		if layer.name == GEOMETRY_LAYER:
+			_light_panels(level, layer)
 	return level
+
+
+## Hang a light on every painted ceiling panel in this level.
+func _light_panels(level: LDTKLevel, layer: TileMapLayer) -> void:
+	var cells: Array[Vector2i] = []
+	for cell in layer.get_used_cells():
+		if layer.get_cell_atlas_coords(cell) == PANEL_TILE:
+			cells.append(cell)
+	if cells.is_empty():
+		return
+	var holder := Node2D.new()
+	holder.name = "CeilingGlow"
+	level.add_child(holder)
+	holder.owner = level
+	for cell in cells:
+		# In LEVEL space, not global: nothing is in a tree yet at import time, so
+		# a global transform would be whatever the level happens to sit at, which
+		# during import is the origin. The layer's own transform is the only
+		# thing between the two.
+		var at: Vector2 = layer.transform * layer.map_to_local(cell)
+		_add_light(holder, level, at, PANEL_GLOW, PANEL_ENERGY, 1.0)
+		_add_light(holder, level, at + Vector2(0.0, POOL_DROP),
+			POOL_TEXTURE, POOL_ENERGY, POOL_SCALE)
+
+
+func _add_light(holder: Node2D, level: LDTKLevel, at: Vector2,
+		texture: Texture2D, energy: float, scale: float) -> void:
+	var light := PointLight2D.new()
+	light.texture = texture
+	light.texture_scale = scale
+	light.color = PANEL_COLOR
+	light.energy = energy
+	light.position = at
+	holder.add_child(light)
+	light.owner = level

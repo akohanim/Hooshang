@@ -26,8 +26,12 @@ Practically that means:
   a run of it is solid to stand on. Its panels are drawn UNLIT and cannot be
   otherwise — a painted tile is a CanvasItem and `CanvasModulate` 0.05 takes it
   to 5% of what was drawn. Paint the architecture, then drop a `CeilingPanel` on
-  the cell you want lit. If a painted run comes through invisible, it is the
-  tileset import flag — see CLAUDE.md on `force_tileset_reimport`.
+  the cell you want lit — but you no longer have to for the ordinary case: the
+  import hangs a panel light and a weak pool on every painted panel cell
+  (`scripts/ldtk_level_post_import.gd`). Panels land every third column and are
+  staggered a column per row, so a two-row ceiling reads as a grid rather than
+  as vertical pairs. If a painted run comes through invisible, it is the
+  importer's tile toggle — see CLAUDE.md.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
   `show_body = false` — the window itself IS the visible source. On the escape
   row that moon is eclipsed and recovering; see *The eclipse* below.

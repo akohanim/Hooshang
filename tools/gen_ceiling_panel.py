@@ -29,7 +29,11 @@ what that looks like — a hole.
   ceiling_floor_light.png the same, with the panel in its underside
   ceiling_floor_glow.png  what that panel emits — biased DOWNWARD, because the
                           light of a ceiling falls into the room beneath it
-  ldtk/art/ceiling_floor.png   the 16x16 icon LDtk shows in its entity list
+  ceiling_tile_glow.png   what the PAINTED 8px panel emits. Its own file and not
+                          a scaled copy of the 24px one: the painted cell's panel
+                          is 5px wide where the prop's is 17, and a glow drawn
+                          for the wrong one either floats past the tile's frame
+                          or sits inside it looking like a chip of paint
 
 THE GLOW IS A SEPARATE FILE BECAUSE IT BECOMES A LIGHT, not paint. CanvasModulate
 is 0.05 in Act I and multiplies every CanvasItem, so a painted luminous panel
@@ -270,6 +274,49 @@ def floor_glow():
     return img
 
 
+## The painted 8px cell's panel, in cell pixels — see tools/gen_bricks_8px.py's
+## `ceiling`, which draws it. Kept here because the glow has to sit exactly on it.
+TILE_PANEL_X0, TILE_PANEL_X1 = 2, 6
+TILE_PANEL_Y0, TILE_PANEL_Y1 = 4, 6
+## Canvas for that glow, with the 8px cell centred in it so the bloom has room to
+## fall past the tile onto whatever is under it.
+TILE_GLOW_W, TILE_GLOW_H = 24, 16
+
+
+def tile_glow():
+    """What a PAINTED panel cell emits, for the light the importer hangs on it.
+
+    A painted tile cannot glow on its own — CanvasModulate is 0.05 and multiplies
+    every CanvasItem — so scripts/ldtk_level_post_import.gd puts a PointLight2D
+    wearing this on every panel cell it finds. The shape is art, the brightness
+    is light.
+    """
+    img = Image.new("RGBA", (TILE_GLOW_W, TILE_GLOW_H), (0, 0, 0, 0))
+    px = img.load()
+    ox, oy = (TILE_GLOW_W - 8) // 2, (TILE_GLOW_H - 8) // 2
+    x0, x1 = ox + TILE_PANEL_X0 + 1, ox + TILE_PANEL_X1 - 1
+    y0, y1 = oy + TILE_PANEL_Y0 + 1, oy + TILE_PANEL_Y1
+    cx = (x0 + x1) / 2.0
+    for x in range(TILE_GLOW_W):
+        for y in range(TILE_GLOW_H):
+            dx = max(0.0, x0 - x, x - x1)
+            dy_up = max(0.0, y0 - y)
+            dy_dn = max(0.0, y - y1)
+            if dx == 0.0 and dy_up == 0.0 and dy_dn == 0.0:
+                fx = 1.0 - abs(x - cx) / max(1.0, (x1 - x0) / 2.0)
+                px[x, y] = mix(LIT_MID, LIT_CORE, 0.6 + 0.4 * fx) + (255,)
+                continue
+            # Down is open room; up is the tile the panel is set into.
+            reach = (dx / 5.5) ** 2 + (dy_up / 1.4) ** 2 + (dy_dn / 4.5) ** 2
+            if reach >= 1.0:
+                continue
+            a = (1.0 - reach) ** 1.7
+            if a < 0.18 and (x + y) % 2:
+                continue
+            px[x, y] = mix(LIT_EDGE, LIT_MID, a) + (int(205 * a),)
+    return img
+
+
 def ldtk_icon():
     """The 16x16 LDtk shows in its entity list. A slice of the lit floor cell
     rather than a drawing of one, so the icon cannot drift from the art."""
@@ -291,7 +338,8 @@ def main():
                       ("ceiling_light_glow.png", glow_cell()),
                       ("ceiling_floor.png", floor_cell()),
                       ("ceiling_floor_light.png", floor_light_cell()),
-                      ("ceiling_floor_glow.png", floor_glow())):
+                      ("ceiling_floor_glow.png", floor_glow()),
+                      ("ceiling_tile_glow.png", tile_glow())):
         path = os.path.join(OUT, name)
         img.save(path)
         print("wrote %s  (%dx%d)" % (os.path.relpath(path, ROOT), *img.size))
