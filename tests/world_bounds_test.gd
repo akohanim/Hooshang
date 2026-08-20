@@ -38,7 +38,7 @@ var _reached := 0.0
 const HEADROOM_CELLS := 3
 ## The LDtk grid.
 const CELL := 8.0
-## Half his 6x12 hitbox, for reading his feet off his origin.
+## Half his 8x12 hitbox, for reading his feet off his origin.
 const HALF_HEIGHT := 6.0
 
 
@@ -112,7 +112,7 @@ func _check_room(room: Node2D) -> bool:
 		if i > 10 and p.is_on_floor():
 			break
 	Input.action_release("move_up")
-	# `peak` is the player's ORIGIN; his head is 6px above it (6x12 hitbox).
+	# `peak` is the player's ORIGIN; his head is 6px above it (8x12 hitbox).
 	var head := peak - 6.0
 	_reached = maxf(_reached, launch_y - peak)
 	_check(head >= top - 0.5,
@@ -124,9 +124,9 @@ func _check_room(room: Node2D) -> bool:
 ## Regression: he must not be able to STAND with his whole body over open air.
 ##
 ## Godot keeps a body standing while any part of its shape overlaps the floor,
-## and his hitbox is wider than the 4.7px he is drawn at — so before
-## Player.footing_width he could come to rest with his centre a full box-half past
-## a ledge, which put every drawn pixel of him past the edge with a 2px gap
+## and his hitbox is 8px across against a drawn body of 4.7 — so before
+## Player.footing_width he could come to rest with his centre a full 4px past a
+## ledge, which put every drawn pixel of him past the edge with a 2px gap
 ## between his feet and the ledge he appeared to be standing on.
 ##
 ## Measured by where he comes to REST, not by the overhang seen on any one

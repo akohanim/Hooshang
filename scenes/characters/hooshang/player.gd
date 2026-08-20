@@ -16,17 +16,17 @@ signal died
 
 enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 
-## Half of the 6x12 hitbox in Hooshang.tscn. Kept here because the footing check
-## has to probe at the box's own edges; if the shape is ever resized, these move
-## with it or he loses his footing at the wrong place.
+## Half of the 8x12 hitbox in Hooshang.tscn — his NORMAL width. Kept here because
+## the footing check has to probe at the box's own edges; if the shape is ever
+## resized, these move with it or he loses his footing at the wrong place.
 ##
-## WHY 6 AND NOT 8. The box used to be a full cell across, and a body exactly as
-## wide as the grid cannot pass through a one-cell slot: Godot resolves two
-## exactly-abutting AABBs as a collision, so Level_1's one-cell chimney held him
-## on its lip with every drawn pixel of him hanging over the hole. Measured, an
-## 8px box entered that shaft from 0 of 33 approach positions; at 6 it enters
-## from anywhere over the mouth and wall-slides down it. See tests/chimney_test.
-const HALF_WIDTH := 3.0
+## He is exactly one cell across on purpose, and it costs something: a body
+## exactly as wide as the grid cannot pass through a one-cell slot at all, since
+## Godot resolves two exactly-abutting AABBs as a collision. That is the right
+## trade for a FLOOR — a one-cell hole in a walkway is something you stride over,
+## not something that swallows you — so the fix is not a narrower man but a
+## deliberate act. See the Squeeze group and `_tick_squeeze()`.
+const HALF_WIDTH := 4.0
 const HALF_HEIGHT := 6.0
 
 @export_group("Run")
@@ -206,11 +206,7 @@ const HALF_HEIGHT := 6.0
 @export_range(0.0, 1.0) var wall_jump_control_mult := 0.3
 ## A wall within this many pixels counts as jumpable — you do NOT need to be
 ## wall-sliding first. This is what makes chained wall jumps feel effortless.
-##
-## Measured from the box's EDGE, so it went up by one when the box lost a pixel
-## either side: his centre still has to be within 7px of a wall for the kick to
-## be there, which is what the chaining was tuned against.
-@export var wall_jump_check_distance := 4.0
+@export var wall_jump_check_distance := 3.0
 ## Coyote time for walls: jumping shortly after drifting off a wall still works.
 @export var wall_coyote_time := 0.1
 ## How long the dedicated wall-jump kick animation plays for after pushing off.
@@ -222,20 +218,18 @@ const HALF_HEIGHT := 6.0
 ## How much solid ground he needs under his MIDDLE to keep standing, in px
 ## either side of his centre. 0 disables the check.
 ##
-## This exists because the hitbox is still wider than the man. The box is 6px
+## This exists because the hitbox is much wider than the man. The box is 8px
 ## across; the drawn body is 4.7 (1.95 left of centre, 2.73 right — he leans).
 ## Godot keeps a body standing while ANY part of its shape overlaps the floor,
-## so before this he could walk until his centre was a full box-half past a
-## ledge — measured at 4px when the box was 8 — which put his visible body from
-## edge+2.05 to edge+6.73. Every drawn pixel of him was over air, with a 2px gap
-## between his feet and the ledge he was apparently standing on.
+## so before this he could walk until his centre was a full 4px past a ledge —
+## measured — which put his visible body from edge+2.05 to edge+6.73. Every
+## drawn pixel of him was over air, with a 2px gap between his feet and the
+## ledge he was apparently standing on.
 ##
-## Narrowing the hitbox does not fix it, and that is worth knowing because the
-## box HAS since been narrowed (8 -> 6, so a one-cell chimney is passable). For
-## any part of him to still be over the platform the overhang has to be under
-## 1.95px, so the box would have to go under 4px wide — narrower than he is
-## drawn. At 6 he can still stand with his centre 3px out, so this check is
-## doing the same job it always was, just over a shorter reach.
+## Narrowing the hitbox does not fix it and is worth knowing why: for any part
+## of him to still be over the platform the overhang has to be under 1.95px, so
+## the box would have to be under 4px wide — narrower than he is drawn — and it
+## would stop being the 1-cell-wide body the 8px grid is built around.
 @export var footing_width := 1.0
 ## How fast he slides off a ledge he has lost his footing on, px/s.
 ##
@@ -245,6 +239,25 @@ const HALF_HEIGHT := 6.0
 ## takes about three frames, which reads as losing his footing rather than as
 ## being teleported off.
 @export var ledge_slip_speed := 55.0
+
+@export_group("Squeeze")
+## How wide his hitbox becomes while he is squeezing down a one-cell slot, in px.
+##
+## Two pixels off the grid, not two pixels off the man. The slot is one cell and
+## so is he, and two AABBs that abut exactly are a collision in Godot — measured,
+## an 8px box entered Level_1's 8px shaft from 0 of 33 approach positions across
+## its mouth, and 7.99 was no better. 6 clears it with a pixel either side, which
+## is enough for the drop to be a control rather than a coin toss.
+@export var squeeze_width := 6.0
+## How far either side of his centre to look for the slot's walls, in px.
+##
+## Past his own edges on purpose: he can be standing off-centre over a slot, and
+## the point of the probe is to find where the hole actually is so he can be put
+## down the middle of it.
+@export var squeeze_probe := 6.0
+## Probe resolution. Half a pixel: the hole is 8 wide and he is 6, so a coarser
+## step can misplace him by more than the clearance he has.
+@export var squeeze_step := 0.5
 
 @export_group("Death")
 ## How long the death animation owns the screen before he respawns, in seconds.
@@ -274,6 +287,9 @@ var facing := 1                 # 1 = right, -1 = left; used for neutral dashes
 var input_locked := false
 var dash_available := true      # one dash per airtime, refilled on landing
 var wall_dir := 0               # which side the wall is on while wall sliding
+## True while his box is narrowed to fit a one-cell slot. Public because the
+## visual could want to know one day; nothing reads it yet.
+var squeezing := false
 
 # Feel timers, all count down to 0 in seconds.
 var coyote_timer := 0.0
@@ -289,6 +305,11 @@ var boost_timer := 0.0          # while > 0, handed-over momentum decays gently
 var jump_hold_timer := 0.0      # how much sustained thrust the held jump has left
 
 var dash_dir := Vector2.RIGHT
+
+## His own collision box, and the width it goes back to. Duplicated in _ready so
+## squeezing writes to HIS shape and not to the one every instance shares.
+var _box: RectangleShape2D
+var _box_width := HALF_WIDTH * 2.0
 
 # Slide zones. The zone he is standing in owns part of his movement: it drags
 # him along `slide_dir`, throttles his steering to `slide_control`, and takes
@@ -306,7 +327,7 @@ var slide_accel := 0.0          # px/s^2 the drag builds at
 var slide_speed := 0.0          # px/s it has built to so far
 
 # The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
-# with its feet offset-pinned to the bottom of the 6x12 hitbox. It lives
+# with its feet offset-pinned to the bottom of the 8x12 hitbox. It lives
 # inside SpriteSquash, a wrapper Node2D that Juice scale-tweens for squash &
 # stretch — Visual's own scale/offset above are never touched by that, so
 # they stay exactly as tuned regardless of what juice.gd is doing.
@@ -318,6 +339,13 @@ var slide_speed := 0.0          # px/s it has built to so far
 
 func _ready() -> void:
 	_apply_glow(has_glow)
+	var shape: CollisionShape2D = $CollisionShape2D
+	# DUPLICATED. A sub-resource in a PackedScene is shared by every instance of
+	# it, so without this a squeeze would narrow every player ever made from this
+	# scene — including the one a test spawned three lines ago.
+	shape.shape = shape.shape.duplicate()
+	_box = shape.shape
+	_box_width = _box.size.x
 
 
 func _physics_process(delta: float) -> void:
@@ -348,6 +376,8 @@ func _physics_process(delta: float) -> void:
 			jump_buffer_timer = jump_buffer_time
 		if Input.is_action_just_pressed("dash") and _try_dash():
 			return  # dash starts next frame, after the freeze-frames
+
+	_tick_squeeze()
 
 	var was_on_floor := is_on_floor()
 
@@ -643,6 +673,84 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 				velocity.y = minf(velocity.y, wall_slide_max_speed)
 
 
+## Squeezing down a one-cell slot: the whole of it.
+##
+## He is exactly one cell wide and so is a one-cell hole, and Godot resolves two
+## exactly-abutting AABBs as a collision — so a hole like that holds him up on
+## its lip with every drawn pixel of him hanging over the gap. Making him
+## permanently narrower would fix it and would cost the wrong thing: he would
+## then drop through a one-cell hole while WALKING over it, and a gap in a floor
+## should be something you stride across.
+##
+## So it is an act, not a property. Hold DOWN over a slot and he turns side-on
+## and goes down it; anywhere else, any other time, he is a full cell wide and
+## walks over it exactly as before. He comes back to full width by TRYING it —
+## every frame, with the wide box, against the world — so nothing has to
+## remember where the slot ended or notice him leaving it.
+func _tick_squeeze() -> void:
+	if squeezing:
+		_try_stand_up()
+		return
+	if input_locked or not is_on_floor():
+		return
+	if not Input.is_action_pressed("move_down"):
+		return
+	var mid := _slot_under()
+	if is_inf(mid):
+		return
+	squeezing = true
+	_set_box_width(squeeze_width)
+	# Put down the MIDDLE of the hole rather than dropped from wherever he
+	# happened to stop. Six in eight leaves a pixel either side: aim that by hand
+	# and the same input works or does not depending on sub-pixel luck, which is
+	# not a control.
+	global_position.x += mid
+	velocity.x = 0.0
+	state = State.FALL
+
+
+## Back to full width the moment the world has room for it.
+func _try_stand_up() -> void:
+	_set_box_width(_box_width)
+	if test_move(global_transform, Vector2.ZERO):
+		_set_box_width(squeeze_width)   # still in it
+		return
+	squeezing = false
+
+
+func _set_box_width(w: float) -> void:
+	if _box != null:
+		_box.size.x = w
+
+
+## The centre of the one-cell hole he is standing over, as an offset from his
+## own centre — or INF if what is under him is not one.
+##
+## Probed with the footing ray rather than read off the tilemap, because this has
+## to work over a platform prop and a room seam as much as over painted brick and
+## none of those are the same object. Both walls have to be FOUND: running out of
+## probe on either side means he is at the edge of a drop, not bridging a slot,
+## and a drop is not something you squeeze into.
+func _slot_under() -> float:
+	if _ground_under(0.0):
+		return INF                          # solid under his middle: no hole
+	var left := 0.0
+	while left > -squeeze_probe and not _ground_under(left - squeeze_step):
+		left -= squeeze_step
+	if left <= -squeeze_probe:
+		return INF
+	var right := 0.0
+	while right < squeeze_probe and not _ground_under(right + squeeze_step):
+		right += squeeze_step
+	if right >= squeeze_probe:
+		return INF
+	# The hole runs from one found wall to the other, a probe step either side of
+	# the last clear reading.
+	if right - left + squeeze_step < squeeze_width + squeeze_step:
+		return INF                          # too tight even side-on
+	return (left + right) * 0.5
+
+
 ## Slide him off a ledge he no longer has his footing on.
 ##
 ## Called only while he is on the floor. If there is ground within footing_width
@@ -664,9 +772,20 @@ func _keep_footing() -> void:
 	# further out is unambiguously over the ledge or over open air, and without
 	# that this whole check found no supported side and did nothing at all.
 	var slip := 0.0
-	if _ground_under(-(HALF_WIDTH + 1.0)):
+	var half := _box.size.x * 0.5 if _box != null else HALF_WIDTH
+	var on_left := _ground_under(-(half + 1.0))
+	var on_right := _ground_under(half + 1.0)
+	# BRIDGING, not overhanging. Ground on both sides and none under his middle
+	# is a slot in the floor, and he is standing across it with his weight on
+	# both edges — nothing to slide off. Without this he gets shoved sideways at
+	# ledge_slip_speed the moment he steps over a one-cell hole, which is both
+	# wrong to look at and enough to push him off the slot he is trying to drop
+	# down (see _tick_squeeze).
+	if on_left and on_right:
+		return
+	if on_left:
 		slip = 1.0            # ground behind on the left: he is going off to the right
-	elif _ground_under(HALF_WIDTH + 1.0):
+	elif on_right:
 		slip = -1.0
 	if slip == 0.0:
 		return                # nothing under him at all; gravity has this
@@ -675,9 +794,9 @@ func _keep_footing() -> void:
 
 ## Is there solid ground just below his feet, `dx` px to the side of his centre?
 ##
-## A ray rather than test_move, because test_move uses the whole width of the
-## body and the whole point here is to ask about a narrower footprint than the
-## one Godot supports him on.
+## A ray rather than test_move, because test_move uses the whole 8px-wide body
+## and the whole point here is to ask about a narrower footprint than the one
+## Godot supports him on.
 func _ground_under(dx: float) -> bool:
 	var space := get_world_2d().direct_space_state
 	var from := global_position + Vector2(dx, HALF_HEIGHT - 1.0)
@@ -760,6 +879,10 @@ func respawn(at: Vector2) -> void:
 	wall_lock_timer = 0.0
 	wall_jump_timer = 0.0
 	jump_hold_timer = 0.0
+	# Full width again. A life that starts squeezed starts him thinner than the
+	# grid, in a room that may have nothing narrow in it at all.
+	squeezing = false
+	_set_box_width(_box_width)
 	# Respawning outside a zone he died in still fires its body_exited, since he
 	# is never removed from collision (see above) — but a checkpoint INSIDE the
 	# same zone would not, and he would come back sliding with no zone to blame.

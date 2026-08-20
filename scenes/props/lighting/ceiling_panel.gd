@@ -35,6 +35,13 @@ extends LampFixture
 ## still in the grid, nothing comes out of it. It needs another light near it or
 ## there is nothing to see, which is the whole point of leaving one where the
 ## moon can find it.
+##
+## IT IS ALSO SOLID. A suspended ceiling is a thing in the room, not a picture of
+## one, and a jump that goes up through the tiles says so immediately. The body
+## is built from the run rather than placed, so it is exactly as wide as the art
+## is — including the rounding up to an odd cell count, which a hand-drawn
+## collider would silently disagree with the first time somebody dragged a run
+## to an even width.
 
 ## The repeating unit, matching tools/gen_ceiling_panel.py.
 const TILE := Vector2(24.0, 8.0)
@@ -89,10 +96,25 @@ const PANEL_GLOW := preload("res://assets/props/ceiling/ceiling_light_glow.png")
 ## origin, and the two would otherwise part company the moment this is not 0.
 @export var panel_offset := 0:
 	set(value): panel_offset = value; _apply()
+## Whether the run stops the player, or is scenery he passes through.
+##
+## On, because this IS the ceiling. Also gated on `show_body`: a run that draws
+## nothing has nothing to bump into, and that is not a corner case — it is the
+## CeilingLight variant, which exists to light a PAINTED 8px cell whose tile
+## already carries the room's own collision. A solid body there would put an
+## invisible slab in front of the tiles it is lighting.
+@export var solid := true:
+	set(value): solid = value; _rebuild()
+
+## World geometry, the same layer the room's tilemap is on. Mask 0: it is a wall,
+## it does not go looking for anything.
+const SOLID_LAYER := 1
 
 @onready var panel: PointLight2D = $Panel
 
 var _tiles: Node2D
+var _body: StaticBody2D
+var _body_shape: CollisionShape2D
 
 
 func _ready() -> void:
@@ -134,6 +156,33 @@ func _rebuild() -> void:
 		cell.texture = PANEL if i == lit else PLAIN
 		cell.position = Vector2((i - middle) * TILE.x, 0.0)
 		_tiles.add_child(cell)
+	_fit_body()
+
+
+## Size the collider to the run that was just laid.
+##
+## The body is kept and resized rather than freed and rebuilt with the tiles.
+## Dragging a run out to a width in LDtk re-enters this on every cell, and a
+## collision node that comes and goes under a physics server mid-frame is a
+## class of crash nobody should have to reproduce.
+func _fit_body() -> void:
+	if _body == null:
+		_body = StaticBody2D.new()
+		_body.name = "Solid"
+		_body.collision_layer = SOLID_LAYER
+		_body.collision_mask = 0
+		_body_shape = CollisionShape2D.new()
+		# Named, or Godot invents one like "@CollisionShape2D@37" and nothing can
+		# path to it — including the test that checks the collider is there.
+		_body_shape.name = "CollisionShape2D"
+		_body_shape.shape = RectangleShape2D.new()
+		_body.add_child(_body_shape)
+		add_child(_body)
+	var box: RectangleShape2D = _body_shape.shape
+	# Centred on the node, like the art: an odd run puts its middle cell on the
+	# origin, so the whole strip is symmetric about it however wide it gets.
+	box.size = Vector2(TILE.x * run_tiles, TILE.y)
+	_body_shape.disabled = not (solid and show_body)
 
 
 ## Index of the panel cell, clamped into the run. An offset that would push it

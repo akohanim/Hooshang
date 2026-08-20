@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="4_light"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(6, 12)
+size = Vector2(8, 12)
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_layer = 2

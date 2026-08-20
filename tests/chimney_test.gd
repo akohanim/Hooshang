@@ -1,12 +1,19 @@
 extends Node
-## Regression: a ONE-CELL shaft is a chimney, not a wall.
+## Regression: a ONE-CELL shaft is a chimney you choose to enter.
 ##
-## Level_1 has an 8px-wide slot cut down through its ceiling block. His hitbox
-## used to be 8px across as well — a full cell — and a body exactly as wide as
-## the grid cannot pass through a one-cell slot at all: Godot resolves two
-## exactly-abutting AABBs as a collision, so he came to rest ON the lip with the
-## whole drawn body hanging over the hole. Measured, the 8px box entered that
-## shaft from 0 of 33 approach positions across its mouth.
+## Level_1 has an 8px-wide slot cut down through its ceiling block. His hitbox is
+## 8px across too — a full cell — and a body exactly as wide as the grid cannot
+## pass through a one-cell slot at all: Godot resolves two exactly-abutting AABBs
+## as a collision, so he came to rest ON the lip with the whole drawn body
+## hanging over the hole. Measured, the 8px box entered that shaft from 0 of 33
+## approach positions across its mouth, and 7.99 was no better.
+##
+## The answer is not a narrower man. A gap in a floor should be something you
+## stride over, and a permanently thinner Hooshang drops through one while
+## WALKING. So he squeezes on purpose: hold DOWN over a slot and his box narrows
+## to squeeze_width, he is placed down the middle of the hole and goes in.
+## Everything below is that bargain — he must go down it when asked, and he must
+## NOT go down it when simply walking across.
 ##
 ## THE SHAFT IS FOUND, NOT WRITTEN DOWN. Rooms have moved twice in this project
 ## and every hand-measured coordinate landed in the wrong room without anything
@@ -62,47 +69,99 @@ func _ready() -> void:
 
 # ------------------------------------------------------------------ checks ---
 
-## He must be able to GET IN, from anywhere over the mouth rather than from one
-## sub-pixel alignment. Nine drops across the cell; a body one pixel too wide
-## scores zero on all of them.
+## He must be able to GET IN when he asks — from anywhere over the mouth, not
+## from one sub-pixel alignment — and he must NOT get in when he does not ask.
 func _check_entry(shaft: Dictionary) -> void:
 	var mouth: Vector2 = shaft["mouth"]
 	var floor_y: float = shaft["floor_y"]
 	var caught := 0
 	var tried := 0
 	for i in 9:
-		var dx := -CELL * 0.5 + CELL * (float(i) + 0.5) / 9.0
-		player.input_locked = false
-		player.velocity = Vector2.ZERO
-		player.respawn(Vector2(mouth.x + dx, mouth.y - 24.0))
-		var deepest := player.global_position.y
-		for f in 60:
-			await _frames(1)
-			player.input_locked = false
-			deepest = maxf(deepest, player.global_position.y)
-		tried += 1
-		if deepest > mouth.y + CELL * 2.0:
+		# Across the cell, stopping short of its edges: past those his middle is
+		# over brick and there is no hole under him to go down.
+		var dx := -3.5 + 7.0 * float(i) / 8.0
+		if await _drop_in(mouth, dx, true):
 			caught += 1
+		tried += 1
 	_check(caught == tried,
-		"he drops into the shaft from anywhere over its mouth  [%d of %d offsets]"
+		"holding DOWN over the mouth takes him in  [%d of %d offsets]"
 			% [caught, tried])
 	_check(player.global_position.y > floor_y - CELL * 2.0,
-		"the last drop reached the bottom  [y %.0f, shaft floor %.0f]"
+		"...and down to the bottom  [y %.0f, shaft floor %.0f]"
 			% [player.global_position.y, floor_y])
+
+	# The other half of the bargain, and the reason his box is still a full cell
+	# wide: standing on the slot without asking must leave him standing on it.
+	var stayed := 0
+	for i in 9:
+		var dx := -3.5 + 7.0 * float(i) / 8.0
+		if not await _drop_in(mouth, dx, false):
+			stayed += 1
+	_check(stayed == 9,
+		"without DOWN he stands on the slot instead  [%d of 9 offsets]" % stayed)
+
+	# And walking across it at speed is a walk across it, not a fall down it.
+	player.input_locked = false
+	player.velocity = Vector2.ZERO
+	player.respawn(Vector2(mouth.x - CELL * 4.0, mouth.y - HALF_HEIGHT - 1.0))
+	await _frames(6)
+	Input.action_press("move_right")
+	var lowest := player.global_position.y
+	for f in 60:
+		await _frames(1)
+		player.input_locked = false
+		lowest = maxf(lowest, player.global_position.y)
+	Input.action_release("move_right")
+	_check(lowest < mouth.y + CELL,
+		"and running over the slot crosses it  [dropped %.0fpx]"
+			% (lowest - (mouth.y - HALF_HEIGHT)))
+
+
+## Stand him on the slot at `dx` from its centre, optionally holding DOWN.
+## Returns true if he ended up down the shaft.
+func _drop_in(mouth: Vector2, dx: float, press_down: bool) -> bool:
+	player.input_locked = false
+	player.velocity = Vector2.ZERO
+	player.respawn(Vector2(mouth.x + dx, mouth.y - HALF_HEIGHT - 1.0))
+	# Let him settle onto the lip before asking for anything.
+	for f in 6:
+		await _frames(1)
+		player.input_locked = false
+	if press_down:
+		Input.action_press("move_down")
+	for f in 60:
+		await _frames(1)
+		player.input_locked = false
+	if press_down:
+		Input.action_release("move_down")
+	return player.global_position.y > mouth.y + CELL * 2.0
 
 
 ## Inside it, pressing into a wall must be a WALL SLIDE and not a free fall.
+##
+## He is put in the way the game puts him in — down through the mouth holding
+## DOWN — because a respawn inside the shaft would come back at full width and
+## wedge him, which is exactly the thing the squeeze exists to avoid.
 func _check_slide(shaft: Dictionary) -> void:
 	var mouth: Vector2 = shaft["mouth"]
 	for dir: int in [-1, 1]:
 		player.input_locked = false
 		player.velocity = Vector2.ZERO
-		player.respawn(Vector2(mouth.x, mouth.y + CELL * 1.5))
+		player.respawn(Vector2(mouth.x, mouth.y - HALF_HEIGHT - 1.0))
+		for f in 6:
+			await _frames(1)
+			player.input_locked = false
+		Input.action_press("move_down")
+		for f in 6:
+			await _frames(1)
+			player.input_locked = false
+		Input.action_release("move_down")
+		_check(player.squeezing, "he is squeezed while in the shaft")
 		var action := "move_left" if dir < 0 else "move_right"
 		Input.action_press(action)
 		var slid := 0
 		var fastest := 0.0
-		for f in 45:
+		for f in 40:
 			await _frames(1)
 			player.input_locked = false
 			if player.state == Player.State.WALL_SLIDE:
@@ -126,8 +185,19 @@ func _check_climb(shaft: Dictionary) -> void:
 	var bottom: float = mouth.y + float(int(shaft["depth"])) * CELL
 	player.input_locked = false
 	player.velocity = Vector2.ZERO
-	player.respawn(Vector2(mouth.x, bottom - HALF_HEIGHT - CELL * 2.0))
-	await _frames(4)
+	player.respawn(Vector2(mouth.x, mouth.y - HALF_HEIGHT - 1.0))
+	for f in 6:
+		await _frames(1)
+		player.input_locked = false
+	Input.action_press("move_down")
+	# In, and down to the deep end of the walled section — below that there is
+	# nothing to kick off and a climb started there is a jump in open air.
+	for f in 40:
+		await _frames(1)
+		player.input_locked = false
+		if player.global_position.y > bottom - HALF_HEIGHT - CELL * 2.0:
+			break
+	Input.action_release("move_down")
 	var start := player.global_position.y
 	var highest := start
 	var dir := 1
@@ -152,6 +222,11 @@ func _check_climb(shaft: Dictionary) -> void:
 	_check(highest <= mouth.y,
 		"he can wall-jump back out of the shaft  [climbed %.0fpx of %.0f, to y %.0f]"
 			% [start - highest, start - mouth.y, highest])
+	# And on the way out he is a full cell again, without anything telling him to
+	# be: the wide box is TRIED against the world every frame.
+	await _frames(20)
+	_check(not player.squeezing,
+		"...and he is back to full width once he is out")
 
 
 # ------------------------------------------------------------------- fixture --

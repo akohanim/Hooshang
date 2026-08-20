@@ -1,9 +1,12 @@
 extends Node
-## The two office-ceiling platforms: one holds, one does not.
+## The office ceiling you can stand on: two platforms, one of which does not
+## hold, and the suspended ceiling run itself.
 ## Run:  godot --headless res://tests/platform_test.tscn
 
 const PLATFORM := preload("res://scenes/props/platforms/Platform.tscn")
 const CRUMBLING := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
+const CEILING_PANEL := preload("res://scenes/props/lighting/CeilingPanel.tscn")
+const CEILING_LIGHT := preload("res://scenes/props/lighting/CeilingLight.tscn")
 const PLAYER := preload("res://scenes/characters/hooshang/Hooshang.tscn")
 
 var failures: Array[String] = []
@@ -89,6 +92,72 @@ func _run() -> void:
 	_check(again, "he can stand on it again after a reset")
 	await _frames(6)
 	_check(player.is_on_floor(), "and it holds again, rather than being spent")
+
+	# --- the suspended ceiling run is solid ---------------------------------
+	#
+	# It draws the ceiling, so it has to BE the ceiling. Before this it was a
+	# picture: a jump went straight up through the tiles.
+	var run: CeilingPanel = CEILING_PANEL.instantiate()
+	run.position = Vector2(800, 100)
+	run.run_tiles = 5
+	world.add_child(run)
+	await _frames(2)
+	var box: RectangleShape2D = run.get_node("Solid/CollisionShape2D").shape
+	# Exactly the width of the art, which is the only rule that cannot drift:
+	# the run rounds UP to an odd number of cells, so a collider written down by
+	# hand disagrees with what is drawn the first time somebody asks for four.
+	_check(box.size == Vector2(CeilingPanel.TILE.x * 5, CeilingPanel.TILE.y),
+		"the run's collider is as wide as the run  [%s, 5 cells of %.0f]"
+			% [box.size, CeilingPanel.TILE.x])
+	run.run_tiles = 4
+	await _frames(2)
+	_check(run.run_tiles == 5 and box.size.x == CeilingPanel.TILE.x * 5,
+		"...and follows it through the rounding to an odd count  [%d cells, %.0fpx]"
+			% [run.run_tiles, box.size.x])
+
+	player.respawn(Vector2(800, 70))
+	var on_ceiling := await _settle(120)
+	_check(on_ceiling, "he lands on top of the ceiling run")
+	_check(absf(player.global_position.y + Player.HALF_HEIGHT
+			- (run.position.y - CeilingPanel.TILE.y * 0.5)) < 1.5,
+		"...on its top surface  [feet %.1f, surface %.1f]"
+			% [player.global_position.y + Player.HALF_HEIGHT,
+			   run.position.y - CeilingPanel.TILE.y * 0.5])
+
+	# And from underneath: he must bonk, not pass through. Fired up hard rather
+	# than jumped, so this is about the collider and not about his jump height.
+	player.respawn(Vector2(800, 160))
+	player.input_locked = true
+	await _frames(1)
+	var top := 999.0
+	for i in 40:
+		player.velocity.y = -240.0
+		await _frames(1)
+		top = minf(top, player.global_position.y)
+	player.input_locked = false
+	_check(top - Player.HALF_HEIGHT >= run.position.y + CeilingPanel.TILE.y * 0.5 - 1.0,
+		"he cannot punch up through it from below  [head %.1f, underside %.1f]"
+			% [top - Player.HALF_HEIGHT, run.position.y + CeilingPanel.TILE.y * 0.5])
+
+	# --- but the bare light is not ------------------------------------------
+	#
+	# CeilingLight draws no run at all: it lights a PAINTED 8px cell, and that
+	# tile already carries the room's own collision. A body here would be an
+	# invisible slab hanging in front of the tiles it is lighting.
+	var lamp: CeilingPanel = CEILING_LIGHT.instantiate()
+	lamp.position = Vector2(1000, 100)
+	world.add_child(lamp)
+	await _frames(2)
+	_check(lamp.get_node("Solid/CollisionShape2D").disabled,
+		"a bare CeilingLight has no collider working")
+	player.respawn(Vector2(1000, 60))
+	var passed_through := false
+	for i in 90:
+		await _frames(1)
+		if player.global_position.y > lamp.position.y + 40.0:
+			passed_through = true
+			break
+	_check(passed_through, "...and he falls straight through where it is")
 
 	if failures.is_empty():
 		print("PLATFORM TEST: ALL PASS")
