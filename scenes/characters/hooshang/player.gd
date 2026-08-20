@@ -241,13 +241,12 @@ const HALF_HEIGHT := 6.0
 @export var ledge_slip_speed := 55.0
 
 @export_group("Squeeze")
-## How wide his hitbox becomes while he is squeezing down a one-cell slot, in px.
+## How wide his hitbox becomes while he is going down a one-cell slot, in px.
 ##
 ## Two pixels off the grid, not two pixels off the man. The slot is one cell and
 ## so is he, and two AABBs that abut exactly are a collision in Godot — measured,
 ## an 8px box entered Level_1's 8px shaft from 0 of 33 approach positions across
-## its mouth, and 7.99 was no better. 6 clears it with a pixel either side, which
-## is enough for the drop to be a control rather than a coin toss.
+## its mouth, and 7.99 was no better. 6 clears it with a pixel either side.
 @export var squeeze_width := 6.0
 ## How far either side of his centre to look for the slot's walls, in px.
 ##
@@ -660,12 +659,29 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		state = State.FALL
 
 	if state == State.WALL_SLIDE:
+		# In a one-cell slot he is against both walls at once and there is no
+		# steering off either of them, so the usual "let go and you fall" does not
+		# apply — he rides it down until he leaves the slot or heads back up.
+		if squeezing:
+			if velocity.y < 0.0:
+				state = State.FALL
 		# Let go, ran out of wall, or moving up -> back to normal air.
-		if not is_on_wall() or input_x * wall_dir <= 0.0 or velocity.y < 0.0:
+		elif not is_on_wall() or input_x * wall_dir <= 0.0 or velocity.y < 0.0:
 			state = State.FALL
 	elif state == State.FALL:
+		# A slot is a chimney, and he goes down it as one WITHOUT being asked.
+		# Dropping straight down the middle of a one-cell shaft never touches
+		# either wall — there is a pixel of clearance on both sides — so
+		# is_on_wall() is false all the way down and the ordinary rule below
+		# would let him free-fall between two walls he is practically resting on.
+		if squeezing and velocity.y > 0.0:
+			var near := _near_wall_dir()
+			if near != 0:
+				wall_dir = near
+				state = State.WALL_SLIDE
+				velocity.y = minf(velocity.y, wall_slide_max_speed)
 		# Falling, touching a wall, and pushing into it -> wall slide.
-		if velocity.y > 0.0 and is_on_wall_only():
+		elif velocity.y > 0.0 and is_on_wall_only():
 			var wd := -signf(get_wall_normal().x)
 			if input_x != 0.0 and signf(input_x) == wd:
 				wall_dir = int(wd)
@@ -673,27 +689,24 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 				velocity.y = minf(velocity.y, wall_slide_max_speed)
 
 
-## Squeezing down a one-cell slot: the whole of it.
+## Going down a one-cell slot: the whole of it.
 ##
 ## He is exactly one cell wide and so is a one-cell hole, and Godot resolves two
-## exactly-abutting AABBs as a collision — so a hole like that holds him up on
-## its lip with every drawn pixel of him hanging over the gap. Making him
-## permanently narrower would fix it and would cost the wrong thing: he would
-## then drop through a one-cell hole while WALKING over it, and a gap in a floor
-## should be something you stride across.
+## exactly-abutting AABBs as a collision — so without this a hole like that holds
+## him up on its lip, standing on eight pixels of nothing with every drawn pixel
+## of him over the gap. That is the picture this exists to stop.
 ##
-## So it is an act, not a property. Hold DOWN over a slot and he turns side-on
-## and goes down it; anywhere else, any other time, he is a full cell wide and
-## walks over it exactly as before. He comes back to full width by TRYING it —
-## every frame, with the wide box, against the world — so nothing has to
-## remember where the slot ended or notice him leaving it.
+## A hole in the floor takes him, so this needs no input: stand over one and he
+## turns side-on and goes down it. His box is only narrowed while he is in it,
+## which is what keeps him a full cell everywhere else — a permanently thinner
+## Hooshang would slip through gaps nobody meant as a route. He comes back to
+## full width by TRYING it — every frame, with the wide box, against the world —
+## so nothing has to remember where the slot ended or notice him leaving it.
 func _tick_squeeze() -> void:
 	if squeezing:
 		_try_stand_up()
 		return
-	if input_locked or not is_on_floor():
-		return
-	if not Input.is_action_pressed("move_down"):
+	if not is_on_floor():
 		return
 	var mid := _slot_under()
 	if is_inf(mid):
@@ -701,10 +714,11 @@ func _tick_squeeze() -> void:
 	squeezing = true
 	_set_box_width(squeeze_width)
 	# Put down the MIDDLE of the hole rather than dropped from wherever he
-	# happened to stop. Six in eight leaves a pixel either side: aim that by hand
-	# and the same input works or does not depending on sub-pixel luck, which is
-	# not a control.
+	# happened to be standing. Six in eight leaves a pixel either side, and
+	# whether he fits should not come down to where his foot landed.
 	global_position.x += mid
+	# His run does not survive the drop. There is nowhere to run to in a one-cell
+	# shaft, and carrying the speed in just bounces him off the far wall.
 	velocity.x = 0.0
 	state = State.FALL
 

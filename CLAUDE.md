@@ -81,11 +81,11 @@ so the two agree now. The tiles are still placeholder art.
     mirrors, the mouth moves only while words are appearing — closing on a
     `[p]` breath and the moment the line ends — and the eyes blink unprompted
   - `Godot --headless --path . res://tests/chimney_test.tscn` — Level_1's
-    one-cell shaft: holding DOWN over its mouth takes him in from anywhere
-    across the cell, NOT holding it leaves him standing on the slot, running
-    over it crosses it, and once inside he wall-slides down at the cap and can
-    wall-jump back out — coming back to full width on the way. It finds the
-    shaft by sweeping the world and asserts it is one cell wide before using it
+    one-cell shaft: standing over its mouth takes him in from anywhere across
+    the cell, running over it drops him in rather than across, and once inside
+    he wall-slides down at the cap with nothing held and can wall-jump back out
+    — coming back to full width on the way. It finds the shaft by sweeping the
+    world and asserts it is one cell wide before using it
   - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
@@ -465,16 +465,20 @@ test rather than being noticed months later in play.
   cell cannot pass through a one-cell hole at all — Godot resolves two
   exactly-abutting AABBs as a collision, and measured, the 8px box entered
   Level_1's 8px shaft from 0 of 33 approach positions (7.99 was no better, and
-  `safe_margin` makes no difference: an exact fit is a hard stop). Making him
-  permanently thinner is the wrong fix, because then he drops through a
-  one-cell hole while WALKING over it. So it is an act: **hold DOWN over a slot**
-  and `Player._tick_squeeze()` narrows his box to `squeeze_width` (6), puts him
-  down the middle of the hole and drops him in; he goes back to full width by
-  TRYING the wide box against the world every frame, so nothing has to notice
-  him leaving. `tests/chimney_test.tscn` holds both halves of that bargain.
+  `safe_margin` makes no difference: an exact fit is a hard stop). He stood on
+  eight pixels of nothing instead. So `Player._tick_squeeze()` narrows his box
+  to `squeeze_width` (6) **whenever he is standing over a slot** — no input, a
+  hole in the floor takes you — puts him down the middle of it and drops him in.
+  He goes back to full width by TRYING the wide box against the world every
+  frame, so nothing has to notice him leaving, and he is a full cell everywhere
+  else. **The shaft then wall-slides him without being asked**: dropping down
+  the middle of a one-cell slot never touches either wall (a pixel of clearance
+  each side), so `is_on_wall()` is false all the way down and the ordinary
+  press-into-the-wall rule would free-fall him between two walls he is
+  practically resting on. `tests/chimney_test.tscn` holds all of it.
   `_keep_footing()` also leaves him alone when there is ground on BOTH sides —
   that is bridging a slot, not overhanging a ledge, and the ledge slip used to
-  shove him off the hole he was standing on.
+  shove him sideways off the hole.
   Interiors: 6 cells = claustrophobic, walkable min is a 2-cell (16px) slot;
   a 1-cell slot is a chimney to slide and wall-jump in, not a walkway.
   Jump reaches 34px (~4 cells), dash ~39px (~5), jump+dash ~85px (~10).
