@@ -98,6 +98,13 @@ so the two agree now. The tiles are still placeholder art.
   on top of each other at the same world x while every name looked right.
   `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
+- **A bigger TILESET needs `ldtk/tilesets/tileset_8px.res` deleted as well.**
+  The importer UPDATES that resource rather than rebuilding it, so new tiles on
+  the sheet never become atlas tiles: `bricks_8px.png` grew to 48px and the
+  texture came through at 48px, while the atlas source stayed at four tiles and
+  every cell painted with the new value imported as nothing at all — no error,
+  no missing-tile warning, just an empty run where the ceiling should be.
+  `rm ldtk/tilesets/tileset_8px.res` alongside the two above.
 - **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after

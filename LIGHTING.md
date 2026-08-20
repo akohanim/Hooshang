@@ -21,6 +21,12 @@ Practically that means:
 - An **office fluorescent** is a `CeilingPanel` — a run of suspended ceiling
   with a flat light panel flush in the grid, for rooms that should read as an
   office rather than as a bulb on a wire. See *Adding a ceiling panel* below.
+- The same ceiling can be **painted** rather than placed: `ceiling_flor` is an
+  IntGrid value on the `Collisions` layer (tools/ldtk_add_ceiling_tile.py), and
+  a run of it is solid to stand on. Its panels are drawn UNLIT and cannot be
+  otherwise — a painted tile is a CanvasItem and `CanvasModulate` 0.05 takes it
+  to 5% of what was drawn. Paint the architecture, then drop a `CeilingPanel` on
+  the cell you want lit.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
   `show_body = false` — the window itself IS the visible source. On the escape
   row that moon is eclipsed and recovering; see *The eclipse* below.

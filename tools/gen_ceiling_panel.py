@@ -6,16 +6,30 @@ tiles in a T-bar grid, with flat luminous panels flush in the grid where a tile
 would otherwise be. Not a fixture hanging on rods: a panel that IS one of the
 ceiling tiles.
 
-Three files, 24x8 each — the same unit `tools/gen_platforms.py` cuts its ceiling
-strip at, deliberately, because in this Act the ceiling and the thing he ends up
-standing on are the same ceiling. Laying them end to end gives a continuous run.
+24x8 cells — the same unit `tools/gen_platforms.py` cuts its ceiling strip at,
+deliberately, because in this Act the ceiling and the thing he ends up standing
+on are the same ceiling. Laying them end to end gives a continuous run.
 
-  ceiling_tile.png        a plain tile, with the T-bar rail on its left edge, so
-                          consecutive tiles butt into a grid
-  ceiling_light.png       the same cell with a light panel in it instead of a
-                          tile: thin frame, flat field, corner vignette
-  ceiling_light_glow.png  ONLY what emits, on transparent, with the bloom that
-                          spills past the frame onto the neighbouring tiles
+TWO ORIENTATIONS, because they are two different objects. Overhead, you are
+looking UP at it: the grid rail catches the room and the lip below it is in
+shadow. As a floor you are looking at it EDGE ON with a surface on top: the lip
+is the brightest thing on the cell because it is what says "stand here", and the
+panel has moved to the underside where a panel actually is. Reusing the overhead
+art as a floor puts its dark edge on top, and `gen_platforms.py` already records
+what that looks like — a hole.
+
+  ceiling_tile.png        overhead: a plain tile, T-bar rail on its left edge,
+                          so consecutive tiles butt into a grid
+  ceiling_light.png       overhead: the same cell with a light panel in it
+                          instead of a tile — thin frame, flat field, vignette
+  ceiling_light_glow.png  overhead: ONLY what emits, on transparent, with the
+                          bloom that spills past the frame onto its neighbours
+  ceiling_floor.png       the same tile as a SURFACE: standing lip on top,
+                          underside in shadow
+  ceiling_floor_light.png the same, with the panel in its underside
+  ceiling_floor_glow.png  what that panel emits — biased DOWNWARD, because the
+                          light of a ceiling falls into the room beneath it
+  ldtk/art/ceiling_floor.png   the 16x16 icon LDtk shows in its entity list
 
 THE GLOW IS A SEPARATE FILE BECAUSE IT BECOMES A LIGHT, not paint. CanvasModulate
 is 0.05 in Act I and multiplies every CanvasItem, so a painted luminous panel
@@ -181,14 +195,110 @@ def glow_cell():
     return img
 
 
+## The floor orientation's panel: lower in the cell than the overhead one,
+## because on a ceiling seen edge-on the panel is in the underside.
+FLOOR_Y0, FLOOR_Y1 = 3, 7
+## The standing lip, brightest thing on the cell.
+LIP_HI = (198, 204, 214)
+LIP_LO = (150, 156, 168)
+
+
+def floor_cell():
+    """A plain ceiling tile seen EDGE ON, as something to stand on."""
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    px = img.load()
+    for x in range(W):
+        px[x, 0] = shade(LIP_HI, speckle(x, 0)) + (255,)      # the lip
+        px[x, 1] = shade(LIP_LO, speckle(x, 1)) + (255,)
+        for y in range(2, H - 1):
+            # The face falls away under the lip, into the shadow of its own
+            # underside.
+            t = 1.0 - (y - 2) / float(H - 3)
+            c = mix(TILE_LO, TILE_HI, 0.15 + t * 0.7)
+            px[x, y] = shade(c, speckle(x, y)) + (255,)
+        px[x, H - 1] = TILE_EDGE + (255,)
+    # The rail, but only below the lip: a T-bar does not cross the top surface.
+    for y in range(2, H):
+        px[0, y] = shade(RAIL_HI, -20) + (255,)
+        px[1, y] = RAIL_LO + (255,)
+    return img
+
+
+def floor_light_cell():
+    """...with a light panel set into its underside."""
+    img = floor_cell()
+    px = img.load()
+    x0, x1 = PANEL_X0, PANEL_X1
+    y0, y1 = FLOOR_Y0, FLOOR_Y1
+    for x in range(x0, x1 + 1):
+        for y in range(y0, min(y1, H - 1) + 1):
+            if x in (x0, x1) or y == y0:
+                px[x, y] = FRAME + (255,)
+                continue
+            fx = 1.0 - abs(x - (x0 + x1) / 2.0) / ((x1 - x0) / 2.0)
+            t = min(1.0, 0.5 + 0.5 * fx)
+            px[x, y] = mix(FIELD_LO, FIELD_HI, t) + (255,)
+    return img
+
+
+def floor_glow():
+    """What the underside panel throws. Biased DOWNWARD — a ceiling lights the
+    room beneath it, and a symmetric bloom would put half of it in the slab."""
+    img = Image.new("RGBA", (GLOW_W, GLOW_H), (0, 0, 0, 0))
+    px = img.load()
+    ox, oy = (GLOW_W - W) // 2, (GLOW_H - H) // 2
+    x0, x1 = ox + PANEL_X0 + 1, ox + PANEL_X1 - 1
+    y0, y1 = oy + FLOOR_Y0 + 1, oy + min(FLOOR_Y1, H - 1)
+    cx = (x0 + x1) / 2.0
+    for x in range(GLOW_W):
+        for y in range(GLOW_H):
+            dx = max(0.0, x0 - x, x - x1)
+            dy_up = max(0.0, y0 - y)
+            dy_dn = max(0.0, y - y1)
+            if dx == 0.0 and dy_up == 0.0 and dy_dn == 0.0:
+                fx = 1.0 - abs(x - cx) / max(1.0, (x1 - x0) / 2.0)
+                px[x, y] = mix(LIT_MID, LIT_CORE, 0.55 + 0.45 * fx) + (255,)
+                continue
+            # Up is cut short by the tile above the panel; down is open room.
+            reach = (dx / 10.0) ** 2 + (dy_up / 1.6) ** 2 + (dy_dn / 6.0) ** 2
+            if reach >= 1.0:
+                continue
+            a = (1.0 - reach) ** 1.8
+            if a < 0.18 and (x + y) % 2:
+                continue
+            px[x, y] = mix(LIT_EDGE, LIT_MID, a) + (int(200 * a),)
+    return img
+
+
+def ldtk_icon():
+    """The 16x16 LDtk shows in its entity list. A slice of the lit floor cell
+    rather than a drawing of one, so the icon cannot drift from the art."""
+    cell = floor_light_cell().convert("RGBA")
+    glow = floor_glow()
+    lit = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    lit.alpha_composite(cell)
+    lit.alpha_composite(glow.crop(((GLOW_W - W) // 2, (GLOW_H - H) // 2,
+                                   (GLOW_W - W) // 2 + W, (GLOW_H - H) // 2 + H)))
+    icon = Image.new("RGB", (16, 16), (22, 24, 30))
+    icon.paste(lit.crop((4, 0, 20, H)).convert("RGB"), (0, 4))
+    return icon
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     for name, img in (("ceiling_tile.png", base_cell()),
                       ("ceiling_light.png", light_cell()),
-                      ("ceiling_light_glow.png", glow_cell())):
+                      ("ceiling_light_glow.png", glow_cell()),
+                      ("ceiling_floor.png", floor_cell()),
+                      ("ceiling_floor_light.png", floor_light_cell()),
+                      ("ceiling_floor_glow.png", floor_glow())):
         path = os.path.join(OUT, name)
         img.save(path)
         print("wrote %s  (%dx%d)" % (os.path.relpath(path, ROOT), *img.size))
+    # The LDtk entity icon lives beside the project file, not with the game art.
+    icon_path = os.path.join(ROOT, "ldtk/art/ceiling_floor.png")
+    ldtk_icon().save(icon_path)
+    print("wrote %s  (16x16)" % os.path.relpath(icon_path, ROOT))
 
 
 if __name__ == "__main__":

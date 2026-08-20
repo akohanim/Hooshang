@@ -70,6 +70,14 @@
 			"intGridValues": [
 				{ "value": 1, "identifier": null, "color": "#000000", "tile": null, "groupUid": 0 },
 				{ "value": 2, "identifier": "brick", "color": "#BE4A2F", "tile": null, "groupUid": 1 }
+			,
+				{
+					"value": 3,
+					"identifier": "ceiling_flor",
+					"color": "#B8C6D2",
+					"tile": null,
+					"groupUid": 0
+				}
 			],
 			"intGridValuesGroups": [{ "uid": 1, "identifier": null, "color": null }],
 			"autoRuleGroups": [
@@ -223,6 +231,96 @@
 					"isOptional": false,
 					"rules": [],
 					"usesWizard": true,
+					"requiredBiomeValues": [],
+					"biomeRequirementMode": 0
+				}
+			,
+				{
+					"uid": 110,
+					"name": "ceiling_flor",
+					"color": null,
+					"icon": null,
+					"active": true,
+					"isOptional": false,
+					"rules": [
+						{
+							"uid": 111,
+							"active": true,
+							"size": 1,
+							"tileRectsIds": [
+								[
+									5
+								]
+							],
+							"alpha": 1,
+							"chance": 1,
+							"breakOnMatch": true,
+							"pattern": [
+								3
+							],
+							"flipX": false,
+							"flipY": false,
+							"xModulo": 3,
+							"yModulo": 1,
+							"xOffset": 1,
+							"yOffset": 0,
+							"tileXOffset": 0,
+							"tileYOffset": 0,
+							"tileRandomXMin": 0,
+							"tileRandomXMax": 0,
+							"tileRandomYMin": 0,
+							"tileRandomYMax": 0,
+							"checker": "None",
+							"tileMode": "Single",
+							"pivotX": 0,
+							"pivotY": 0,
+							"outOfBoundsValue": null,
+							"invalidated": false,
+							"perlinActive": false,
+							"perlinSeed": 4367591,
+							"perlinScale": 0.2,
+							"perlinOctaves": 2
+						},
+						{
+							"uid": 112,
+							"active": true,
+							"size": 1,
+							"tileRectsIds": [
+								[
+									4
+								]
+							],
+							"alpha": 1,
+							"chance": 1,
+							"breakOnMatch": true,
+							"pattern": [
+								3
+							],
+							"flipX": false,
+							"flipY": false,
+							"xModulo": 1,
+							"yModulo": 1,
+							"xOffset": 0,
+							"yOffset": 0,
+							"tileXOffset": 0,
+							"tileYOffset": 0,
+							"tileRandomXMin": 0,
+							"tileRandomXMax": 0,
+							"tileRandomYMin": 0,
+							"tileRandomYMax": 0,
+							"checker": "None",
+							"tileMode": "Single",
+							"pivotX": 0,
+							"pivotY": 0,
+							"outOfBoundsValue": null,
+							"invalidated": false,
+							"perlinActive": false,
+							"perlinSeed": 4367591,
+							"perlinScale": 0.2,
+							"perlinOctaves": 2
+						}
+					],
+					"usesWizard": false,
 					"requiredBiomeValues": [],
 					"biomeRequirementMode": 0
 				}
@@ -1804,13 +1902,13 @@
 			"cachedPixelData": { "opaqueTiles": "0000001000000000", "averageColors": "38336833a83368335833a833f833a83337237833a83368330000383358333723" }
 		},
 		{
-			"__cWid": 4,
+			"__cWid": 6,
 			"__cHei": 1,
 			"identifier": "Bricks8px",
 			"uid": 32,
 			"relPath": "art/bricks_8px.png",
 			"embedAtlas": null,
-			"pxWid": 32,
+			"pxWid": 48,
 			"pxHei": 8,
 			"tileGridSize": 8,
 			"spacing": 0,
