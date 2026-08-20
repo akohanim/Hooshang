@@ -52,6 +52,10 @@ REFERENCE = ("SlideZone", "angle")
 
 ## (LDtk field, the prop property it drives, doc).
 FIELDS = [
+    ("PanelOffset", "panel_offset",
+     "WHICH cell of the run is the lit one, counted from the middle. 0 is the "
+     "middle, -1 one cell left, +1 one right. Offset the lower of two stacked "
+     "runs by 1 so their panels do not line up into vertical pairs."),
     ("PanelEnergy", "panel_energy",
      "How bright the FITTING itself looks — separate from the pool it throws."),
     ("PoolEnergy", "light_energy",
@@ -136,6 +140,13 @@ def main():
     out = raw
     for name in ENTITIES:
         tuned = prop_defaults(name)
+        # KEEP THE UIDS OF FIELDS THAT ALREADY EXIST. Field instances point at a
+        # defUid, so renumbering on every run would orphan every value anybody
+        # had typed into LDtk — silently, since the field would simply come back
+        # blank. Only genuinely new fields take a new number.
+        existing = {f["identifier"]: f["uid"]
+                    for e in doc["defs"]["entities"] if e["identifier"] == name
+                    for f in e["fieldDefs"]}
         defs = []
         for ident, prop, text in FIELDS:
             if ident in STEADY:
@@ -145,8 +156,11 @@ def main():
             else:
                 raise SystemExit("!! %s has no %s to take a default from"
                                  % (name, prop))
-            uid += 1
-            made = field_def(ident, text, default, uid, ref)
+            if ident in existing:
+                made = field_def(ident, text, default, existing[ident], ref)
+            else:
+                uid += 1
+                made = field_def(ident, text, default, uid, ref)
             assert_shaped_like(made, ref)
             defs.append(made)
         print("  %s" % name)

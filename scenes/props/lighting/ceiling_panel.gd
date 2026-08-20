@@ -76,6 +76,19 @@ const PANEL_GLOW := preload("res://assets/props/ceiling/ceiling_light_glow.png")
 ## tile's frame or sits inside it looking like a chip of paint.
 @export var panel_texture: Texture2D = PANEL_GLOW:
 	set(value): panel_texture = value; _apply()
+## WHICH cell of the run is the lit one, counted from the middle. 0 is the
+## middle; -1 is one cell left, +1 one right.
+##
+## What it is for: two runs stacked into a two-row ceiling put their panels in
+## the same column and the result reads as vertical PAIRS rather than as a
+## ceiling. Offsetting the lower row by one breaks that up without moving either
+## run, so both still span the same stretch of wall and neither end goes ragged.
+##
+## The light moves with the panel, obviously — but it is worth saying, because
+## the panel is art and the light is a separate node sitting at the fixture's
+## origin, and the two would otherwise part company the moment this is not 0.
+@export var panel_offset := 0:
+	set(value): panel_offset = value; _apply()
 
 @onready var panel: PointLight2D = $Panel
 
@@ -97,7 +110,9 @@ func _apply() -> void:
 	bulb.visible = false
 	panel.energy = panel_energy
 	panel.texture = panel_texture
-	glow.position = Vector2(0.0, pool_drop)
+	var across := (_lit_cell() - run_tiles / 2) * TILE.x
+	panel.position = Vector2(across, 0.0)
+	glow.position = Vector2(across, pool_drop)
 	_rebuild()
 
 
@@ -113,11 +128,20 @@ func _rebuild() -> void:
 		child.queue_free()
 	_tiles.visible = show_body
 	var middle := run_tiles / 2
+	var lit := _lit_cell()
 	for i in run_tiles:
 		var cell := Sprite2D.new()
-		cell.texture = PANEL if i == middle else PLAIN
+		cell.texture = PANEL if i == lit else PLAIN
 		cell.position = Vector2((i - middle) * TILE.x, 0.0)
 		_tiles.add_child(cell)
+
+
+## Index of the panel cell, clamped into the run. An offset that would push it
+## off the end lights the end cell instead of nothing at all — a run with no
+## panel in it is indistinguishable from a bulb that has gone, and this is a
+## typo, not a design decision.
+func _lit_cell() -> int:
+	return clampi(run_tiles / 2 + panel_offset, 0, run_tiles - 1)
 
 
 func _process(delta: float) -> void:
