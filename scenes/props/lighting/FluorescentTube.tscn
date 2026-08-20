@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/lighting/fluorescent_tube.gd" id="1_fluor"]
+[ext_resource type="Texture2D" path="res://assets/light_radial.png" id="2_light"]
+[ext_resource type="Texture2D" path="res://assets/props/fluorescent.png" id="3_body"]
+[ext_resource type="Texture2D" path="res://assets/props/fluorescent_lit.png" id="4_tube"]
+
+[node name="FluorescentTube" type="Node2D"]
+script = ExtResource("1_fluor")
+light_color = Color(0.83, 0.9, 0.95, 1)
+light_energy = 1.4
+light_scale = 1.8
+cable_length = 34.0
+
+[node name="StemL" type="ColorRect" parent="."]
+offset_left = -14.0
+offset_top = -34.0
+offset_right = -12.0
+offset_bottom = -5.0
+color = Color(0.26, 0.28, 0.33, 1)
+mouse_filter = 2
+
+[node name="StemR" type="ColorRect" parent="."]
+offset_left = 12.0
+offset_top = -34.0
+offset_right = 14.0
+offset_bottom = -5.0
+color = Color(0.26, 0.28, 0.33, 1)
+mouse_filter = 2
+
+[node name="Housing" type="Sprite2D" parent="."]
+texture = ExtResource("3_body")
+
+[node name="Cable" type="ColorRect" parent="."]
+visible = false
+offset_left = -1.0
+offset_top = -12.0
+offset_right = 1.0
+offset_bottom = 0.0
+color = Color(0.3, 0.3, 0.34, 1)
+mouse_filter = 2
+
+[node name="Bulb" type="ColorRect" parent="."]
+visible = false
+offset_left = -3.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 2.0
+color = Color(0.95, 0.95, 0.8, 1)
+mouse_filter = 2
+
+[node name="Tube" type="PointLight2D" parent="."]
+energy = 1.5
+texture = ExtResource("4_tube")
+
+[node name="Glow" type="PointLight2D" parent="."]
+color = Color(0.83, 0.9, 0.95, 1)
+energy = 1.4
+texture = ExtResource("2_light")
+texture_scale = 1.8

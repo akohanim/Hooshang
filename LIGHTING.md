@@ -18,6 +18,9 @@ Practically that means:
 
 - A ceiling fixture is a `LampFixture` with `show_body = true`, so you see the
   cord and bulb.
+- An **office fluorescent** is a `FluorescentTube` — a drawn troffer on two drop
+  rods, for the rooms that are meant to read as an office rather than a bulb on
+  a wire. See *Adding a fluorescent* below.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
   `show_body = false` — the window itself IS the visible source. On the escape
   row that moon is eclipsed and recovering; see *The eclipse* below.
@@ -398,6 +401,17 @@ Monitor (MonitorGlow)   energy 0.9-1.1   scale 1.0-1.2
 Feature light           energy 1.6   scale 1.3   show_body true
   e.g. over the musical tiles in the cave
 
+Office fluorescent      energy 1.4   scale 1.8   cable 62   tube_energy 1.5
+  FluorescentTube, cold Color(0.83, 0.9, 0.95); bulb at y 230 so the pool
+  still reaches a floor at 336 — see the trap above
+
+Failing fluorescent     energy 0.7   scale 1.55  cable 56   tube_energy 1.2
+  + flickers 0.55 at speed 11, Color(0.86, 0.92, 0.82) — room 2's middle
+
+Dead fluorescent        energy 0     tube_energy 0
+  housing only. Needs another light near it or it is invisible; room 2 hangs
+  one in the moonlight over the drop
+
 Dawn window             energy 2.6   scale 1.25  show_body false
   warm Color(1, 0.72, 0.42), placed on a DawnWindow — room 23 only
 
@@ -452,6 +466,45 @@ and someone leaving an orange light on.
 
 Pair it the same way — a warm `LampFixture`, `show_body = false` — and see the
 Dawn window recipe above.
+
+---
+
+## Adding a fluorescent
+
+`scenes/props/lighting/FluorescentTube.tscn` **extends `LampFixture`**, so
+colour, energy, pool size, the `lights` group and the flicker all come from
+there and cannot drift. What it adds is a body worth looking at: a housing
+sprite, two drop rods sized from `cable_length`, and the tube.
+
+Place it exactly like a `LampFixture` — position is the fixture, `cable_length`
+is the distance back up to the ceiling — plus one export of its own:
+
+```
+tube_energy   how bright the TUBE reads, separate from the pool it throws
+```
+
+Those are two different jobs. The pool is how far the light carries; `tube_energy`
+is how bright the thing looks. Turning the pool down without it leaves a dim room
+lit by a fixture that still looks brand new.
+
+**The tube is a light, not a sprite,** and that is the whole reason this is not
+`LampFixture` with a picture on it. `CanvasModulate` is 0.05 and multiplies every
+CanvasItem, so a painted glowing tube comes out at 5% of what was drawn — the
+same trap `SunShaft` and `WallPattern` document. The tube is a `PointLight2D`
+wearing `assets/props/fluorescent_lit.png` as its texture: the shape is art, the
+brightness is light. The housing under it is ordinary paint, lit by its own tube.
+
+Because the tube is a light, **the flicker reaches it for free** — the prop reads
+the pool's energy back each frame rather than recomputing the waveform, so the
+two cannot drift. A fixture whose pool stutters while its tube burns steadily
+reads as a bug in the game rather than a fault in the building.
+
+`light_energy = 0` with `tube_energy = 0` gives a **dead fixture**: housing, no
+tube, no pool. It needs another light near it or it is invisible — which is the
+point of hanging one where the moon can find it.
+
+Art: `tools/gen_fluorescent.py` draws both files, 40×10 (five cells wide). The
+stems are deliberately NOT in the art, because the drop varies per instance.
 
 ---
 
