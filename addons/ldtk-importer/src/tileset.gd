@@ -174,12 +174,28 @@ static func create_new_tileset_source(definition: Dictionary, base_dir: String) 
 			var tile_region := TileUtil.get_tile_region(coords, tile_size, margin, separation, grid_w)
 			var tile_image := image.get_region(tile_region)
 
+			# PATCHED (Hooshang). Upstream reads:
+			#
+			#     if not tile_image.is_invisible():
+			#         if source.get_tile_at_coords(coords) == Vector2i(-1,-1):
+			#             source.create_tile(coords)
+			#         elif not source.get_tile_at_coords(coords) == Vector2i(-1,-1):
+			#             source.remove_tile(coords)      # TODO: import flag
+			#
+			# which TOGGLES: a tile that should exist and does is deleted, so
+			# every import against an already-built tileset inverts which tiles
+			# there are. Painting with a newly added tile then imports as
+			# nothing at all — the level references a tile the atlas no longer
+			# has and the cell is silently dropped, in every room, with no
+			# warning. This is the comment's own stated intent instead: create
+			# tiles in non-empty cells, remove them in empty ones, and leave the
+			# rest alone, which makes an import idempotent.
+			var exists := source.get_tile_at_coords(coords) != Vector2i(-1, -1)
 			if not tile_image.is_invisible():
-				if source.get_tile_at_coords(coords) == Vector2i(-1,-1):
+				if not exists:
 					source.create_tile(coords)
-				elif not source.get_tile_at_coords(coords) == Vector2i(-1,-1):
-					# TODO: Make this an import flag
-					source.remove_tile(coords)
+			elif exists:
+				source.remove_tile(coords)
 
 	# Add definition UID to references
 	Util.add_tileset_reference(definition.uid, source)

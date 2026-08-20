@@ -98,17 +98,24 @@ so the two agree now. The tiles are still placeholder art.
   on top of each other at the same world x while every name looked right.
   `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
-- **`force_tileset_reimport=true` is set in `hooshang_claude.ldtk.import`, and
-  it has to stay on.** Left off, the importer LOADS the existing
-  `ldtk/tilesets/tileset_8px.res` and then walks the sheet doing "create the
-  tile if it is missing, REMOVE it if it is there" — so every import inverts
-  which tiles exist. That is how a 48px sheet kept importing as four tiles with
-  the texture arriving at 48px: cells painted with a new value came through as
-  nothing at all, in every room, with no missing-tile warning and nothing in the
-  output to pull on. On it, the TileSet is rebuilt from the sheet each time.
-  Nothing is lost by that — the per-tile collision this project needs is
-  re-applied on every import by `scripts/ldtk_tileset_post_import.gd`, which is
-  exactly why that hook exists rather than the collision being set by hand.
+- **`addons/ldtk-importer/src/tileset.gd` carries a local PATCH, marked
+  `PATCHED (Hooshang)`. Keep it through any addon update.** Upstream builds the
+  atlas with "create the tile if it is missing, REMOVE it if it is there", which
+  TOGGLES — every import against an already-built tileset inverts which tiles
+  exist. A level then references a tile the atlas no longer has and the cell is
+  dropped in silence, in every room. That is how two new tiles on a 48px sheet
+  kept importing as nothing while the texture arrived at 48px and the `.ldtk`
+  held the paint: no error, no missing-tile warning, nothing to pull on. The
+  patch is the comment's own stated intent — create in non-empty cells, remove
+  in empty ones, leave the rest alone — which makes an import idempotent.
+  `force_tileset_reimport=true` is also set in `hooshang_claude.ldtk.import` as
+  a second line of defence; nothing is lost by rebuilding the TileSet, because
+  the per-tile collision this project needs is re-applied on every import by
+  `scripts/ldtk_tileset_post_import.gd`.
+- **A running Godot EDITOR re-imports with the params it started with.** The
+  editor re-imported the world seconds after the flag was set and dropped the
+  new tiles right back out, which looked exactly like the fix not working.
+  Restart the editor after changing anything in a `.import`.
 - **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after
