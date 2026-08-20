@@ -543,6 +543,42 @@ up standing on are the same ceiling.
 
 ---
 
+## Tuning a ceiling light
+
+Three places, depending on which one you mean.
+
+**One placed fixture** — select the `CeilingPanel` or `CeilingLight` in LDtk and
+fill in its fields. Every one is OPTIONAL, and blank means *leave the prop
+alone*: an untouched instance is exactly the fixture in room 2, and only the
+fields you fill in move.
+
+| Field | What it does |
+| --- | --- |
+| `PanelEnergy` | How bright the FITTING looks |
+| `PoolEnergy` | How bright the pool it throws is |
+| `PoolScale` | That pool's radius — 64px per 1.0, and the seam rule applies |
+| `PoolDrop` | How far below the fixture the pool is centred, in px |
+| `Tint` | Colour of both |
+| `Flicker` | Fluorescent sputter, with `FlickerAmount` and `FlickerSpeed` |
+
+The two energies are two different jobs. `PoolEnergy` is how far the light
+carries; `PanelEnergy` is how bright the thing looks. Turning the pool down
+without the panel leaves a dim room lit by a fitting that still looks brand new
+— and a failing tube wants both down, not one.
+
+**Every placed fixture at once** — the defaults live in
+`scenes/props/lighting/CeilingPanel.tscn` (and `CeilingLight.tscn`, which is the
+same prop with its tiles hidden). Changing those moves every instance that has
+not been given a field of its own.
+
+**The painted panels** — `ceiling` and `ceiling_flor` cells have no entity to
+carry fields, so they are lit from the constants at the top of
+`scripts/ldtk_level_post_import.gd`: `PANEL_ENERGY`, `POOL_ENERGY`, `POOL_SCALE`,
+`POOL_DROP`, `PANEL_COLOR`. That is one global for the whole world. To overrule
+a single painted cell, drop a `CeilingLight` on it and tune that.
+
+---
+
 ## Adding a sun shaft
 
 `scenes/props/lighting/SunShaft.tscn` draws the light itself: parallel bars
