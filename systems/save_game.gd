@@ -171,6 +171,7 @@ func summary(i: int) -> Dictionary:
 	var world_state: Dictionary = payload.get("world_state", {})
 	var collectibles: Dictionary = payload.get("collectibles", {})
 	var deaths: Dictionary = payload.get("deaths", {})
+	var points: Dictionary = payload.get("points", {})
 	var room := str(world_state.get("room", ""))
 	return {
 		"empty": false,
@@ -180,6 +181,7 @@ func summary(i: int) -> Dictionary:
 		"room_number": LdtkWorld.index_in_name(room) + 1,
 		"lemons": int(collectibles.get("total", 0)),
 		"deaths": int(deaths.get("total", 0)),
+		"points": int(points.get("total", 0)),
 		"play_seconds": float(payload.get("play_seconds", 0.0)),
 		"visited": _names(payload.get("visited", [])),
 	}
@@ -213,6 +215,7 @@ func start_new(i: int) -> void:
 	_play_seconds = 0.0
 	Collectibles.reset()
 	Deaths.reset()
+	Points.reset()
 	Game.current_index = 0
 	Game.completed = false
 	_enter_world(FIRST_WORLD, "")
@@ -274,6 +277,7 @@ func open_finished(room: String) -> void:
 	_play_seconds = 0.0
 	Collectibles.reset()
 	Deaths.reset()
+	Points.reset()
 	Game.current_index = 0
 	Game.completed = false
 	_pending = {
@@ -368,6 +372,7 @@ func _apply(payload: Dictionary) -> void:
 	_play_seconds = float(payload.get("play_seconds", 0.0))
 	Collectibles.load_state(payload.get("collectibles", {}))
 	Deaths.load_state(payload.get("deaths", {}))
+	Points.load_state(payload.get("points", {}))
 	Game.current_index = int(payload.get("game_index", 0))
 	Game.completed = false
 
@@ -392,6 +397,7 @@ func _gather() -> Dictionary:
 		"visited": _visited.keys(),
 		"collectibles": Collectibles.save_state(),
 		"deaths": Deaths.save_state(),
+		"points": Points.save_state(),
 	}
 	if world is LdtkWorld:
 		payload["world_state"] = (world as LdtkWorld).save_state()

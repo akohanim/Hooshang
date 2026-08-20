@@ -198,6 +198,14 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   pickup the fruit flies from where it was taken into the counter, and the
   DISPLAYED number ticks over on arrival — `total` banks immediately, so nothing
   else ever waits on the animation (`Collectibles.shown()` is the display).
+- `systems/points.gd` — `Points` autoload: the run's SCORE, top-left under the
+  fruit count. Not the fruit count times 1000: Collectibles counts lemons and a
+  save is really about which fruit are still out there, so the two are separate
+  numbers with separate owners. Anything that pays out calls `award(amount,
+  source)`, which banks it, rolls the counter up and pops the "+N" over whatever
+  earned it — nothing else has to know the tag exists. `_set_shown` KILLS the
+  roll before setting the number, because a load that only assigns leaves the
+  running tween writing the run you just left over the one you opened.
 - `systems/deaths.gd` — `Deaths` autoload: the run's death count, top-right.
   `Player.die()` calls `Deaths.record()` — the player reports its own death
   rather than the counter hunting for a player, which would race every level's
@@ -338,17 +346,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   down into every blink. `hooshang_dazed` is deliberately unrigged: it is a 3/4
   view with the mouth off the edge of the frame and a tilted eye these
   axis-aligned warps cannot follow. Re-run it after re-cutting any portrait.
-- `tools/gen_points_popup.py` — the "+1000" that pops off a picked-up lemon.
-  Neon pixel numerals: dark outline, pale rim one pixel inside it, green fill,
-  and a blurred tint under the lot. Strokes are THREE pixels because that order
-  needs a middle — at two, every pixel is an edge, the rim eats the fill and the
-  digits come out as hollow rings. Three glyphs is the whole font (`+`, `1`,
-  `0`), hand-set the way `gen_input_prompt.py` sets the five letters of "DASH".
-  Drawn at game resolution and blown up 4x with nearest filtering: it lives on
-  the HUD layer, which is authored at 1280x720 and carries fine art elsewhere,
-  but chunky is the point here. Sparks are hand-placed — a random scatter
-  re-rolls on every run, and art that changes when you regenerate it is art
-  nobody can review.
+- `tools/gen_points_popup.py` — the "+N" that pops off a scoring pickup, as a
+  SHEET of eleven glyphs (`+0123456789`) the popup composes at runtime. It was
+  one drawn picture of "+1000", which is right up until something awards a
+  different number and the tag says 1000 anyway. Neon: dark outline, pale rim one
+  pixel inside it, green fill, blurred tint under the lot. Strokes are THREE
+  pixels because that order needs a middle — at two, every pixel is an edge, the
+  rim eats the fill and the digits come out as hollow rings. Each glyph carries
+  its own glow margin and the popup lays them a stroke-width apart, so the halos
+  overlap the way they would in one drawing.
 - `tools/gen_persian_trim.py`, `gen_persian_glyph.py` — the Persian polish. The
   trim is UI art authored in the dialogue box's own 1280x720 space (a quarter of
   a design pixel each), the glyph is a light COOKIE and therefore white with the

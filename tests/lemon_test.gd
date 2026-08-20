@@ -113,13 +113,28 @@ func _ready() -> void:
 	# written. The tag's LIFETIME is measured at the end instead.
 	var tag := _popup_tag()
 	_check(tag != null, "a +1000 pops off the fruit")
+	# The score is a SEPARATE number from the fruit count, banked on contact the
+	# way the fruit is — nothing may wait on the tag or the roll.
+	_check(Points.total == Points.LEMON,
+		"and the lemon paid into the score  [%d]" % Points.total)
+	_check(Points.shown() < Points.total,
+		"...which the counter is still running up to  [showing %d of %d]"
+			% [Points.shown(), Points.total])
+	# Five glyphs for "+1000", one per character, composed from the sheet.
+	_check(tag != null and tag.get_child_count() >= 5,
+		"the tag is built per digit, so it can say any number  [%d children]"
+			% (tag.get_child_count() if tag != null else -1))
 	if tag != null:
 		# Over the fruit, not parked at the corner: a tag at the origin is what
 		# you get when the source's screen position was never asked for.
 		var where: Vector2 = tag.position + tag.size * 0.5
 		_check(where.length() > 40.0 and where.x < 1280.0 and where.y < 720.0,
 			"...over the fruit rather than at the origin  [%s]" % where)
-		_check(tag.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
+		# The filter lives on the GLYPHS, not on the tag: the tag is a Control
+		# holding one TextureRect per character now.
+		var glyph := tag.get_child(0) as TextureRect
+		_check(glyph != null
+				and glyph.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
 			"...drawn with square pixels, not smoothed")
 
 	# The fruit flies to the counter and the DISPLAYED number ticks over when it
@@ -178,6 +193,8 @@ func _ready() -> void:
 		await _frames(1)
 		frames += 1
 	var life := frames / 60.0
+	_check(Points.shown() == Points.total,
+		"the counter has caught up by then  [%d]" % Points.shown())
 	_check(life >= 0.7 and life <= 1.6,
 		"the +1000 is up for about a second  [%.2fs]" % life)
 
@@ -200,18 +217,14 @@ func _check(cond: bool, name: String) -> void:
 
 
 ## Every lemon picture currently on Screen's token surface.
-## The +1000 tag, if one is on the HUD layer. Found by its texture rather than
-## by name or index: the layer also carries the counter, its icon and whatever
-## fruit is mid-flight.
-func _popup_tag() -> TextureRect:
-	var hud: CanvasLayer = Collectibles.get_node_or_null("CollectibleHud")
+## The "+N" tag, if one is up. It belongs to Points now, not to Collectibles:
+## the fruit count and the score are separate numbers with separate owners, and
+## the tag is the score's.
+func _popup_tag() -> Control:
+	var hud: CanvasLayer = Points.get_node_or_null("PointsHud")
 	if hud == null:
 		return null
-	for child in hud.get_children():
-		var tex := child as TextureRect
-		if tex != null and tex.texture == Collectibles.POPUP:
-			return tex
-	return null
+	return hud.get_node_or_null("PointsTag") as Control
 
 
 func _tokens_on_surface() -> Array[Node]:

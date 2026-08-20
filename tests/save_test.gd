@@ -83,6 +83,9 @@ func _check_round_trip() -> void:
 
 	Collectibles.collect("fruit:a")
 	Collectibles.collect("fruit:b")
+	# The score is its own owner and its own number — two lemons pay it, but a
+	# save that carries the fruit count and drops the score is a run that comes
+	# back with its trophies and none of its total.
 	Deaths.record()
 	Deaths.record()
 	Deaths.record()
@@ -104,6 +107,8 @@ func _check_round_trip() -> void:
 	# renumber's numeric list being one entry short.
 	_check(int(card.get("room_number", 0)) == 10,
 		"numbered the way the pickers number it  [%s]" % card.get("room_number", 0))
+	_check(int(card.get("points", -1)) == 2 * Points.LEMON,
+		"and the score it had earned  [%s]" % card.get("points", -1))
 	_check(int(card.get("lemons", -1)) == 2 and int(card.get("deaths", -1)) == 3,
 		"with the two counters on it  [%s / %s]"
 			% [card.get("lemons"), card.get("deaths")])
@@ -114,9 +119,11 @@ func _check_round_trip() -> void:
 	# something the load did not have to do, which is the point of doing it.
 	Collectibles.reset()
 	Deaths.reset()
+	Points.reset()
 	SaveGame.unbind()
 	world = null
-	_check(Collectibles.total == 0 and Deaths.total == 0, "in-memory state wiped")
+	_check(Collectibles.total == 0 and Deaths.total == 0 and Points.total == 0,
+		"in-memory state wiped")
 
 	_check(SaveGame.resume(0), "slot 1 loads")
 	await _settle()
@@ -128,6 +135,12 @@ func _check_round_trip() -> void:
 		"the counter shows it outright rather than flying a fruit in  [%d]"
 			% Collectibles.shown())
 	_check(Deaths.total == 3, "death count restored  [%d]" % Deaths.total)
+	_check(Points.total == 2 * Points.LEMON,
+		"score restored  [%d]" % Points.total)
+	# Straight to the number, not counted up: nothing was earned, a save was
+	# opened, and a score running up from zero is a lie about what just happened.
+	_check(Points.shown() == Points.total,
+		"...and shown outright rather than rolled  [%d]" % Points.shown())
 	_check(world.current_room != null and world.current_room.name == "Level_9",
 		"opened in the room it was saved in  [%s]"
 			% (world.current_room.name if world.current_room else "<none>"))
@@ -301,7 +314,11 @@ func _check_menu_offers() -> void:
 
 	menu._show_levels(0)
 	var rooms := _labels()
-	_check(rooms.has("ROOM 12") and not rooms.has("ROOM 4"),
+	# 13 and 5, not 12 and 4: rooms are numbered index PLUS ONE, and the insert
+	# that put the dash tutorial second moved every room after the first along by
+	# one. Same class of thing as room_number above — a room named by NUMBER,
+	# which a Level_N rename cannot see.
+	_check(rooms.has("ROOM 13") and not rooms.has("ROOM 5"),
 		"level select offers the rooms that run stood in and no others  %s" % str(rooms))
 
 	menu._show_confirm(0)

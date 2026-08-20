@@ -21,6 +21,7 @@ Dialogue="*res://scenes/ui/DialogueBox.tscn"
 Game="*res://systems/game.gd"
 Collectibles="*res://systems/collectibles.gd"
 Deaths="*res://systems/deaths.gd"
+Points="*res://systems/points.gd"
 SaveGame="*res://systems/save_game.gd"
 Pause="*res://scenes/ui/PauseMenu.tscn"
 

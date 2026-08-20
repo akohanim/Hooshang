@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctg7wp4cw0uk0"
-path="res://.godot/imported/points_1000.png-7ef454fc0fa9ca95c7010b044652aceb.ctex"
+uid="uid://bxohvbctfvrl5"
+path="res://.godot/imported/points_digits.png-a317fe29200b92df0d721d1d3005e02d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/points_1000.png"
-dest_files=["res://.godot/imported/points_1000.png-7ef454fc0fa9ca95c7010b044652aceb.ctex"]
+source_file="res://assets/ui/points_digits.png"
+dest_files=["res://.godot/imported/points_digits.png-a317fe29200b92df0d721d1d3005e02d.ctex"]
 
 [params]
 

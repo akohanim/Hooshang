@@ -8,10 +8,14 @@ the dense frame, the dialogue box gets real type), but this is not fine art: the
 reference is chunky neon pixel numerals, and drawing them at 4x would smooth
 them into something that belongs to the UI rather than to the game.
 
-Three glyphs is the whole font. "+1000" needs a plus, a one and a zero, so this
-hand-sets those and nothing else, the way tools/gen_input_prompt.py hand-sets
-the five letters of "DASH". A general font would be five times the code for
-glyphs nothing draws.
+ELEVEN GLYPHS, on a sheet the popup composes at runtime: 0-9 and a plus. It was
+three — a plus, a one and a zero, enough to spell "+1000" — and that was right
+while a lemon was the only thing that awarded anything. It is wrong the moment a
+second award is worth a different number, because a fixed picture of "+1000"
+over a 500-point pickup is a lie the code cannot even see it is telling.
+
+Each glyph gets its own cell WITH its glow margin, and the popup lays them out
+one stroke-width apart so the halos overlap the way they would in one drawing.
 
 FOUR PASSES, and the order is what makes it read as neon rather than as green
 text:
@@ -69,19 +73,6 @@ GLYPHS = {
         "000000000",
         "000000000",
     ],
-    "1": [
-        "000111000",
-        "001111000",
-        "011111000",
-        "000111000",
-        "000111000",
-        "000111000",
-        "000111000",
-        "000111000",
-        "000111000",
-        "001111100",
-        "001111100",
-    ],
     "0": [
         "001111100",
         "011111110",
@@ -95,87 +86,192 @@ GLYPHS = {
         "011111110",
         "001111100",
     ],
+    "1": [
+        "000111000",
+        "001111000",
+        "011111000",
+        "000111000",
+        "000111000",
+        "000111000",
+        "000111000",
+        "000111000",
+        "000111000",
+        "001111100",
+        "001111100",
+    ],
+    "2": [
+        "001111100",
+        "011111110",
+        "111000111",
+        "000000111",
+        "000001110",
+        "000011100",
+        "000111000",
+        "001110000",
+        "011100000",
+        "111111111",
+        "111111111",
+    ],
+    "3": [
+        "011111110",
+        "111111111",
+        "000000111",
+        "000000111",
+        "000111110",
+        "000111110",
+        "000000111",
+        "000000111",
+        "111000111",
+        "111111110",
+        "011111100",
+    ],
+    "4": [
+        "000011110",
+        "000111110",
+        "001110110",
+        "011100110",
+        "111000110",
+        "111111111",
+        "111111111",
+        "000000110",
+        "000000110",
+        "000000110",
+        "000000110",
+    ],
+    "5": [
+        "111111111",
+        "111111111",
+        "111000000",
+        "111000000",
+        "111111100",
+        "011111110",
+        "000000111",
+        "000000111",
+        "111000111",
+        "111111110",
+        "011111100",
+    ],
+    "6": [
+        "001111100",
+        "011111110",
+        "111000000",
+        "111000000",
+        "111111100",
+        "111111110",
+        "111000111",
+        "111000111",
+        "111000111",
+        "011111110",
+        "001111100",
+    ],
+    "7": [
+        "111111111",
+        "111111111",
+        "000000111",
+        "000001110",
+        "000011100",
+        "000111000",
+        "000111000",
+        "000111000",
+        "000111000",
+        "000111000",
+        "000111000",
+    ],
+    "8": [
+        "001111100",
+        "011111110",
+        "111000111",
+        "111000111",
+        "011111110",
+        "011111110",
+        "111000111",
+        "111000111",
+        "111000111",
+        "011111110",
+        "001111100",
+    ],
+    "9": [
+        "001111100",
+        "011111110",
+        "111000111",
+        "111000111",
+        "111000111",
+        "011111111",
+        "001111111",
+        "000000111",
+        "000000111",
+        "011111110",
+        "001111100",
+    ],
 }
 
-TEXT = "+1000"
+## The order they sit on the sheet. The popup indexes by this, so do not reorder.
+ORDER = "+0123456789"
 
-## Four-pointed stars, at (x, y) in the finished canvas. Placed by hand: a
-## random scatter re-rolls every time the tool runs, and art that changes when
-## you regenerate it is art nobody can review.
-SPARKS = [(7, 2), (21, 0), (32, 3), (43, 1), (52, 4),
-          (12, 17), (27, 18), (40, 17), (50, 14)]
-## The bigger ones get arms; the rest are single pixels.
-BIG_SPARKS = {(21, 0), (32, 3), (40, 17)}
-
-
-def mask():
-    """Where the strokes are, as a set of (x, y)."""
+def draw_glyph(rows):
+    """One glyph in its own cell, glow margin included."""
+    w, h = GW + MARGIN * 2, GH + MARGIN * 2
     on = set()
-    for i, ch in enumerate(TEXT):
-        ox = MARGIN + i * (GW + GAP)
-        for y, row in enumerate(GLYPHS[ch]):
-            for x, bit in enumerate(row):
-                if bit == "1":
-                    on.add((ox + x, MARGIN + y))
-    return on
-
-
-def main():
-    os.makedirs(OUT, exist_ok=True)
-    w = MARGIN * 2 + len(TEXT) * GW + (len(TEXT) - 1) * GAP
-    h = MARGIN * 2 + GH
-    on = mask()
+    for y, row in enumerate(rows):
+        for x, bit in enumerate(row):
+            if bit == "1":
+                on.add((MARGIN + x, MARGIN + y))
 
     # 1. the glow: the mask, blurred, tinted.
-    glow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    gp = glow.load()
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    px = img.load()
     for x, y in on:
-        gp[x, y] = GLOW + (255,)
-    glow = glow.filter(ImageFilter.GaussianBlur(2.2))
-    gp = glow.load()
+        px[x, y] = GLOW + (255,)
+    img = img.filter(ImageFilter.GaussianBlur(2.2))
+    px = img.load()
     for x in range(w):
         for y in range(h):
-            r, g, b, a = gp[x, y]
+            a = px[x, y][3]
             # Blur dims the colour as well as the alpha; put the colour back and
             # keep only the falloff, or the halo comes out grey.
-            gp[x, y] = GLOW + (min(255, int(a * 1.7)),)
-
-    img = glow
-    px = img.load()
+            px[x, y] = GLOW + (min(255, int(a * 1.7)),)
 
     # 2. the outline, one pixel around every stroke.
-    for x, y in list(on):
+    for x, y in on:
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
                 n = (x + dx, y + dy)
                 if n not in on and 0 <= n[0] < w and 0 <= n[1] < h:
                     px[n] = OUTLINE
 
-    # 3. the fill, and 4. the rim — in one pass, because which a pixel gets
-    # depends on the same test. A stroke pixel with all four neighbours inside
-    # the glyph is interior and takes the fill; anything on the edge takes the
-    # pale rim, which is the tube catching light and the single thing that says
-    # "neon" rather than "bright green".
+    # 3. the rim and 4. the fill — one pass, because the same test decides
+    # which a pixel gets. A stroke pixel with all four neighbours inside the
+    # glyph is interior and takes the fill; anything on the edge takes the pale
+    # rim, which is the tube catching light.
     for x, y in on:
         edge = any((x + dx, y + dy) not in on
                    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)))
         px[x, y] = RIM if edge else FILL
+    return img
 
-    # ...and the sparks.
-    for x, y in SPARKS:
-        if not (0 <= x < w and 0 <= y < h):
-            continue
-        px[x, y] = SPARK
-        if (x, y) in BIG_SPARKS:
-            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-                n = (x + dx, y + dy)
-                if 0 <= n[0] < w and 0 <= n[1] < h:
-                    r, g, b, a = px[n]
-                    px[n] = SPARK[:3] + (max(a, 150),)
 
-    path = os.path.join(OUT, "points_1000.png")
-    img.save(path)
-    print("wrote %s  (%dx%d)" % (os.path.relpath(path, ROOT), w, h))
+def spark():
+    """One four-pointed star, for the popup to scatter around a tag."""
+    img = Image.new("RGBA", (5, 5), (0, 0, 0, 0))
+    px = img.load()
+    px[2, 2] = SPARK
+    for d in (1, 2):
+        for x, y in ((2 - d, 2), (2 + d, 2), (2, 2 - d), (2, 2 + d)):
+            px[x, y] = SPARK[:3] + (200 if d == 1 else 90,)
+    return img
+
+
+def main():
+    os.makedirs(OUT, exist_ok=True)
+    cw, ch = GW + MARGIN * 2, GH + MARGIN * 2
+    sheet = Image.new("RGBA", (cw * len(ORDER), ch), (0, 0, 0, 0))
+    for i, ch_ in enumerate(ORDER):
+        sheet.paste(draw_glyph(GLYPHS[ch_]), (i * cw, 0))
+    for name, img in (("points_digits.png", sheet), ("points_spark.png", spark())):
+        path = os.path.join(OUT, name)
+        img.save(path)
+        print("wrote %s  (%dx%d)" % (os.path.relpath(path, ROOT), *img.size))
+    print("  cell %dx%d, %d glyphs, order %r" % (cw, ch, len(ORDER), ORDER))
 
 
 if __name__ == "__main__":

@@ -25,26 +25,6 @@ var _taken := {}
 ## type that isn't a magnified pixel grid (see systems/screen.gd).
 const HUD_SCALE := 0.25
 
-## The "+1000" that pops off a picked-up lemon.
-##
-## Pure flourish: the counter counts FRUIT, one per lemon, and this is a score
-## the game does not otherwise keep. It is here because picking something up
-## should feel like it paid, and a counter ticking 6 -> 7 in the corner does not.
-##
-## Drawn at game resolution and blown up, with nearest filtering. This layer is
-## authored at 1280x720 and carries fine art elsewhere — the counter's lemon is
-## the dense frame, the dialogue box gets real type — but chunky neon numerals
-## are the point here, and drawing them at the layer's own resolution would
-## smooth them into UI. See tools/gen_points_popup.py.
-const POPUP := preload("res://assets/ui/points_1000.png")
-## Whole-number scale, or the pixels stop being square.
-const POPUP_SCALE := 4.0
-## How far it drifts up while it is on screen, in this layer's px.
-const POPUP_RISE := 40.0
-## About a second, as asked. The fade takes the last third of it, so it is fully
-## legible for most of its life rather than dying from the moment it appears.
-const POPUP_TIME := 1.0
-const POPUP_FADE := 0.34
 ## Icon box in HUD px. A WHOLE multiple of the art it draws (20px dense frame x
 ## 2), the same rule deaths.gd follows: this layer is scaled by 0.25 onto the
 ## window, and a fractional upscale is what chewed the skull's eye sockets. It
@@ -111,7 +91,10 @@ func collect(id: String, amount := 1, source: CanvasItem = null) -> void:
 	total += amount
 	changed.emit(total)
 	collected.emit(total)
-	_popup(source)
+	# The score is a separate number kept by a separate owner — see
+	# systems/points.gd on why the fruit count is not just multiplied by 1000.
+	# It puts the "+N" up as well, so nothing here has to know the tag exists.
+	Points.award(Points.LEMON * amount, source)
 	if source == null or not _launch(source, amount):
 		_land(amount)
 
@@ -212,50 +195,6 @@ func _refresh() -> void:
 ## the 320x180 sub-viewport, the counter is on the window's own full-resolution
 ## layer (systems/screen.gd). So its start point has to be converted rather than
 ## copied — canvas position first, then up into this layer's 4x design space.
-## Pop a "+1000" over whatever was just picked up.
-##
-## On the same layer as the flight and positioned the same way — the HUD is
-## authored at 1280x720, so a world point has to come through
-## get_global_transform_with_canvas() and be divided back out of HUD_SCALE.
-## Doing it in world space instead puts it in the SubViewport, where
-## CanvasModulate would take it to 5% of what was drawn.
-##
-## Silent when there is no source: a fruit granted by a script has no position on
-## screen, and a "+1000" in the corner of the room it did not come from is worse
-## than none at all.
-func _popup(source: CanvasItem) -> void:
-	if _hud == null or source == null or not is_instance_valid(source) \
-			or not source.is_inside_tree():
-		return
-	var at: Vector2 = source.get_global_transform_with_canvas().origin / HUD_SCALE
-	var size := Vector2(POPUP.get_size()) * POPUP_SCALE
-
-	var tag := TextureRect.new()
-	tag.texture = POPUP
-	tag.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	tag.size = size
-	tag.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tag.stretch_mode = TextureRect.STRETCH_SCALE
-	tag.pivot_offset = size * 0.5              # it grows about its middle
-	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# Centred on the fruit and lifted clear of it, so the thing you just took is
-	# not hidden by the number it was worth.
-	tag.position = at - size * 0.5 - Vector2(0.0, size.y * 0.55)
-	tag.scale = Vector2(0.72, 0.72)
-	_hud.add_child(tag)
-
-	var t := create_tween().set_parallel()
-	t.tween_property(tag, "position:y", tag.position.y - POPUP_RISE, POPUP_TIME) \
-		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	# A short spring on the way in, then nothing — a tag that keeps moving reads
-	# as an animation playing rather than as a thing that happened.
-	t.tween_property(tag, "scale", Vector2.ONE, 0.18) \
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	t.tween_property(tag, "modulate:a", 0.0, POPUP_FADE) \
-		.set_delay(POPUP_TIME - POPUP_FADE)
-	t.chain().tween_callback(tag.queue_free)
-
-
 func _launch(source: CanvasItem, amount: int) -> bool:
 	if _hud == null or not is_instance_valid(source) or not source.is_inside_tree():
 		return false
