@@ -196,11 +196,16 @@ func _build_ceiling_panel(data: Dictionary) -> CeilingPanel:
 
 ## Per-instance lighting, from the entity's own LDtk fields.
 ##
-## EVERY FIELD FALLS BACK TO WHAT THE PROP ALREADY HAS, not to a number written
-## here. An LDtk field that has not been typed into arrives as null, and a null
-## that becomes 0.0 is a light that is off while looking configured — so an
-## untouched instance is the scene's own tuning (room 2's), and only the fields
-## you actually fill in move.
+## THE DEFAULTS IN LDTK MATCH THE PROP'S OWN, which is what makes placing one
+## harmless: an untouched instance is the fixture in room 2, because the number
+## LDtk hands over is the number the scene already had.
+## tools/ldtk_fix_light_fields.py reads both .tscn files to keep them level and
+## refuses to run if any of the six disagree.
+##
+## Each read still falls back to the prop's value, for entities placed BEFORE
+## these fields existed: their instances carry no field at all, and a missing
+## one must leave the prop alone rather than become 0.0 — a light that is off
+## while looking configured.
 ##
 ## The vocabulary is LIGHTING.md's: energy is brightness, scale is the radius at
 ## 64px per 1.0, and the two ENERGIES are different jobs — the panel is how
@@ -210,10 +215,14 @@ func _light_fields(node: CeilingPanel, data: Dictionary) -> void:
 	node.light_energy = _field_float(data, "PoolEnergy", node.light_energy)
 	node.light_scale = _field_float(data, "PoolScale", node.light_scale)
 	node.pool_drop = _field_float(data, "PoolDrop", node.pool_drop)
-	node.light_color = _field_color(data, "Tint", node.light_color)
-	node.flickers = _field_bool(data, "Flicker", node.flickers)
+	# Flicker is a NUMBER here rather than a checkbox with a number under it.
+	# LDtk has only ever written String and Float fields in this project, and a
+	# Bool written from a guessed shape is what crashed the editor once already;
+	# 0 reads as "steady" perfectly well.
+	var amount := _field_float(data, "FlickerAmount", 0.0)
+	node.flickers = amount > 0.0
 	if node.flickers:
-		node.flicker_amount = _field_float(data, "FlickerAmount", node.flicker_amount)
+		node.flicker_amount = amount
 		node.flicker_speed = _field_float(data, "FlickerSpeed", node.flicker_speed)
 
 
@@ -375,20 +384,6 @@ func _field_int(data: Dictionary, key: String, fallback: int) -> int:
 func _field_float(data: Dictionary, key: String, fallback: float) -> float:
 	var raw = data.fields.get(key)
 	return float(raw) if raw is float or raw is int else fallback
-
-
-## Same, for Color fields. The importer hands these over already parsed into a
-## Color (see addons/ldtk-importer/src/util/field-util.gd), so an unset one is
-## null rather than a black that would silently put a light out.
-func _field_color(data: Dictionary, key: String, fallback: Color) -> Color:
-	var raw = data.fields.get(key)
-	return raw if raw is Color else fallback
-
-
-## Same, for Bool fields.
-func _field_bool(data: Dictionary, key: String, fallback: bool) -> bool:
-	var raw = data.fields.get(key)
-	return raw if raw is bool else fallback
 
 
 ## Walking into this Area2D (invisible at runtime — Area2D/CollisionShape2D

@@ -558,13 +558,25 @@ fields you fill in move.
 | `PoolEnergy` | How bright the pool it throws is |
 | `PoolScale` | That pool's radius — 64px per 1.0, and the seam rule applies |
 | `PoolDrop` | How far below the fixture the pool is centred, in px |
-| `Tint` | Colour of both |
-| `Flicker` | Fluorescent sputter, with `FlickerAmount` and `FlickerSpeed` |
+| `FlickerAmount` | Sputter depth, 0..1. **0 is a steady tube** |
+| `FlickerSpeed` | How fast that sputter runs |
 
 The two energies are two different jobs. `PoolEnergy` is how far the light
 carries; `PanelEnergy` is how bright the thing looks. Turning the pool down
 without the panel leaves a dim room lit by a fitting that still looks brand new
 — and a failing tube wants both down, not one.
+
+**They are all Floats, and that is deliberate.** LDtk has only ever written two
+field types in this project, String and Float, so those are the only two whose
+shape can be copied from something it wrote itself. A Bool and a Color built
+from a guessed shape crashed the editor outright the first time these fields
+existed — `createFieldInput`, reading `.substr` of null — so the flicker is a
+number with 0 meaning steady, and COLOUR is not a field: it is `light_color` on
+the prop, changed in the .tscn for all of them.
+
+Every default here is the prop's own, so placing one changes nothing until you
+type in it. `tools/ldtk_fix_light_fields.py` reads both .tscn files and refuses
+to run if any default has drifted from what the prop is actually tuned to.
 
 **Every placed fixture at once** — the defaults live in
 `scenes/props/lighting/CeilingPanel.tscn` (and `CeilingLight.tscn`, which is the
