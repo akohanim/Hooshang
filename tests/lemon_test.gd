@@ -99,6 +99,29 @@ func _ready() -> void:
 	_check(Collectibles.total == 1, "picking one up banks it (total=%d)" % Collectibles.total)
 
 	_check(Collectibles.is_taken(id), "the fruit is remembered as taken")
+
+	# --- the "+1000" -------------------------------------------------------
+	#
+	# On the HUD layer rather than in the world, and that is the whole reason it
+	# is visible at all: the world is rasterised under a CanvasModulate of 0.05,
+	# which would take a painted tag to 5% of what was drawn. Same layer the
+	# flying fruit uses.
+	#
+	# CHECKED WITHOUT WAITING, deliberately. The counter assertions below turn on
+	# the fruit still being in the air, so a wait parked here reads as the flight
+	# having landed early — which is exactly what it did the first time this was
+	# written. The tag's LIFETIME is measured at the end instead.
+	var tag := _popup_tag()
+	_check(tag != null, "a +1000 pops off the fruit")
+	if tag != null:
+		# Over the fruit, not parked at the corner: a tag at the origin is what
+		# you get when the source's screen position was never asked for.
+		var where: Vector2 = tag.position + tag.size * 0.5
+		_check(where.length() > 40.0 and where.x < 1280.0 and where.y < 720.0,
+			"...over the fruit rather than at the origin  [%s]" % where)
+		_check(tag.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST,
+			"...drawn with square pixels, not smoothed")
+
 	# The fruit flies to the counter and the DISPLAYED number ticks over when it
 	# lands — but the banked total goes up on contact. Nothing the rest of the
 	# game reads may wait on an animation, so the two are checked apart.
@@ -144,6 +167,20 @@ func _ready() -> void:
 	_check(Collectibles.total == after,
 		"collecting the same fruit twice counts once (total=%d)" % Collectibles.total)
 
+	# --- how long the tag lives -------------------------------------------
+	#
+	# Timed rather than sampled at one moment: "a second" is the whole ask, and
+	# an assertion that only looks once cannot tell a tag that lasts 1.0s from
+	# one that lasts 0.3s and one that never goes away.
+	Collectibles.collect("popup:probe", 1, world.player)
+	var frames := 0
+	while _popup_tag() != null and frames < 240:
+		await _frames(1)
+		frames += 1
+	var life := frames / 60.0
+	_check(life >= 0.7 and life <= 1.6,
+		"the +1000 is up for about a second  [%.2fs]" % life)
+
 	if failures.is_empty():
 		print("LEMON TEST: ALL PASS")
 	else:
@@ -163,6 +200,20 @@ func _check(cond: bool, name: String) -> void:
 
 
 ## Every lemon picture currently on Screen's token surface.
+## The +1000 tag, if one is on the HUD layer. Found by its texture rather than
+## by name or index: the layer also carries the counter, its icon and whatever
+## fruit is mid-flight.
+func _popup_tag() -> TextureRect:
+	var hud: CanvasLayer = Collectibles.get_node_or_null("CollectibleHud")
+	if hud == null:
+		return null
+	for child in hud.get_children():
+		var tex := child as TextureRect
+		if tex != null and tex.texture == Collectibles.POPUP:
+			return tex
+	return null
+
+
 func _tokens_on_surface() -> Array[Node]:
 	var found: Array[Node] = []
 	if Screen.token_viewport == null:

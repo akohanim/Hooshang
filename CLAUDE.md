@@ -338,6 +338,17 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   down into every blink. `hooshang_dazed` is deliberately unrigged: it is a 3/4
   view with the mouth off the edge of the frame and a tilted eye these
   axis-aligned warps cannot follow. Re-run it after re-cutting any portrait.
+- `tools/gen_points_popup.py` — the "+1000" that pops off a picked-up lemon.
+  Neon pixel numerals: dark outline, pale rim one pixel inside it, green fill,
+  and a blurred tint under the lot. Strokes are THREE pixels because that order
+  needs a middle — at two, every pixel is an edge, the rim eats the fill and the
+  digits come out as hollow rings. Three glyphs is the whole font (`+`, `1`,
+  `0`), hand-set the way `gen_input_prompt.py` sets the five letters of "DASH".
+  Drawn at game resolution and blown up 4x with nearest filtering: it lives on
+  the HUD layer, which is authored at 1280x720 and carries fine art elsewhere,
+  but chunky is the point here. Sparks are hand-placed — a random scatter
+  re-rolls on every run, and art that changes when you regenerate it is art
+  nobody can review.
 - `tools/gen_persian_trim.py`, `gen_persian_glyph.py` — the Persian polish. The
   trim is UI art authored in the dialogue box's own 1280x720 space (a quarter of
   a design pixel each), the glyph is a light COOKIE and therefore white with the
