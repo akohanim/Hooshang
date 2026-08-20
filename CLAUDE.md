@@ -118,10 +118,14 @@ so the two agree now. The tiles are still placeholder art.
   a second line of defence; nothing is lost by rebuilding the TileSet, because
   the per-tile collision this project needs is re-applied on every import by
   `scripts/ldtk_tileset_post_import.gd`.
-- **A running Godot EDITOR re-imports with the params it started with.** The
-  editor re-imported the world seconds after the flag was set and dropped the
-  new tiles right back out, which looked exactly like the fix not working.
-  Restart the editor after changing anything in a `.import`.
+- **A running Godot EDITOR re-imports with the state it started with.** It
+  re-imported the world seconds after an import flag was set and dropped the new
+  tiles right back out, which looked exactly like the fix not working; a newly
+  handled ENTITY goes the same way, arriving as nothing while the hook that
+  builds it plainly has a case for it. Restart the editor after changing
+  anything in a `.import` OR in a post-import hook, and rebuild:
+  `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
+  `--import`.
 - **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after

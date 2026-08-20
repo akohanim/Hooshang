@@ -182,6 +182,13 @@ func _build_ceiling_panel(data: Dictionary) -> Node2D:
 	var run: Node2D = CEILING_PANEL_SCENE.instantiate()
 	run.position = data.position
 	run.run_tiles = maxi(int(roundf(Vector2(data.size).x / CeilingPanel.TILE.x)), 1)
+	# ABOVE THE ROOM'S OWN TILES. The Entities layer is built before Collisions
+	# and both sit at z 0, so a run placed over painted ceiling would be drawn
+	# and then covered by the paint — present, correct, and invisible, which is
+	# the hardest kind of missing thing to chase. z 1 clears the tile layers and
+	# still leaves it behind Foreground, which is the band for scenery the
+	# player passes in front of.
+	run.z_index = 1
 	return run
 
 
