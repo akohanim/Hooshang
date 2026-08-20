@@ -98,13 +98,17 @@ so the two agree now. The tiles are still placeholder art.
   on top of each other at the same world x while every name looked right.
   `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
-- **A bigger TILESET needs `ldtk/tilesets/tileset_8px.res` deleted as well.**
-  The importer UPDATES that resource rather than rebuilding it, so new tiles on
-  the sheet never become atlas tiles: `bricks_8px.png` grew to 48px and the
-  texture came through at 48px, while the atlas source stayed at four tiles and
-  every cell painted with the new value imported as nothing at all — no error,
-  no missing-tile warning, just an empty run where the ceiling should be.
-  `rm ldtk/tilesets/tileset_8px.res` alongside the two above.
+- **`force_tileset_reimport=true` is set in `hooshang_claude.ldtk.import`, and
+  it has to stay on.** Left off, the importer LOADS the existing
+  `ldtk/tilesets/tileset_8px.res` and then walks the sheet doing "create the
+  tile if it is missing, REMOVE it if it is there" — so every import inverts
+  which tiles exist. That is how a 48px sheet kept importing as four tiles with
+  the texture arriving at 48px: cells painted with a new value came through as
+  nothing at all, in every room, with no missing-tile warning and nothing in the
+  output to pull on. On it, the TileSet is rebuilt from the sheet each time.
+  Nothing is lost by that — the per-tile collision this project needs is
+  re-applied on every import by `scripts/ldtk_tileset_post_import.gd`, which is
+  exactly why that hook exists rather than the collision being set by hand.
 - **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after

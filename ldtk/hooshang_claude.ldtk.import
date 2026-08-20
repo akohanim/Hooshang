@@ -33,5 +33,5 @@ entities_post_import="res://scripts/ldtk_entities_post_import.gd"
 level_post_import="res://scripts/ldtk_level_post_import.gd"
 world_post_import=""
 Debug=""
-force_tileset_reimport=false
+force_tileset_reimport=true
 verbose_output=false

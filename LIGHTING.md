@@ -26,7 +26,8 @@ Practically that means:
   a run of it is solid to stand on. Its panels are drawn UNLIT and cannot be
   otherwise — a painted tile is a CanvasItem and `CanvasModulate` 0.05 takes it
   to 5% of what was drawn. Paint the architecture, then drop a `CeilingPanel` on
-  the cell you want lit.
+  the cell you want lit. If a painted run comes through invisible, it is the
+  tileset import flag — see CLAUDE.md on `force_tileset_reimport`.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
   `show_body = false` — the window itself IS the visible source. On the escape
   row that moon is eclipsed and recovering; see *The eclipse* below.
