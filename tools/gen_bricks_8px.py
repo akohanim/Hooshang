@@ -10,8 +10,12 @@ places.
 
 Order on the sheet IS the tile id the rules use, so do not reorder:
 
-    0  fill        2  left edge      4  ceiling floor
-    1  top edge    3  top-left corner 5  ceiling floor + panel
+    0  fill        2  left edge       4  ceiling floor    6  ceiling overhead
+    1  top edge    3  top-left corner  5  ...+ panel       7  ...+ panel
+
+The ceiling comes in two orientations because they are two different objects:
+4/5 are a SURFACE, seen edge on with a lip to stand on, and 6/7 are the ceiling
+seen from BELOW, which is what the room above his head is made of.
 
 THE CEILING TILES LIVE ON THE BRICK SHEET because an LDtk auto-layer has exactly
 ONE tileset, and both are painted on `Collisions`. They are drawn from
@@ -154,6 +158,33 @@ def ceiling(panel):
     return img
 
 
+def ceiling_overhead(panel):
+    """One 8px cell of the same ceiling, seen from BELOW — the room's own roof.
+
+    Upside down from `ceiling`, and not by mirroring it: looking up, the slab
+    the grid hangs from is the dark edge along the TOP and the lip into the room
+    is at the bottom, where the floor orientation has its standing surface. The
+    panel sits in the middle of the cell rather than in an underside, because
+    from here the underside is all you can see of it.
+    """
+    img = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
+    px = img.load()
+    for x in range(CELL):
+        px[x, 0] = TILE_EDGE + (255,)
+        for y in range(1, CELL - 1):
+            t = 1.0 - (y - 1) / float(CELL - 2)
+            px[x, y] = shade(mix(TILE_LO, TILE_HI, t * 0.9), speckle(x, y)) + (255,)
+        px[x, CELL - 1] = shade(TILE_EDGE, 6) + (255,)
+    for y in range(CELL):
+        px[0, y] = shade(RAIL_HI, -8 if y > CELL - 3 else 0) + (255,)
+    if panel:
+        for x in range(2, CELL - 1):
+            for y in range(2, CELL - 2):
+                px[x, y] = FRAME + (255,) if x in (2, CELL - 2) or y in (2, CELL - 3) \
+                    else mix(FIELD_LO, FIELD_HI, 0.75) + (255,)
+    return img
+
+
 TILES = [
     ("fill", False, False),
     ("top", True, False),
@@ -161,16 +192,22 @@ TILES = [
     ("corner", True, True),
 ]
 CEILING = [("ceiling", False), ("ceiling panel", True)]
+OVERHEAD = [("overhead", False), ("overhead panel", True)]
 
-sheet = Image.new("RGBA", (CELL * (len(TILES) + len(CEILING)), CELL), (0, 0, 0, 0))
+count = len(TILES) + len(CEILING) + len(OVERHEAD)
+sheet = Image.new("RGBA", (CELL * count, CELL), (0, 0, 0, 0))
 for i, (_name, top, left) in enumerate(TILES):
     sheet.paste(draw(top, left), (i * CELL, 0))
 for i, (_name, panel) in enumerate(CEILING):
     sheet.paste(ceiling(panel), ((len(TILES) + i) * CELL, 0))
+for i, (_name, panel) in enumerate(OVERHEAD):
+    sheet.paste(ceiling_overhead(panel),
+                ((len(TILES) + len(CEILING) + i) * CELL, 0))
 
 os.makedirs(OUT, exist_ok=True)
 path = os.path.join(OUT, "bricks_8px.png")
 sheet.save(path)
 print("wrote %s  %dx%d  (%s)"
       % (path, sheet.width, sheet.height,
-         ", ".join([t[0] for t in TILES] + [c[0] for c in CEILING])))
+         ", ".join([t[0] for t in TILES] + [c[0] for c in CEILING]
+                   + [o[0] for o in OVERHEAD])))

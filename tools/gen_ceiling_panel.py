@@ -24,11 +24,6 @@ what that looks like — a hole.
                           instead of a tile — thin frame, flat field, vignette
   ceiling_light_glow.png  overhead: ONLY what emits, on transparent, with the
                           bloom that spills past the frame onto its neighbours
-  ceiling_floor.png       the same tile as a SURFACE: standing lip on top,
-                          underside in shadow
-  ceiling_floor_light.png the same, with the panel in its underside
-  ceiling_floor_glow.png  what that panel emits — biased DOWNWARD, because the
-                          light of a ceiling falls into the room beneath it
   ceiling_tile_glow.png   what the PAINTED 8px panel emits. Its own file and not
                           a scaled copy of the 24px one: the painted cell's panel
                           is 5px wide where the prop's is 17, and a glow drawn
@@ -317,17 +312,72 @@ def tile_glow():
     return img
 
 
+## The overhead painted cell's panel — see tools/gen_bricks_8px.py's
+## `ceiling_overhead`. Higher in the cell than the floor version's, because from
+## below the panel is the middle of the tile rather than its underside.
+OVER_PANEL_X0, OVER_PANEL_X1 = 2, 6
+OVER_PANEL_Y0, OVER_PANEL_Y1 = 2, 5
+
+
+def over_glow():
+    """What a painted OVERHEAD panel emits. Falls downward into the room, the
+    same as the floor version — a ceiling lights what is under it either way."""
+    img = Image.new("RGBA", (TILE_GLOW_W, TILE_GLOW_H), (0, 0, 0, 0))
+    px = img.load()
+    ox, oy = (TILE_GLOW_W - 8) // 2, (TILE_GLOW_H - 8) // 2
+    x0, x1 = ox + OVER_PANEL_X0 + 1, ox + OVER_PANEL_X1 - 1
+    y0, y1 = oy + OVER_PANEL_Y0 + 1, oy + OVER_PANEL_Y1 - 1
+    cx = (x0 + x1) / 2.0
+    for x in range(TILE_GLOW_W):
+        for y in range(TILE_GLOW_H):
+            dx = max(0.0, x0 - x, x - x1)
+            dy_up = max(0.0, y0 - y)
+            dy_dn = max(0.0, y - y1)
+            if dx == 0.0 and dy_up == 0.0 and dy_dn == 0.0:
+                fx = 1.0 - abs(x - cx) / max(1.0, (x1 - x0) / 2.0)
+                px[x, y] = mix(LIT_MID, LIT_CORE, 0.6 + 0.4 * fx) + (255,)
+                continue
+            reach = (dx / 5.5) ** 2 + (dy_up / 2.2) ** 2 + (dy_dn / 5.5) ** 2
+            if reach >= 1.0:
+                continue
+            a = (1.0 - reach) ** 1.7
+            if a < 0.18 and (x + y) % 2:
+                continue
+            px[x, y] = mix(LIT_EDGE, LIT_MID, a) + (int(205 * a),)
+    return img
+
+
 def ldtk_icon():
-    """The 16x16 LDtk shows in its entity list. A slice of the lit floor cell
-    rather than a drawing of one, so the icon cannot drift from the art."""
-    cell = floor_light_cell().convert("RGBA")
-    glow = floor_glow()
-    lit = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    """The 16x16 LDtk shows for the CeilingLight entity.
+
+    A slice of the lit OVERHEAD panel rather than a drawing of one, so the icon
+    in the entity list cannot drift from the thing it places.
+    """
+    from PIL import Image as _Image
+    cell = _Image.new("RGBA", (8, 8), (0, 0, 0, 0))
+    # Redraw the overhead panel cell here rather than importing the sheet tool,
+    # which imports THIS module — the cycle is the only reason for the repeat.
+    px = cell.load()
+    for x in range(8):
+        px[x, 0] = TILE_EDGE + (255,)
+        for y in range(1, 7):
+            t = 1.0 - (y - 1) / 6.0
+            px[x, y] = shade(mix(TILE_LO, TILE_HI, t * 0.9), speckle(x, y)) + (255,)
+        px[x, 7] = shade(TILE_EDGE, 6) + (255,)
+    for y in range(8):
+        px[0, y] = shade(RAIL_HI, -8 if y > 5 else 0) + (255,)
+    for x in range(2, 7):
+        for y in range(2, 6):
+            px[x, y] = FRAME + (255,) if x in (2, 6) or y in (2, 5) \
+                else mix(FIELD_LO, FIELD_HI, 0.75) + (255,)
+    lit = _Image.new("RGBA", (8, 8), (0, 0, 0, 0))
     lit.alpha_composite(cell)
-    lit.alpha_composite(glow.crop(((GLOW_W - W) // 2, (GLOW_H - H) // 2,
-                                   (GLOW_W - W) // 2 + W, (GLOW_H - H) // 2 + H)))
+    g = over_glow()
+    lit.alpha_composite(g.crop(((TILE_GLOW_W - 8) // 2, (TILE_GLOW_H - 8) // 2,
+                                (TILE_GLOW_W - 8) // 2 + 8,
+                                (TILE_GLOW_H - 8) // 2 + 8)))
     icon = Image.new("RGB", (16, 16), (22, 24, 30))
-    icon.paste(lit.crop((4, 0, 20, H)).convert("RGB"), (0, 4))
+    icon.paste(lit.resize((16, 16), Image.NEAREST).convert("RGB"), (0, 0))
     return icon
 
 
@@ -336,15 +386,13 @@ def main():
     for name, img in (("ceiling_tile.png", base_cell()),
                       ("ceiling_light.png", light_cell()),
                       ("ceiling_light_glow.png", glow_cell()),
-                      ("ceiling_floor.png", floor_cell()),
-                      ("ceiling_floor_light.png", floor_light_cell()),
-                      ("ceiling_floor_glow.png", floor_glow()),
-                      ("ceiling_tile_glow.png", tile_glow())):
+                      ("ceiling_tile_glow.png", tile_glow()),
+                      ("ceiling_over_glow.png", over_glow())):
         path = os.path.join(OUT, name)
         img.save(path)
         print("wrote %s  (%dx%d)" % (os.path.relpath(path, ROOT), *img.size))
     # The LDtk entity icon lives beside the project file, not with the game art.
-    icon_path = os.path.join(ROOT, "ldtk/art/ceiling_floor.png")
+    icon_path = os.path.join(ROOT, "ldtk/art/ceiling_light.png")
     ldtk_icon().save(icon_path)
     print("wrote %s  (16x16)" % os.path.relpath(icon_path, ROOT))
 

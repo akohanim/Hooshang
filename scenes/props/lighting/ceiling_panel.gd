@@ -41,6 +41,9 @@ const TILE := Vector2(24.0, 8.0)
 
 const PLAIN := preload("res://assets/props/ceiling/ceiling_tile.png")
 const PANEL := preload("res://assets/props/ceiling/ceiling_light.png")
+## What this prop's own panel emits — the 24px cell's glow. Instances that light
+## a painted 8px cell override it; see `panel_texture`.
+const PANEL_GLOW := preload("res://assets/props/ceiling/ceiling_light_glow.png")
 
 ## How many cells of ceiling to lay, panel included. Forced ODD: the panel is
 ## the middle cell, and an even run has no middle — it would put the light half
@@ -65,6 +68,14 @@ const PANEL := preload("res://assets/props/ceiling/ceiling_light.png")
 ## and the rooms independent; the panel is still visibly the thing it comes from.
 @export var pool_drop := 50.0:
 	set(value): pool_drop = value; _apply()
+## The panel's emission, worn by the light as its texture.
+##
+## Per instance because the SAME fixture is used at two scales: the prop draws a
+## 24px cell whose panel is 17px across, and the painted `ceiling` tile is an 8px
+## cell whose panel is 5. A glow made for the wrong one either floats past the
+## tile's frame or sits inside it looking like a chip of paint.
+@export var panel_texture: Texture2D = PANEL_GLOW:
+	set(value): panel_texture = value; _apply()
 
 @onready var panel: PointLight2D = $Panel
 
@@ -85,6 +96,7 @@ func _apply() -> void:
 	cable.visible = false
 	bulb.visible = false
 	panel.energy = panel_energy
+	panel.texture = panel_texture
 	glow.position = Vector2(0.0, pool_drop)
 	_rebuild()
 

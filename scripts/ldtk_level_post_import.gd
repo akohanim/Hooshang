@@ -31,7 +31,14 @@ const VALUES_LAYER_SUFFIX := "-values"
 ## documented in tools/gen_bricks_8px.py ("Order on the sheet IS the tile id the
 ## rules use, so do not reorder") — this is tile 5.
 const GEOMETRY_LAYER := "Collisions"
-const PANEL_TILE := Vector2i(5, 0)
+## The panel tiles, and the emission each one wears. Two, because the ceiling is
+## painted in two orientations — `ceiling_flor` is a surface seen edge on and
+## `ceiling` is the room's own roof seen from below — and their panels sit at
+## different heights in the cell, so one glow cannot serve both.
+const PANEL_TILES := {
+	Vector2i(5, 0): preload("res://assets/props/ceiling/ceiling_tile_glow.png"),
+	Vector2i(7, 0): preload("res://assets/props/ceiling/ceiling_over_glow.png"),
+}
 
 ## What a painted panel emits.
 ##
@@ -47,7 +54,6 @@ const PANEL_TILE := Vector2i(5, 0)
 ## POOL is the light that actually falls into the room under it. The pool is kept
 ## deliberately weak — panels land every third cell, so a run of them stacks, and
 ## anything stronger turns a corridor into an even wash with nothing dark left.
-const PANEL_GLOW := preload("res://assets/props/ceiling/ceiling_tile_glow.png")
 const POOL_TEXTURE := preload("res://assets/light_radial.png")
 const PANEL_COLOR := Color(0.83, 0.9, 0.95)
 const PANEL_ENERGY := 1.4
@@ -85,7 +91,7 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 func _light_panels(level: LDTKLevel, layer: TileMapLayer) -> void:
 	var cells: Array[Vector2i] = []
 	for cell in layer.get_used_cells():
-		if layer.get_cell_atlas_coords(cell) == PANEL_TILE:
+		if PANEL_TILES.has(layer.get_cell_atlas_coords(cell)):
 			cells.append(cell)
 	if cells.is_empty():
 		return
@@ -99,7 +105,8 @@ func _light_panels(level: LDTKLevel, layer: TileMapLayer) -> void:
 		# during import is the origin. The layer's own transform is the only
 		# thing between the two.
 		var at: Vector2 = layer.transform * layer.map_to_local(cell)
-		_add_light(holder, level, at, PANEL_GLOW, PANEL_ENERGY, 1.0)
+		var glow: Texture2D = PANEL_TILES[layer.get_cell_atlas_coords(cell)]
+		_add_light(holder, level, at, glow, PANEL_ENERGY, 1.0)
 		_add_light(holder, level, at + Vector2(0.0, POOL_DROP),
 			POOL_TEXTURE, POOL_ENERGY, POOL_SCALE)
 

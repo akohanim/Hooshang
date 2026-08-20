@@ -21,6 +21,7 @@ const DARKSHANG_SCENE := preload("res://scenes/props/chase/Darkshang.tscn")
 const SURGE_POINT_SCENE := preload("res://scenes/props/chase/SurgePointTrigger.tscn")
 const SAFE_ZONE_SCENE := preload("res://scenes/props/chase/SafeZoneTrigger.tscn")
 const DARKSHANG_TRIGGER_SCENE := preload("res://scenes/props/chase/DarkshangTrigger.tscn")
+const CEILING_LIGHT_SCENE := preload("res://scenes/props/lighting/CeilingLight.tscn")
 const RUMI_TRIGGER_SCRIPT := preload("res://scripts/ldtk_rumi_trigger.gd")
 const LDTK_DOOR_SCRIPT := preload("res://scripts/ldtk_door.gd")
 const EXIT_SIGN_SCENE := preload("res://scenes/props/ExitSign.tscn")
@@ -89,6 +90,13 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.RIGHT))
 			"GlassSpikesRightWall":
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.LEFT))
+			# The light of a ceiling panel, placed by hand. Painted panels are
+			# lit by the import already (ldtk_level_post_import.gd) — this is
+			# for the ones off that rhythm, and for lighting a plain cell.
+			"CeilingLight":
+				var lamp: Node2D = CEILING_LIGHT_SCENE.instantiate()
+				lamp.position = data.position
+				entity_layer.add_child(lamp)
 			"SlideZone":
 				entity_layer.add_child(_build_slide_zone(data))
 			# One entity per direction, so which way a belt runs is chosen by

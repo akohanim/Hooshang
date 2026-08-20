@@ -21,17 +21,23 @@ Practically that means:
 - An **office fluorescent** is a `CeilingPanel` — a run of suspended ceiling
   with a flat light panel flush in the grid, for rooms that should read as an
   office rather than as a bulb on a wire. See *Adding a ceiling panel* below.
-- The same ceiling can be **painted** rather than placed: `ceiling_flor` is an
-  IntGrid value on the `Collisions` layer (tools/ldtk_add_ceiling_tile.py), and
-  a run of it is solid to stand on. Its panels are drawn UNLIT and cannot be
-  otherwise — a painted tile is a CanvasItem and `CanvasModulate` 0.05 takes it
-  to 5% of what was drawn. Paint the architecture, then drop a `CeilingPanel` on
-  the cell you want lit — but you no longer have to for the ordinary case: the
-  import hangs a panel light and a weak pool on every painted panel cell
-  (`scripts/ldtk_level_post_import.gd`). Panels land every third column and are
-  staggered a column per row, so a two-row ceiling reads as a grid rather than
-  as vertical pairs. If a painted run comes through invisible, it is the
-  importer's tile toggle — see CLAUDE.md.
+- The same ceiling can be **painted** rather than placed. Two IntGrid values on
+  the `Collisions` layer, next to `brick`: `ceiling` is the room's own roof seen
+  from below (what room 2's `CeilingPanel` props are made of), and `ceiling_flor`
+  is the same ceiling seen edge on, as a surface to stand on. Both are solid,
+  like every other tile on that layer. Panels land every third column and are
+  staggered a column per row, so a two-row run reads as a grid rather than as
+  vertical pairs.
+- **A painted panel cannot glow.** It is a CanvasItem, and `CanvasModulate` 0.05
+  takes it to 5% of what was drawn — the trap `SunShaft` and `WallPattern`
+  document. The light is a separate thing from the paint, and the import supplies
+  it: `scripts/ldtk_level_post_import.gd` hangs a panel light and a weak pool on
+  every painted panel cell. Nothing to place for the ordinary case.
+- **`CeilingLight`** is an LDtk entity: the light of a panel, on its own. For the
+  ones off that rhythm — a lit panel over a doorway, a single fitting in a dark
+  room, or a grid you painted whose lights you want somewhere else.
+- If a painted run comes through invisible, it is the importer's tile toggle —
+  see CLAUDE.md.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
   `show_body = false` — the window itself IS the visible source. On the escape
   row that moon is eclipsed and recovering; see *The eclipse* below.

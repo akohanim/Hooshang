@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cvmvo8wbl3qel"
-path="res://.godot/imported/ceiling_floor.png-94aefa89ac0238ec6126c4fdea66fbb5.ctex"
+uid="uid://dyneeyo1d4f3x"
+path="res://.godot/imported/ceiling_over_glow.png-d3fabcb5afd2fcb77c2b826c50956953.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/props/ceiling/ceiling_floor.png"
-dest_files=["res://.godot/imported/ceiling_floor.png-94aefa89ac0238ec6126c4fdea66fbb5.ctex"]
+source_file="res://assets/props/ceiling/ceiling_over_glow.png"
+dest_files=["res://.godot/imported/ceiling_over_glow.png-d3fabcb5afd2fcb77c2b826c50956953.ctex"]
 
 [params]
 

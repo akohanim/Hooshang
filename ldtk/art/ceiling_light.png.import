@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6iye50y2teae"
-path="res://.godot/imported/ceiling_floor.png-189c8ceea58338850adf5b9dbb1c8149.ctex"
+uid="uid://6o4o8gq0mmk1"
+path="res://.godot/imported/ceiling_light.png-f84f067c85b477b29a5b05790002d11c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ldtk/art/ceiling_floor.png"
-dest_files=["res://.godot/imported/ceiling_floor.png-189c8ceea58338850adf5b9dbb1c8149.ctex"]
+source_file="res://ldtk/art/ceiling_light.png"
+dest_files=["res://.godot/imported/ceiling_light.png-f84f067c85b477b29a5b05790002d11c.ctex"]
 
 [params]
 

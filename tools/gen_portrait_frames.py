@@ -172,6 +172,69 @@ def _clamp_rect(x0, y0, x1, y1):
     return (max(0, int(x0)), max(0, int(y0)), min(SIZE, int(x1)), min(SIZE, int(y1)))
 
 
+# Godot's import settings for an overlay, matching what the portraits
+# themselves are imported with (see tools/import_portraits.py).
+#
+# MIPMAPS ARE THE POINT. An overlay sits directly on top of a mipmapped painting
+# minified to a third of its size; imported at the project default — Nearest, no
+# mipmaps, which is right for the 8px world and wrong for this — the patch
+# aliases into sparkle while the face under it stays smooth, and the join is
+# visible as a rectangle around his mouth. These are written by the tool rather
+# than set by hand in the editor so a fresh checkout gets them.
+IMPORT_TEMPLATE = """[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://%s"
+path="res://.godot/imported/%s-%s.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/portraits/anim/%s"
+dest_files=["res://.godot/imported/%s-%s.ctex"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=1
+"""
+
+
+def _write_import(filename):
+    """Write `<file>.png.import` unless one is already there.
+
+    Left alone if it exists: Godot rewrites these on import with a real uid and
+    content hash, and clobbering that on every run would dirty the repo and
+    force a re-import of art that has not changed.
+    """
+    path = os.path.join(OUT, filename + ".import")
+    if os.path.exists(path):
+        return
+    import hashlib
+    digest = hashlib.md5(filename.encode()).hexdigest()
+    uid = "z" + digest[:12]
+    with open(path, "w") as fh:
+        fh.write(IMPORT_TEMPLATE % (uid, filename, digest, filename, filename, digest))
+
+
 def _strip(frames, rect):
     """Crop every frame to `rect` and lay them out left to right."""
     x0, y0, x1, y1 = rect
@@ -196,11 +259,15 @@ def main():
         if "lip_y" in lm:
             lip_y, (mx0, mx1) = lm["lip_y"], lm["mouth_x"]
             cx = (mx0 + mx1) / 2.0
-            # Wide enough for the feathered oval and tall enough for the lowest
-            # jaw position, or the bottom of the drop is cropped off.
-            rect = _clamp_rect(cx - 125, lip_y - 12, cx + 125, lip_y + 135 + max(MOUTH_DROPS))
+            # Wider than the feathered oval actually reaches (its blur carries
+            # ~36px past its edge), and tall enough for the lowest jaw position.
+            # The margin is not slack: it means every frame's BORDER pixels are
+            # untouched crop, identical across the strip, so the mipmaps below
+            # can bleed one frame into the next without it showing.
+            rect = _clamp_rect(cx - 152, lip_y - 12, cx + 152, lip_y + 135 + max(MOUTH_DROPS))
             sheet, place = _strip([_open_mouth(im, lm, d) for d in MOUTH_DROPS], rect)
             sheet.save(os.path.join(OUT, "%s_mouth.png" % name))
+            _write_import("%s_mouth.png" % name)
             entry["mouth"] = {"rect": list(place), "frames": len(MOUTH_DROPS)}
 
         eyes = lm["eyes"]
@@ -208,6 +275,7 @@ def main():
                            max(e[2] for e in eyes) + 14, max(e[3] for e in eyes) + 16)
         sheet, place = _strip([_blink(im, eyes, t) for t in BLINK_STEPS], rect)
         sheet.save(os.path.join(OUT, "%s_eyes.png" % name))
+        _write_import("%s_eyes.png" % name)
         entry["eyes"] = {"rect": list(place), "frames": len(BLINK_STEPS)}
 
         manifest[name] = entry

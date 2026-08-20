@@ -74,6 +74,12 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/platform_test.tscn` — the two office
     ceiling platforms: the solid one holds, the crumbling one gives way in
     under a second and comes BACK on reset (collision, art and its spent flag)
+  - `Godot --headless --path . res://tests/portrait_anim_test.tscn` — the talking
+    dialogue faces: the frame manifest loads off res:// at all, a rigged face
+    raises both overlays and an unrigged one holds still, the overlays land on
+    the face (mouth low, eyes above it) and travel with it when the banner
+    mirrors, the mouth moves only while words are appearing — closing on a
+    `[p]` breath and the moment the line ends — and the eyes blink unprompted
   - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
@@ -279,6 +285,10 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
   Runs WINDOWED — 2D does not rasterise headless — and binds no save slot:
   `Godot --path . res://tests/room_shot.tscn -- Level_24`
+- `tests/portrait_shot.tscn` — dev capture harness for the talking portraits,
+  not pass/fail. Photographs the banner at every mouth position and blink frame
+  so the rig can be LOOKED at. Windowed, like `room_shot`:
+  `Godot --path . res://tests/portrait_shot.tscn -- hooshang_skeptical`
 - `tests/feel_measure.tscn` — the same idea for MOVEMENT, and also not pass/fail.
   Prints the jump apex, the airtime, the horizontal reach of a running jump and
   a 20-timing sweep of the jump+up-dash. Run it before and after touching
@@ -313,6 +323,17 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   are kept but SCALED — which is why `Lemon.tscn` sets `bob_height = 0`, or the
   prop's own tween hovers it a second time and the squash drifts out of step.
   Sizes: `10` world, `20 dense`, `16 icon` (writes `ldtk/art/lemon.png`).
+- `tools/gen_portrait_frames.py` — the talking dialogue faces, WARPED out of the
+  painted portraits rather than drawn: a jaw that drops and a lid that closes,
+  cut to patch strips in `assets/portraits/anim/` with a `manifest.json` of
+  rects. Two things it has to get right that a crop does not. The jaw slide is
+  composited through a FEATHERED OVAL over the chin — shifting the full-width
+  band under the lip line takes the shirt collar and both cheeks with it — and
+  the lid is stretched from a SIX-PIXEL strip, because these paintings leave
+  barely any skin between brow and eye and a taller source drags the eyebrow
+  down into every blink. `hooshang_dazed` is deliberately unrigged: it is a 3/4
+  view with the mouth off the edge of the frame and a tilted eye these
+  axis-aligned warps cannot follow. Re-run it after re-cutting any portrait.
 - `tools/gen_persian_trim.py`, `gen_persian_glyph.py` — the Persian polish. The
   trim is UI art authored in the dialogue box's own 1280x720 space (a quarter of
   a design pixel each), the glyph is a light COOKIE and therefore white with the
@@ -379,6 +400,13 @@ test rather than being noticed months later in play.
   both bands stay on the banner's edges through mirroring, BOTTOM placement and
   pagination growth — the bottom one is POSITIONED rather than shifted, so it is
   the one that gets left behind.
+- **A rigged face blinks, and talks only while it is talking.** Hooshang's
+  portraits move their mouth for exactly as long as the typewriter is revealing
+  — closing on a `[p]` breath and on the last character — and blink on their
+  own clock. Nothing in a beat asks for this: the rig is found from the portrait
+  TEXTURE's path, so a script still just names a state. A face with no rig
+  (Rumi's, the tinted stand-in, the waking shot) holds still, which is what
+  every portrait did before. Frames come from `tools/gen_portrait_frames.py`.
 - Dialogue is drawn on the window's own surface at full resolution, the emote
   bubble inside the 320x180 game viewport with the sprites. That split is
   deliberate — see `systems/screen.gd`. Restyling one can never touch the other.

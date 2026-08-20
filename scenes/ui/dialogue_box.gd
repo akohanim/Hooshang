@@ -302,6 +302,9 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		else:
 			portrait.texture = _default_portrait
 			portrait.modulate = portrait_tint
+		_set_rig(portrait.texture)
+	else:
+		_set_rig(null)
 	var pages := _paginate(text)
 	# Sized ONCE for the whole speech, not per page. The box stays up between
 	# pages, so a per-page height would be seen as the banner growing and
@@ -474,7 +477,133 @@ func _fit_banner(rows: int) -> void:
 	arrow.offset_top = arrow.offset_bottom - ARROW_HEIGHT
 
 
+## Read the frame rigs the generator wrote.
+##
+## A missing or unreadable manifest is NOT an error and is not reported: every
+## face then behaves as an unrigged one, which is exactly how this box worked
+## before rigs existed. Dialogue is not worth crashing a run over.
+##
+## Loaded as a Resource rather than read with FileAccess so it survives export —
+## a plain data file read off res:// is at the mercy of the export filters,
+## which is a bug that only ever shows up in the itch.io build.
+func _load_rigs() -> void:
+	var res := load(ANIM_DIR + "manifest.json")
+	if res is JSON and res.data is Dictionary:
+		_rigs = res.data
+
+
+## Point the overlays at `tex`'s rig, or stand them down if it has none.
+##
+## The face is identified by its texture PATH, which is what keeps this box's
+## callers out of it — a beat names a state, act1_beats turns that into a
+## preloaded portrait, and the rig follows the art rather than the script.
+func _set_rig(tex: Texture2D) -> void:
+	_rig = {}
+	portrait_mouth.visible = false
+	portrait_eyes.visible = false
+	_blink_t = -1.0
+	_blink_left = randf_range(BLINK_GAP.x, BLINK_GAP.y)
+	_mouth_left = 0.0
+	if tex == null or tex.resource_path == "":
+		return
+	var key := tex.resource_path.get_file().get_basename()
+	if not _rigs.has(key):
+		return
+	_rig = _rigs[key]
+	var src := tex.get_size()
+	if src.x <= 0.0 or src.y <= 0.0:
+		_rig = {}
+		return
+	_fit_overlay(portrait_mouth, key, "mouth", src)
+	_fit_overlay(portrait_eyes, key, "eyes", src)
+
+
+## Hang one overlay strip over the part of the portrait it replaces.
+##
+## By ANCHOR, not by offset. The manifest's rect is in the painting's own 512px
+## space while the portrait is drawn into a 172px frame, so a pixel offset would
+## be wrong by a factor of three — and would have to be recomputed every time
+## _place() mirrors the banner or _fit_banner grows it. Anchors are fractions of
+## the parent, so both of those come out right without this knowing they ran.
+func _fit_overlay(node: TextureRect, key: String, part: String, src: Vector2) -> void:
+	if not _rig.has(part):
+		return
+	var strip := load(ANIM_DIR + "%s_%s.png" % [key, part]) as Texture2D
+	if strip == null:
+		return
+	var r: Array = _rig[part]["rect"]
+	var atlas := AtlasTexture.new()
+	atlas.atlas = strip
+	atlas.region = Rect2(0.0, 0.0, float(r[2]), float(r[3]))
+	node.texture = atlas
+	node.anchor_left = float(r[0]) / src.x
+	node.anchor_top = float(r[1]) / src.y
+	node.anchor_right = (float(r[0]) + float(r[2])) / src.x
+	node.anchor_bottom = (float(r[1]) + float(r[3])) / src.y
+	node.offset_left = 0.0
+	node.offset_top = 0.0
+	node.offset_right = 0.0
+	node.offset_bottom = 0.0
+	node.visible = true
+
+
+## Slide an overlay's window along its strip to frame `index`.
+func _show_frame(node: TextureRect, index: int) -> void:
+	var atlas := node.texture as AtlasTexture
+	if atlas == null:
+		return
+	var region := atlas.region
+	region.position.x = index * region.size.x
+	atlas.region = region
+
+
+## Run a rigged face for one frame: a mouth driven by the typewriter, and a blink
+## on its own clock.
+func _animate_portrait(delta: float) -> void:
+	if _rig.is_empty() or not portrait.visible:
+		return
+
+	if portrait_mouth.visible:
+		# The mouth moves for exactly as long as words are appearing, and stops
+		# dead on a breath. A face still chewing through "[p]" — or through the
+		# wait for a button press — is the tell that the mouth is running on its
+		# own timer rather than saying the line.
+		if _revealing and _pause_left <= 0.0:
+			_mouth_left -= delta
+			if _mouth_left <= 0.0:
+				_mouth_left = MOUTH_FRAME_TIME
+				# Never frame 0: that one is the closed mouth, and it means
+				# silence. Picking it mid-word reads as a stutter.
+				_show_frame(portrait_mouth, randi_range(1, int(_rig["mouth"]["frames"]) - 1))
+		else:
+			_show_frame(portrait_mouth, 0)
+
+	if not portrait_eyes.visible:
+		return
+	var frames: int = int(_rig["eyes"]["frames"])
+	if _blink_t < 0.0:
+		_blink_left -= delta
+		if _blink_left <= 0.0:
+			_blink_t = 0.0
+		return
+	_blink_t += delta
+	if _blink_t >= BLINK_TIME:
+		_blink_t = -1.0
+		_blink_left = randf_range(BLINK_GAP.x, BLINK_GAP.y)
+		_show_frame(portrait_eyes, 0)
+		return
+	# Down and back up: the shut frame is the MIDDLE of a blink, not the end of
+	# one. Running the strip straight through would leave his eyes closed.
+	var half := BLINK_TIME * 0.5
+	var t: float = _blink_t / half if _blink_t < half else (BLINK_TIME - _blink_t) / half
+	_show_frame(portrait_eyes, clampi(int(t * frames), 0, frames - 1))
+
+
 func _process(delta: float) -> void:
+	# Before the reveal guard below: a rigged face blinks whether or not there
+	# are still words arriving, including while the line sits finished waiting
+	# for a press.
+	_animate_portrait(delta)
 	if not _revealing:
 		return
 	if _pause_left > 0.0:
