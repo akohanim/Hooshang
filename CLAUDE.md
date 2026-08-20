@@ -80,6 +80,10 @@ so the two agree now. The tiles are still placeholder art.
     the face (mouth low, eyes above it) and travel with it when the banner
     mirrors, the mouth moves only while words are appearing — closing on a
     `[p]` breath and the moment the line ends — and the eyes blink unprompted
+  - `Godot --headless --path . res://tests/chimney_test.tscn` — Level_1's
+    one-cell shaft: he drops into it from anywhere over its mouth, wall-slides
+    down it instead of free-falling, and can wall-jump back up. This is the
+    test that pins the 6px hitbox — at 8 he cannot get into the shaft at all
   - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
@@ -438,14 +442,21 @@ test rather than being noticed months later in play.
   collide with mask 2 only.
 - Every tunable is an `@export` with a one-line comment saying what tweaking
   it changes. Feel timers count down as plain floats in `_tick_timers()`.
-- Player hitbox 8x12 — one cell wide, one and a half tall on the 8px grid.
-  **It is wider than he is drawn** (4.7px), which is why `Player.footing_width`
-  exists: Godot keeps a body standing while any part of its shape overlaps the
-  floor, so without it he rests with his centre 4px past a ledge and every
-  drawn pixel over air. Narrowing the hitbox cannot fix that — it would have
-  to go under 4px, narrower than the sprite and no longer the one-cell body
-  the grid is built around.
-  Interiors: 6 cells = claustrophobic, walkable min is a 2-cell (16px) slot.
+- Player hitbox **6x12** — three quarters of a cell across, one and a half
+  tall on the 8px grid. It was 8 (a full cell) until Level_1's one-cell chimney:
+  **a body exactly as wide as a cell cannot pass through a one-cell slot**,
+  because Godot resolves two exactly-abutting AABBs as a collision. He sat on
+  the lip of that shaft with every drawn pixel over the hole — measured, an 8px
+  box entered it from 0 of 33 approach positions and a 6px box enters from
+  anywhere over its mouth. `tests/chimney_test.tscn` holds that.
+  `Player.HALF_WIDTH` is half this box and moves with it.
+  **It is still wider than he is drawn** (4.7px), which is why
+  `Player.footing_width` exists: Godot keeps a body standing while any part of
+  its shape overlaps the floor, so without it he rests with his centre a full
+  box-half past a ledge and every drawn pixel over air. Narrowing further does
+  not fix THAT — it would have to go under 4px, narrower than the sprite.
+  Interiors: 6 cells = claustrophobic, walkable min is a 2-cell (16px) slot;
+  a 1-cell slot is a chimney he can slide and wall-jump in, not a walkway.
   Jump reaches 34px (~4 cells), dash ~39px (~5), jump+dash ~85px (~10).
   **These are pixel figures first.** The grid halving did not move any of them,
   and a future grid change should not either — level geometry is built against

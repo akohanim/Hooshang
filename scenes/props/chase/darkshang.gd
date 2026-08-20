@@ -141,7 +141,7 @@ signal chase_reset(at: Vector2)
 
 @export_group("Detection")
 ## Size of his kill box in px, centred on him. 12x16 is a shade wider and taller
-## than the player's own 8x12 hitbox: a shadow that swallows you should not need
+## than the player's own 6x12 hitbox: a shadow that swallows you should not need
 ## to be pixel-aligned with you.
 @export var catch_size := Vector2(12.0, 16.0):
 	set(value):

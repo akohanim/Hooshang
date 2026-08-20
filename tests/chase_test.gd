@@ -239,7 +239,7 @@ func _test_pass_through() -> void:
 	shadow.surge_warning = 0.0  # no telegraph: the line he travels is what is under test
 	# His kill box is switched off for the run, not shrunk. Shrinking it does NOT
 	# stop him catching anybody — a 0.01px box sitting exactly on the player still
-	# overlaps the player's own 8x12 — and a catch mid-measurement freezes him,
+	# overlaps the player's own 6x12 — and a catch mid-measurement freezes him,
 	# which reads as geometry having stopped him. It is turned back on below.
 	shadow.monitoring = false
 	shadow.state = Darkshang.State.FOLLOWING

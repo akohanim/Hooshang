@@ -94,7 +94,7 @@ const DUST_SHAPES := 3
 ## Pale warm grey. Alpha here is the starting opacity — office dust should be
 ## barely there, not a white puff.
 @export var dust_color := Color(0.85, 0.83, 0.78, 0.45)
-## How far below his origin his feet are (8x12 hitbox, so 6px).
+## How far below his origin his feet are (6x12 hitbox, so 6px).
 @export var dust_foot_offset := 6.0
 ## Fraction of a full burst a jump throws. A takeoff disturbs less than a landing.
 @export_range(0.0, 2.0) var dust_jump_strength := 0.6
