@@ -22,6 +22,7 @@ const SURGE_POINT_SCENE := preload("res://scenes/props/chase/SurgePointTrigger.t
 const SAFE_ZONE_SCENE := preload("res://scenes/props/chase/SafeZoneTrigger.tscn")
 const DARKSHANG_TRIGGER_SCENE := preload("res://scenes/props/chase/DarkshangTrigger.tscn")
 const CEILING_LIGHT_SCENE := preload("res://scenes/props/lighting/CeilingLight.tscn")
+const CEILING_PANEL_SCENE := preload("res://scenes/props/lighting/CeilingPanel.tscn")
 const RUMI_TRIGGER_SCRIPT := preload("res://scripts/ldtk_rumi_trigger.gd")
 const LDTK_DOOR_SCRIPT := preload("res://scripts/ldtk_door.gd")
 const EXIT_SIGN_SCENE := preload("res://scenes/props/ExitSign.tscn")
@@ -90,6 +91,12 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.RIGHT))
 			"GlassSpikesRightWall":
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.LEFT))
+			# The full-size ceiling run — the fixture standing in room 2, not
+			# the 8px paint tiles. Dragged to a WIDTH, which becomes the number
+			# of 24px cells; the prop rounds that to an odd count, because the
+			# panel is the middle cell and an even run has no middle.
+			"CeilingPanel":
+				entity_layer.add_child(_build_ceiling_panel(data))
 			# The light of a ceiling panel, placed by hand. Painted panels are
 			# lit by the import already (ldtk_level_post_import.gd) — this is
 			# for the ones off that rhythm, and for lighting a plain cell.
@@ -164,6 +171,18 @@ func _build_platform(data: Dictionary, scene: PackedScene) -> StaticBody2D:
 	plat.position = data.position
 	plat.size = Vector2(Vector2(data.size).x, Platform.CELL)
 	return plat
+
+
+## A ceiling run, at the width it was dragged to.
+##
+## `position` is the entity's CENTRE, like every other sized entity here, and
+## CeilingPanel centres its run on that too — so the panel lands on the point
+## you placed rather than half a run away from it.
+func _build_ceiling_panel(data: Dictionary) -> Node2D:
+	var run: Node2D = CEILING_PANEL_SCENE.instantiate()
+	run.position = data.position
+	run.run_tiles = maxi(int(roundf(Vector2(data.size).x / CeilingPanel.TILE.x)), 1)
+	return run
 
 
 func _build_glass_spikes(data: Dictionary, facing: GlassSpikes.Facing) -> Area2D:

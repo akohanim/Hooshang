@@ -20,7 +20,14 @@ Practically that means:
   cord and bulb.
 - An **office fluorescent** is a `CeilingPanel` — a run of suspended ceiling
   with a flat light panel flush in the grid, for rooms that should read as an
-  office rather than as a bulb on a wire. See *Adding a ceiling panel* below.
+  office rather than as a bulb on a wire. It is also an LDtk **entity**: drag it
+  to a width and the width becomes the number of 24px cells, rounded to an odd
+  count because the panel is the middle one. See *Adding a ceiling panel* below.
+- **The full-size run and the paint tiles are the same ceiling at two scales.**
+  The entity is the fixture — a 24px cell whose panel is 17px across, the thing
+  standing in room 2. The `ceiling` IntGrid value is that cell cut down to the
+  8px paint grid, panel and all, for brushing a long roof in. Reach for the
+  entity when you want the fitting, the paint when you want the architecture.
 - The same ceiling can be **painted** rather than placed. Two IntGrid values on
   the `Collisions` layer, next to `brick`: `ceiling` is the room's own roof seen
   from below (what room 2's `CeilingPanel` props are made of), and `ceiling_flor`

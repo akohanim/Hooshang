@@ -347,6 +347,21 @@ def over_glow():
     return img
 
 
+def ldtk_run_icon():
+    """The 16x16 LDtk shows for the CeilingPanel entity — the 24px cell's own
+    lit panel, cut from the art rather than drawn, so the icon in the entity
+    list cannot drift from the thing it places."""
+    lit = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    lit.alpha_composite(light_cell())
+    g = glow_cell()
+    lit.alpha_composite(g.crop(((GLOW_W - W) // 2, (GLOW_H - H) // 2,
+                                (GLOW_W - W) // 2 + W, (GLOW_H - H) // 2 + H)))
+    icon = Image.new("RGB", (16, 16), (22, 24, 30))
+    # The panel is 18px of a 24px cell; take that and letterbox it.
+    icon.paste(lit.crop((4, 0, 20, H)).convert("RGB"), (0, 4))
+    return icon
+
+
 def ldtk_icon():
     """The 16x16 LDtk shows for the CeilingLight entity.
 
@@ -392,9 +407,11 @@ def main():
         img.save(path)
         print("wrote %s  (%dx%d)" % (os.path.relpath(path, ROOT), *img.size))
     # The LDtk entity icon lives beside the project file, not with the game art.
-    icon_path = os.path.join(ROOT, "ldtk/art/ceiling_light.png")
-    ldtk_icon().save(icon_path)
-    print("wrote %s  (16x16)" % os.path.relpath(icon_path, ROOT))
+    for name, img in (("ceiling_light.png", ldtk_icon()),
+                      ("ceiling_panel.png", ldtk_run_icon())):
+        icon_path = os.path.join(ROOT, "ldtk/art", name)
+        img.save(icon_path)
+        print("wrote %s  (16x16)" % os.path.relpath(icon_path, ROOT))
 
 
 if __name__ == "__main__":

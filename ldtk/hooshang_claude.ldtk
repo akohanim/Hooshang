@@ -70,15 +70,8 @@
 			"intGridValues": [
 				{ "value": 1, "identifier": null, "color": "#000000", "tile": null, "groupUid": 0 },
 				{ "value": 2, "identifier": "brick", "color": "#BE4A2F", "tile": null, "groupUid": 1 },
-				{ "value": 3, "identifier": "ceiling_flor", "color": "#B8C6D2", "tile": null, "groupUid": 0 }
-			,
-				{
-					"value": 4,
-					"identifier": "ceiling",
-					"color": "#9AA8B6",
-					"tile": null,
-					"groupUid": 0
-				}
+				{ "value": 3, "identifier": "ceiling_flor", "color": "#B8C6D2", "tile": null, "groupUid": 0 },
+				{ "value": 4, "identifier": "ceiling", "color": "#9AA8B6", "tile": null, "groupUid": 0 }
 			],
 			"intGridValuesGroups": [{ "uid": 1, "identifier": null, "color": null }],
 			"autoRuleGroups": [
@@ -343,8 +336,7 @@
 					"usesWizard": false,
 					"requiredBiomeValues": [],
 					"biomeRequirementMode": 0
-				}
-			,
+				},
 				{
 					"uid": 114,
 					"name": "ceiling",
@@ -357,17 +349,11 @@
 							"uid": 115,
 							"active": true,
 							"size": 1,
-							"tileRectsIds": [
-								[
-									7
-								]
-							],
+							"tileRectsIds": [[7]],
 							"alpha": 1,
 							"chance": 1,
 							"breakOnMatch": true,
-							"pattern": [
-								4
-							],
+							"pattern": [4],
 							"flipX": false,
 							"flipY": false,
 							"xModulo": 3,
@@ -395,17 +381,11 @@
 							"uid": 116,
 							"active": true,
 							"size": 1,
-							"tileRectsIds": [
-								[
-									7
-								]
-							],
+							"tileRectsIds": [[7]],
 							"alpha": 1,
 							"chance": 1,
 							"breakOnMatch": true,
-							"pattern": [
-								4
-							],
+							"pattern": [4],
 							"flipX": false,
 							"flipY": false,
 							"xModulo": 3,
@@ -433,17 +413,11 @@
 							"uid": 117,
 							"active": true,
 							"size": 1,
-							"tileRectsIds": [
-								[
-									6
-								]
-							],
+							"tileRectsIds": [[6]],
 							"alpha": 1,
 							"chance": 1,
 							"breakOnMatch": true,
-							"pattern": [
-								4
-							],
+							"pattern": [4],
 							"flipX": false,
 							"flipY": false,
 							"xModulo": 1,
@@ -2035,7 +2009,7 @@
 			"tags": [],
 			"exportToToc": false,
 			"allowOutOfBounds": false,
-			"doc": "The light of a ceiling panel: the panel's own glow, and the pool it drops into the room. Painted `ceiling` panels are lit automatically \u2014 place this for the ones that are not on the rhythm, or to light a plain cell.",
+			"doc": "The light of a ceiling panel: the panel's own glow, and the pool it drops into the room. Painted `ceiling` panels are lit automatically — place this for the ones that are not on the rhythm, or to light a plain cell.",
 			"width": 8,
 			"height": 8,
 			"resizableX": false,
@@ -2054,15 +2028,50 @@
 			"showName": false,
 			"tilesetId": 118,
 			"tileRenderMode": "FitInside",
+			"tileRect": { "tilesetUid": 118, "x": 0, "y": 0, "w": 16, "h": 16 },
+			"uiTileRect": { "tilesetUid": 118, "x": 0, "y": 0, "w": 16, "h": 16 },
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLayer",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0.5,
+			"pivotY": 0.5,
+			"fieldDefs": []
+		},
+		{
+			"identifier": "CeilingPanel",
+			"uid": 121,
+			"tags": [],
+			"exportToToc": false,
+			"allowOutOfBounds": false,
+			"doc": "A run of suspended office ceiling with a light panel in the middle of it \u2014 the full-size fixture, not the 8px paint tiles. Stretch it SIDEWAYS; the width becomes the number of 24px cells and is rounded to an ODD count, because the panel is the middle one. One cell tall.",
+			"width": 120,
+			"height": 8,
+			"resizableX": true,
+			"resizableY": false,
+			"minWidth": 24,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 0.4,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#C4D4E2",
+			"renderMode": "Tile",
+			"showName": true,
+			"tilesetId": 120,
+			"tileRenderMode": "Repeat",
 			"tileRect": {
-				"tilesetUid": 118,
+				"tilesetUid": 120,
 				"x": 0,
 				"y": 0,
 				"w": 16,
 				"h": 16
 			},
 			"uiTileRect": {
-				"tilesetUid": 118,
+				"tilesetUid": 120,
 				"x": 0,
 				"y": 0,
 				"w": 16,
@@ -2113,7 +2122,7 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "111111", "averageColors": "f611f533f633f544f788f888" }
+			"cachedPixelData": { "opaqueTiles": "11111111", "averageColors": "f611f533f633f544f788f888f667f667" }
 		},
 		{
 			"__cWid": 5,
@@ -2397,6 +2406,25 @@
 			"tagsSourceEnumUid": null,
 			"enumTags": [],
 			"customData": [],
+			"savedSelections": [],
+			"cachedPixelData": { "opaqueTiles": "1", "averageColors": "f9aa" }
+		},
+		{
+			"__cWid": 1,
+			"__cHei": 1,
+			"identifier": "CeilingPanelIcon",
+			"uid": 120,
+			"relPath": "art/ceiling_panel.png",
+			"embedAtlas": null,
+			"pxWid": 16,
+			"pxHei": 16,
+			"tileGridSize": 16,
+			"spacing": 0,
+			"padding": 0,
+			"tags": [],
+			"tagsSourceEnumUid": null,
+			"enumTags": [],
+			"customData": [],
 			"cachedPixelData": null,
 			"savedSelections": []
 		}
@@ -2456,9 +2484,9 @@
 					"optionalRules": [],
 					"intGridCsv": [
 						2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-						2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-						3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-						3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,
@@ -2485,62 +2513,6 @@
 						2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
 					],
 					"autoLayerTiles": [
-						{ "px": [48,8], "src": [32,0], "f": 0, "t": 4, "d": [112,46], "a": 1 },
-						{ "px": [56,8], "src": [32,0], "f": 0, "t": 4, "d": [112,47], "a": 1 },
-						{ "px": [72,8], "src": [32,0], "f": 0, "t": 4, "d": [112,49], "a": 1 },
-						{ "px": [80,8], "src": [32,0], "f": 0, "t": 4, "d": [112,50], "a": 1 },
-						{ "px": [96,8], "src": [32,0], "f": 0, "t": 4, "d": [112,52], "a": 1 },
-						{ "px": [104,8], "src": [32,0], "f": 0, "t": 4, "d": [112,53], "a": 1 },
-						{ "px": [120,8], "src": [32,0], "f": 0, "t": 4, "d": [112,55], "a": 1 },
-						{ "px": [128,8], "src": [32,0], "f": 0, "t": 4, "d": [112,56], "a": 1 },
-						{ "px": [144,8], "src": [32,0], "f": 0, "t": 4, "d": [112,58], "a": 1 },
-						{ "px": [152,8], "src": [32,0], "f": 0, "t": 4, "d": [112,59], "a": 1 },
-						{ "px": [168,8], "src": [32,0], "f": 0, "t": 4, "d": [112,61], "a": 1 },
-						{ "px": [176,8], "src": [32,0], "f": 0, "t": 4, "d": [112,62], "a": 1 },
-						{ "px": [192,8], "src": [32,0], "f": 0, "t": 4, "d": [112,64], "a": 1 },
-						{ "px": [200,8], "src": [32,0], "f": 0, "t": 4, "d": [112,65], "a": 1 },
-						{ "px": [216,8], "src": [32,0], "f": 0, "t": 4, "d": [112,67], "a": 1 },
-						{ "px": [224,8], "src": [32,0], "f": 0, "t": 4, "d": [112,68], "a": 1 },
-						{ "px": [240,8], "src": [32,0], "f": 0, "t": 4, "d": [112,70], "a": 1 },
-						{ "px": [248,8], "src": [32,0], "f": 0, "t": 4, "d": [112,71], "a": 1 },
-						{ "px": [264,8], "src": [32,0], "f": 0, "t": 4, "d": [112,73], "a": 1 },
-						{ "px": [48,16], "src": [32,0], "f": 0, "t": 4, "d": [112,86], "a": 1 },
-						{ "px": [64,16], "src": [32,0], "f": 0, "t": 4, "d": [112,88], "a": 1 },
-						{ "px": [72,16], "src": [32,0], "f": 0, "t": 4, "d": [112,89], "a": 1 },
-						{ "px": [88,16], "src": [32,0], "f": 0, "t": 4, "d": [112,91], "a": 1 },
-						{ "px": [96,16], "src": [32,0], "f": 0, "t": 4, "d": [112,92], "a": 1 },
-						{ "px": [112,16], "src": [32,0], "f": 0, "t": 4, "d": [112,94], "a": 1 },
-						{ "px": [120,16], "src": [32,0], "f": 0, "t": 4, "d": [112,95], "a": 1 },
-						{ "px": [136,16], "src": [32,0], "f": 0, "t": 4, "d": [112,97], "a": 1 },
-						{ "px": [144,16], "src": [32,0], "f": 0, "t": 4, "d": [112,98], "a": 1 },
-						{ "px": [160,16], "src": [32,0], "f": 0, "t": 4, "d": [112,100], "a": 1 },
-						{ "px": [168,16], "src": [32,0], "f": 0, "t": 4, "d": [112,101], "a": 1 },
-						{ "px": [184,16], "src": [32,0], "f": 0, "t": 4, "d": [112,103], "a": 1 },
-						{ "px": [192,16], "src": [32,0], "f": 0, "t": 4, "d": [112,104], "a": 1 },
-						{ "px": [208,16], "src": [32,0], "f": 0, "t": 4, "d": [112,106], "a": 1 },
-						{ "px": [216,16], "src": [32,0], "f": 0, "t": 4, "d": [112,107], "a": 1 },
-						{ "px": [232,16], "src": [32,0], "f": 0, "t": 4, "d": [112,109], "a": 1 },
-						{ "px": [240,16], "src": [32,0], "f": 0, "t": 4, "d": [112,110], "a": 1 },
-						{ "px": [256,16], "src": [32,0], "f": 0, "t": 4, "d": [112,112], "a": 1 },
-						{ "px": [264,16], "src": [32,0], "f": 0, "t": 4, "d": [112,113], "a": 1 },
-						{ "px": [64,8], "src": [40,0], "f": 0, "t": 5, "d": [111,48], "a": 1 },
-						{ "px": [88,8], "src": [40,0], "f": 0, "t": 5, "d": [111,51], "a": 1 },
-						{ "px": [112,8], "src": [40,0], "f": 0, "t": 5, "d": [111,54], "a": 1 },
-						{ "px": [136,8], "src": [40,0], "f": 0, "t": 5, "d": [111,57], "a": 1 },
-						{ "px": [160,8], "src": [40,0], "f": 0, "t": 5, "d": [111,60], "a": 1 },
-						{ "px": [184,8], "src": [40,0], "f": 0, "t": 5, "d": [111,63], "a": 1 },
-						{ "px": [208,8], "src": [40,0], "f": 0, "t": 5, "d": [111,66], "a": 1 },
-						{ "px": [232,8], "src": [40,0], "f": 0, "t": 5, "d": [111,69], "a": 1 },
-						{ "px": [256,8], "src": [40,0], "f": 0, "t": 5, "d": [111,72], "a": 1 },
-						{ "px": [56,16], "src": [40,0], "f": 0, "t": 5, "d": [111,87], "a": 1 },
-						{ "px": [80,16], "src": [40,0], "f": 0, "t": 5, "d": [111,90], "a": 1 },
-						{ "px": [104,16], "src": [40,0], "f": 0, "t": 5, "d": [111,93], "a": 1 },
-						{ "px": [128,16], "src": [40,0], "f": 0, "t": 5, "d": [111,96], "a": 1 },
-						{ "px": [152,16], "src": [40,0], "f": 0, "t": 5, "d": [111,99], "a": 1 },
-						{ "px": [176,16], "src": [40,0], "f": 0, "t": 5, "d": [111,102], "a": 1 },
-						{ "px": [200,16], "src": [40,0], "f": 0, "t": 5, "d": [111,105], "a": 1 },
-						{ "px": [224,16], "src": [40,0], "f": 0, "t": 5, "d": [111,108], "a": 1 },
-						{ "px": [248,16], "src": [40,0], "f": 0, "t": 5, "d": [111,111], "a": 1 },
 						{ "px": [0,0], "src": [0,0], "f": 0, "t": 0, "d": [36,0], "a": 1 },
 						{ "px": [8,0], "src": [0,0], "f": 0, "t": 0, "d": [36,1], "a": 1 },
 						{ "px": [16,0], "src": [0,0], "f": 0, "t": 0, "d": [36,2], "a": 1 },
