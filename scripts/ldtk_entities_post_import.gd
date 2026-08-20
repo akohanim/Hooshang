@@ -211,6 +211,10 @@ func _build_ceiling_panel(data: Dictionary) -> CeilingPanel:
 ## 64px per 1.0, and the two ENERGIES are different jobs — the panel is how
 ## bright the fitting looks, the pool is how far its light carries.
 func _light_fields(node: CeilingPanel, data: Dictionary) -> void:
+	# Whole cells, so it is rounded rather than truncated: LDtk hands this over
+	# as a Float (the only numeric type it has ever written in this project),
+	# and int(-0.9) is 0 where round(-0.9) is the -1 that was typed.
+	node.panel_offset = roundi(_field_float(data, "PanelOffset", node.panel_offset))
 	node.panel_energy = _field_float(data, "PanelEnergy", node.panel_energy)
 	node.light_energy = _field_float(data, "PoolEnergy", node.light_energy)
 	node.light_scale = _field_float(data, "PoolScale", node.light_scale)

@@ -2038,8 +2038,50 @@
 			"pivotY": 0.5,
 			"fieldDefs": [
 				{
+					"identifier": "PanelOffset",
+					"doc": "WHICH cell of the run is the lit one, counted from the middle. 0 is the middle, -1 one cell left, +1 one right. Offset the lower of two stacked runs by 1 so their panels do not line up into vertical pairs.",
+					"__type": "Float",
+					"uid": 151,
+					"type": "F_Float",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "NameAndValue",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "ArrowsLine",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							0.0
+						]
+					},
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": false,
+					"allowOutOfLevelRef": false,
+					"allowedRefs": "Any",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
 					"identifier": "PanelEnergy",
-					"doc": "How bright the FITTING itself looks — separate from the pool it throws.",
+					"doc": "How bright the FITTING itself looks \u2014 separate from the pool it throws.",
 					"__type": "Float",
 					"uid": 144,
 					"type": "F_Float",
@@ -2064,7 +2106,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [1.4] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							1.4
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2101,7 +2148,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [0.55] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							0.55
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2113,7 +2165,7 @@
 				},
 				{
 					"identifier": "PoolScale",
-					"doc": "Radius of that pool: 64px per 1.0. Mind the seam rule — a light does not stop at a room's edge (LIGHTING.md).",
+					"doc": "Radius of that pool: 64px per 1.0. Mind the seam rule \u2014 a light does not stop at a room's edge (LIGHTING.md).",
 					"__type": "Float",
 					"uid": 146,
 					"type": "F_Float",
@@ -2138,7 +2190,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [1.1] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							1.1
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2175,7 +2232,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [18] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							18.0
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2212,7 +2274,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [0] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							0.0
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2249,7 +2316,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [14] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							14.0
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2296,8 +2368,50 @@
 			"pivotY": 0.5,
 			"fieldDefs": [
 				{
+					"identifier": "PanelOffset",
+					"doc": "WHICH cell of the run is the lit one, counted from the middle. 0 is the middle, -1 one cell left, +1 one right. Offset the lower of two stacked runs by 1 so their panels do not line up into vertical pairs.",
+					"__type": "Float",
+					"uid": 150,
+					"type": "F_Float",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "NameAndValue",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "ArrowsLine",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							0.0
+						]
+					},
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": false,
+					"allowOutOfLevelRef": false,
+					"allowedRefs": "Any",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
 					"identifier": "PanelEnergy",
-					"doc": "How bright the FITTING itself looks — separate from the pool it throws.",
+					"doc": "How bright the FITTING itself looks \u2014 separate from the pool it throws.",
 					"__type": "Float",
 					"uid": 138,
 					"type": "F_Float",
@@ -2322,7 +2436,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [1.6] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							1.6
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2359,7 +2478,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [1.4] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							1.4
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2371,7 +2495,7 @@
 				},
 				{
 					"identifier": "PoolScale",
-					"doc": "Radius of that pool: 64px per 1.0. Mind the seam rule — a light does not stop at a room's edge (LIGHTING.md).",
+					"doc": "Radius of that pool: 64px per 1.0. Mind the seam rule \u2014 a light does not stop at a room's edge (LIGHTING.md).",
 					"__type": "Float",
 					"uid": 140,
 					"type": "F_Float",
@@ -2396,7 +2520,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [1.9] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							1.9
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2433,7 +2562,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [50] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							50.0
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2470,7 +2604,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [0] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							0.0
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,
@@ -2507,7 +2646,12 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": { "id": "V_Float", "params": [14] },
+					"defaultOverride": {
+						"id": "V_Float",
+						"params": [
+							14.0
+						]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": false,

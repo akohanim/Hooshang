@@ -554,6 +554,7 @@ fields you fill in move.
 
 | Field | What it does |
 | --- | --- |
+| `PanelOffset` | WHICH cell of the run is lit — 0 is the middle, ±1 a cell either side |
 | `PanelEnergy` | How bright the FITTING looks |
 | `PoolEnergy` | How bright the pool it throws is |
 | `PoolScale` | That pool's radius — 64px per 1.0, and the seam rule applies |
@@ -565,6 +566,12 @@ The two energies are two different jobs. `PoolEnergy` is how far the light
 carries; `PanelEnergy` is how bright the thing looks. Turning the pool down
 without the panel leaves a dim room lit by a fitting that still looks brand new
 — and a failing tube wants both down, not one.
+
+`PanelOffset` is what stops a two-row ceiling reading as vertical PAIRS. Two
+runs stacked one above the other put their panels in the same column; give the
+lower one an offset of 1 and its panel steps over a cell while both runs still
+span the same stretch of wall. Shifting a whole run 24px does the same thing to
+the panel and leaves a ragged cell at each end instead.
 
 **They are all Floats, and that is deliberate.** LDtk has only ever written two
 field types in this project, String and Float, so those are the only two whose
