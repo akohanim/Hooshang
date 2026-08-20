@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cil0gik41j7u"
-path="res://.godot/imported/fluorescent.png-9a3b5edc90e5e495a7a0183fc67e61e4.ctex"
+uid="uid://b5sjevffjwvrh"
+path="res://.godot/imported/ceiling_tile.png-711e511586d8cd52caaad51498f2a94f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/props/fluorescent.png"
-dest_files=["res://.godot/imported/fluorescent.png-9a3b5edc90e5e495a7a0183fc67e61e4.ctex"]
+source_file="res://assets/props/ceiling/ceiling_tile.png"
+dest_files=["res://.godot/imported/ceiling_tile.png-711e511586d8cd52caaad51498f2a94f.ctex"]
 
 [params]
 

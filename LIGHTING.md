@@ -18,9 +18,9 @@ Practically that means:
 
 - A ceiling fixture is a `LampFixture` with `show_body = true`, so you see the
   cord and bulb.
-- An **office fluorescent** is a `FluorescentTube` — a drawn troffer on two drop
-  rods, for the rooms that are meant to read as an office rather than a bulb on
-  a wire. See *Adding a fluorescent* below.
+- An **office fluorescent** is a `CeilingPanel` — a run of suspended ceiling
+  with a flat light panel flush in the grid, for rooms that should read as an
+  office rather than as a bulb on a wire. See *Adding a ceiling panel* below.
 - Moonlight is a `MoonWindow` (art) plus a cold `LampFixture` with
   `show_body = false` — the window itself IS the visible source. On the escape
   row that moon is eclipsed and recovering; see *The eclipse* below.
@@ -401,16 +401,16 @@ Monitor (MonitorGlow)   energy 0.9-1.1   scale 1.0-1.2
 Feature light           energy 1.6   scale 1.3   show_body true
   e.g. over the musical tiles in the cave
 
-Office fluorescent      energy 1.4   scale 1.8   cable 62   tube_energy 1.5
-  FluorescentTube, cold Color(0.83, 0.9, 0.95); bulb at y 230 so the pool
-  still reaches a floor at 336 — see the trap above
+Office ceiling panel    energy 1.4   scale 1.9   panel_energy 1.6   run 5
+  CeilingPanel at the ceiling line (y 172), cold Color(0.83, 0.9, 0.95).
+  pool_drop 50 is what lets a 122px pool reach a floor 164px below it
 
-Failing fluorescent     energy 0.7   scale 1.55  cable 56   tube_energy 1.2
+Failing panel           energy 0.7   scale 1.55  panel_energy 1.3   run 3
   + flickers 0.55 at speed 11, Color(0.86, 0.92, 0.82) — room 2's middle
 
-Dead fluorescent        energy 0     tube_energy 0
-  housing only. Needs another light near it or it is invisible; room 2 hangs
-  one in the moonlight over the drop
+Dead panel              energy 0     panel_energy 0
+  the frame still in the grid, nothing coming out of it. Needs another light
+  near it or there is nothing to see; room 2 leaves one over the drop
 
 Dawn window             energy 2.6   scale 1.25  show_body false
   warm Color(1, 0.72, 0.42), placed on a DawnWindow — room 23 only
@@ -469,42 +469,53 @@ Dawn window recipe above.
 
 ---
 
-## Adding a fluorescent
+## Adding a ceiling panel
 
-`scenes/props/lighting/FluorescentTube.tscn` **extends `LampFixture`**, so
-colour, energy, pool size, the `lights` group and the flicker all come from
-there and cannot drift. What it adds is a body worth looking at: a housing
-sprite, two drop rods sized from `cable_length`, and the tube.
+`scenes/props/lighting/CeilingPanel.tscn` is the office fluorescent, and it is
+not hung from the ceiling — it **is** the ceiling: T-bar grid, acoustic tiles,
+and one cell where a flat luminous panel sits flush where a tile would be.
 
-Place it exactly like a `LampFixture` — position is the fixture, `cable_length`
-is the distance back up to the ceiling — plus one export of its own:
+It **extends `LampFixture`**, so colour, energy, pool size, the `lights` group
+and the flicker all come from there and cannot drift. Place it on the room's
+ceiling line — **y 172** in the top row, the 8px band just under the ceiling
+tiles — with three exports of its own:
 
 ```
-tube_energy   how bright the TUBE reads, separate from the pool it throws
+run_tiles     cells of ceiling to lay, panel included. Forced ODD: the panel is
+              the MIDDLE cell, so the position you place is the light and the
+              grid grows evenly either side of it
+panel_energy  how bright the panel's FACE reads, separate from the pool
+pool_drop     how far below the ceiling the room pool is centred
 ```
 
-Those are two different jobs. The pool is how far the light carries; `tube_energy`
-is how bright the thing looks. Turning the pool down without it leaves a dim room
-lit by a fixture that still looks brand new.
+`pool_drop` is the one honest fudge, and it is the same trade this guide already
+makes for hanging lamps. A panel in the ceiling is ~164px above the floor, so a
+pool centred on it needs a 164px radius to reach the ground — wider than half a
+room, straight through the seam into the room next door. Dropping the POOL and
+not the fixture keeps the reach honest and the rooms independent; the panel is
+still visibly the thing the light comes from.
 
-**The tube is a light, not a sprite,** and that is the whole reason this is not
-`LampFixture` with a picture on it. `CanvasModulate` is 0.05 and multiplies every
-CanvasItem, so a painted glowing tube comes out at 5% of what was drawn — the
-same trap `SunShaft` and `WallPattern` document. The tube is a `PointLight2D`
-wearing `assets/props/fluorescent_lit.png` as its texture: the shape is art, the
-brightness is light. The housing under it is ordinary paint, lit by its own tube.
+**The panel's glow is a light, not a sprite.** `CanvasModulate` is 0.05 and
+multiplies every CanvasItem, so a painted luminous panel arrives at 5% of what
+was drawn — the same trap `SunShaft` and `WallPattern` document. The glow is a
+`PointLight2D` wearing `assets/props/ceiling/ceiling_light_glow.png`: the shape
+is art, the brightness is light. The tiles either side are ordinary paint, lit
+by the panel between them, which is what a dark office ceiling actually looks
+like.
 
-Because the tube is a light, **the flicker reaches it for free** — the prop reads
+Because the glow is a light, **the flicker reaches it for free** — the prop reads
 the pool's energy back each frame rather than recomputing the waveform, so the
-two cannot drift. A fixture whose pool stutters while its tube burns steadily
-reads as a bug in the game rather than a fault in the building.
+two cannot drift. A panel whose pool stutters while its face burns steadily reads
+as a bug in the game rather than a fault in the building.
 
-`light_energy = 0` with `tube_energy = 0` gives a **dead fixture**: housing, no
-tube, no pool. It needs another light near it or it is invisible — which is the
-point of hanging one where the moon can find it.
+`light_energy = 0` with `panel_energy = 0` gives a **dead panel**: the frame is
+still in the grid and nothing comes out of it. It needs another light near it or
+there is nothing to see — which is the point of leaving one where the moon can
+find it.
 
-Art: `tools/gen_fluorescent.py` draws both files, 40×10 (five cells wide). The
-stems are deliberately NOT in the art, because the drop varies per instance.
+Art: `tools/gen_ceiling_panel.py`, three files on the same 24x8 cell
+`tools/gen_platforms.py` uses, so the ceiling above him and the ceiling he ends
+up standing on are the same ceiling.
 
 ---
 
