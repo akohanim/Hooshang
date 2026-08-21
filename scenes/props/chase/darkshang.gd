@@ -138,6 +138,19 @@ signal chase_reset(at: Vector2)
 ## where he and the player might still overlap from the life that just ended —
 ## a respawn that kills you on frame one is unplayable and unloseable to debug.
 @export var respawn_grace := 0.4
+## How far the player must travel ALONG THE ROUTE after a respawn or a room
+## change before the shadow comes back into the room, in px. 0 disables the wait.
+##
+## He arrives `respawn_gap` behind you, which is fine when you are already
+## running and awful when you are not: entering a room or coming back from a
+## death puts you at a standstill with a shadow materialising a few frames'
+## sprint away, before you have looked at the floor you are about to cross. So he
+## stays out of the room entirely until you have committed to leaving — sixteen
+## pixels, two cells, about a fifth of a second at a run.
+##
+## Measured along `route_direction`, not as a plain distance: backing up, or
+## jumping on the spot, is not committing to anything and must not summon him.
+@export var entry_hold_distance := 16.0
 
 @export_group("Detection")
 ## Size of his kill box in px, centred on him. 12x16 is a shade wider and taller
@@ -173,6 +186,10 @@ var _warning_timer := 0.0
 var _pending_surge := Vector2.ZERO  # x = duration, y = intensity, queued by the warning
 var _reattach := 0.0                # seconds of blend left after a surge
 var _grace_timer := 0.0
+## Where the player stood when the chase was last reset, and whether he is still
+## being kept out of the room because of it. See `entry_hold_distance`.
+var _hold_from := Vector2.ZERO
+var _holding_entry := false
 ## How fast he appeared to move last frame, px/s. Derived, not integrated — see
 ## velocity().
 var _velocity := Vector2.ZERO
@@ -226,6 +243,12 @@ func _physics_process(delta: float) -> void:
 		return
 	if state == State.CAUGHT:
 		return  # frozen for the length of the ingestion
+	if _holding_entry:
+		# Before the movement AND before _check_catch: he is not in the room yet,
+		# so he must neither close the gap nor be able to kill from where the
+		# reset happened to park him.
+		_tick_entry_hold()
+		return
 
 	var was := global_position
 	_tick_surge(delta)
@@ -604,20 +627,57 @@ func _on_player_teleported(to: Vector2) -> void:
 ## to where the player actually is, the delay is back at base, he is FOLLOWING
 ## (never mid-surge), and contact cannot register for respawn_grace seconds.
 func reset_to_checkpoint(at: Vector2) -> void:
-	var back := route_direction.normalized() if route_direction != Vector2.ZERO \
-		else Vector2.LEFT
-	global_position = at - back * respawn_gap
-	_seed_buffer_from(at)
-	read_delay = follow_delay
+	_place_behind(at)
 	state = State.FOLLOWING
 	_surge_timer = 0.0
 	_warning_timer = 0.0
 	_pending_surge = Vector2.ZERO
 	_reattach = 0.0
-	_grace_timer = respawn_grace
 	_rearm_surge_points(at)
-	_push_visual()
 	chase_reset.emit(at)
+	# ...and then stay out of the room until the player commits to leaving it.
+	# Set AFTER the reset rather than instead of it, so everything a checkpoint
+	# guarantees is already true the moment the hold lifts — the tape, the delay,
+	# the surge points — and lifting it is only a re-placement.
+	_hold_from = at
+	_holding_entry = entry_hold_distance > 0.0
+	if _holding_entry:
+		visible = false
+
+
+## The way the player travels, as a unit vector. `route_direction` is exported
+## per instance and may be left at zero; LEFT is this Act's chase.
+func _route() -> Vector2:
+	return route_direction.normalized() if route_direction != Vector2.ZERO \
+		else Vector2.LEFT
+
+
+## Put him the standard gap behind a player standing at `at`, with a tape that
+## leads there and a fresh grace period. The half of a checkpoint reset that is
+## about POSITION, split out because lifting an entry hold needs exactly this and
+## none of the rest — by then the surge points are already re-armed and the state
+## is already FOLLOWING.
+func _place_behind(at: Vector2) -> void:
+	global_position = at - _route() * respawn_gap
+	_seed_buffer_from(at)
+	read_delay = follow_delay
+	_grace_timer = respawn_grace
+	_push_visual()
+
+
+## Keep him out of the room until the player has travelled `entry_hold_distance`
+## along the route from where the reset put him.
+##
+## The release RE-PLACES him from where the player is NOW, not from where the
+## room put him. That is the whole point: the two differ by however far the
+## player walked to earn it, and seeding from the stale point would drop him in
+## already short of the gap the chase is tuned around.
+func _tick_entry_hold() -> void:
+	if _route().dot(_player.global_position - _hold_from) < entry_hold_distance:
+		return
+	_holding_entry = false
+	visible = true
+	_place_behind(_player.global_position)
 
 
 ## Seed the tape with a synthetic run-in, so the very first Following read puts
@@ -625,10 +685,8 @@ func reset_to_checkpoint(at: Vector2) -> void:
 ## zero. The trail speed is chosen so the sample at follow_delay IS respawn_gap
 ## behind: the two numbers cannot disagree because only one of them is typed in.
 func _seed_buffer_from(at: Vector2) -> void:
-	var back := route_direction.normalized() if route_direction != Vector2.ZERO \
-		else Vector2.LEFT
 	var trail_speed := respawn_gap / maxf(follow_delay, 0.0001)
-	buffer.clear_and_seed(at, -back, trail_speed)
+	buffer.clear_and_seed(at, -_route(), trail_speed)
 
 
 ## Surge points the player has yet to reach again are made live again; ones he
@@ -638,8 +696,7 @@ func _seed_buffer_from(at: Vector2) -> void:
 ## — an unavoidable ambush on a checkpoint — or, resetting nothing, leaves the
 ## stretch AFTER the checkpoint permanently toothless.
 func _rearm_surge_points(at: Vector2) -> void:
-	var forward := route_direction.normalized() if route_direction != Vector2.ZERO \
-		else Vector2.RIGHT
+	var forward := _route()
 	for node in get_tree().get_nodes_in_group("surge_point"):
 		if node is not SurgePointTrigger:
 			continue

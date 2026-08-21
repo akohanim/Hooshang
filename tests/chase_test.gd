@@ -93,6 +93,16 @@ func _ready() -> void:
 		print("  NOTE  no DarkshangSpawn in the .ldtk yet — instanced the prefab "
 			+ "into Level_13 at its PlayerStart")
 	shadow.auto_start = false  # every section below starts the chase deliberately
+	# NO ENTRY THRESHOLD IN THIS SUITE. In play, a reset parks him out of the room
+	# until the player has travelled entry_hold_distance along the route — so a
+	# respawn cannot drop a shadow on a standing start. Every section below calls
+	# reset_to_checkpoint directly and then measures a chase that is supposed to
+	# be RUNNING, several of them with the player deliberately standing still
+	# ("standing still is what kills you"), which the threshold is designed to
+	# prevent. Zeroing it here states the fixture rather than weakening it: the
+	# threshold is not this file's subject and has its own suite, which drives it
+	# through the real reset path — see tests/chase_entry_test.tscn.
+	shadow.entry_hold_distance = 0.0
 	await _frames(4)
 	_check(shadow.get_parent() != null and room.is_ancestor_of(shadow),
 		"and he is inside Level_13, not in a shared scene")

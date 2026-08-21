@@ -44,6 +44,13 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/chase_route_test.tscn` — meeting
     Darkshang re-points Level_13's ENTRANCE at Level_14 (not back at Level_12),
     it holds however many times that doorway is used, and no other room moves
+  - `Godot --headless --path . res://tests/chase_entry_test.tscn` — the shadow
+    waits at the threshold: after a respawn or a room change he is parked OUT of
+    the room until the player has travelled `entry_hold_distance` (16px) along
+    the route. Standing still keeps him out however long, backing UP keeps him
+    out too (it is distance along the route, not distance travelled), he cannot
+    kill while he waits even with the player standing on him, and crossing the
+    line lets him in at the FULL gap measured from where the player is by then
   - `Godot --headless --path . res://tests/route_order_test.tscn` — play order is
     the level IDENTIFIER, not world position: the escape row (14-23) runs right
     to left across the grid, so position order reads it backwards
