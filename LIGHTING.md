@@ -241,6 +241,16 @@ column in `Act1World.tscn` instead of hiding in ten PNGs nobody can compare.
 **Rooms 16, 19 and 20 have no moon window** and are untouched by this. The row
 was only ever given seven, and the ramp still reads across the gaps.
 
+> **Read that by NAME, not by position — they disagree.** Every backdrop and
+> glow in the escape row is named two rooms low: `MoonWindowRoom11` stands in
+> Level_13, `…Room14` in Level_16, `…Room15` in Level_17, `…Room17` in Level_19.
+> The names are from before the renumber that inserted rooms; the props never
+> moved. So by POSITION it is rooms 12 and 18 that have no window, and Level_16
+> — which the sentence above implies is unlit — has a window, a glow, an
+> EclipseChill and a wall pattern in it. `Act1Beats.blood_moon_window` points at
+> `MoonWindowRoom11` and is correct: that node is the boss room's. Renaming them
+> means moving that NodePath with them.
+
 Four things worth knowing before retuning it:
 
 - **The sky patch is not allowed to go black.** It started at `(0.055, 0.03,

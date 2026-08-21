@@ -31,10 +31,17 @@ rather than as a dozen separate failures. Distinct, non-harmonic speeds are the
 only phase control the prop has (there is no phase field), so they drift apart
 within a second of the room loading.
 
-WHAT IT DOES NOT TOUCH: PoolDrop and PanelOffset. Those are GEOMETRY — how far
-below a particular ceiling that room's pool has to fall, and which cell of the
-run is the lit one. They are authored per room against the ceiling height, and a
-mood pass has no business moving them.
+POOLDROP IS DERIVED, BUT ONLY WHERE NOBODY HAS SET IT. It is geometry — how far
+below the ceiling a room's pool has to fall to land where he walks — so an
+authored value is left alone. An UNTOUCHED one is a different thing: the entity
+default is 50, and in a room whose floor is 172px below the panels that leaves
+the pool 122px in the air, lighting the ceiling and nothing else. So a panel
+still sitting on the default gets 58% of its own room's panel-to-floor distance,
+which is not a number picked to taste — it reproduces the 100 the author tuned
+Level_14 to by hand, in a room with exactly that geometry.
+
+PanelOffset is never touched: which cell of the run is the lit one is a
+composition choice, and it has no wrong default.
 
 LDTK MUST BE CLOSED.
 
@@ -108,6 +115,51 @@ def num(v):
     return int(v) if float(v).is_integer() else round(float(v), 4)
 
 
+## How far down the pool sits, as a fraction of panel-to-floor. Reproduces the
+## 100 Level_14 was hand-tuned to over its own 172px drop.
+DROP_SHARE = 0.58
+
+
+def _floor_y(level, below_y):
+    """Top of the lowest thing he can stand on, in room px.
+
+    BELOW_Y matters: the search is bottom-up for the lowest mostly-solid row,
+    and without it a room whose only full-width rows are its CEILING answers with
+    the ceiling — Level_17 did exactly that, reporting a floor 4px above the
+    panels and a negative drop.
+
+    Falls back to the lowest row with ANY solid in it, which is what a shaft room
+    like Level_17 needs: it has no floor, just platforms scattered down it, and
+    the lowest of those is the thing the light should still be reaching."""
+    for layer in level["layerInstances"]:
+        if layer["__identifier"] != "Collisions":
+            continue
+        w, h, cs = layer["__cWid"], layer["__cHei"], layer["intGridCsv"]
+        for test in (lambda r: sum(1 for v in r if v) > w * 0.5, any):
+            for y in range(h - 1, -1, -1):
+                if y * 8 > below_y and test(cs[y * w:(y + 1) * w]):
+                    return y * 8
+    return None
+
+
+def _drop_for(entity, level, default_drop):
+    """A PoolDrop for a panel that has none of its own, or None to leave it."""
+    current = None
+    for fi in entity["fieldInstances"]:
+        if fi["__identifier"] == "PoolDrop":
+            current = fi["__value"]
+    # Authored: somebody chose this, and it is not ours to second-guess.
+    if current is None or float(current) != float(default_drop):
+        return None
+    floor_y = _floor_y(level, entity["px"][1])
+    if floor_y is None:
+        return None
+    gap = floor_y - entity["px"][1]
+    if gap <= 0:
+        return None
+    return float(round(gap * DROP_SHARE / 5.0) * 5)
+
+
 def _role_for(i, total):
     """Which personality the i-th panel in play order gets.
 
@@ -147,6 +199,16 @@ def main():
     raw = open(LDTK).read()
     doc = json.loads(raw)
 
+    default_drop = None
+    for e in doc["defs"]["entities"]:
+        if e["identifier"] != ENTITY:
+            continue
+        for f in e["fieldDefs"]:
+            if f["identifier"] == "PoolDrop":
+                default_drop = f["defaultOverride"]["params"][0]
+    if default_drop is None:
+        raise SystemExit("!! %s has no PoolDrop default to compare against" % ENTITY)
+
     plan = {}          # iid -> (room, role, values)
     for level in doc["levels"]:
         if level["identifier"] not in ROOMS:
@@ -157,13 +219,19 @@ def main():
             print("             (none placed — nothing to tune here)")
             continue
         for i, e in enumerate(panels):
-            role, values = _role_for(i, len(panels))
+            role, shared = _role_for(i, len(panels))
+            values = dict(shared)          # copied: PoolDrop differs per room
+            drop = _drop_for(e, level, default_drop)
+            if drop is not None:
+                values["PoolDrop"] = drop
             plan[e["iid"]] = (level["identifier"], role, values)
-            print("             x=%-4d %-8s pool %.2f  flicker %.2f @ %.1f%s"
+            print("             x=%-4d %-8s pool %.2f  flicker %.2f @ %.1f%s%s"
                   % (e["px"][0], role, values["PoolEnergy"],
                      values["FlickerAmount"], values["FlickerSpeed"],
                      "  motion %.0fpx" % values["MotionRange"]
-                     if values["MotionRange"] else ""))
+                     if values["MotionRange"] else "",
+                     "  drop %.0f (was default)" % values["PoolDrop"]
+                     if "PoolDrop" in values else ""))
     if not plan:
         raise SystemExit("!! no %s found in %s — nothing to do." % (ENTITY, ROOMS))
 
@@ -223,13 +291,17 @@ def main():
         raise SystemExit("!! instances changed that were not planned: %s" % stray)
     # What matters is where they ENDED, so check the plan and not the diff.
     for iid in plan:
+        wanted = plan[iid][2]
         for name, (val, rev) in fb[iid].items():
-            if name not in OWNED:
+            # Keyed off what this INSTANCE was planned to get, not a fixed list:
+            # PoolDrop is set on some panels and deliberately left on others, and
+            # a global list cannot tell those two apart.
+            if name not in wanted:
                 if fa[iid][name] != (val, rev):
                     raise SystemExit("!! %s changed on %s, and it is not ours"
                                      % (name, iid))
                 continue
-            want = num(plan[iid][2][name])
+            want = num(wanted[name])
             if val != want:
                 raise SystemExit("!! %s came out %s, wanted %s" % (name, val, want))
             if not rev or rev[0].get("params", [None])[0] != want:
@@ -244,8 +316,7 @@ def main():
                     L["entityInstances"] = None
     if sa != sb:
         raise SystemExit("!! something outside the entity layers moved")
-    print("\nverified: %d panels retuned, %d fields each, nothing else touched"
-          % (len(changed), len(OWNED)))
+    print("\nverified: %d panels retuned, nothing else touched" % len(changed))
 
     if not APPLY:
         print("\nDRY RUN — nothing written. Re-run with --apply")
