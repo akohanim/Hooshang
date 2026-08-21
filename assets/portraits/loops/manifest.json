@@ -1,0 +1,62 @@
+{
+  "hooshang_dazed": {
+    "sheet": "hooshang_dazed_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true
+  },
+  "hooshang_hesitant": {
+    "sheet": "hooshang_hesitant_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true
+  },
+  "hooshang_skeptical": {
+    "sheet": "hooshang_skeptical_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true
+  },
+  "hooshang_annoyed": {
+    "sheet": "hooshang_annoyed_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true
+  },
+  "hooshang_vulnerable": {
+    "sheet": "hooshang_vulnerable_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true
+  },
+  "hooshang_shocked": {
+    "sheet": "hooshang_shocked_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true
+  }
+}
