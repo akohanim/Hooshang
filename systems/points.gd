@@ -77,8 +77,12 @@ var _shown := 0
 
 func _ready() -> void:
 	_build_hud()
-	# Nothing to score with no world up (the title screen), so nothing to draw.
-	Screen.scene_loaded.connect(func(scene: Node) -> void: _hud.visible = scene != null)
+	# The score is tracked all through play but never SHOWN during it — a final
+	# score is a separate feature, surfaced later. So the HUD stays hidden for the
+	# whole run (title screen and gameplay alike) and nothing turns it back on;
+	# the "+N" tag is a child of this same layer, so it never renders either. The
+	# total, the roll, award() and save/load are all untouched underneath.
+	_hud.visible = false
 
 
 ## Pay out. `source` is whatever earned it — the tag pops over that, so a fruit
@@ -158,7 +162,9 @@ func _build_hud() -> void:
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_label)
 
-	_hud.visible = Screen.current != null
+	# Never shown to the player (see _ready) — the score is banked and saved, not
+	# displayed, until a final-score screen surfaces it.
+	_hud.visible = false
 	_refresh()
 
 

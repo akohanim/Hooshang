@@ -23,16 +23,30 @@ var total := 0
 ## is much larger) worked out at 3.25x and visibly chewed the eye sockets.
 const ICON := 64.0
 
+## The counter is not on screen the whole run — it surfaces for HUD_SHOW_TIME
+## after a death, then fades out over HUD_FADE_TIME and gets out of the way.
+const HUD_SHOW_TIME := 2.0
+const HUD_FADE_TIME := 0.2
+
 var _hud: CanvasLayer
 var _root: Control
 var _label: Label
 var _punch: Tween
+var _fade: Tween
+## Bumped every time the counter is brought up, so a death while it is already
+## showing invalidates the earlier hide timer — it stays up a full HUD_SHOW_TIME
+## from the LATEST death rather than hiding on the first one's clock.
+var _show_token := 0
 
 
 func _ready() -> void:
 	_build_hud()
-	# Nothing to count with no world up (the title screen), so nothing to draw.
-	Screen.scene_loaded.connect(func(scene: Node) -> void: _hud.visible = scene != null)
+	# The counter stays hidden during play and surfaces only on a death (see
+	# _show_briefly). This just makes sure a world going away — back to the title
+	# screen — always leaves it hidden; it never turns it back ON.
+	Screen.scene_loaded.connect(func(scene: Node) -> void:
+		if scene == null:
+			_hud.visible = false)
 
 
 ## One death. Called by Player.die(), which already guards against re-entry, so
@@ -42,6 +56,8 @@ func record() -> void:
 	changed.emit(total)
 	_refresh()
 	_punch_counter()
+	# Bring the counter up for a couple of seconds so the death reads, then hide.
+	_show_briefly()
 
 
 ## Wipe the run — a fresh game, not a respawn. SaveGame.start_new() calls this
@@ -110,15 +126,40 @@ func _build_hud() -> void:
 	_label.add_theme_constant_override("shadow_offset_y", 2)
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_label)
-	# Hidden until a world is up: the game boots to the title screen, and a
-	# counter floating over the menu belongs to no run at all.
-	_hud.visible = Screen.current != null
+	# Hidden to begin with, on the title screen and in play alike — it comes up
+	# only when the player dies (see _show_briefly).
+	_hud.visible = false
 	_refresh()
 
 
 func _refresh() -> void:
 	if _label != null:
 		_label.text = str(total)
+
+
+## Bring the counter up and (re)start the countdown to hiding it. Called on every
+## death: a second one while it is still showing bumps _show_token, so the
+## earlier timer's timeout is ignored and it stays up a full HUD_SHOW_TIME from
+## the latest death, then fades out.
+func _show_briefly() -> void:
+	if _hud == null or _root == null:
+		return
+	if _fade and _fade.is_valid():
+		_fade.kill()
+	_root.modulate.a = 1.0
+	_hud.visible = true
+	_show_token += 1
+	var token := _show_token
+	# A plain SceneTreeTimer, so it PAUSES with the game — the counter must not
+	# tick away behind the pause menu (same reasoning as the respawn holds).
+	get_tree().create_timer(HUD_SHOW_TIME).timeout.connect(func() -> void:
+		if token != _show_token or _hud == null or _root == null:
+			return
+		_fade = create_tween()
+		_fade.tween_property(_root, "modulate:a", 0.0, HUD_FADE_TIME)
+		_fade.tween_callback(func() -> void:
+			if token == _show_token and _hud != null:
+				_hud.visible = false))
 
 
 ## A short knock when the number goes up — enough to catch the eye on a respawn
