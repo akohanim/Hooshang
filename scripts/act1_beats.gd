@@ -631,7 +631,20 @@ func _wire_chase() -> void:
 	# happen on the same threshold, and folding them into one handler means
 	# blanking `chase_way_back` to leave a doorway alone silently takes the moon
 	# with it — the same trap `_wire_collapse` hit with `room_changed`.
-	_chase.triggered.connect(func(_player: Player) -> void: _turn_the_moon(true))
+	#
+	# ON `chase_begun`, NOT `triggered`, and that is the one difference from the
+	# doorway below. `triggered` fires the instant he crosses the line, which is
+	# BEFORE the reveal beat — so the whole turn, eight seconds of it, played out
+	# underneath the dialogue banner and was over by the time the box came down.
+	# The most deliberate visual in the Act, spent behind a text box.
+	#
+	# The doorway keeps `triggered` for the reason written above it: a route that
+	# is missed strands the player, so it must not wait on a beat that could be
+	# interrupted. The moon is the opposite case — nothing depends on it, and a
+	# beat that never finishes leaves a save whose resume snaps the moon red
+	# anyway (`_turn_the_moon(false)`), so the worst an interruption costs here is
+	# the animation, not the state.
+	_chase.chase_begun.connect(func() -> void: _turn_the_moon(true))
 
 	if chase_way_back == "":
 		return

@@ -16,6 +16,15 @@ extends Node
 ##      re-route written once into _return_room would survive exactly until the
 ##      player walked back INTO the boss room and then quietly revert to layout
 ##      order — which reads in play as "it worked the first time".
+##
+## And a fourth, which is about the same threshold rather than the same feature:
+## the doorway and the MOON hang off two different signals on purpose. The
+## doorway re-points on `triggered`, the instant he crosses the line, because a
+## route that gets missed strands the player. The moon turns on `chase_begun`,
+## after the reveal dialogue, because on `triggered` its eight-second ramp played
+## out entirely underneath the dialogue banner — the most deliberate visual in
+## the Act, spent behind a text box. Pinned here because "which signal" is a
+## one-word edit that nothing else would notice.
 ## Run:  godot --headless res://tests/chase_route_test.tscn
 
 var failures: Array[String] = []
@@ -70,8 +79,28 @@ func _ready() -> void:
 	# The crossing itself, not _play(): the reveal awaits two lines of dialogue
 	# and a button press each. `triggered` is what the trigger emits on the frame
 	# the player breaks the line, before any of that — see darkshang_trigger.gd.
+	# The moon must NOT move on this signal. Read off shadow_amount, the umbra the
+	# eclipse tween actually drives, rather than off a flag — a moon that sets
+	# "turning = true" and never reaches the window is the failure worth catching,
+	# and it stays invisible until the escape row looks wrong ten rooms later.
+	var moon := _moon()
+	_check(moon != null, "Act1Beats points at a MoonWindow to turn")
+	var before: float = moon.shadow_amount if moon != null else -1.0
 	trigger.triggered.emit(world.player)
 	await _frames(20)
+	if moon != null:
+		_check(is_equal_approx(moon.shadow_amount, before),
+			"crossing the line does NOT start the moon — the dialogue would hide it  [%.3f]"
+				% moon.shadow_amount)
+		# And it does turn, once the beat that was hiding it is over. Given a real
+		# slice of the ramp rather than a few frames: the crossing is eased IN, so
+		# half a second of an eight-second turn is a couple of thousandths and
+		# would read the same as nothing happening.
+		trigger.chase_begun.emit()
+		await _frames(180)
+		_check(moon.shadow_amount > before + 0.05,
+			"...and finishing the reveal starts it  [%.3f -> %.3f]"
+				% [before, moon.shadow_amount])
 	await _go_back()
 	_check(world.current_room == next_room,
 		"after meeting him it leads to Level_14 instead  [%s]" % world.current_room.name)
@@ -158,6 +187,17 @@ func _room(name: String) -> Node2D:
 		if r.name == name:
 			return r
 	return null
+
+
+## The window Act1Beats turns to blood, found the way the game finds it —
+## through the beats node's own exported NodePath. A test that reached for any
+## MoonWindow in the scene would pass with the export blank, which is the one
+## thing that stops the moon turning at all.
+func _moon() -> MoonWindow:
+	var beats := world.get_node_or_null("Act1Beats") as Act1Beats
+	if beats == null or beats.blood_moon_window.is_empty():
+		return null
+	return beats.get_node_or_null(beats.blood_moon_window) as MoonWindow
 
 
 func _chase_trigger(node: Node = null) -> DarkshangTrigger:

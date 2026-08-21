@@ -214,6 +214,14 @@ disc is clear and warm and its glow is the colour of the sunrise waiting in room
 22. The ramp is the visual spine of the escape — you should be able to tell
 roughly how far out you are by looking at the window.
 
+**The turn itself happens AFTER the reveal dialogue**, on the trigger's
+`chase_begun` rather than on `triggered`. It used to run on the crossing, which
+put all eight seconds of it underneath the dialogue banner — the most deliberate
+visual in the Act, finished before the text box came down. The doorway re-point
+still hangs off `triggered`, deliberately: a route that gets missed strands the
+player, while a moon that gets missed costs an animation (see `_wire_chase` in
+`scripts/act1_beats.gd`, and `tests/chase_route_test.tscn`, which pins both).
+
 It is **six numbers per window**, not seven drawn moons. `MoonWindow` tints the
 one `moon.png` and lays two white alpha masks over it
 (`tools/gen_eclipse_moon.py`): `Shadow` is the umbra, `Halo` is the ring of lit
