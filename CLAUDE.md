@@ -303,6 +303,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `CeilingLight.tscn` (the same scene with no run drawn, for lighting a PAINTED
   8px ceiling cell) pass-through, since the tile under it already carries the
   room's collision.
+  **It can be MOTION ACTIVATED**: `MotionRange` in LDtk (px, **0 = simply on**,
+  which is what everything placed before it does) wakes the fixture when he
+  comes near and drops it again when he leaves, over `MotionFade` seconds.
+  The range is measured to the POOL — `pool_drop` below the panel, where the
+  light actually lands — not to the fixture in the ceiling, which is ~164px
+  above the floor he walks on and would make every number a designer typed be
+  off by the height of the room. The fade is applied to the pool and the panel's
+  face follows it for free, because the face is already derived from the pool
+  (that is also what keeps the flicker and the sensor from fighting).
   `zones/SlideZone.tscn` is a volume, not a prop: inside it Hooshang's steering
   drops to `control_strength`, a drag builds along `angle`, and jump and dash
   are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the

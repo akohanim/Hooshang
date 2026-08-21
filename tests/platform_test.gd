@@ -159,11 +159,78 @@ func _run() -> void:
 			break
 	_check(passed_through, "...and he falls straight through where it is")
 
+	# --- the motion sensor ---------------------------------------------------
+	#
+	# A sensored fixture is dark until he walks under it. Everything here is
+	# measured off `glow.energy`, the pool the fixture actually throws, rather
+	# than off a flag — a sensor that flips its own bool and never reaches the
+	# light is the failure this is for.
+	var sensed: CeilingPanel = CEILING_PANEL.instantiate()
+	sensed.position = Vector2(1200, 100)
+	sensed.run_tiles = 5
+	world.add_child(sensed)
+	sensed.motion_fade = 0.0          # snap, so this measures the sensor not the fade
+	sensed.motion_range = 40.0
+	var pool: PointLight2D = sensed.get_node("Glow")
+	var full: float = sensed.light_energy
+
+	player.respawn(Vector2(1200, 420))   # far below, well out of range
+	await _frames(4)
+	_check(pool.energy < full * 0.05,
+		"a sensored fixture is dark with nobody near it  [%.2f of %.2f]"
+			% [pool.energy, full])
+
+	# Into the pool it throws. The range is measured from there, not from the
+	# fixture in the ceiling, so this is the distance a designer types.
+	player.respawn(pool.global_position + Vector2(0, 10))
+	await _frames(4)
+	_check(pool.energy > full * 0.95,
+		"...and comes up when he walks under it  [%.2f of %.2f]" % [pool.energy, full])
+	_check(sensed.panel.energy > sensed.panel_energy * 0.95,
+		"...with the panel's own face lit too, not just the pool  [%.2f of %.2f]"
+			% [sensed.panel.energy, sensed.panel_energy])
+
+	player.respawn(Vector2(1200, 420))
+	await _frames(4)
+	_check(pool.energy < full * 0.05,
+		"...and goes back out when he leaves  [%.2f of %.2f]" % [pool.energy, full])
+
+	# The fade is a fade, not a jump: partway there after a fraction of it.
+	#
+	# HELD in range rather than left there. There is no floor under the pool, so
+	# a plain wait lets gravity carry him back out of range part way through the
+	# fade — which reads exactly like the fade stalling at zero.
+	sensed.motion_fade = 1.0
+	player.respawn(pool.global_position + Vector2(0, 10))
+	await _hold(pool.global_position + Vector2(0, 10), 6)
+	var partway := pool.energy
+	_check(partway > 0.0 and partway < full * 0.9,
+		"the fade takes time rather than snapping  [%.2f of %.2f after ~0.1s]"
+			% [partway, full])
+	await _hold(pool.global_position + Vector2(0, 10), 90)
+	_check(pool.energy > full * 0.95,
+		"...and gets all the way there  [%.2f of %.2f]" % [pool.energy, full])
+
+	# And a fixture with no sensor is untouched by any of it — this is the
+	# default, so every panel already placed in the world depends on it.
+	_check(run.motion_range == 0.0 and run.get_node("Glow").energy > run.light_energy * 0.95,
+		"an unsensored fixture just stays on  [%.2f of %.2f]"
+			% [run.get_node("Glow").energy, run.light_energy])
+
 	if failures.is_empty():
 		print("PLATFORM TEST: ALL PASS")
 	else:
 		print("PLATFORM TEST: %d FAILURE(S)" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+
+## Keep the player parked on `at` for `n` frames. Used where the thing under
+## test needs him to STAY somewhere there is no floor.
+func _hold(at: Vector2, n: int) -> void:
+	for i in n:
+		player.global_position = at
+		player.velocity = Vector2.ZERO
+		await _frames(1)
 
 
 func _settle(budget: int) -> bool:

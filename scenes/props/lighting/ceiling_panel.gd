@@ -96,6 +96,22 @@ const PANEL_GLOW := preload("res://assets/props/ceiling/ceiling_light_glow.png")
 ## origin, and the two would otherwise part company the moment this is not 0.
 @export var panel_offset := 0:
 	set(value): panel_offset = value; _apply()
+
+@export_group("Motion sensor")
+## How close he has to get before this fixture wakes up, in px. **0 keeps it
+## simply on**, which is what every panel placed before this existed does.
+##
+## Measured to the POOL, not to the fixture. The fixture is in the ceiling and he
+## walks on the floor ~164px below it, so a radius to the fixture would have to
+## be enormous before it ever tripped, and every number a designer typed would be
+## off by the height of the room. `glow` already sits `pool_drop` below the panel
+## — where the light actually lands — so a range measured from there is a range
+## measured from the bit of floor the fixture lights.
+@export var motion_range := 0.0:
+	set(value): motion_range = maxf(value, 0.0); _apply()
+## How long it takes to come up, and to go back down, in seconds. 0 snaps.
+@export var motion_fade := 0.25:
+	set(value): motion_fade = maxf(value, 0.0)
 ## Whether the run stops the player, or is scenery he passes through.
 ##
 ## On, because this IS the ceiling. Also gated on `show_body`: a run that draws
@@ -115,6 +131,13 @@ const SOLID_LAYER := 1
 var _tiles: Node2D
 var _body: StaticBody2D
 var _body_shape: CollisionShape2D
+## How far up this fixture currently is, 0..1. Sensored panels start at 0 — dark
+## until something walks under them — and unsensored ones sit at 1 forever.
+var _lit := 1.0
+## Who it is watching for, re-found when he is replaced. A respawn frees the old
+## player, so holding this across one leaves the fixture watching a dead node and
+## dark for the rest of the run.
+var _watched: Node2D = null
 
 
 func _ready() -> void:
@@ -126,6 +149,11 @@ func _apply() -> void:
 	super()
 	if panel == null:
 		return
+	# A sensored fixture is OFF until it sees him. Starting lit means every panel
+	# in the room is on for the first frame of the room, which reads as the
+	# lights failing rather than as a sensor arming.
+	if motion_range > 0.0 and not Engine.is_editor_hint():
+		_lit = 0.0
 	# The inherited cable and bulb are the greybox lamp's body. This fixture has
 	# no body hanging in the room at all — it is in the ceiling.
 	cable.visible = false
@@ -197,6 +225,33 @@ func _process(delta: float) -> void:
 	super(delta)
 	if Engine.is_editor_hint() or panel == null or glow == null:
 		return
+	_tick_motion(delta)
+	# The pool as the FLICKER left it, before the sensor gets a say. Read back off
+	# glow only in the flickering case — that is the one where super() just wrote
+	# it, from light_energy rather than from its own last value. Reading it back
+	# in the steady case instead would multiply this frame's fade into last
+	# frame's, and a fixture that is meant to hold at half would sink to nothing
+	# over a second.
+	var flickered := glow.energy if flickers else light_energy
+	glow.energy = flickered * _lit
 	# Keep the panel's face in step with the pool. Read back off the pool rather
-	# than recomputing the flicker, so there is one waveform and no drift.
+	# than recomputing the flicker, so there is one waveform and no drift — and
+	# so the sensor's fade reaches the face for free.
 	panel.energy = panel_energy * (glow.energy / maxf(light_energy, 0.0001))
+
+
+## Walk `_lit` toward whether he is standing in range.
+func _tick_motion(delta: float) -> void:
+	if motion_range <= 0.0:
+		_lit = 1.0
+		return
+	if not is_instance_valid(_watched):
+		_watched = get_tree().get_first_node_in_group("player") as Node2D
+	var want := 0.0
+	if _watched != null and is_instance_valid(_watched) \
+			and glow.global_position.distance_to(_watched.global_position) <= motion_range:
+		want = 1.0
+	if motion_fade <= 0.0:
+		_lit = want
+		return
+	_lit = move_toward(_lit, want, delta / motion_fade)

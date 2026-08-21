@@ -69,6 +69,15 @@ FIELDS = [
     ("FlickerAmount", "flicker_amount",
      "Fluorescent sputter: how deep the dip is, 0..1. 0 is a steady tube."),
     ("FlickerSpeed", "flicker_speed", "How fast that sputter runs."),
+    ("MotionRange", "motion_range",
+     "Motion sensor: how close he has to get before this fixture wakes up, in "
+     "px. 0 keeps it simply ON, which is what every panel placed before this "
+     "existed does. Measured to the POOL the fixture throws (PoolDrop below the "
+     "panel), not to the panel in the ceiling — so it is a distance from the bit "
+     "of floor this light lands on, not from the roof."),
+    ("MotionFade", "motion_fade",
+     "How long a sensored fixture takes to come up, and to go back down, in "
+     "seconds. 0 snaps."),
 ]
 ## FlickerAmount does not take the prop's own default: LampFixture ships 0.18
 ## with `flickers` OFF, and 0.18 here would light every placed fixture with a

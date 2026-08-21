@@ -223,6 +223,8 @@ func _light_fields(node: CeilingPanel, data: Dictionary) -> void:
 	# LDtk has only ever written String and Float fields in this project, and a
 	# Bool written from a guessed shape is what crashed the editor once already;
 	# 0 reads as "steady" perfectly well.
+	node.motion_range = _field_float(data, "MotionRange", node.motion_range)
+	node.motion_fade = _field_float(data, "MotionFade", node.motion_fade)
 	var amount := _field_float(data, "FlickerAmount", 0.0)
 	node.flickers = amount > 0.0
 	if node.flickers:
