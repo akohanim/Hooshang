@@ -3,6 +3,9 @@ class_name CrumblingPlatform
 extends Platform
 ## A ceiling panel that has already given up: stand on it and it goes.
 ##
+## It arms the instant he is on top of it, not when he next touches its edge —
+## see `_try_arm`.
+##
 ## Timeline, once he first stands on it — `crumble_time` total, under a second by
 ## design, so it is a thing you cross rather than a thing you wait on:
 ##
@@ -32,7 +35,7 @@ const FRAMES := [
 
 ## How long from first footfall to the floor going away. Under a second, and the
 ## three damage frames are spread across it.
-@export var crumble_time := 0.55
+@export var crumble_time := 0.75
 ## How long the wreckage takes to fall out of sight afterwards.
 @export var fall_time := 0.5
 ## How far it drops while falling.
@@ -44,6 +47,12 @@ var _skin: Area2D
 var _skin_shape: CollisionShape2D
 ## Armed once, by the first footfall. Cleared only by reset().
 var _spent := false
+## Set by reset() so a panel restored UNDER a standing player does not arm on
+## the spot. Polling every frame (see `_try_arm`) otherwise loses the one
+## guarantee `body_entered` gave for free: that arming needs a fresh entry. He
+## has to be clear of the skin once before it will count him again — which
+## costs nothing on a real landing, because he was outside it a frame earlier.
+var _needs_clear := false
 var _timer := 0.0
 var _falling := false
 var _fall_tween: Tween
@@ -85,12 +94,38 @@ func _apply_frame(i: int) -> void:
 
 
 func _on_touched(body: Node2D) -> void:
-	if _spent or Engine.is_editor_hint() or body is not Player:
+	_try_arm(body)
+
+
+## Start the countdown, if this body is a player and he is on top right now.
+##
+## Reached from TWO directions, and it needs both. `body_entered` is the fast
+## path — a clean landing arms on the very frame he touches down. But that
+## signal fires once per entry, and `_standing_on` can perfectly well be false
+## at that instant: he rises into the skin from below, or clips its end while
+## moving upward. Nothing fires again once he is inside, so a signal-only
+## version leaves him standing on a panel that has decided it was never landed
+## on. `_process` therefore re-asks the same question every frame until it is
+## armed, which is what makes "as soon as he stands on top" true regardless of
+## how he got there.
+func _try_arm(body: Node2D) -> void:
+	if _spent or _falling or _needs_clear or Engine.is_editor_hint() or body is not Player:
 		return
 	if not _standing_on(body as Player):
 		return
 	_spent = true
 	_timer = 0.0
+
+
+## Every player currently inside the detection skin — usually none or one.
+func _players_on_skin() -> Array[Player]:
+	var found: Array[Player] = []
+	if _skin == null:
+		return found
+	for body in _skin.get_overlapping_bodies():
+		if body is Player:
+			found.append(body as Player)
+	return found
 
 
 ## On TOP of it, not merely touching it. His feet have to be at the platform's
@@ -102,8 +137,19 @@ func _standing_on(who: Player) -> bool:
 
 
 func _process(delta: float) -> void:
-	if not _spent or _falling:
+	if _falling:
 		return
+	if not _spent:
+		var players := _players_on_skin()
+		if _needs_clear:
+			# Nothing to be clear of any more — the next entry counts.
+			if players.is_empty():
+				_needs_clear = false
+			return
+		for who in players:
+			_try_arm(who)
+		if not _spent:
+			return
 	_timer += delta
 	var t := clampf(_timer / maxf(crumble_time, 0.01), 0.0, 1.0)
 	_apply_frame(int(t * FRAMES.size()))
@@ -156,6 +202,9 @@ func reset() -> void:
 	_spent = false
 	_falling = false
 	_timer = 0.0
+	# If he is inside the skin right now — he just fell through this panel, or a
+	# respawn put him on it — make him leave before it can arm again.
+	_needs_clear = not _players_on_skin().is_empty()
 	set_collision_layer_value(1, true)
 	if _visual != null:
 		_visual.position = Vector2.ZERO
