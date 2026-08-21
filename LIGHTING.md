@@ -251,6 +251,17 @@ was only ever given seven, and the ramp still reads across the gaps.
 > `MoonWindowRoom11` and is correct: that node is the boss room's. Renaming them
 > means moving that NodePath with them.
 
+**Level_13 carries TWO windows.** `MoonWindowRoom11` (x 4852) and
+`MoonWindowRoom11B` (x 5052) sit 200px apart on the same back wall, each with its
+own glow (`MoonGlowRoom11`, `MoonGlowRoom11B`) — identical values, so they are
+one sky and not two. Both are plain full moons on the way in and both are turned
+by the encounter: `Act1Beats` drives them from ONE list in ONE frame
+(`blood_moon_windows` / `blood_moon_glows` beside the original single pair), which
+is the only thing keeping the eight-second ramp in step between them. Add a third
+by appending to those two arrays, never by calling `eclipse()` a second time.
+`tests/chase_route_test.gd` pins that every window moves and that they move
+together, animated and snapped.
+
 Four things worth knowing before retuning it:
 
 - **The sky patch is not allowed to go black.** It started at `(0.055, 0.03,

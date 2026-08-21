@@ -83,24 +83,72 @@ func _ready() -> void:
 	# eclipse tween actually drives, rather than off a flag — a moon that sets
 	# "turning = true" and never reaches the window is the failure worth catching,
 	# and it stays invisible until the escape row looks wrong ten rooms later.
-	var moon := _moon()
-	_check(moon != null, "Act1Beats points at a MoonWindow to turn")
-	var before: float = moon.shadow_amount if moon != null else -1.0
+	#
+	# BOTH windows, not just the first. Level_13's back wall carries two moons and
+	# they are one sky: a test that watched only the window named by
+	# `blood_moon_window` would pass with the second one never wired up at all,
+	# and the room would play with one red moon and one blue one.
+	var moons := _moons()
+	var glows := _moon_glows()
+	_check(moons.size() == 2,
+		"Act1Beats drives BOTH of the boss room's moon windows  [%d]" % moons.size())
+	_check(glows.size() == moons.size(),
+		"and each of them has its light paired with it  [%d]" % glows.size())
+	if moons.is_empty():
+		return _finish()
+	var moon: MoonWindow = moons[0]
+	var before: float = moon.shadow_amount
+	_check(_all_in_step(moons), "they start on the same moon  [%s]" % _amounts(moons))
+	var glow_before: float = glows[0].light_energy if not glows.is_empty() \
+			and glows[0] != null else -1.0
 	trigger.triggered.emit(world.player)
 	await _frames(20)
-	if moon != null:
-		_check(is_equal_approx(moon.shadow_amount, before),
-			"crossing the line does NOT start the moon — the dialogue would hide it  [%.3f]"
-				% moon.shadow_amount)
-		# And it does turn, once the beat that was hiding it is over. Given a real
-		# slice of the ramp rather than a few frames: the crossing is eased IN, so
-		# half a second of an eight-second turn is a couple of thousandths and
-		# would read the same as nothing happening.
-		trigger.chase_begun.emit()
-		await _frames(180)
-		_check(moon.shadow_amount > before + 0.05,
-			"...and finishing the reveal starts it  [%.3f -> %.3f]"
-				% [before, moon.shadow_amount])
+	_check(is_equal_approx(moon.shadow_amount, before),
+		"crossing the line does NOT start the moon — the dialogue would hide it  [%.3f]"
+			% moon.shadow_amount)
+	_check(_all_in_step(moons),
+		"and it starts none of the others either  [%s]" % _amounts(moons))
+	# And it does turn, once the beat that was hiding it is over. Given a real
+	# slice of the ramp rather than a few frames: the crossing is eased IN, so
+	# half a second of an eight-second turn is a couple of thousandths and
+	# would read the same as nothing happening.
+	trigger.chase_begun.emit()
+	await _frames(180)
+	_check(moon.shadow_amount > before + 0.05,
+		"...and finishing the reveal starts it  [%.3f -> %.3f]"
+			% [before, moon.shadow_amount])
+	# The second window is the assertion. Every one of them has moved, and they
+	# are all at the SAME point of the ramp — one call site, one frame, one
+	# duration, so nothing can have started late or on a different curve.
+	for m in moons:
+		_check(m.shadow_amount > before + 0.05,
+			"...every window in the room turns  [%s = %.3f]" % [m.name, m.shadow_amount])
+	_check(_all_in_step(moons),
+		"...and they turn together, in step  [%s]" % _amounts(moons))
+	# The lights they are paired with go with them, or a second window turns red
+	# over a room still lit cold blue.
+	for g in glows:
+		_check(g != null and g.light_energy < glow_before - 0.05,
+			"...and each paired light drains with it  [%s = %.3f]"
+				% [g.name if g != null else "<none>",
+					g.light_energy if g != null else -1.0])
+	_check(glows.size() < 2 or is_equal_approx(glows[0].light_energy, glows[1].light_energy),
+		"...in step as well  [%.3f vs %.3f]"
+			% [glows[0].light_energy, glows[1].light_energy])
+	# The RESUME path is the same call with `animated` false — a slot loaded after
+	# the encounter snaps the moon rather than replaying the turn. It has to snap
+	# EVERY window: a second window wired into only the animated path comes back
+	# from a save as a blue moon beside a red one.
+	var beats := world.get_node_or_null("Act1Beats") as Act1Beats
+	_check(beats != null, "the world has an Act1Beats to resume through")
+	if beats != null:
+		beats._turn_the_moon(false)
+		await _frames(2)
+		for m in moons:
+			_check(is_equal_approx(m.shadow_amount, m.blood_shadow_amount)
+					and m.moon_color.is_equal_approx(m.blood_moon_color),
+				"a resumed save snaps it, and snaps all of it  [%s = %.3f]"
+					% [m.name, m.shadow_amount])
 	await _go_back()
 	_check(world.current_room == next_room,
 		"after meeting him it leads to Level_14 instead  [%s]" % world.current_room.name)
@@ -194,10 +242,69 @@ func _room(name: String) -> Node2D:
 ## MoonWindow in the scene would pass with the export blank, which is the one
 ## thing that stops the moon turning at all.
 func _moon() -> MoonWindow:
+	var found := _moons()
+	return found[0] if not found.is_empty() else null
+
+
+## EVERY window it turns — the single export first, then the list beside it, in
+## the order _turn_the_moon walks them. Same rule as _moon(): found through the
+## beats node's own exports, so a blank one is a failure and not a silent pass.
+func _moons() -> Array[MoonWindow]:
+	var found: Array[MoonWindow] = []
 	var beats := world.get_node_or_null("Act1Beats") as Act1Beats
-	if beats == null or beats.blood_moon_window.is_empty():
-		return null
-	return beats.get_node_or_null(beats.blood_moon_window) as MoonWindow
+	if beats == null:
+		return found
+	for path in _moon_paths(beats):
+		var window := beats.get_node_or_null(path) as MoonWindow
+		if window != null:
+			found.append(window)
+	return found
+
+
+## The lights paired with them, in the same order.
+func _moon_glows() -> Array[LampFixture]:
+	var found: Array[LampFixture] = []
+	var beats := world.get_node_or_null("Act1Beats") as Act1Beats
+	if beats == null:
+		return found
+	var paths: Array[NodePath] = []
+	if not beats.blood_moon_window.is_empty():
+		paths.append(beats.blood_moon_glow)
+	paths.append_array(beats.blood_moon_glows)
+	for path in paths:
+		if path.is_empty():
+			continue
+		var glow := beats.get_node_or_null(path) as LampFixture
+		if glow != null:
+			found.append(glow)
+	return found
+
+
+func _moon_paths(beats: Act1Beats) -> Array[NodePath]:
+	var paths: Array[NodePath] = []
+	if not beats.blood_moon_window.is_empty():
+		paths.append(beats.blood_moon_window)
+	for path in beats.blood_moon_windows:
+		if not path.is_empty():
+			paths.append(path)
+	return paths
+
+
+## Whether every window is at the same point of the ramp. Two tweens started in
+## the same frame with the same duration land on the same value every frame; two
+## started a frame apart do not, and that is exactly the drift worth catching.
+func _all_in_step(moons: Array[MoonWindow]) -> bool:
+	for m in moons:
+		if not is_equal_approx(m.shadow_amount, moons[0].shadow_amount):
+			return false
+	return true
+
+
+func _amounts(moons: Array[MoonWindow]) -> String:
+	var parts: Array[String] = []
+	for m in moons:
+		parts.append("%s=%.3f" % [m.name, m.shadow_amount])
+	return ", ".join(parts)
 
 
 func _chase_trigger(node: Node = null) -> DarkshangTrigger:

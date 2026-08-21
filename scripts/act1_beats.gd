@@ -178,6 +178,23 @@ const EMOTE_LINES := {
 ## layout (STYLE_GUIDE §9). "" on either turns the beat off.
 @export var blood_moon_window: NodePath
 @export var blood_moon_glow: NodePath
+## ANY FURTHER WINDOWS IN THE SAME ROOM, paired by index with `blood_moon_glows`.
+##
+## Level_13's back wall carries two moons, and they are one sky: they must go
+## dark and come back red as a single event, not as two windows that happen to
+## have been told the same thing. So this is a LIST driven from one call site in
+## one frame (`_turn_the_moon`) rather than a second copy of the beat — two call
+## sites is two places for the duration, the signal or the snap-on-load to drift,
+## and the failure would be a room with one red moon and one blue one.
+##
+## The pair above is kept as its own export rather than folded in here: it is the
+## window the beat was written about, `tests/chase_route_test.gd` finds the moon
+## through it, and a scene that never fills these in behaves exactly as before.
+##
+## A window with no glow beside it is allowed — leave the matching entry empty,
+## or short the list. The window still turns; nothing lights the room from it.
+@export var blood_moon_windows: Array[NodePath] = []
+@export var blood_moon_glows: Array[NodePath] = []
 ## How long the turn takes. Tuned against the encounter's dialogue rather than
 ## chosen: it starts on the threshold, before the first line, and should still be
 ## finishing as Rumi says "Don't let it absorb you."
@@ -658,15 +675,43 @@ func _wire_chase() -> void:
 ## `animated` false snaps it, for a save resumed after the encounter: the turn
 ## already happened, and replaying it on load would be a cutscene nobody asked
 ## for playing over a player who has their controls.
+##
+## EVERY WINDOW IN THE ROOM, IN THE SAME FRAME. `eclipse()` builds its own tween,
+## so two windows started on the same frame with the same duration stay in step
+## for the whole ramp — but only because nothing else ever calls them. That is
+## the entire reason this loop exists rather than a second wiring somewhere.
 func _turn_the_moon(animated: bool) -> void:
-	if blood_moon_window.is_empty():
-		return
-	var window := get_node_or_null(blood_moon_window) as MoonWindow
-	if window == null:
-		push_warning("Act1Beats: blood_moon_window points at no MoonWindow — the moon never turns.")
-		return
-	var glow := get_node_or_null(blood_moon_glow) as LampFixture
-	window.eclipse(blood_moon_seconds if animated else 0.0, glow)
+	var duration := blood_moon_seconds if animated else 0.0
+	for pair in _moon_pairs():
+		var window := get_node_or_null(pair[0] as NodePath) as MoonWindow
+		if window == null:
+			push_warning("Act1Beats: %s points at no MoonWindow — that moon never turns."
+				% pair[0])
+			continue
+		var glow_path: NodePath = pair[1]
+		var glow: LampFixture = null
+		if not glow_path.is_empty():
+			glow = get_node_or_null(glow_path) as LampFixture
+		window.eclipse(duration, glow)
+
+
+## The room's windows and their lights, as [window, glow] paths — the single
+## export first, then the list, skipping blanks. Built fresh each time rather
+## than cached in _ready: this is called from the encounter and from a resumed
+## save, and both already have the nodes.
+func _moon_pairs() -> Array:
+	var pairs: Array = []
+	if not blood_moon_window.is_empty():
+		pairs.append([blood_moon_window, blood_moon_glow])
+	for i in blood_moon_windows.size():
+		var window_path: NodePath = blood_moon_windows[i]
+		if window_path.is_empty():
+			continue
+		var glow_path := NodePath()
+		if i < blood_moon_glows.size():
+			glow_path = blood_moon_glows[i]
+		pairs.append([window_path, glow_path])
+	return pairs
 
 
 ## The room's Darkshang trigger, wherever in the room it was dropped. Scoped to
