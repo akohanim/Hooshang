@@ -105,7 +105,10 @@ var _pulled := false
 ## Whether the lock on his controls is OURS to lift. The fall is not his to
 ## steer, but this beat is not the only thing that ever locks him, so it only
 ## puts back what it took.
-var _locked_fall := false
+## True while THIS beat is holding his controls — from the moment the floor is
+## pulled, through the fall, and on through everything Rumi says. Named for the
+## fall alone when the fall was all it covered.
+var _locked := false
 
 
 func _ready() -> void:
@@ -198,7 +201,7 @@ func _physics_process(_delta: float) -> void:
 		if not _pulled:
 			_pull_the_floor()
 			_player.input_locked = true
-			_locked_fall = true
+			_locked = true
 			return
 		# AND HE FALLS THERE, rather than being put there. The catch used to fire
 		# on the first frame he was airborne and teleport him to the hang point,
@@ -247,16 +250,21 @@ func _catch() -> void:
 	# height is the part the dash has to answer — and he is kept far enough from
 	# the lip that drifting into it cannot make the lesson free.
 	_hang.x = clampf(_player.global_position.x, arm_at_x, ledge_x - 24.0)
-	_unlock()
+	# HIS CONTROLS STAY GONE. They used to come back here, which put them in his
+	# hands for the whole of Rumi's beat — he could walk out from under the
+	# lesson while it was being explained, and a dash pressed over the dialogue
+	# was watched for and could finish the lesson before the line teaching it had
+	# been read. They come back with the prompt instead, in _begin().
 	_pin()
 	_begin()
 
 
-## Give his controls back, if this beat is what took them.
+## Give his controls back, if this beat is what took them. Safe to call twice —
+## teardown and death both come through here without knowing what state it is in.
 func _unlock() -> void:
-	if _locked_fall and is_instance_valid(_player):
+	if _locked and is_instance_valid(_player):
 		_player.input_locked = false
-	_locked_fall = false
+	_locked = false
 
 
 ## Put the lesson back after a fall down the gap.
@@ -281,6 +289,14 @@ func _begin() -> void:
 	_prompt = load("res://scenes/ui/InputPrompt.tscn").instantiate()
 	_world.add_child(_prompt)
 	_prompt.show_at(_player.global_position + Vector2(0.0, -6.0))
+	# NOW he can press something — not before. The prompt going up is the first
+	# moment there is anything to answer, and it is also the first moment the
+	# dialogue box is no longer eating the button he would answer it with.
+	#
+	# This gives back his INPUT, not his freedom: _pin() still holds him on the
+	# spot every frame, so the only thing that moves him off it is the diagonal
+	# dash the prompt is asking for.
+	_unlock()
 
 
 ## Rumi drops in beside him, hands the dash over if he does not have it yet,

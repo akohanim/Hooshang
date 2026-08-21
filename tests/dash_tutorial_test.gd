@@ -84,6 +84,8 @@ func _ready() -> void:
 	p.respawn(Vector2(tut.arm_at_x + 10.0, tut.ledge_top_y - 40.0))
 	var caught := false
 	var locked_falling := false
+	var lesson_frames := 0
+	var loose_in_lesson := 0
 	for i in 240:
 		await _frames(1)
 		# THE FALL IS NOT HIS. His controls go the moment the floor does, so he
@@ -91,13 +93,30 @@ func _ready() -> void:
 		# back with the prompt, or there is nothing he can press to answer it.
 		if tut._pulled and not tut._held and p.input_locked:
 			locked_falling = true
+		# NOR IS RUMI'S BEAT. Caught and being spoken to, before the prompt is
+		# up: he must be frozen for all of it. This used to be the window where
+		# his controls came back early — he could walk out from under the lesson
+		# mid-sentence, and a dash pressed over the dialogue was watched for and
+		# could finish the lesson before the line teaching it had been read.
+		# Counted rather than flagged, so one stray frame cannot pass as none.
+		if tut._held and tut._prompt == null:
+			lesson_frames += 1
+			if not p.input_locked:
+				loose_in_lesson += 1
 		if tut._prompt != null:
 			caught = true
 			break
 	_check(caught, "he is caught mid-fall and the prompt arrives")
 	_check(p.has_dash, "and Rumi has handed him the dash he is about to need")
 	_check(locked_falling, "his controls are gone for the fall")
-	_check(not p.input_locked, "and back in his hands at the hang point")
+	# Proves the window exists before proving he was locked in it: with no window
+	# there is nothing to be frozen for, and the check below would pass vacuously.
+	_check(lesson_frames > 0,
+		"there is a beat between the catch and the prompt  [%d frames]" % lesson_frames)
+	_check(loose_in_lesson == 0,
+		"and his controls stay gone for all of it  [loose on %d of %d frames]"
+			% [loose_in_lesson, lesson_frames])
+	_check(not p.input_locked, "and come back with the prompt, to answer it with")
 
 	# THE FLOOR IS TAKEN, not waited for. Relaxed enough to hold while he crosses,
 	# the panels also held long enough to walk the whole run and never need the
