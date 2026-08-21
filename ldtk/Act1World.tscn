@@ -13,7 +13,6 @@
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/SunShaft.tscn" id="12_shaft"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/WallPattern.tscn" id="13_wallpat"]
 [ext_resource type="Script" uid="uid://r7t5ujuaujk5" path="res://scripts/dash_tutorial.gd" id="14_dashtut"]
-[ext_resource type="PackedScene" path="res://scenes/props/lighting/CeilingPanel.tscn" id="15_ceil"]
 
 [node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
@@ -53,7 +52,7 @@ position = Vector2(3752, 220)
 position = Vector2(4852, 220)
 
 [node name="MoonWindowRoom11B" parent="Backdrop" unique_id=78536781 instance=ExtResource("8_moon")]
-position = Vector2(5052, 220)
+position = Vector2(5152, 220)
 
 [node name="MoonWindowRoom8" parent="Backdrop" unique_id=1137299729 instance=ExtResource("8_moon")]
 position = Vector2(2652, 220)
@@ -261,7 +260,7 @@ light_scale = 1.6
 show_body = false
 
 [node name="MoonGlowRoom11B" parent="Lights" unique_id=1111313831 instance=ExtResource("3_lamp")]
-position = Vector2(5052, 224)
+position = Vector2(5152, 224)
 light_color = Color(0.62, 0.74, 1, 1)
 light_energy = 1.3
 light_scale = 1.6
