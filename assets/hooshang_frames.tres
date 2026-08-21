@@ -19,13 +19,12 @@
 [ext_resource type="Texture2D" uid="uid://dyynr2j3m7rfg" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_006.png" id="56_jump6"]
 [ext_resource type="Texture2D" uid="uid://doh3am43bqxf1" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_007.png" id="57_jump7"]
 [ext_resource type="Texture2D" uid="uid://j80t7l207imy" path="res://assets/hooshang_sprites/animations/Jumping/east/frame_008.png" id="58_jump8"]
-[ext_resource type="Texture2D" uid="uid://da3qq07rfq17k" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_000.png" id="60_fall0"]
-[ext_resource type="Texture2D" uid="uid://dk1hy3infup3t" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_001.png" id="61_fall1"]
-[ext_resource type="Texture2D" uid="uid://cpmvvyjplpsas" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_002.png" id="62_fall2"]
-[ext_resource type="Texture2D" uid="uid://c8tdyeiwdyyw1" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_003.png" id="63_fall3"]
-[ext_resource type="Texture2D" uid="uid://dhfpob2t4570u" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_004.png" id="64_fall4"]
-[ext_resource type="Texture2D" uid="uid://ql785vglxv3g" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_005.png" id="65_fall5"]
-[ext_resource type="Texture2D" uid="uid://ce58yroppkt5u" path="res://assets/hooshang_sprites/animations/Two-Footed_Jump/east/frame_006.png" id="66_fall6"]
+[ext_resource type="Texture2D" uid="uid://cd3vngkkwtomd" path="res://assets/hooshang_sprites/animations/Falling/east/frame_000.png" id="60_fall0"]
+[ext_resource type="Texture2D" uid="uid://c0dinesv15v0f" path="res://assets/hooshang_sprites/animations/Falling/east/frame_001.png" id="61_fall1"]
+[ext_resource type="Texture2D" uid="uid://dl7ev2ht1t4vf" path="res://assets/hooshang_sprites/animations/Falling/east/frame_002.png" id="62_fall2"]
+[ext_resource type="Texture2D" uid="uid://cjwq2wsq4au18" path="res://assets/hooshang_sprites/animations/Falling/east/frame_003.png" id="63_fall3"]
+[ext_resource type="Texture2D" uid="uid://d63lp2ofxdfx" path="res://assets/hooshang_sprites/animations/Falling/east/frame_004.png" id="64_fall4"]
+[ext_resource type="Texture2D" uid="uid://ch56aa0w62lgq" path="res://assets/hooshang_sprites/animations/Falling/east/frame_005.png" id="65_fall5"]
 [ext_resource type="Texture2D" uid="uid://dile0qtoae4sl" path="res://assets/hooshang_sprites/animations/Slide/east/frame_000.png" id="70_slide0"]
 [ext_resource type="Texture2D" uid="uid://dxbmcmdryu01m" path="res://assets/hooshang_sprites/animations/Slide/east/frame_001.png" id="71_slide1"]
 [ext_resource type="Texture2D" uid="uid://0sd3nq7c07ae" path="res://assets/hooshang_sprites/animations/Slide/east/frame_002.png" id="72_slide2"]
@@ -70,24 +69,21 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("60_fall0")
-}, {
+},{
 "duration": 1.0,
 "texture": ExtResource("61_fall1")
-}, {
+},{
 "duration": 1.0,
 "texture": ExtResource("62_fall2")
-}, {
+},{
 "duration": 1.0,
 "texture": ExtResource("63_fall3")
-}, {
+},{
 "duration": 1.0,
 "texture": ExtResource("64_fall4")
-}, {
+},{
 "duration": 1.0,
 "texture": ExtResource("65_fall5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("66_fall6")
 }],
 "loop": true,
 "name": &"fall",
