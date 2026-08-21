@@ -75,11 +75,13 @@ so the two agree now. The tiles are still placeholder art.
     ceiling platforms: the solid one holds, the crumbling one gives way in
     under a second and comes BACK on reset (collision, art and its spent flag)
   - `Godot --headless --path . res://tests/portrait_anim_test.tscn` — the talking
-    dialogue faces: the frame manifest loads off res:// at all, a rigged face
-    raises both overlays and an unrigged one holds still, the overlays land on
-    the face (mouth low, eyes above it) and travel with it when the banner
-    mirrors, the mouth moves only while words are appearing — closing on a
-    `[p]` breath and the moment the line ends — and the eyes blink unprompted
+    dialogue faces: the loop manifest loads off res:// at all, a looped face
+    draws its sheet over the still (and leaves the older overlays off) while the
+    still underneath still NAMES the face, the frame window stays on the sheet,
+    the loop travels with the banner when it mirrors, speech frames run only
+    while words are appearing and never land on the rest frame — returning to it
+    on a `[p]` breath and the moment the line ends — and the eyes blink
+    unprompted, from a blink frame kept OUT of the speech cycle
   - `Godot --headless --path . res://tests/chimney_test.tscn` — Level_1's
     one-cell shaft: standing over its mouth takes him in from anywhere across
     the cell, running over it drops him in rather than across, and once inside
@@ -314,9 +316,11 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   Runs WINDOWED — 2D does not rasterise headless — and binds no save slot:
   `Godot --path . res://tests/room_shot.tscn -- Level_24`
 - `tests/portrait_shot.tscn` — dev capture harness for the talking portraits,
-  not pass/fail. Photographs the banner at every mouth position and blink frame
-  so the rig can be LOOKED at. Windowed, like `room_shot`:
-  `Godot --path . res://tests/portrait_shot.tscn -- hooshang_skeptical`
+  not pass/fail. Photographs the banner on every frame of a face's loop, LABELLED
+  by role, so you can check that the frame the box calls `rest` really is a shut
+  mouth and the one it calls `blink` really is shut eyes. Windowed, like
+  `room_shot`. Shots go to `user://portrait_shots` unless a directory is given:
+  `Godot --path . res://tests/portrait_shot.tscn -- hooshang_annoyed /tmp/shots`
 - `tests/feel_measure.tscn` — the same idea for MOVEMENT, and also not pass/fail.
   Prints the jump apex, the airtime, the horizontal reach of a running jump and
   a 20-timing sweep of the jump+up-dash. Run it before and after touching
@@ -351,7 +355,22 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   are kept but SCALED — which is why `Lemon.tscn` sets `bob_height = 0`, or the
   prop's own tween hovers it a second time and the squash drifts out of step.
   Sizes: `10` world, `20 dense`, `16 icon` (writes `ldtk/art/lemon.png`).
-- `tools/gen_portrait_frames.py` — the talking dialogue faces, WARPED out of the
+- `tools/gen_portrait_loops.py` — indexes the talking-portrait LOOPS: which
+  frame of each sheet is silence, which are speech, which is the blink. The
+  sheets themselves are generated art (Pixellab, from one base portrait); this
+  turns them into something the box can drive. The blink is found by EDGE ENERGY
+  in the eye band, not by brightness or by difference from frame 0: a closed lid
+  removes the pupil, the lash line and the iris edge at once so the region goes
+  smooth, while plain difference cannot tell a blink from a raised eyebrow —
+  measured, both peak on the same frames. The blink frame is kept OUT of `talk`,
+  which is what lets the mouth run off the typewriter and the blink run off its
+  own clock without the two fighting over a frame.
+- `tools/gen_portrait_frames.py` — SUPERSEDED for Hooshang by the loops above,
+  and kept for any future face that wants patch overlays instead. Note its
+  strips in `assets/portraits/anim/` are warped from the OLD paintings, which
+  the loops replaced — they are stale against the current portraits, and only
+  unreachable because a loop wins whenever a face has both.
+  The talking dialogue faces, WARPED out of the
   painted portraits rather than drawn: a jaw that drops and a lid that closes,
   cut to patch strips in `assets/portraits/anim/` with a `manifest.json` of
   rects. Two things it has to get right that a crop does not. The jaw slide is
@@ -439,11 +458,21 @@ test rather than being noticed months later in play.
   the one that gets left behind.
 - **A rigged face blinks, and talks only while it is talking.** Hooshang's
   portraits move their mouth for exactly as long as the typewriter is revealing
-  — closing on a `[p]` breath and on the last character — and blink on their
-  own clock. Nothing in a beat asks for this: the rig is found from the portrait
-  TEXTURE's path, so a script still just names a state. A face with no rig
-  (Rumi's, the tinted stand-in, the waking shot) holds still, which is what
-  every portrait did before. Frames come from `tools/gen_portrait_frames.py`.
+  — returning to rest on a `[p]` breath and on the last character — and blink on
+  their own clock. Nothing in a beat asks for this: the face is found from the
+  portrait TEXTURE's path, so a script still just names a state. A face with
+  neither a loop nor a rig (Rumi's, the tinted stand-in) holds still, which is
+  what every portrait did before.
+  **They are LOOPS now** — a sheet of whole faces per emotion in
+  `assets/portraits/loops/`, indexed by `tools/gen_portrait_loops.py` — and the
+  box DRIVES the sheet rather than playing it, which is the only way those two
+  rules survive: a plain looping AnimatedTexture would chew through silences.
+  The frame is drawn in `$Portrait/Loop`, a child covering the portrait, and the
+  still underneath is deliberately left in place: the still is how a face is
+  IDENTIFIED, and an AtlasTexture built at runtime has no `resource_path`, so
+  replacing it made every face come back nameless (`intro_test` catches this).
+  The waking shot is no longer the deliberately unrigged one — it faces front in
+  the new art, so it talks like the rest.
 - Dialogue is drawn on the window's own surface at full resolution, the emote
   bubble inside the 320x180 game viewport with the sprites. That split is
   deliberate — see `systems/screen.gd`. Restyling one can never touch the other.

@@ -2,31 +2,39 @@ extends Node
 ## The talking-portrait rig: Hooshang's dialogue face blinks, and moves his mouth
 ## for exactly as long as words are appearing.
 ##
-## Everything here is a thing that breaks SILENTLY. A rig that fails to load, an
-## overlay anchored to the wrong corner or left behind when the banner mirrors,
-## a mouth that keeps chewing after the line has finished — none of them raise an
-## error, none of them stop a run, and all of them are only visible to somebody
-## sitting and watching a cutscene, which is the one thing nobody does while
-## working on the level geometry the cutscene is set in.
+## Everything here is a thing that breaks SILENTLY. A manifest that fails to
+## load, a face left on the wrong frame, a mouth that keeps chewing after the
+## line has finished — none of them raise an error, none of them stop a run, and
+## all of them are only visible to somebody sitting and watching a cutscene,
+## which is the one thing nobody does while working on the level geometry the
+## cutscene is set in.
+##
+## HOOSHANG'S FACES ARE NOW LOOPS, not overlays. A loop is a sheet of whole
+## faces generated from the portrait (assets/portraits/loops/), and the box
+## DRIVES it rather than playing it — which is the only reason it can still obey
+## the two rules that made the old overlay rig read as speech:
 ##
 ##   - the manifest loads AT ALL (it is data on res://, not a scene reference —
 ##     the failure mode is every face silently going back to a still painting)
-##   - a rigged face turns both overlays on; an unrigged one (Rumi, the tinted
-##     stand-in, the un-rigged waking shot) leaves them off and holds still
-##   - the overlays land ON the face they belong to: the mouth in the lower half
-##     of the portrait, the eyes in the upper half, both inside its rect
-##   - and they stay there when _place() mirrors the banner for a right-hand
-##     speaker, which is what anchoring them to the portrait buys
-##   - the mouth moves while revealing, closes the instant the line finishes,
-##     and holds closed through a "[p]" breath
-##   - the eyes blink on their own, with no typing going on at all
+##   - a looped face puts a window onto its sheet in the portrait, and leaves the
+##     older mouth/eye overlays OFF, because those are warped from the painting
+##     the loop replaced and would be drawn over the wrong face
+##   - a face with neither (the tinted stand-in, which is how Rumi is drawn)
+##     holds still, exactly as every portrait did before any of this existed
+##   - the loop survives _place() mirroring the banner for a right-hand speaker
+##   - speech frames advance while revealing, and NEVER land on the rest frame,
+##     which means silence
+##   - a "[p]" breath and the end of the line both return it to rest at once
+##   - the eyes blink on their own clock with no typing going on, and the blink
+##     frame is kept out of the speech cycle so the two cannot fight over a frame
 ##
 ## Run:  godot --headless res://tests/portrait_anim_test.tscn
 
-## A face the generator rigs, and one it deliberately does not (see the comment
-## on `hooshang_dazed` in tools/gen_portrait_frames.py).
-const RIGGED := preload("res://assets/portraits/hooshang_skeptical.png")
-const UNRIGGED := preload("res://assets/portraits/hooshang_dazed.png")
+## A face with a loop. Every one of Hooshang's six has one now — including the
+## waking shot, which used to be deliberately unrigged because it was a 3/4 view
+## the old warps could not follow, and is front-facing art today.
+const LOOPED := preload("res://assets/portraits/hooshang_skeptical.png")
+const WAKING := preload("res://assets/portraits/hooshang_dazed.png")
 
 var failures: Array[String] = []
 
@@ -34,102 +42,119 @@ var failures: Array[String] = []
 func _ready() -> void:
 	var box: DialogueBox = Dialogue
 
-	# --- the rigs load --------------------------------------------------------
-	_check(not box._rigs.is_empty(),
-		"the frame manifest loads off res:// at all  [%d rigs]" % box._rigs.size())
-	_check(box._rigs.has("hooshang_skeptical"),
+	# --- the manifests load ---------------------------------------------------
+	_check(not box._loops.is_empty(),
+		"the loop manifest loads off res:// at all  [%d loops]" % box._loops.size())
+	_check(box._loops.has("hooshang_skeptical"),
 		"...and holds the face this test drives")
-	_check(not box._rigs.has("hooshang_dazed"),
-		"...and NOT the waking shot, which is deliberately unrigged")
+	_check(box._loops.has("hooshang_dazed"),
+		"...and the waking shot, which has a loop now that it faces front")
 
-	# --- a rigged face brings both overlays up --------------------------------
-	await _say(box, "A line with a rigged face.", DialogueBox.Side.LEFT, RIGGED)
-	_check(box.portrait_mouth.visible, "a rigged face shows its mouth overlay")
-	_check(box.portrait_eyes.visible, "...and its eyes overlay")
-
-	# Both must sit on the face, not merely somewhere on the banner. Anchors are
-	# fractions of the portrait, so a rect read in the wrong order or divided by
-	# the wrong size puts a mouth on his forehead and nothing errors.
-	var face := box.portrait.get_global_rect()
-	var mouth := box.portrait_mouth.get_global_rect()
-	var eyes := box.portrait_eyes.get_global_rect()
-	_check(face.encloses(mouth), "the mouth overlay lies inside the portrait  [%s in %s]"
-		% [mouth, face])
-	_check(face.encloses(eyes), "the eyes overlay lies inside the portrait  [%s in %s]"
-		% [eyes, face])
-	_check(mouth.get_center().y > face.get_center().y,
-		"the mouth is in the LOWER half of the face  [%.1f vs %.1f]"
-			% [mouth.get_center().y, face.get_center().y])
-	# Against the mouth rather than against the middle of the frame: these
-	# paintings are bust-framed, so the eye line lands within a pixel or two of
-	# the portrait's centre and a halves test passes or fails on rounding.
-	_check(eyes.get_center().y < mouth.get_center().y,
-		"the eyes sit above the mouth  [%.1f vs %.1f]"
-			% [eyes.get_center().y, mouth.get_center().y])
-
-	# --- an unrigged face holds still ----------------------------------------
-	await _close(box)
-	await _say(box, "A line with an unrigged face.", DialogueBox.Side.LEFT, UNRIGGED)
+	# --- a looped face drives the portrait itself -----------------------------
+	await _say(box, "A line with a looped face.", DialogueBox.Side.LEFT, LOOPED)
+	_check(not box._loop.is_empty(), "a looped face arms its loop")
+	_check(box.portrait_loop.visible and box.portrait_loop.texture is AtlasTexture,
+		"...by drawing a window onto the sheet over the face")
+	_check(box.portrait.texture != null
+			and box.portrait.texture.resource_path.ends_with("hooshang_skeptical.png"),
+		"...while the still underneath still NAMES the face  [%s]"
+			% box.portrait.texture.resource_path)
 	_check(not box.portrait_mouth.visible and not box.portrait_eyes.visible,
-		"an unrigged face shows no overlays and simply holds still")
+		"...and leaves the older overlays off, so nothing is drawn over it")
+
+	# The window must stay ON the sheet. A frame index multiplied by the wrong
+	# width walks off the end and shows nothing, silently.
+	var atlas := box.portrait_loop.texture as AtlasTexture
+	_check(atlas.atlas != null and atlas.region.end.x <= atlas.atlas.get_width()
+			and atlas.region.size.x > 0.0,
+		"the window lies inside the sheet  [%s in %d wide]"
+			% [atlas.region, atlas.atlas.get_width() if atlas.atlas else -1])
+
+	# As ints: JSON numbers arrive as floats, so `talk.has(3)` is false against a
+	# 3.0 and every membership test here would quietly invert.
+	var talk := _ints(box._loop["talk"])
+	var rest := int(box._loop.get("rest", 0))
+	_check(not talk.has(rest),
+		"the rest frame is not a speech frame  [rest %d, talk %s]" % [rest, talk])
+	if box._loop.has("blink"):
+		_check(not talk.has(int(box._loop["blink"])),
+			"and neither is the blink  [blink %d, talk %s]" % [box._loop["blink"], talk])
+
+	# --- a face with no loop holds still --------------------------------------
 	await _close(box)
 	# The tinted stand-in is the same path, and is how Rumi is still drawn.
 	await _say(box, "Rumi, tinted.", DialogueBox.Side.LEFT, null)
-	_check(not box.portrait_mouth.visible and not box.portrait_eyes.visible,
-		"...and so does the tinted stand-in")
+	_check(box._loop.is_empty() and not box.portrait_loop.visible
+			and not box.portrait_eyes.visible,
+		"the tinted stand-in animates nothing and simply holds still")
 
-	# --- mirroring carries the overlays with the face -------------------------
+	# --- mirroring carries the loop with the face -----------------------------
 	await _close(box)
-	await _say(box, "Speaking from the right.", DialogueBox.Side.RIGHT, RIGGED)
-	face = box.portrait.get_global_rect()
-	mouth = box.portrait_mouth.get_global_rect()
+	await _say(box, "Speaking from the right.", DialogueBox.Side.RIGHT, LOOPED)
+	var face := box.portrait.get_global_rect()
 	_check(face.get_center().x > DialogueBox.CANVAS_WIDTH * 0.5,
 		"Side.RIGHT put the portrait on the right  [%.1f]" % face.get_center().x)
-	_check(face.encloses(mouth),
-		"...and the mouth overlay travelled with it  [%s in %s]" % [mouth, face])
+	_check(not box._loop.is_empty() and box.portrait_loop.visible
+			and box.portrait.get_global_rect().encloses(box.portrait_loop.get_global_rect()),
+		"...and the loop frame came with it, still over the face")
 
 	# --- the mouth is driven by the typewriter, not by a timer of its own -----
 	#
 	# Stepped by hand rather than by waiting on real frames: the behaviour under
 	# test is "which frame for which state", and a wall-clock version of this
-	# would be both slow and flaky.
+	# would be both slow and flaky. The blink clock is pushed out of the way
+	# first, so what is measured here is the speech cycle and only that.
+	talk = _ints(box._loop["talk"])
+	rest = int(box._loop.get("rest", 0))
 	box._revealing = true
 	box._pause_left = 0.0
+	box._blink_t = -1.0
+	box._blink_left = 999.0
 	var seen := {}
 	for i in 60:
-		box._animate_portrait(0.05)
-		seen[_frame_of(box.portrait_mouth)] = true
-	_check(not seen.has(0),
-		"while revealing, the mouth never rests on the closed frame  [saw %s]" % [seen.keys()])
+		box._animate_loop(0.05)
+		seen[_frame_of(box.portrait_loop)] = true
+	_check(not seen.has(rest),
+		"while revealing, the face never rests on the silent frame  [saw %s]" % [seen.keys()])
 	_check(seen.size() > 1,
 		"...and it actually moves between positions  [saw %s]" % [seen.keys()])
+	var stray := []
+	for f in seen:
+		if not talk.has(f):
+			stray.append(f)
+	_check(stray.is_empty(),
+		"...and only ever shows speech frames  [strays %s, talk %s]" % [stray, talk])
 
 	box._pause_left = 0.5   # a "[p]" breath, mid-line
-	box._animate_portrait(0.05)
-	_check(_frame_of(box.portrait_mouth) == 0,
-		"a breath closes the mouth  [frame %d]" % _frame_of(box.portrait_mouth))
+	box._animate_loop(0.05)
+	_check(_frame_of(box.portrait_loop) == rest,
+		"a breath returns the face to rest  [frame %d, rest %d]"
+			% [_frame_of(box.portrait_loop), rest])
 
 	box._pause_left = 0.0
 	box._revealing = false  # line finished, waiting on a press
-	box._animate_portrait(0.05)
-	_check(_frame_of(box.portrait_mouth) == 0,
-		"and the mouth closes the instant the line finishes  [frame %d]"
-			% _frame_of(box.portrait_mouth))
+	box._animate_loop(0.05)
+	_check(_frame_of(box.portrait_loop) == rest,
+		"and it rests the instant the line finishes  [frame %d, rest %d]"
+			% [_frame_of(box.portrait_loop), rest])
 
 	# --- the eyes blink on their own, with nothing being said -----------------
-	var shut := int(box._rig["eyes"]["frames"]) - 1
-	var blinked := false
-	var reopened := false
-	for i in 400:
-		box._animate_portrait(0.02)
-		var f := _frame_of(box.portrait_eyes)
-		if f == shut:
-			blinked = true
-		elif blinked and f == 0:
-			reopened = true
-			break
-	_check(blinked, "the eyes blink shut on their own, with no typing going on")
-	_check(reopened, "...and open again afterwards, rather than staying shut")
+	if box._loop.has("blink"):
+		var shut := int(box._loop["blink"])
+		box._blink_t = -1.0
+		box._blink_left = 0.05
+		var blinked := false
+		var reopened := false
+		for i in 800:
+			box._animate_loop(0.02)
+			var f := _frame_of(box.portrait_loop)
+			if f == shut:
+				blinked = true
+			elif blinked and f == rest:
+				reopened = true
+				break
+		_check(blinked, "the eyes blink shut on their own, with no typing going on")
+		_check(reopened, "...and open again afterwards, rather than staying shut")
 	await _close(box)
 
 	if failures.is_empty():
@@ -139,7 +164,15 @@ func _ready() -> void:
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 
-## Which frame of its strip an overlay is showing.
+## A manifest frame list as ints. JSON has one number type and it is float.
+func _ints(a: Array) -> Array:
+	var out := []
+	for v in a:
+		out.append(int(v))
+	return out
+
+
+## Which frame of its sheet a TextureRect is showing.
 func _frame_of(node: TextureRect) -> int:
 	var atlas := node.texture as AtlasTexture
 	if atlas == null or atlas.region.size.x <= 0.0:

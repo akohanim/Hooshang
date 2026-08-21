@@ -133,6 +133,26 @@ const TRIM_HEIGHT := 16.0
 # every portrait had before this existed.
 const ANIM_DIR := "res://assets/portraits/anim/"
 
+# --- looped faces ----------------------------------------------------------
+#
+# The newer portraits come as a SHEET of whole faces rather than as mouth and
+# eye patches warped over a painting: seven frames generated from the portrait
+# itself (assets/portraits/loops/, tools/gen_portrait_loops.py). A loop takes
+# priority over an overlay rig when a face has both, because the overlay strips
+# are warped from the painting the loop replaced and would be drawn over the
+# wrong face.
+#
+# IT IS DRIVEN, NOT PLAYED. Handing a looping AnimatedTexture to the portrait
+# would be far less code and would be wrong: the mouth has to move for exactly
+# as long as words are appearing and stop dead on a breath, which is the whole
+# difference between a face saying this line and a face chewing on a timer. So
+# the frame roles come out of the manifest — `rest` for silence, `talk` to cycle
+# while revealing, `blink` on its own clock — and this picks between them under
+# the same rules the overlay rig has always used.
+const LOOP_DIR := "res://assets/portraits/loops/"
+## Seconds each speech frame is held. Matches the manifest's own fps.
+const LOOP_FRAME_TIME := 0.125
+
 ## Seconds each mouth position is held while he is speaking. Roughly two
 ## positions per syllable at `chars_per_second`; much slower reads as chewing.
 const MOUTH_FRAME_TIME := 0.075
@@ -147,6 +167,15 @@ const BLINK_GAP := Vector2(2.4, 6.5)
 var _rigs := {}
 ## The rig showing right now, or {} when this face has none.
 var _rig := {}
+## Same, for the whole-face loops: basename -> frame roles.
+var _loops := {}
+## The loop showing right now, or {} when this face has none.
+var _loop := {}
+var _loop_left := 0.0
+## Which speech frame is up, as an index INTO `talk` rather than a frame number:
+## the blink frame is not in that list, so counting in frame numbers would walk
+## onto it.
+var _loop_step := 0
 var _mouth_left := 0.0
 var _blink_left := 0.0
 ## How far into a blink we are, or -1 when the eyes are simply open.
@@ -176,6 +205,15 @@ var _pause_left := 0.0
 ## what makes them free: _place() mirrors the portrait for a right-hand speaker
 ## and _place_vside/_fit_banner move it down the screen, and both carry these
 ## along without knowing they exist.
+## The whole-face loop frame, drawn OVER the still. A child of Portrait for the
+## same reason the two overlays are: _place() mirrors the banner, _fit_banner
+## grows it and _place_vside moves it down the screen, and a child is carried by
+## all three without any of them knowing it exists.
+##
+## The still underneath is deliberately left in place rather than replaced. It is
+## what a face IS — everything that asks which portrait is on screen reads the
+## texture's path, and an atlas built at runtime has no path to read.
+@onready var portrait_loop: TextureRect = $Portrait/Loop
 @onready var portrait_mouth: TextureRect = $Portrait/Mouth
 @onready var portrait_eyes: TextureRect = $Portrait/Eyes
 ## The scene's built-in stand-in, kept so a tinted speaker can go back to it
@@ -490,6 +528,9 @@ func _load_rigs() -> void:
 	var res := load(ANIM_DIR + "manifest.json")
 	if res is JSON and res.data is Dictionary:
 		_rigs = res.data
+	var loops := load(LOOP_DIR + "manifest.json")
+	if loops is JSON and loops.data is Dictionary:
+		_loops = loops.data
 
 
 ## Point the overlays at `tex`'s rig, or stand them down if it has none.
@@ -499,6 +540,10 @@ func _load_rigs() -> void:
 ## preloaded portrait, and the rig follows the art rather than the script.
 func _set_rig(tex: Texture2D) -> void:
 	_rig = {}
+	_loop = {}
+	_loop_left = 0.0
+	_loop_step = 0
+	portrait_loop.visible = false
 	portrait_mouth.visible = false
 	portrait_eyes.visible = false
 	_blink_t = -1.0
@@ -507,6 +552,8 @@ func _set_rig(tex: Texture2D) -> void:
 	if tex == null or tex.resource_path == "":
 		return
 	var key := tex.resource_path.get_file().get_basename()
+	if _set_loop(key):
+		return
 	if not _rigs.has(key):
 		return
 	_rig = _rigs[key]
@@ -557,6 +604,70 @@ func _show_frame(node: TextureRect, index: int) -> void:
 	atlas.region = region
 
 
+## Point the portrait at `key`'s loop sheet, if it has one. True when it did.
+##
+## The frame is drawn in a child that covers the portrait, and the still is left
+## underneath untouched. Replacing the portrait's own texture was the shorter
+## version and it cost something real: the still is how a face is IDENTIFIED —
+## the rig lookup, and every test that asks which portrait is on screen, read the
+## texture's resource path — and an AtlasTexture built at runtime has no path, so
+## every face came back nameless.
+func _set_loop(key: String) -> bool:
+	if not _loops.has(key):
+		return false
+	var data: Dictionary = _loops[key]
+	var sheet := load(LOOP_DIR + str(data.get("sheet", ""))) as Texture2D
+	if sheet == null:
+		return false
+	var size: Array = data.get("frame_size", [])
+	if size.size() != 2 or float(size[0]) <= 0.0:
+		return false
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = Rect2(0.0, 0.0, float(size[0]), float(size[1]))
+	portrait_loop.texture = atlas
+	portrait_loop.visible = true
+	_loop = data
+	_show_frame(portrait_loop, int(data.get("rest", 0)))
+	return true
+
+
+## Run a looped face for one frame.
+##
+## Same two rules the overlay rig has always followed, which is the point of
+## driving the sheet rather than playing it: speech frames advance only while
+## words are appearing and the face returns to `rest` the moment they stop, and
+## the blink runs on its own clock so a finished line waiting for a press still
+## blinks. The blink is not in `talk`, so the two can never fight over a frame.
+func _animate_loop(delta: float) -> void:
+	if _loop.is_empty() or not portrait_loop.visible:
+		return
+	var talk: Array = _loop.get("talk", [])
+	# The blink wins the frame while it is running: it is a tenth of a second,
+	# and a mouth position missed inside one is not a thing anybody can see.
+	if _loop.has("blink"):
+		if _blink_t < 0.0:
+			_blink_left -= delta
+			if _blink_left <= 0.0:
+				_blink_t = 0.0
+		else:
+			_blink_t += delta
+			if _blink_t >= BLINK_TIME:
+				_blink_t = -1.0
+				_blink_left = randf_range(BLINK_GAP.x, BLINK_GAP.y)
+			else:
+				_show_frame(portrait_loop, int(_loop["blink"]))
+				return
+	if _revealing and _pause_left <= 0.0 and not talk.is_empty():
+		_loop_left -= delta
+		if _loop_left <= 0.0:
+			_loop_left = LOOP_FRAME_TIME
+			_loop_step = (_loop_step + 1) % talk.size()
+			_show_frame(portrait_loop, int(talk[_loop_step]))
+		return
+	_show_frame(portrait_loop, int(_loop.get("rest", 0)))
+
+
 ## Run a rigged face for one frame: a mouth driven by the typewriter, and a blink
 ## on its own clock.
 func _animate_portrait(delta: float) -> void:
@@ -604,6 +715,7 @@ func _process(delta: float) -> void:
 	# are still words arriving, including while the line sits finished waiting
 	# for a press.
 	_animate_portrait(delta)
+	_animate_loop(delta)
 	if not _revealing:
 		return
 	if _pause_left > 0.0:
