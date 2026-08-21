@@ -1,24 +1,29 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://w3weq6yy4uwj"]
 
-[ext_resource type="Script" path="res://scenes/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="Script" uid="uid://dmsmmh1vf23u8" path="res://scenes/ui/main_menu.gd" id="1_menu"]
 
-[node name="MainMenu" type="CanvasLayer"]
+[node name="MainMenu" type="CanvasLayer" unique_id=501181757]
 layer = 110
 scale = Vector2(0.25, 0.25)
+transform = Transform2D(0.25, 0, 0, 0.25, 0, 0)
 script = ExtResource("1_menu")
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=1601056121]
+layout_mode = 3
+anchors_preset = 0
 offset_right = 1280.0
 offset_bottom = 720.0
 mouse_filter = 2
 
-[node name="Backdrop" type="ColorRect" parent="Root"]
+[node name="Backdrop" type="ColorRect" parent="Root" unique_id=559051608]
+layout_mode = 0
 offset_right = 1280.0
 offset_bottom = 720.0
+mouse_filter = 2
 color = Color(0.04, 0.035, 0.05, 1)
-mouse_filter = 2
 
-[node name="Title" type="Label" parent="Root"]
+[node name="Title" type="Label" parent="Root" unique_id=1464654977]
+layout_mode = 0
 offset_top = 84.0
 offset_right = 1280.0
 offset_bottom = 164.0
@@ -27,9 +32,9 @@ theme_override_font_sizes/font_size = 64
 text = "HOOSHANG"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Subtitle" type="Label" parent="Root"]
+[node name="Subtitle" type="Label" parent="Root" unique_id=560072088]
+layout_mode = 0
 offset_top = 170.0
 offset_right = 1280.0
 offset_bottom = 204.0
@@ -38,17 +43,18 @@ theme_override_font_sizes/font_size = 24
 text = "ACT I  —  THE OFFICE"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Rule" type="ColorRect" parent="Root"]
+[node name="Rule" type="ColorRect" parent="Root" unique_id=855490208]
+layout_mode = 0
 offset_left = 490.0
 offset_top = 206.0
 offset_right = 790.0
 offset_bottom = 209.0
-color = Color(1, 0.82, 0.42, 0.42)
 mouse_filter = 2
+color = Color(1, 0.82, 0.42, 0.42)
 
-[node name="MoreAbove" type="Label" parent="Root"]
+[node name="MoreAbove" type="Label" parent="Root" unique_id=1095956870]
+layout_mode = 0
 offset_top = 216.0
 offset_right = 1280.0
 offset_bottom = 238.0
@@ -57,9 +63,9 @@ theme_override_font_sizes/font_size = 20
 text = "^"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Caret" type="Label" parent="Root"]
+[node name="Caret" type="Label" parent="Root" unique_id=1970092178]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 52.0
 theme_override_colors/font_color = Color(1, 0.82, 0.42, 1)
@@ -67,15 +73,16 @@ theme_override_font_sizes/font_size = 34
 text = ">"
 horizontal_alignment = 2
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Rows" type="Control" parent="Root"]
+[node name="Rows" type="Control" parent="Root" unique_id=1064037297]
+anchors_preset = 0
 offset_top = 240.0
 offset_right = 1280.0
 offset_bottom = 612.0
 mouse_filter = 2
 
-[node name="MoreBelow" type="Label" parent="Root"]
+[node name="MoreBelow" type="Label" parent="Root" unique_id=2035721008]
+layout_mode = 0
 offset_top = 606.0
 offset_right = 1280.0
 offset_bottom = 630.0
@@ -84,9 +91,9 @@ theme_override_font_sizes/font_size = 20
 text = "v"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Detail" type="Label" parent="Root"]
+[node name="Detail" type="Label" parent="Root" unique_id=2090825041]
+layout_mode = 0
 offset_top = 634.0
 offset_right = 1280.0
 offset_bottom = 668.0
@@ -94,9 +101,9 @@ theme_override_colors/font_color = Color(0.86, 0.8, 0.72, 0.75)
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Hint" type="Label" parent="Root"]
+[node name="Hint" type="Label" parent="Root" unique_id=1405529122]
+layout_mode = 0
 offset_top = 676.0
 offset_right = 1280.0
 offset_bottom = 708.0
@@ -105,4 +112,3 @@ theme_override_font_sizes/font_size = 20
 text = "W/S / STICK  MOVE      C / Z / A  SELECT      ESC / B  BACK"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
