@@ -22,7 +22,13 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/flow_test.tscn` — Level 1→2 transition
   - `Godot --headless --path . res://tests/world_bounds_test.tscn` — LDtk rooms
     are sealed at the top (a jump+dash can't leave through the ceiling), and
-    he cannot STAND out over a drop (`Player.footing_width`)
+    he cannot STAND out over a drop (`Player.footing_width`). Its launch point is
+    the room's highest tile HIS BODY FITS ABOVE, not merely one with three empty
+    cells over it: the seal is an invisible lid outside the tilemap, so the tile
+    test alone aimed three rooms at the roof and they read as unstandable. The
+    apex is also measured only while he is still IN the room — a launch that ends
+    in the kill plane respawns him at the checkpoint, which can be a whole row of
+    rooms away, and that landed in the reading as "706px of reach"
   - `Godot --headless --path . res://tests/backtrack_test.tscn` — Exits work
     both ways all the way back, not just one room deep
   - `Godot --headless --path . res://tests/intro_test.tscn` — Act I's beats:
@@ -115,7 +121,14 @@ so the two agree now. The tiles are still placeholder art.
     the cell, running over it drops him in rather than across, and once inside
     he wall-slides down at the cap with nothing held and can wall-jump back out
     — coming back to full width on the way. It finds the shaft by sweeping the
-    world and asserts it is one cell wide before using it
+    world and asserts it is one cell wide before using it.
+    **It also covers the one-cell gaps made of PROPS**, which that sweep cannot
+    see: it reads the `Collisions` TileMapLayer, and Level_2's two drop-throughs
+    are gaps in a run of platform props under `Entities`. They were reported
+    broken from play while this file was passing. Those are found from the
+    COLLIDERS — two prop boxes with the same top edge, a cell apart, and room for
+    his squeezed body to stand over them, which is what rules out the four
+    lookalike gaps between CEILING panels (plugged by the room's invisible lid)
   - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
@@ -401,8 +414,13 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the
   numbers and player.gd does all the moving, so nothing else writes velocity.
   Place it in LDtk as a `SlideZone` and set the three fields per instance.
-- `assets/hooshang_frames.tres` = SpriteFrames from the samurai pack
-  (`assets/FREE_Samurai .../Sprites`); Rumi reuses it tinted gold.
+- `assets/hooshang_frames.tres` = the player's SpriteFrames: 40 east-facing 88px
+  frames across eight clips, played at 0.39 scale. It points at
+  `assets/hooshang_sprites/chubby/`, NOT at `.../animations/` — the thin pack in
+  `animations/` is the source and `tools/gen_chubby_hooshang.py` is the pass that
+  puts the weight on. `dash` is the Slide clip; west is `flip_h`, not art.
+  (Rumi still reuses the samurai pack, `assets/FREE_Samurai .../Sprites`, tinted
+  gold — `assets/rumi_frames.tres`.)
 - `tests/room_shot.tscn` — dev capture harness, not a pass/fail test. Stands the
   player in a named room, photographs the 320x180 game surface and prints the
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
@@ -571,6 +589,20 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   render's cracks into speckle, and the worst window came back a black bar.
   `tools/ldtk_add_platforms.py` adds the two LDtk entities (LDtk must be
   CLOSED; it refuses to run otherwise).
+- `tools/gen_chubby_hooshang.py` — Hooshang with the weight on: the thin sprite
+  pack (`assets/hooshang_sprites/animations/`) warped into
+  `assets/hooshang_sprites/chubby/`, which is what `hooshang_frames.tres` plays.
+  A warp rather than 40 fresh generations, because 40 independent generations
+  would have to agree with each other about how fat he is frame to frame and a
+  deterministic warp cannot disagree with itself. Run it AFTER `gen_wall_slide.py`,
+  which writes into the thin pack. Three things it has to get right: weight is
+  added in PIXELS per row and not in percent (a flat 1.6x is a belly on a
+  standing frame and a flung-out arm on a running one), each row is scaled about
+  a centreline SMOOTHED down the sprite (a raw per-row middle jumps wherever an
+  arm enters the silhouette and shears his outline into a staircase), and the
+  resample is NEAREST (anything smoother invents colours between two flat pixel
+  shades — the palette count is unchanged, which is the cheapest proof it did
+  not). Wall_Slide is pinned by its RIGHT edge so his palm stays on the wall.
 - `tools/gen_dust.py` — the puffs kicked up on a jump, a landing and a dash
   start. Its own sheet rather than `death_shard.png` tinted: shards are
   hard-edged debris, and a landing that throws those reads as a small death.
@@ -652,24 +684,40 @@ test rather than being noticed months later in play.
   collide with mask 2 only.
 - Every tunable is an `@export` with a one-line comment saying what tweaking
   it changes. Feel timers count down as plain floats in `_tick_timers()`.
-- Player hitbox 8x12 — one cell wide, one and a half tall on the 8px grid.
-  **It is wider than he is drawn** (4.7px), which is why `Player.footing_width`
+- Player hitbox 9x12 — a cell and an eighth wide, one and a half tall on the
+  8px grid. It was exactly one cell (8x12) until he put on weight; the extra
+  half-pixel a side came in with the belly (`tools/gen_chubby_hooshang.py` took
+  him from 4.7px drawn across to 7.0). **Keep it modest.** Walkable minimum is a
+  2-cell (16px) slot, so 9 clears one with 3.5px a side and 10 starts eating a
+  margin the level geometry was authored against; measured, nothing in the world
+  passable at 8 is blocked at 9.
+  **It is still wider than he is drawn where it matters** — his boots are 3.1px
+  across (1.17 left of centre, 1.95 right) — which is why `Player.footing_width`
   exists: Godot keeps a body standing while any part of its shape overlaps the
-  floor, so without it he rests with his centre 4px past a ledge and every
-  drawn pixel over air. Narrowing the hitbox cannot fix that — it would have
-  to go under 4px, narrower than the sprite and no longer the one-cell body
-  the grid is built around.
-  **A one-cell slot therefore needs the SQUEEZE.** A body exactly as wide as a
-  cell cannot pass through a one-cell hole at all — Godot resolves two
-  exactly-abutting AABBs as a collision, and measured, the 8px box entered
+  floor, so without it he rests with his centre a whole box-half past a ledge and
+  every drawn pixel over air. Narrowing the hitbox cannot fix that, and note
+  `footing_width` does NOT scale with the box: the check probes a single ray at
+  his CENTRE, and the number is that ray's downward reach.
+  **A one-cell slot therefore needs the SQUEEZE.** A body a cell wide or more
+  cannot pass through a one-cell hole at all — Godot resolves two
+  exactly-abutting AABBs as a collision, and measured back at 8px the box entered
   Level_1's 8px shaft from 0 of 33 approach positions (7.99 was no better, and
   `safe_margin` makes no difference: an exact fit is a hard stop). He stood on
   eight pixels of nothing instead. So `Player._tick_squeeze()` narrows his box
   to `squeeze_width` (6) **whenever he is standing over a slot** — no input, a
   hole in the floor takes you — puts him down the middle of it and drops him in.
+  `squeeze_width` and `squeeze_probe` are ABSOLUTE and did not move when he did:
+  what has to fit is the 8px shaft, which is 8px whatever he weighs.
   He goes back to full width by TRYING the wide box against the world every
   frame, so nothing has to notice him leaving, and he is a full cell everywhere
-  else. **The shaft then wall-slides him without being asked**: dropping down
+  else. **That try needs `recovery_as_collision`** — `test_move`'s fifth
+  argument, off by default. Without it Godot depenetrates first and reports only
+  what is left, so a box buried half a pixel in the brick either side comes back
+  "clear": measured on Level_1's shaft the answer was not even monotonic (6 and 7
+  fitted, 8 collided, 9 and 10 "fitted"). At exactly a cell he happened to ABUT
+  rather than penetrate, so the squeeze held on a coincidence; at 9 he stood up
+  on the lip, fell a tenth of a pixel, squeezed, stood up again, and rode that
+  loop forever above the hole. **The shaft then wall-slides him without being asked**: dropping down
   the middle of a one-cell slot never touches either wall (a pixel of clearance
   each side), so `is_on_wall()` is false all the way down and the ordinary
   press-into-the-wall rule would free-fall him between two walls he is

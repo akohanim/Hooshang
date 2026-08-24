@@ -76,6 +76,7 @@ func _ready() -> void:
 func _check_room(room: Node2D) -> bool:
 	var from := _launch_point(room)
 	if from == Vector2.INF:
+		print("  note  %s — no standable tile with headroom" % room.name)
 		return false
 	world.current_room = room
 	var top := world.room_rect(room).position.y
@@ -96,6 +97,8 @@ func _check_room(room: Node2D) -> bool:
 			landed = true
 			break
 	if not landed:
+		print("  note  %s — never settled at (%.0f,%.0f), ended y=%.0f"
+			% [room.name, from.x, from.y, p.global_position.y])
 		return false
 	# He must have settled where he was put, not fallen out of the room and onto
 	# something below it — the exact failure the old fixed coordinates hid.
@@ -113,8 +116,17 @@ func _check_room(room: Node2D) -> bool:
 	await _frames(2)
 	Input.action_release("dash")
 	var peak := p.global_position.y
+	# Measured only while he is still IN this room. A launch that ends badly
+	# drops him past the kill plane, and the respawn that follows puts him at the
+	# run's checkpoint — which can be in another row of rooms entirely. Left
+	# unguarded that lands in `peak` as a reading of THIS room's ceiling: Level_15
+	# reported a head height of 242 against a ceiling of 800, "706px of reach",
+	# from a jump that never left the floor.
+	var reach: Rect2 = world.room_rect(room).grow(CELL * 4.0)
 	for i in 90:
 		await _frames(1)
+		if not reach.has_point(p.global_position):
+			break
 		peak = minf(peak, p.global_position.y)
 		if i > 10 and p.is_on_floor():
 			break
@@ -216,7 +228,7 @@ func _launch_point(room: Node2D) -> Vector2:
 	# ceiling before he jumped and the assertion could only fail. Inset by a cell
 	# so the floor he stands on is a floor and not the seal.
 	var inner := world.room_rect(room).grow(-CELL)
-	var best := Vector2.INF
+	var candidates: Array[Vector2] = []
 	for c: Vector2i in solid:
 		var clear := true
 		for up in range(1, HEADROOM_CELLS + 1):
@@ -229,13 +241,27 @@ func _launch_point(room: Node2D) -> Vector2:
 		var centre := layer.to_global(layer.map_to_local(c))
 		if not inner.has_point(centre):
 			continue
-		if best == Vector2.INF or centre.y < best.y:
-			best = centre
-	if best == Vector2.INF:
-		return Vector2.INF
-	# Stand him a little above the tile's top face and let the settle loop drop
-	# him onto it, rather than trying to place his 12px body exactly on it.
-	return best - Vector2(0.0, CELL)
+		candidates.append(centre)
+	candidates.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.y < b.y)
+	# Highest first, and the first one HIS BODY actually fits in wins.
+	#
+	# The tilemap alone cannot answer that, which is the whole reason for this
+	# second pass. A room's ceiling is sealed by an invisible lid LdtkWorld hangs
+	# OUTSIDE the room (`seal_room_ceilings`) — it is in no tile layer, so three
+	# empty cells above a tile read as headroom while the twelve pixels he would
+	# occupy are half inside the lid. Three rooms were picked that way and none of
+	# them ever settled: he was respawned inside the seal and hung there, one
+	# pixel from where he was put, for the whole 90-frame budget. It reads as
+	# "the room is unstandable" and it is really "the test aimed at the roof".
+	var p := world.player
+	for centre: Vector2 in candidates:
+		# Feet a pixel clear of the tile's top face, so the probe is asking
+		# whether he FITS there and not whether he is standing in the tile: the
+		# body is 12px tall and the tile centre is 4px below its own surface.
+		var at := centre - Vector2(0.0, CELL * 0.5 + HALF_HEIGHT + 1.0)
+		if not p.test_move(Transform2D(0.0, at), Vector2.ZERO, null, 0.08, true):
+			return at
+	return Vector2.INF
 
 
 func _frames(n: int) -> void:

@@ -2,11 +2,11 @@ extends Node
 ## Regression: a ONE-CELL shaft is a chimney you choose to enter.
 ##
 ## Level_1 has an 8px-wide slot cut down through its ceiling block. His hitbox is
-## 8px across too — a full cell — and a body exactly as wide as the grid cannot
-## pass through a one-cell slot at all: Godot resolves two exactly-abutting AABBs
-## as a collision, so he came to rest ON the lip with the whole drawn body
-## hanging over the hole. Measured, the 8px box entered that shaft from 0 of 33
-## approach positions across its mouth, and 7.99 was no better.
+## 9px across — a cell and an eighth — and a body that wide cannot pass through a
+## one-cell slot at all, so he came to rest ON the lip with the whole drawn body
+## hanging over the hole. Measured back when the box was exactly a cell, it
+## entered that shaft from 0 of 33 approach positions across its mouth, and 7.99
+## was no better; at 9 it does not even abut.
 ##
 ## A hole in the floor takes him, so nothing has to be pressed: standing over one
 ## narrows his box to squeeze_width, puts him down the middle of it and drops him
@@ -69,6 +69,7 @@ func _ready() -> void:
 	await _check_entry(found)
 	await _check_slide(found)
 	await _check_climb(found)
+	await _check_prop_slots()
 	_finish()
 
 
@@ -262,6 +263,146 @@ func _a_chimney() -> Dictionary:
 				"floor_y": origin.y + float(gap.y + out) * CELL,
 			}
 	return best
+
+
+## The other kind of one-cell hole: the one between two PROPS.
+##
+## Everything above sweeps the room's `Collisions` TileMapLayer, and that is
+## thinner coverage than it looks. Level_2's drop-throughs are gaps in a run of
+## platform props under `Entities` — real StaticBody2Ds the player stands on and
+## falls through, owned by no tilemap — so the sweep above walks straight past
+## them. They were reported broken from play while this file was passing.
+##
+## Found from the COLLIDERS, not from a coordinate: two prop boxes with the same
+## top edge and a cell of daylight between them that he could actually be
+## standing over. That last clause is not tidiness. Six pairs match on geometry
+## alone and only two of them are holes — the other four are gaps between CEILING
+## panels, with a room's invisible lid (LdtkWorld's `seal_room_ceilings`) or
+## another panel row filling the twelve pixels he would have to occupy to stand
+## on them. He cannot drop through those at any width, 8px or 9, so a check that
+## counted them would be failing on level design rather than on him. Finding none
+## at all means the sweep has stopped working rather than that a designer removed
+## them, so that is a failure and not a skip.
+func _check_prop_slots() -> void:
+	var slots := _prop_slots()
+	_check(not slots.is_empty(), "found one-cell gaps between props  [%d]" % slots.size())
+	if slots.is_empty():
+		return
+	var worst := 99
+	var worst_at := ""
+	for slot in slots:
+		var caught := 0
+		for i in 5:
+			var dx := -3.0 + 6.0 * float(i) / 4.0
+			if await _drops_through(slot, dx):
+				caught += 1
+		if caught < worst:
+			worst = caught
+			worst_at = "%s x%.0f" % [slot["room"], slot["centre"].x]
+	_check(worst == 5,
+		"he drops through every prop gap from anywhere across it  [worst %d of 5 at %s]"
+			% [worst, worst_at])
+
+
+## Stand him over a prop gap at `dx` from its centre; true if he went through.
+##
+## Measured on the DEEPEST point he reached, not on where he ends up. These gaps
+## drop him out of the bottom of the room, so the kill plane has him a moment
+## later — and he is parked on solid ground first so the previous trial's respawn
+## cannot land in the middle of this one, which reads as an alternating,
+## every-other-offset failure that is entirely the harness.
+func _drops_through(slot: Dictionary, dx: float) -> bool:
+	var centre: Vector2 = slot["centre"]
+	player.input_locked = false
+	player.velocity = Vector2.ZERO
+	player.respawn(slot["park"])
+	await _frames(20)
+	player.input_locked = false
+	player.velocity = Vector2.ZERO
+	player.respawn(Vector2(centre.x + dx, centre.y - HALF_HEIGHT - 1.0))
+	var deepest := player.global_position.y
+	for f in 40:
+		await _frames(1)
+		player.input_locked = false
+		deepest = maxf(deepest, player.global_position.y)
+	return deepest > centre.y + CELL * 2.0
+
+
+## Every one-cell gap between two prop colliders, world-wide.
+func _prop_slots() -> Array:
+	var out: Array = []
+	for room: Node2D in world.rooms:
+		var boxes := _prop_boxes(room)
+		boxes.sort_custom(func(a: Rect2, b: Rect2) -> bool:
+			return a.position.x < b.position.x)
+		for i in range(boxes.size() - 1):
+			var a: Rect2 = boxes[i]
+			for j in range(i + 1, boxes.size()):
+				var b: Rect2 = boxes[j]
+				if absf(a.position.y - b.position.y) > 0.5:
+					continue
+				var gap: float = b.position.x - a.end.x
+				if gap >= CELL - 1.0 and gap <= CELL + 1.0 \
+						and _is_a_drop(Vector2((a.end.x + b.position.x) * 0.5,
+							a.position.y)):
+					out.append({
+						"room": room.name,
+						"centre": Vector2((a.end.x + b.position.x) * 0.5, a.position.y),
+						# Somewhere on the prop itself to settle between trials.
+						"park": Vector2(a.end.x - CELL, a.position.y - HALF_HEIGHT - 1.0),
+					})
+				break
+	return out
+
+
+## Is a gap whose top face is at `at` a hole he could fall down?
+##
+## Two questions, and the first is the one that matters. Somewhere to STAND: his
+## squeezed box, feet on the face — that is what rules out the gaps between
+## ceiling panels, where the twelve pixels he would occupy are already full of
+## room lid. And somewhere to FALL: nothing within two cells under the face.
+##
+## The standing probe is made with HIS shape rather than with a ray, because the
+## question is whether a body fits, and it is made at squeeze_width because that
+## is the width he would be at if he were going down. `recovery_as_collision` is
+## on for the reason player.gd's `_try_stand_up` documents at length: without it
+## a box buried in the brick is quietly pushed out and reported as fitting.
+func _is_a_drop(at: Vector2) -> bool:
+	var space := player.get_world_2d().direct_space_state
+	var below := PhysicsRayQueryParameters2D.create(
+		at + Vector2(0.0, 0.5), at + Vector2(0.0, CELL * 2.0), 1)
+	below.hit_from_inside = true
+	below.exclude = [player.get_rid()]
+	if not space.intersect_ray(below).is_empty():
+		return false
+	var shape: RectangleShape2D = player.get_node("CollisionShape2D").shape
+	var was: float = shape.size.x
+	shape.size.x = player.squeeze_width
+	var stand := Transform2D(0.0, at + Vector2(0.0, -HALF_HEIGHT))
+	var blocked: bool = player.test_move(stand, Vector2.ZERO, null, 0.08, true)
+	shape.size.x = was
+	return not blocked
+
+
+## World-space rects of a room's prop colliders — the solid boxes that are not
+## the tilemap. Rectangles only, which is every platform in the game.
+func _prop_boxes(room: Node2D) -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	var stack: Array[Node] = [room]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		for c in n.get_children():
+			stack.append(c)
+		if not (n is CollisionShape2D) or not (n.shape is RectangleShape2D):
+			continue
+		var body := n.get_parent()
+		if not (body is StaticBody2D) or body is TileMapLayer:
+			continue
+		if (body as StaticBody2D).collision_layer & 1 == 0:
+			continue
+		var size: Vector2 = (n.shape as RectangleShape2D).size
+		out.append(Rect2((n as Node2D).global_position - size * 0.5, size))
+	return out
 
 
 # -------------------------------------------------------------------- rig ---
