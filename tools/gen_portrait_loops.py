@@ -46,23 +46,30 @@ LOOPS = os.path.join(ROOT, "assets/portraits/loops")
 ## activity peaks at y 24-64 (brows and eyes) and y 96-140 (mouth). These are
 ## the eye band narrowed horizontally to the face, so the hair edges — which
 ## move with nothing — cannot vote.
-EYE = (slice(40, 68), slice(78, 180))
+##
+## THIS IS HOOSHANG'S FACE, and it is only the default. It is where HIS eyes
+## are, in a frame he fills bare-headed. Rumi wears a turban and sits lower:
+## measured off his own blink, his eyes are at y 98-124, and read in the band
+## below they would be missed entirely — the blink would go unfound and his
+## faces would never shut their eyes, silently. So an entry may carry its own
+## `eye` band, as [y0, y1, x0, x1], and gen_rumi_loops.py writes one.
+EYE = [40, 68, 78, 180]
 ## How much smoother than frame 0 the eye band has to be to count as shut.
 BLINK_DROP = 0.10
 ## Frames per second the box plays a talking cycle at.
 FPS = 8
 
 
-def eye_edge(frame):
+def eye_edge(frame, eye):
     """Edge energy in the eye band: high with the eyes open, low with them shut."""
-    b = frame[EYE[0], EYE[1]]
+    b = frame[eye[0]:eye[1], eye[2]:eye[3]]
     return float(np.abs(np.diff(b, axis=0)).mean() + np.abs(np.diff(b, axis=1)).mean())
 
 
-def roles(path, frames):
+def roles(path, frames, eye):
     sheet = np.asarray(Image.open(path).convert("L"), dtype=np.float64)
     w = sheet.shape[1] // frames
-    energy = [eye_edge(sheet[:, i * w:(i + 1) * w]) for i in range(frames)]
+    energy = [eye_edge(sheet[:, i * w:(i + 1) * w], eye) for i in range(frames)]
     shut = int(min(range(frames), key=lambda i: energy[i]))
     blink = shut if energy[shut] < energy[0] * (1.0 - BLINK_DROP) else None
     # Never frame 0 in `talk`: frame 0 is the closed mouth and it means silence,
@@ -78,7 +85,8 @@ def main():
     for key in sorted(man):
         entry = man[key]
         path = os.path.join(LOOPS, entry["sheet"])
-        blink, talk, energy = roles(path, int(entry["frames"]))
+        blink, talk, energy = roles(path, int(entry["frames"]),
+                                    entry.get("eye", EYE))
         entry["rest"] = 0
         entry["talk"] = talk
         if blink is None:

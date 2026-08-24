@@ -703,6 +703,79 @@ Six are placed, spread across the Act: rooms 1, 5, 9 on the way down and 14, 18,
 21 on the way out, with phases that are not multiples of each other so no two
 ever come up together.
 
+## The budget: SIXTEEN lights per item, and past that they just vanish
+
+The renderer is `gl_compatibility` (`project.godot` — the web export needs it),
+and its 2D renderer lights any one canvas item from **at most sixteen lights**.
+Past the cap the extra ones are dropped with no warning and nothing in a log.
+Measured by sweeping lights over a single item:
+
+| lights over one item | how many actually lit it |
+| --- | --- |
+| 4 / 8 / 12 | 4 / 8 / 12 |
+| 16 | 15 |
+| 20 / 24 / 32 | 15 / 15 / 16 |
+
+**This is the most expensive thing in this document to forget.** It cost a
+session already: the thought hazards' glows were appearing in some rooms and not
+others, which looked exactly like a bug in the prop and was not. A room with
+eight `CeilingPanel`s is *already at the cap* — each panel spends **two** lights,
+a face and a pool — so anything added to that room was competing for a budget
+that had run out, and which lights lost changed as the props moved between
+tilemap chunks. Photographed both ways: with the panel lights on, two of four
+thoughts had no pool at all; with them off, all four did.
+
+Counting the lights in a room before adding one:
+
+```bash
+grep -c 'PointLight2D' ldtk/levels/Level_N.scn
+```
+
+Two ways out when a room is over budget. Spend fewer — a `CeilingLight` costs
+one where a `CeilingPanel` costs two — or **make the glow paint instead**, which
+is what the section below is about.
+
+## The hazard that carries its own light — and doesn't use a light to do it
+
+`DarkThought` and `LightThought` carry a red halo through the room. It was a
+`PointLight2D` and is now **an unshaded, additively blended sprite**, for the
+cap above: paint cannot be culled, and it hands the room's light budget back to
+the fixtures that genuinely need to be lights.
+
+**This does not repeal "a glow must be a light".** `CanvasModulate` 0.05 eats a
+*shaded* painted glow, exactly as `SunShaft`, `WallPattern` and `CeilingPanel`
+each document. It does not touch an **unshaded** one — measured, the same white
+sprite renders `0.047` shaded and `1.000` unshaded under 0.05. Unshaded is
+outside the modulate *and* outside every light in the level, which is the whole
+trade: the thing is drawn exactly as painted, wherever it goes.
+
+| Field | Value | Why |
+| --- | --- | --- |
+| `light_color` | `Color(1.0, 0.24, 0.16)` | The same hot red the rim is drawn with — one glow, both halves painted |
+| `light_energy` | `1.15` | Below every fixture recipe (1.3 – 2.1) on purpose: a 16px prop has to be *seen coming*, not light the corridor |
+| `light_scale` | `0.7` | A 45px pool at the 64px-per-1.0 above — the texture is 128px, so this is its sprite scale directly |
+| `PAINT_GAIN` | `0.35` | **The calibration.** See below |
+| `glow` | `true` | LDtk field `Glow`: 1 on, 0 off, unset counts as on |
+
+`PAINT_GAIN` is the one number here that is a measurement rather than a taste.
+A `Light2D` adds `colour × energy × ALBEDO` — it multiplies the surface under
+it, which is why its pool picks the brickwork out. An additive sprite adds
+`colour × energy` flat, with no surface in the term, so at equal energy it lands
+about `1/albedo` too bright: the first pass was a saturated red disc with the
+cloud's own rim lost inside it. 0.35 is the office brick's albedo. Checked by
+`room_shot` on the same room before and after the swap — **mean 59.6 / 59.8 /
+56.5 as a light, 60.1 / 60.3 / 59.3 as paint.**
+
+**The rim is drawn as well as lit, and has to be.** A red light on a wall
+already at 255 in the red channel does nothing — the same reason Rumi's gift
+needed a drawn core. In `Level_4` (mean 126) the cloud reads on its rim; in the
+cave it reads on both.
+
+**Turning a halo off** costs nothing and is the right move for a cluster: with
+several thoughts in one room the halos merge into a single red smear and stop
+telling you where any individual hazard is. Set `Glow` to 0 on the ones the
+player is not being warned about.
+
 ## When you add a room in LDtk
 
 Lights are placed at fixed world coordinates in `Act1World.tscn`, but rooms move

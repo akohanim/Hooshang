@@ -19,8 +19,12 @@ extends Node
 ##   - a looped face puts a window onto its sheet in the portrait, and leaves the
 ##     older mouth/eye overlays OFF, because those are warped from the painting
 ##     the loop replaced and would be drawn over the wrong face
-##   - a face with neither (the tinted stand-in, which is how Rumi is drawn)
-##     holds still, exactly as every portrait did before any of this existed
+##   - a face with NO portrait at all holds still, exactly as every portrait did
+##     before any of this existed (Rumi was drawn that way until he got sheets
+##     of his own; this now covers the no-face path rather than his)
+##   - RUMI'S faces are loops too, and his blink is found where HIS eyes are —
+##     he wears a turban and sits lower in frame than Hooshang, so the indexer's
+##     default eye band would miss it and report no blink at all, silently
 ##   - the loop survives _place() mirroring the banner for a right-hand speaker
 ##   - speech frames advance while revealing, and NEVER land on the rest frame,
 ##     which means silence
@@ -35,6 +39,9 @@ extends Node
 ## the old warps could not follow, and is front-facing art today.
 const LOOPED := preload("res://assets/portraits/hooshang_skeptical.png")
 const WAKING := preload("res://assets/portraits/hooshang_dazed.png")
+## Rumi's, whose sheets are built a different way — only the mouth and the eyes
+## are composited onto the still, so his frames differ from it nowhere else.
+const RUMI := preload("res://assets/portraits/rumi_serene.png")
 
 var failures: Array[String] = []
 
@@ -82,11 +89,48 @@ func _ready() -> void:
 
 	# --- a face with no loop holds still --------------------------------------
 	await _close(box)
-	# The tinted stand-in is the same path, and is how Rumi is still drawn.
+	# No texture at all. Rumi used to be drawn this way; he has his own sheets
+	# now, so this covers the no-face path rather than his.
 	await _say(box, "Rumi, tinted.", DialogueBox.Side.LEFT, null)
 	_check(box._loop.is_empty() and not box.portrait_loop.visible
 			and not box.portrait_eyes.visible,
-		"the tinted stand-in animates nothing and simply holds still")
+		"a face with no portrait at all animates nothing and simply holds still")
+
+	# --- Rumi's faces are loops too -------------------------------------------
+	#
+	# Worth its own case because his sheets are built differently and his blink
+	# is found differently. The indexer's default eye band is HOOSHANG's — bare
+	# headed, y 40-68 — and Rumi wears a turban and sits lower, at y 98-124. Read
+	# in the wrong band his blink is simply not found, and the failure is silent:
+	# the face still talks, still rests, and never once shuts its eyes.
+	await _close(box)
+	await _say(box, "A line from Rumi.", DialogueBox.Side.RIGHT, RUMI)
+	_check(not box._loop.is_empty(), "Rumi's face arms a loop of its own")
+	_check(box.portrait.texture != null
+			and box.portrait.texture.resource_path.ends_with("rumi_serene.png"),
+		"...and the still underneath still names him  [%s]"
+			% box.portrait.texture.resource_path)
+	_check(box._loop.has("blink"),
+		"...and his blink was FOUND, in the band his eyes are actually in")
+	var rumi_talk := _ints(box._loop["talk"])
+	_check(not rumi_talk.has(int(box._loop["blink"])),
+		"...and kept out of the speech cycle  [blink %d, talk %s]"
+			% [box._loop["blink"], rumi_talk])
+	# Not vacuous: a sheet whose frames were all identical would satisfy every
+	# check above. Only the mouth and the eyes are meant to differ from the
+	# still, so a speech frame has to differ from the rest frame SOMEWHERE.
+	var sheet: AtlasTexture = box.portrait_loop.texture
+	var img := sheet.atlas.get_image()
+	var w := int(sheet.region.size.x)
+	var rest_px := img.get_region(Rect2i(0, 0, w, img.get_height()))
+	var talk_px := img.get_region(Rect2i(rumi_talk[0] * w, 0, w, img.get_height()))
+	var diff := 0
+	for y in range(0, rest_px.get_height(), 2):
+		for x in range(0, w, 2):
+			if rest_px.get_pixel(x, y) != talk_px.get_pixel(x, y):
+				diff += 1
+	_check(diff > 40,
+		"...and a speech frame really differs from the rest frame  [%d px]" % diff)
 
 	# --- mirroring carries the loop with the face -----------------------------
 	await _close(box)

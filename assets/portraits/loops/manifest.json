@@ -112,5 +112,130 @@
       5
     ],
     "blink": 6
+  },
+  "rumi_serene": {
+    "sheet": "rumi_serene_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "eye": [
+      98,
+      124,
+      96,
+      178
+    ],
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "blink": 6
+  },
+  "rumi_warm_open": {
+    "sheet": "rumi_warm_open_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "eye": [
+      98,
+      124,
+      96,
+      178
+    ],
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "blink": 6
+  },
+  "rumi_urgent": {
+    "sheet": "rumi_urgent_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "eye": [
+      98,
+      124,
+      96,
+      178
+    ],
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "blink": 6
+  },
+  "rumi_wistful": {
+    "sheet": "rumi_wistful_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "eye": [
+      98,
+      124,
+      96,
+      178
+    ],
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "blink": 6
+  },
+  "rumi_sorrowful": {
+    "sheet": "rumi_sorrowful_sheet.png",
+    "frames": 7,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "eye": [
+      98,
+      124,
+      96,
+      178
+    ],
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "blink": 6
   }
 }

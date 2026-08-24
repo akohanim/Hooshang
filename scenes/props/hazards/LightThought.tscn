@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/hazards/dark_thought.gd" id="1_thought"]
+
+[node name="LightThought" type="Area2D" groups=["hazard"]]
+script = ExtResource("1_thought")
+size = Vector2(16, 12)
+tone = 1

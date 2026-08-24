@@ -16,22 +16,45 @@ signal died
 
 enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
 
-## Half of the 8x12 hitbox in Hooshang.tscn — his NORMAL width. Kept here because
+## Half of the 9x12 hitbox in Hooshang.tscn — his NORMAL width. Kept here because
 ## the footing check has to probe at the box's own edges; if the shape is ever
 ## resized, these move with it or he loses his footing at the wrong place.
 ##
-## He is exactly one cell across on purpose, and it costs something: a body
-## exactly as wide as the grid cannot pass through a one-cell slot at all, since
-## Godot resolves two exactly-abutting AABBs as a collision. That is the right
-## trade for a FLOOR — a one-cell hole in a walkway is something you stride over,
-## not something that swallows you — so the fix is not a narrower man but a
-## deliberate act. See the Squeeze group and `_tick_squeeze()`.
-const HALF_WIDTH := 4.0
+## He is a cell and an eighth across, and every part of that is deliberate.
+##
+## He used to be exactly one cell (4.0), and the extra half-pixel a side came in
+## with the weight: he is drawn 7.0px across the belly now against 4.7px before
+## (tools/gen_chubby_hooshang.py), and a box that still stopped at 8 would have
+## had him brushing rooms his own gut is visibly inside. It is deliberately only
+## a pixel. The world is built on 8px cells and the walkable minimum is a 2-cell
+## slot; at 9 he still clears one of those with 3.5px a side, and 10 starts
+## eating a margin that level geometry was authored against.
+##
+## Being at least a cell wide costs something either way: a body that wide
+## cannot pass through a one-cell slot at all, since Godot resolves two
+## exactly-abutting AABBs as a collision and 9 into 8 does not even abut. That
+## is the right trade for a FLOOR — a one-cell hole in a walkway is something you
+## stride over, not something that swallows you — so the fix is not a narrower
+## man but a deliberate act. See the Squeeze group and `_tick_squeeze()`, whose
+## `squeeze_width` is an ABSOLUTE width and therefore did not move with this.
+const HALF_WIDTH := 4.5
 const HALF_HEIGHT := 6.0
 
 @export_group("Run")
-## Top horizontal speed. 90 px/s (Celeste's run speed) reads well at 8px tiles.
-@export var max_run_speed := 90.0
+## Top horizontal speed.
+##
+## 72 px/s, which is Celeste's own run speed (90, and what this was) taken down
+## by a fifth. Deliberately BELOW Madeline rather than level with her: he is an
+## elderly office worker, and the whole read of the character is that he is
+## slower than the game he is in.
+##
+## THIS IS A LEVEL-GEOMETRY NUMBER, not just a feel one. Horizontal reach is
+## airtime x this, so changing it moves every gap in the game: measured, a
+## running jump went 54.0px across at 90 and goes 43.2px at 72 — more than a
+## cell shorter. Run tests/feel_measure.tscn before and after touching it, and
+## the level tests after, or a gap somebody built to be just clearable stops
+## being clearable and nothing says so.
+@export var max_run_speed := 72.0
 ## Ground acceleration. 900 px/s^2 reaches top speed in ~6 frames (90/900 = 0.1s).
 @export var ground_accel := 900.0
 ## Used when stopping OR turning around. Higher than accel so stops and
@@ -218,18 +241,29 @@ const HALF_HEIGHT := 6.0
 ## How much solid ground he needs under his MIDDLE to keep standing, in px
 ## either side of his centre. 0 disables the check.
 ##
-## This exists because the hitbox is much wider than the man. The box is 8px
-## across; the drawn body is 4.7 (1.95 left of centre, 2.73 right — he leans).
-## Godot keeps a body standing while ANY part of its shape overlaps the floor,
-## so before this he could walk until his centre was a full 4px past a ledge —
-## measured — which put his visible body from edge+2.05 to edge+6.73. Every
-## drawn pixel of him was over air, with a 2px gap between his feet and the
-## ledge he was apparently standing on.
+## This exists because the hitbox is much wider than the part of him that
+## stands. Godot keeps a body standing while ANY part of its shape overlaps the
+## floor, so before this he could walk until his centre was a full box-half past
+## a ledge — measured at 4px, when the box was 8 — which put every drawn pixel
+## of him over air with a 2px gap between his feet and the ledge he was
+## apparently standing on.
 ##
 ## Narrowing the hitbox does not fix it and is worth knowing why: for any part
-## of him to still be over the platform the overhang has to be under 1.95px, so
-## the box would have to be under 4px wide — narrower than he is drawn — and it
-## would stop being the 1-cell-wide body the 8px grid is built around.
+## of him to still be over the platform the overhang has to be under his own
+## drawn half-width at the FEET, and his boots measure 1.17px left of centre and
+## 1.95 right — narrower than any body the 8px grid can be built around. Putting
+## weight on him did not change that either: the belly went from 4.7px across to
+## 7.0 and the boots did not move (tools/gen_chubby_hooshang.py fattens by
+## normalised height and the last band is 0.5px).
+##
+## **It does not scale with the box, and did not move when the box widened to
+## 9.** The footprint this check asks about is his CENTRE — `_keep_footing`
+## probes `_ground_under(0.0)`, a single ray — so what counts as standing is
+## already the strictest it can be at any width. This number is that ray's
+## reach: it starts a px above his soles and runs `footing_width + 2` down, so
+## raising it lets him keep his footing further off a surface, not further out
+## over one. What DID follow from the wider box is the slide: he now has to be
+## moved 4.5px rather than 4 to clear a ledge (see `ledge_slip_speed`).
 @export var footing_width := 1.0
 ## How fast he slides off a ledge he has lost his footing on, px/s.
 ##
@@ -244,15 +278,27 @@ const HALF_HEIGHT := 6.0
 ## How wide his hitbox becomes while he is going down a one-cell slot, in px.
 ##
 ## Two pixels off the grid, not two pixels off the man. The slot is one cell and
-## so is he, and two AABBs that abut exactly are a collision in Godot — measured,
-## an 8px box entered Level_1's 8px shaft from 0 of 33 approach positions across
-## its mouth, and 7.99 was no better. 6 clears it with a pixel either side.
+## he is a cell and an eighth, and even at exactly a cell two AABBs that abut
+## are a collision in Godot — measured, an 8px box entered Level_1's 8px shaft
+## from 0 of 33 approach positions across its mouth, and 7.99 was no better.
+## 6 clears it with a pixel either side.
+##
+## **This is an ABSOLUTE width, not a fraction of HALF_WIDTH, and that is the
+## point.** What has to fit is the shaft, which is 8px whatever he weighs — so
+## when the box went from 8 to 9 this did not move, and the chimney measures
+## exactly as it did before. Deriving it from his own width instead would have
+## quietly widened him out of Level_1's shaft the day he put on weight.
 @export var squeeze_width := 6.0
 ## How far either side of his centre to look for the slot's walls, in px.
 ##
 ## Past his own edges on purpose: he can be standing off-centre over a slot, and
 ## the point of the probe is to find where the hole actually is so he can be put
 ## down the middle of it.
+##
+## Absolute, like `squeeze_width`, and for the same reason — it measures the
+## SLOT. It is bounded on both sides: shorter than a cell and a half or a
+## one-cell hole two thirds under him is missed, longer and a two-cell gap in
+## the floor starts reading as a slot to squeeze into rather than a drop.
 @export var squeeze_probe := 6.0
 ## Probe resolution. Half a pixel: the hole is 8 wide and he is 6, so a coarser
 ## step can misplace him by more than the clearance he has.
@@ -326,7 +372,7 @@ var slide_accel := 0.0          # px/s^2 the drag builds at
 var slide_speed := 0.0          # px/s it has built to so far
 
 # The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
-# with its feet offset-pinned to the bottom of the 8x12 hitbox. It lives
+# with its feet offset-pinned to the bottom of the 9x12 hitbox. It lives
 # inside SpriteSquash, a wrapper Node2D that Juice scale-tweens for squash &
 # stretch — Visual's own scale/offset above are never touched by that, so
 # they stay exactly as tuned regardless of what juice.gd is doing.
@@ -724,9 +770,27 @@ func _tick_squeeze() -> void:
 
 
 ## Back to full width the moment the world has room for it.
+##
+## `recovery_as_collision` is the whole of this and it is not optional. With it
+## off — the default, and what this did — `test_move` runs Godot's depenetration
+## first and only reports what is left over, so a box buried HALF A PIXEL in the
+## brick either side is pushed back out and comes back clean. Measured on
+## Level_1's shaft, the answer was not even monotonic: at the mouth, a 6 and a 7
+## fitted, an 8 collided, and a 9 and a 10 "fitted" again.
+##
+## That is exactly the width he grew through. At 8 he happened to abut the two
+## walls to the pixel, which is a contact and not a penetration, so there was
+## nothing to recover and the collision was reported — the squeeze held and he
+## went down the shaft on the strength of a coincidence. At 9 he penetrates,
+## gets recovered, stands up on the lip, falls the tenth of a pixel gravity
+## gives him, squeezes, stands up again, and rides that loop forever a whole
+## body-height above the hole he is supposed to be dropping down.
+##
+## With recovery counted the answer is the plain one at every width and every
+## depth: 6 and 7 fit that shaft, 8 and up do not.
 func _try_stand_up() -> void:
 	_set_box_width(_box_width)
-	if test_move(global_transform, Vector2.ZERO):
+	if test_move(global_transform, Vector2.ZERO, null, 0.08, true):
 		_set_box_width(squeeze_width)   # still in it
 		return
 	squeezing = false
@@ -808,7 +872,7 @@ func _keep_footing() -> void:
 
 ## Is there solid ground just below his feet, `dx` px to the side of his centre?
 ##
-## A ray rather than test_move, because test_move uses the whole 8px-wide body
+## A ray rather than test_move, because test_move uses the whole 9px-wide body
 ## and the whole point here is to ask about a narrower footprint than the one
 ## Godot supports him on.
 func _ground_under(dx: float) -> bool:

@@ -40,6 +40,13 @@ const HEADROOM_CELLS := 3
 const CELL := 8.0
 ## Half his 8x12 hitbox, for reading his feet off his origin.
 const HALF_HEIGHT := 6.0
+## What of him is actually drawn OVER the ledge, measured off
+## assets/hooshang_sprites/chubby/Breathing_Idle/east/frame_000.png at the boot
+## row and scaled by Hooshang.tscn's 0.39. His boots, not his belly: the weight
+## went on above the knee (tools/gen_chubby_hooshang.py) and standing is done
+## with the feet. Reported only — the check itself is on his CENTRE.
+const BOOT_LEFT := 1.17
+const BOOT_RIGHT := 1.95
 
 
 func _ready() -> void:
@@ -124,9 +131,9 @@ func _check_room(room: Node2D) -> bool:
 ## Regression: he must not be able to STAND with his whole body over open air.
 ##
 ## Godot keeps a body standing while any part of its shape overlaps the floor,
-## and his hitbox is 8px across against a drawn body of 4.7 — so before
-## Player.footing_width he could come to rest with his centre a full 4px past a
-## ledge, which put every drawn pixel of him past the edge with a 2px gap
+## and his hitbox is 9px across against boots that are 3.1 — so before
+## Player.footing_width he could come to rest with his centre a whole box-half
+## past a ledge, which put every drawn pixel of him past the edge with a 2px gap
 ## between his feet and the ledge he appeared to be standing on.
 ##
 ## Measured by where he comes to REST, not by the overhang seen on any one
@@ -152,8 +159,8 @@ func _check_footing() -> void:
 	# His centre may reach the edge; it may not go past it. Half a pixel of slack
 	# for the physics margin, not for a policy.
 	_check(rest <= 0.5,
-		"he cannot stand out over the drop  [rests at most %+.2fpx past the edge, body %+.2f..%+.2f]"
-			% [rest, rest - 1.95, rest + 2.73])
+		"he cannot stand out over the drop  [rests at most %+.2fpx past the edge, boots %+.2f..%+.2f]"
+			% [rest, rest - BOOT_LEFT, rest + BOOT_RIGHT])
 
 
 ## A ledge with a genuine drop to its right, away from a room seam.

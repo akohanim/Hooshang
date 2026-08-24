@@ -13,6 +13,14 @@ const DOOR_SCENE := preload("res://scenes/props/Door.tscn")
 const CHECKPOINT_SCENE := preload("res://scenes/props/Checkpoint.tscn")
 const HAZARD_SCENE := preload("res://scenes/props/hazards/Hazard.tscn")
 const GLASS_SPIKES_SCENE := preload("res://scenes/props/hazards/GlassSpikes.tscn")
+const CONE_SPIKES_SCENE := preload("res://scenes/props/hazards/ConeSpikes.tscn")
+## The two tones of thought. One prop, one script, one set of fields — the only
+## difference is which sheet the cloud is drawn from, so they are two LDtk
+## entities purely so the editor shows you which one you placed.
+const THOUGHT_SCENES := {
+	"DarkThought": preload("res://scenes/props/hazards/DarkThought.tscn"),
+	"LightThought": preload("res://scenes/props/hazards/LightThought.tscn"),
+}
 const PLATFORM_SCENE := preload("res://scenes/props/platforms/Platform.tscn")
 const CRUMBLING_SCENE := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
 const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
@@ -91,6 +99,18 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.RIGHT))
 			"GlassSpikesRightWall":
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.LEFT))
+			# The single-cell version of the same idea: 8px conical spikes, for a
+			# floor you want threatened without giving up two cells of the room's
+			# height to the hazard. Four entities for the same reason the glass
+			# ones are four — a direction FIELD is a thing you can forget to set.
+			"ConeSpikes":
+				entity_layer.add_child(_build_cone_spikes(data, ConeSpikes.Facing.UP))
+			"ConeSpikesCeiling":
+				entity_layer.add_child(_build_cone_spikes(data, ConeSpikes.Facing.DOWN))
+			"ConeSpikesLeftWall":
+				entity_layer.add_child(_build_cone_spikes(data, ConeSpikes.Facing.RIGHT))
+			"ConeSpikesRightWall":
+				entity_layer.add_child(_build_cone_spikes(data, ConeSpikes.Facing.LEFT))
 			# The full-size ceiling run — the fixture standing in room 2, not
 			# the 8px paint tiles. Dragged to a WIDTH, which becomes the number
 			# of 24px cells; the prop rounds that to an odd count, because the
@@ -105,6 +125,12 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				lamp.position = data.position
 				_light_fields(lamp, data)
 				entity_layer.add_child(lamp)
+			# A hazard that MOVES, and the one entity here whose direction is a
+			# field rather than its own entity. Two names, one prop: the tones
+			# are split so LDtk shows which is which, nothing more. See
+			# _build_thought.
+			"DarkThought", "LightThought":
+				entity_layer.add_child(_build_thought(data))
 			"SlideZone":
 				entity_layer.add_child(_build_slide_zone(data))
 			# One entity per direction, so which way a belt runs is chosen by
@@ -243,6 +269,84 @@ func _build_glass_spikes(data: Dictionary, facing: GlassSpikes.Facing) -> Area2D
 	return spikes
 
 
+## The 8px spikes. Same shape as _build_glass_spikes and the same axis forcing,
+## against ConeSpikes.CELL (8) rather than GlassSpikes.CELL (16) — which is the
+## one line that must not be copied across, because a strip built at the wrong
+## cell size still imports, still kills, and is simply drawn at twice the length
+## somebody dragged.
+##
+## The axis the strip does NOT run along is forced to one cell, so a handle
+## dragged diagonally in LDtk still yields a strip rather than a block.
+func _build_cone_spikes(data: Dictionary, facing: ConeSpikes.Facing) -> Area2D:
+	var spikes: Area2D = CONE_SPIKES_SCENE.instantiate()
+	spikes.position = data.position
+	spikes.facing = facing
+	var drawn := Vector2(data.size)
+	var wall := facing == ConeSpikes.Facing.RIGHT or facing == ConeSpikes.Facing.LEFT
+	spikes.size = Vector2(ConeSpikes.CELL, drawn.y) if wall \
+		else Vector2(drawn.x, ConeSpikes.CELL)
+	return spikes
+
+
+## A drifting cloud that kills on contact, at the path it was tuned to.
+##
+## THE OPPOSITE CALL FROM THE SPIKE STRIPS, deliberately. Those are four entities
+## each because direction there is a binary you can forget to set and the failure
+## is silent — spikes growing out of a ceiling upside down. Motion here is
+## NUMBERS (how far, how fast, how far into the cycle), and tuning belongs on the
+## instance for the reason _build_slide_zone gives: two thoughts in one room can
+## legitimately want different paths, which is the case an entity-per-variant
+## cannot serve. A thought whose Motion nobody set still visibly drifts, so there
+## is no silent wrong answer to design around.
+##
+## Motion is read with _field_str and NOT _field_int: an LDtk enum crosses the
+## boundary as the value's STRING id (addons/ldtk-importer/src/util/field-util.gd
+## matches `LocalEnum.<name>` and hands back `value.id`), so an integer read of it
+## is 0 for every mode and every thought in the world drifts vertically.
+##
+## Clockwise is a Float because LDtk has only ever written String and Float
+## fields in this project and a Bool from a guessed shape crashed the editor once
+## already — the FlickerAmount precedent, where 0 means off. Anything above zero
+## is clockwise.
+##
+## Size is NOT read. The entity is 16x16 and not resizable, and the kill box is
+## derived from the art in dark_thought.gd; taking Vector2(data.size) through
+## would let a future stretched instance promise a bigger hazard than the one
+## that actually kills.
+func _build_thought(data: Dictionary) -> Area2D:
+	# By identifier, so the two tones cannot be told apart by anything except
+	# which entity was placed — and so a test can drive this the way the importer
+	# does, with a name, rather than being handed the answer as an argument.
+	var scene: PackedScene = THOUGHT_SCENES[data.identifier]
+	var thought: DarkThought = scene.instantiate()
+	thought.position = data.position
+	match _field_enum(data, "Motion"):
+		"Horizontal": thought.motion = DarkThought.Motion.HORIZONTAL
+		"Circle": thought.motion = DarkThought.Motion.CIRCLE
+		# Vertical, and also the empty string an untouched field arrives as —
+		# which is the prop's own default, so a thought placed before this field
+		# existed still moves rather than standing still looking configured.
+		_: thought.motion = DarkThought.Motion.VERTICAL
+	# absf on the amplitude: the sign belongs to `phase`, so a negative typed
+	# here is a distance somebody wrote the wrong way round, not a still hazard.
+	thought.amplitude = absf(_field_float(data, "Amplitude", thought.amplitude))
+	thought.speed = _field_float(data, "Speed", thought.speed)
+	thought.phase = _field_float(data, "Phase", thought.phase)
+	thought.clockwise = _field_float(data, "Clockwise", 1.0) > 0.0
+	# Unset counts as ON: every thought placed before this field existed has no
+	# value for it, and a hazard that quietly went dark would be worse than one
+	# that ignored the setting.
+	thought.glow = _field_float(data, "Glow", 1.0) > 0.0
+	# ABOVE THE ROOM'S OWN TILES, for the reason _build_ceiling_panel gives: the
+	# Entities layer is built before Collisions and both sit at z 0, so anything
+	# that passes in front of painted brick is drawn and then covered by the
+	# paint. A ceiling run merely looks wrong that way; a hazard that vanishes
+	# behind the wall it is drifting across is one you die to for no visible
+	# reason.
+	thought.z_index = 1
+	return thought
+
+
 ## A stretch of floor that will not hold him. Unlike the spike entities, this one
 ## DOES read fields: angle, control_strength and speed_ramp are tuning, and
 ## tuning belongs on the instance — two chutes in one room can legitimately want
@@ -376,6 +480,29 @@ func _build_exit(data: Dictionary) -> Area2D:
 func _field_str(data: Dictionary, key: String) -> String:
 	var raw = data.fields.get(key)
 	return raw if raw is String else ""
+
+
+## An LDtk ENUM field, as its bare value. NOT _field_str, and this is the whole
+## reason it exists: the importer hands an enum back QUALIFIED. Read
+## `__parse_enum` in addons/ldtk-importer/src/util/field-util.gd — the regex
+## there pulls the enum's NAME out of the `LocalEnum.ThoughtMotion` type string,
+## and the value it returns is `"ThoughtMotion.Circle"`, never `"Circle"`.
+##
+## Matching the bare name against that misses EVERY value and falls through to
+## whatever the default case is, which is not an error anywhere: the entity
+## imports, draws, and quietly behaves as though the field were never set. That
+## shipped once — every DarkThought in the world drifted vertically no matter
+## what Motion said in LDtk.
+##
+## Splitting on the last "." accepts the bare form too, so this keeps working if
+## the addon is ever fixed upstream.
+func _field_enum(data: Dictionary, key: String) -> String:
+	var raw = data.fields.get(key)
+	if not (raw is String):
+		return ""
+	var text: String = raw
+	var dot := text.rfind(".")
+	return text.substr(dot + 1) if dot >= 0 else text
 
 
 ## Same null-safety as _field_str, for Int fields.

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/hazards/cone_spikes.gd" id="1_cone"]
+
+[node name="ConeSpikes" type="Area2D" groups=["hazard"]]
+script = ExtResource("1_cone")
+size = Vector2(8, 8)

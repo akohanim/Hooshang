@@ -78,6 +78,27 @@ so the two agree now. The tiles are still placeholder art.
     diagonal-dash lesson: the prompt arrives at the dash point, a FLAT dash
     does not clear it and an up-forward one does, and only that room's
     crumbling panels are relaxed
+  - `Godot --headless --path . res://tests/cone_spikes_test.tscn` — the 8px
+    conical spikes: all four facings build five cells from their OWN sheet with
+    the kill box leaning towards the points, the lethal band stops exactly where
+    the cones end so standing in the base is safe, and a longer strip gets
+    longer rather than deeper. The base check is made THROUGH the physics server
+    with a 2px probe body — the real player is 12px tall and cannot fit in a 3px
+    base, so a test using him could only ever prove the cones kill
+  - `Godot --headless --path . res://tests/dark_thought_test.tscn` — the drifting
+    cloud: all three motions swing the amplitude they were given and no further
+    (each backed by a measured-travel control, so "stays on one x" cannot pass
+    for a thought that never moved), a circle stays exactly the radius out and
+    goes the way `clockwise` says, `phase` separates two otherwise identical
+    thoughts — with a same-phase control proving the gap came from the field and
+    not from sampling drift — and `reset_all` restores the placed point AND the
+    cycle. A plain Hazard hung at the same height DOES drop when the room
+    collapses while the thought stays in its band, which is what makes the
+    anchored check mean something. It also holds the GLOW: the prop carries no
+    Light2D at all (the assertion nothing else can catch — a change back to a
+    PointLight2D looks right in an empty test room and fails only in a full
+    one), the halo is unshaded/additive and behind the cloud, and the `Glow`
+    field switches it with unset counting as on
   - `Godot --headless --path . res://tests/platform_test.tscn` — the two office
     ceiling platforms: the solid one holds, the crumbling one gives way in
     under a second and comes BACK on reset (collision, art and its spent flag)
@@ -141,6 +162,15 @@ so the two agree now. The tiles are still placeholder art.
   anything in a `.import` OR in a post-import hook, and rebuild:
   `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
+- **An LDtk ENUM field arrives QUALIFIED.** `field-util.gd`'s `__parse_enum`
+  returns `"ThoughtMotion.Circle"`, never `"Circle"` — the regex there pulls the
+  enum's NAME out of the type string, it does not strip it off the value. Match
+  the bare name and every value misses and falls through to the default case,
+  which is not an error anywhere: the entity imports, draws, kills, and quietly
+  behaves as though the field were never set. That shipped once — every
+  DarkThought drifted vertically whatever Motion said in LDtk. Read enum fields
+  with `_field_enum()`, not `_field_str()`; `dark_thought_test` pins both the
+  addon's output shape and the mapping.
 - **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after
@@ -293,6 +323,53 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   to; the other axis is forced to one cell on import. Art:
   `tools/gen_glass_spikes.py` draws the floor sheet and transforms the other
   three, keeping the light in the upper left rather than rotating it.
+  `hazards/ConeSpikes.tscn` is the SINGLE-CELL version of exactly that: 8px
+  conical spikes for a floor you want threatened without giving up two cells of
+  the room's height. Same four-entity split (`ConeSpikes`, `ConeSpikesCeiling`,
+  `ConeSpikesLeftWall`, `ConeSpikesRightWall`), same axis forcing, art from
+  `tools/gen_cone_spikes.py` and the entities from
+  `tools/ldtk_add_cone_spikes.py`. **`Hazard.KILL_MARGIN` cannot be used across
+  the cones**: it insets 2px a side, which against 5px of cone leaves ONE pixel
+  — a hazard you could stand in the middle of. So the across axis uses
+  `ConeSpikes.TIP_LENIENCY` (1px) shaved off the POINTED end only, and the kill
+  box stops exactly where the cones do, which is what keeps standing in the base
+  safe. `CONE_HEIGHT` here and `BASE_TOP` in the generator are one number in two
+  files and have to move together.
+  `hazards/DarkThought.tscn` is the moving one: a small black cloud with a hot
+  red rim, drifting a repeating path through the air and lethal to touch. ONE
+  entity with fields, deliberately not four like the spike strips — direction
+  there is a binary you can forget to set and the failure is silent, whereas the
+  motion here is NUMBERS (`Motion`, `Amplitude`, `Speed`, `Phase`, `Clockwise`),
+  two thoughts in one room can legitimately want different paths, and one whose
+  mode nobody set still visibly drifts. **The placed point is the CENTRE of the
+  path in all three modes** — a CIRCLE orbits it rather than starting on it. The
+  red rim is DRAWN as well as lit: a `PointLight2D` alone is not enough against
+  office walls already at 255 in the red channel, the case `LIGHTING.md` records
+  for Rumi's gift. Anchored against `RoomCollapse` (it is floating, not resting),
+  and `DarkThought.reset_all()` puts every one back on its placed point with its
+  cycle at the start — called from both of `ldtk_world.gd`'s reset sites, beside
+  `CrumblingPlatform.reset_all`. Art from `tools/gen_dark_thought.py`, the entity
+  from `tools/ldtk_add_dark_thought.py`.
+  `hazards/LightThought.tscn` is the SAME PROP in the other tone — the same
+  script, path, fields and kill box, `tone = LIGHT` — and the sheets are two
+  palettes off one generator, so the two cannot drift apart. Two LDtk entities
+  rather than a Tone field purely so the editor SHOWS which you placed
+  (`tools/ldtk_add_light_thought.py`, which builds its definition from the
+  DarkThought one and checks it key-for-key rather than transcribing the
+  fieldDef shape a second time).
+  **Both clouds are drawn UNSHADED and the halo is PAINT, not a light** — and
+  that is the fix for glows that appeared in some rooms and not others. This
+  renderer lights any one canvas item from **at most 16 lights** and drops the
+  rest in SILENCE; a room with eight `CeilingPanel`s already spends 16 (two
+  each), so every thought in it was competing for a budget that had run out.
+  `CanvasModulate` 0.05 eats a *shaded* painted glow — the rule `SunShaft` and
+  `WallPattern` document — but not an unshaded one (measured: the same sprite
+  renders 0.047 shaded, 1.000 unshaded), so the halo is an unshaded additive
+  sprite that cannot be culled and costs nothing from the room. `PAINT_GAIN`
+  (0.35) is the calibration that buys back what a light got for free: a light
+  multiplies the surface under it, paint does not, so at equal energy paint
+  lands ~1/albedo too bright. `Glow` in LDtk (1/0, unset = on) turns it off.
+  Full numbers and the per-item cap: `LIGHTING.md`.
   `backdrop/WallPattern.tscn` is the Persian rosette that blooms on the office
   walls. A LIGHT, not paint — `CanvasModulate` 0.05 would eat a painted one, the
   same trap `SunShaft` documents — with the ornament in the cookie's alpha so one
@@ -347,6 +424,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   **Airtime is capped by Level 2's second gap**, which is a dash GATE — airtime
   times max_run_speed is horizontal reach, and past about +16% a plain running
   jump clears a gap that exists to teach the dash (`level2_test` catches it).
+  **And Level 2's THIRD gap caps it from below, much more tightly.** It is a
+  94px gap with a 2-tile rise, authored so only a near-perfect apex jump+dash
+  clears it, which means the geometry has almost no headroom on the slow side:
+  measured by bisection, `max_run_speed` 86 still clears it and 82 does not — so
+  roughly **5% is all the slowing this level tolerates**. Below that he still
+  crosses the gap horizontally but arrives UNDER the platform lip and falls past
+  the edge, which is the rise he can no longer make in time rather than the
+  distance. Slowing him further means shortening or lowering P3 in
+  `tools/gen_level2.py`; nothing else in the game is this tight.
 - `tools/ldtk_to_8px.py` — the one-shot 16px -> 8px grid migration, kept for the
   record because it documents what the conversion had to get right. It
   REGENERATES the auto-layer tiles rather than leaving that to LDtk (they live
@@ -359,6 +445,36 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `tools/gen_bricks_8px.py` — the four 8px wall tiles (fill, top, left,
   corner). Four is the WHOLE tileset: no tile in the world is hand-placed, and
   the four auto-rules never ask for anything else.
+- `tools/gen_cone_spikes.py` — the 8px cone sheets, four facings from one drawn
+  floor sheet, same transform table as `gen_glass_spikes.py`. The PALETTE and
+  proportions are measured off a Pixellab generation; the bitmap is not reused,
+  because at this scale it could not be: it drew 13 cones over 160px (a cone
+  every 3px once reduced — a picket fence), its cones run height = 2.35 x
+  half-width (a 5px-tall cone at that slope is 5px wide, so two will not fit in
+  an 8px cell), and a 4x downsample of a 15px cone loses the apex a spike is
+  entirely made of. `tools/ldtk_add_cone_spikes.py` adds the four entities and
+  their four 8px tilesets, as TEXT rather than a json round trip — see its
+  docstring for why that matters on a 1MB project file.
+- `tools/gen_dark_thought.py` — the drifting clouds, BOTH tones, cut from one
+  generated strip.
+  Three things it has to do that a crop-and-resize does not. The frames are cut
+  by CONNECTIVITY: Pixellab returned EIGHT stamps on a 40px pitch rather than the
+  five asked for, and the two on the ends are clipped by the canvas edge, so
+  slicing the strip into fifths puts a seam through two clouds (the clipped pair
+  identify themselves by being narrower than the modal width). The colour is a
+  RECOLOUR, not a tint — it came back plum-and-pink, and "black body" and "red
+  rim" are two different remaps of the same pixel, which a hue shift cannot do at
+  once: the body is crushed toward black along its own luminance so the lobes
+  survive as shading, and every opaque pixel with a transparent neighbour is
+  repainted hot red AFTER the reduction, so the rim stays one crisp pixel. And
+  the loop is a BREATH, a 12/13/12/11px height cycle inside a fixed cell, rather
+  than the sideways roil the strip suggests — the prop is already travelling, so
+  a drawn offset reads as the sprite lagging its hitbox.
+  It writes `dark_thought.png` and `light_thought.png` from one cut and one
+  reduction, differing only in the body ramp — verified: all 160 rim pixels are
+  byte-identical between the sheets and all 429 body pixels changed. Two scripts
+  would let a retimed breath land in one and not the other, which is two hazards
+  that no longer read as the same object.
 - `tools/gen_lemon.py` — the lemon collectible, cut from a generated bounce
   sheet. Two things it has to do that a crop-and-resize does not. The source is
   a JPEG with the **transparency checkerboard baked in as pixels**, and JPEG
@@ -371,6 +487,42 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   are kept but SCALED — which is why `Lemon.tscn` sets `bob_height = 0`, or the
   prop's own tween hovers it a second time and the squash drifts out of step.
   Sizes: `10` world, `20 dense`, `16 icon` (writes `ldtk/art/lemon.png`).
+- `tools/gen_rumi_loops.py` — Rumi's talking sheets, seven frames per
+  expression in the same shape as Hooshang's: the still, five mouth positions,
+  a blink. The mouths come from a Pixellab `animate_image` pass and the blink
+  from an `edit_image` "eyes closed"; both are 256px and both are REGENERATIONS
+  of the whole portrait, which is the thing this tool exists to undo. Measured
+  on the first pass, the animator moves the silhouette centroid only 1.6px — the
+  head does not really go anywhere — but the mean per-pixel difference from the
+  still is ~20/255 spread evenly over turban, beard and shoulders, and the
+  busiest rows in the frame were the TURBAN, not the mouth. Played back that is
+  a portrait boiling, which on flat pixel art is the most obvious artifact there
+  is. So every frame is the STILL with one feathered ellipse composited on:
+  the mouth (centred 136, 162, from the motion map of the talking pass) or the
+  eyes (136, 110, from the blink's own difference against the still). The head
+  cannot drift because there is only ever one head. `gen_portrait_frames.py`
+  made the same call for Hooshang's older rig.
+  **`gen_portrait_loops.py` needed a per-face eye band for this.** Its default
+  is Hooshang's y 40-68; Rumi wears a turban and his eyes are at y 98-124, and
+  read in the wrong band the blink is simply never found — the face still talks,
+  still rests, and silently never shuts its eyes. Entries may now carry `eye`.
+  The indexer then finds Rumi's blink at frame 6 on its own, which is where this
+  tool put it — a check rather than a copy.
+- `tools/gen_rumi_portraits.py` — Rumi's five dialogue faces, normalised out of
+  the raw Pixellab generations in `assets/portraits/rumi/raw/` (the reference
+  the likeness came from is kept beside them in `rumi/source/`). The states are
+  the file names and the file names are the contract: `Act1Beats.RUMI_FACES`
+  preloads `rumi_<state>.png`, so re-cutting a face never touches a beat. What
+  the script is for is the GROUND — the generator returns the bust on light
+  grey and every Hooshang portrait sits on the office's near-black (55, 50, 46);
+  two faces sharing a banner cannot sit on two different fields. It is replaced
+  by a flood fill inward from the border, because the turban is cream and the
+  undershirt near-white and a plain colour match eats holes in both. **The
+  tolerance is picked off a measured plateau, and the guard is a STABILITY test
+  rather than a size cap** — the first pass ran wide, took 60% of the undershirt
+  and still only moved the fill from 43% to 46% of the canvas, which no
+  threshold could have separated. It now runs the fill twice, at the tolerance
+  and half of it, and fails if they disagree.
 - `tools/gen_portrait_loops.py` — indexes the talking-portrait LOOPS: which
   frame of each sheet is silence, which are speech, which is the blink. The
   sheets themselves are generated art (Pixellab, from one base portrait); this
@@ -477,8 +629,9 @@ test rather than being noticed months later in play.
   — returning to rest on a `[p]` breath and on the last character — and blink on
   their own clock. Nothing in a beat asks for this: the face is found from the
   portrait TEXTURE's path, so a script still just names a state. A face with
-  neither a loop nor a rig (Rumi's, the tinted stand-in) holds still, which is
-  what every portrait did before.
+  neither a loop nor a rig holds still, which is what every portrait did before.
+  **RUMI HAS LOOPS NOW TOO** (`tools/gen_rumi_loops.py`), so that path is only
+  reached by a line with no portrait at all.
   **They are LOOPS now** — a sheet of whole faces per emotion in
   `assets/portraits/loops/`, indexed by `tools/gen_portrait_loops.py` — and the
   box DRIVES the sheet rather than playing it, which is the only way those two

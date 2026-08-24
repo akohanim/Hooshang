@@ -390,8 +390,12 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	if door != null:
 		door.rearm()
 	# Same rule as the door above: a room is restored per VISIT, so walking back
-	# into one finds its floor the way it was first seen.
+	# into one finds its floor the way it was first seen — and its moving
+	# hazards at the start of their cycle, so a room presents the same pattern
+	# every time you walk into it and not whichever phase the clock happens to
+	# be at.
 	CrumblingPlatform.reset_all(get_tree())
+	DarkThought.reset_all(get_tree())
 	room_changed.emit(room)
 
 
@@ -439,6 +443,11 @@ func _on_player_died() -> void:
 	# Covers R-to-retry too — that route calls player.die() rather than
 	# respawning directly, exactly so there is one path through here.
 	CrumblingPlatform.reset_all(get_tree())
+	# The same argument for a hazard that MOVES, and it bites harder: a crumbled
+	# floor is at least visibly missing, while a drifting hazard half a lap out
+	# of step just looks like bad luck. Every retry gets the pattern the room was
+	# built around.
+	DarkThought.reset_all(get_tree())
 
 
 ## A story door in a room OWNS that room's doorway: you leave by walking
