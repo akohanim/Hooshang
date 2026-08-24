@@ -102,6 +102,10 @@ var _return_room: Node2D
 var _return_pos := Vector2.ZERO
 var _return_armed := false
 
+# The current room's paintable thought-hazard TileMapLayer (null if the room has
+# none painted). Cached on room entry so the per-frame overlap check is cheap.
+var _thought_layer: TileMapLayer
+
 # Rooms whose way back the story has re-pointed: room name -> the room walking
 # back out of it actually leads to. See set_way_back().
 var _way_back := {}
@@ -396,6 +400,7 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	# be at.
 	CrumblingPlatform.reset_all(get_tree())
 	DarkThought.reset_all(get_tree())
+	_thought_layer = room.get_node_or_null("ThoughtHazards") as TileMapLayer
 	room_changed.emit(room)
 
 
@@ -408,6 +413,16 @@ func _physics_process(_delta: float) -> void:
 	if player.global_position.y > rect.end.y + kill_margin:
 		player.die()
 		return
+	if _in_thought_tile():
+		player.die()
+		return
+
+
+func _in_thought_tile() -> bool:
+	if _thought_layer == null:
+		return false
+	var cell := _thought_layer.local_to_map(_thought_layer.to_local(player.global_position))
+	return _thought_layer.get_cell_source_id(cell) != -1
 
 
 func _unhandled_input(event: InputEvent) -> void:

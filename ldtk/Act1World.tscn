@@ -407,7 +407,7 @@ blood_moon_glow = NodePath("../Lights/MoonGlowRoom11")
 blood_moon_windows = Array[NodePath]([NodePath("../Backdrop/MoonWindowRoom11B")])
 blood_moon_glows = Array[NodePath]([NodePath("../Lights/MoonGlowRoom11B")])
 
-[node name="EditorPreview" parent="." unique_id=1698957715 instance=ExtResource("2_ldtk")]
+[node name="EditorPreview" parent="." unique_id=1043774659 instance=ExtResource("2_ldtk")]
 
 [node name="DashTutorial" type="Node" parent="." unique_id=2009312701]
 script = ExtResource("14_dashtut")

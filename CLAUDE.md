@@ -133,6 +133,11 @@ so the two agree now. The tiles are still placeholder art.
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
     while `input_locked` or when the loaded scene has no player
+  - `Godot --headless --path . res://tests/thought_tiles_test.tscn` — paintable
+    thought-hazard tiles: the ThoughtHazards IntGrid layer imports as a
+    pass-through TileMapLayer (collision disabled), the world caches it on room
+    entry, an empty cell is not a hazard, a painted cell IS, and stepping into
+    one kills the player on the next physics tick
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -463,6 +468,20 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `tools/gen_bricks_8px.py` — the four 8px wall tiles (fill, top, left,
   corner). Four is the WHOLE tileset: no tile in the world is hand-placed, and
   the four auto-rules never ask for anything else.
+- `tools/gen_thought_tiles.py` — the four 8px paintable hazard tiles (fill, top
+  edge, left edge, top-left corner), the same layout as the bricks. The body is
+  the DarkThought's dark purple-black; exposed edges carry a 1px hot-red rim
+  with BUBBLY CONTOURS — per-column/row offsets that create cloud-like organic
+  edges rather than straight lines. The contour profiles start and end at the
+  same offset (the seam value) so adjacent tiles tile cleanly; the corner uses
+  both profiles (AND). Auto-rules with flipX/flipY give all eight edge and
+  corner variants. Painted on the `ThoughtHazards` IntGrid layer;
+  `tools/ldtk_add_thought_tiles.py` adds the layer, its tileset, and auto-rules
+  to the LDtk project. `ldtk_level_post_import.gd` disables collision on the
+  layer (pass-through) AND sets `LIGHT_MODE_UNSHADED` via a `CanvasItemMaterial`
+  — without it, `CanvasModulate` 0.05 crushes the dark pixels to invisible, the
+  same trap `DarkThought`, `SunShaft` and `WallPattern` all document.
+  `ldtk_world.gd` checks tile overlap each frame to kill the player.
 - `tools/gen_cone_spikes.py` — the 8px cone sheets, four facings from one drawn
   floor sheet, same transform table as `gen_glass_spikes.py`. The PALETTE and
   proportions are measured off a Pixellab generation; the bitmap is not reused,

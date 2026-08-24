@@ -26,7 +26,25 @@ const MOTE_TEXTURE := preload("res://assets/gift_mote.png")
 ## light_radial.png is 128px, so its untouched radius is 64 (see LIGHTING.md).
 const TEXTURE_RADIUS := 64.0
 
-@export var dialogue_line: String = ""
+## What he says, as a SCRIPT rather than a line: one spoken line per line of
+## text, played a button press at a time. Set from LDtk's `DialogueLine`, whose
+## String field takes newlines.
+##
+## A line may open with a PORTRAIT STATE in parentheses — `(serene)`, `(urgent)`
+## — naming which of Act1Beats.RUMI_FACES he wears for it. That is the project's
+## dialogue rule and not a shortcut: a parenthetical in a script is an
+## instruction to the scene, never words anybody says, so it is read and STRIPPED
+## and can never reach the screen as text. The state is sticky, so a script that
+## names it once keeps it until it says otherwise, which is how a written script
+## reads. An optional leading speaker name and dash are tolerated too, so a
+## script can be pasted in exactly as it was written:
+##
+##     RUMI (serene) — These are the thoughts you would rather not have.
+##     You cannot strike them down.[p] There is nothing here to strike.
+##
+## `[p]` (DialogueBox.PAUSE_MARK) still works inside a line, and is a held
+## breath rather than a page break.
+@export_multiline var dialogue_line: String = ""
 ## When a cutscene script owns this beat, it sets this so the trigger does NOT
 ## play its own one-line version — it just emits `triggered` and steps aside.
 ## Set from code (the script that takes over), not from LDtk: which beats are
@@ -230,10 +248,89 @@ func _on_body_entered(body: Node2D) -> void:
 func _play_beat(player: Player) -> void:
 	player.input_locked = true
 	await appear()
-	await Dialogue.say("Rumi", dialogue_line, RUMI_GOLD, null, portrait_side(player))
+	for beat: Dictionary in script_beats():
+		await Dialogue.say("Rumi", beat["text"], RUMI_GOLD,
+			Act1Beats.RUMI_FACES.get(beat["face"]), portrait_side(player))
 	await vanish()
 	player.input_locked = false
 	arm_room_door()
+
+
+## `dialogue_line` parsed into [{text, face}], in order.
+##
+## Public and pure so a test can read a script without staging the whole beat —
+## the parsing is the part that can go quietly wrong, and the failure it makes is
+## a stage direction printed on screen as though Rumi said it.
+func script_beats() -> Array[Dictionary]:
+	var beats: Array[Dictionary] = []
+	var face := ""
+	for raw: String in dialogue_line.split("\n"):
+		var line := _drop_heading(raw.strip_edges())
+		if line.is_empty():
+			continue
+		# The portrait state. A parenthetical is an instruction to the scene and
+		# never speech, so it is read and then removed — see the dialogue rules
+		# in CLAUDE.md. Sticky: it holds until a later line names another.
+		if line.begins_with("("):
+			var close := line.find(")")
+			if close > 0:
+				var state := line.substr(1, close - 1).strip_edges()
+				if _is_state(state):
+					face = state
+					line = _drop_dashes(line.substr(close + 1).strip_edges())
+					# A named state that is not a face he has would otherwise
+					# just show no portrait, which looks like the art failing to
+					# load rather than like a typo.
+					if not Act1Beats.RUMI_FACES.has(state):
+						push_warning("RumiTrigger: no portrait state '%s'" % state)
+		if line.is_empty():
+			continue
+		beats.append({"text": line, "face": face})
+	return beats
+
+
+## Drop a script's speaker heading ("RUMI — ", "RUMI (serene) — ").
+##
+## Both halves of the test matter. The heading has to be UPPERCASE, which is how
+## a script writes one and is what tells "RUMI" from a line that simply opens on
+## a name; and it has to be FOLLOWED by a parenthetical or a dash, so nothing is
+## taken off a line that merely starts with a shout.
+func _drop_heading(line: String) -> String:
+	var space := line.find(" ")
+	if space <= 0:
+		return line
+	var head := line.substr(0, space)
+	if head != head.to_upper() or not _is_state(head.to_lower()):
+		return line
+	var rest := line.substr(space + 1).strip_edges()
+	if rest.begins_with("(") or _starts_with_dash(rest):
+		return _drop_dashes(rest)
+	return line
+
+
+## The em dash a script puts between its heading and the words. Written as the
+## character rather than an escape on purpose: GDScript and the regex engine
+## disagree about \u, and this file got that wrong once already.
+func _starts_with_dash(line: String) -> bool:
+	return line.begins_with("—") or line.begins_with("–") or line.begins_with("-")
+
+
+func _drop_dashes(line: String) -> String:
+	var out := line
+	while _starts_with_dash(out):
+		out = out.substr(1).strip_edges()
+	return out
+
+
+## A bare word a state could be — lowercase letters and underscores, nothing
+## else. Keeps a genuine aside like "(he looks away)" from being read as one.
+func _is_state(text: String) -> bool:
+	if text.is_empty():
+		return false
+	for c: String in text:
+		if not ((c >= "a" and c <= "z") or c == "_"):
+			return false
+	return true
 
 
 # ------------------------------------------------------------- staging API ----

@@ -31,6 +31,9 @@ const VALUES_LAYER_SUFFIX := "-values"
 ## documented in tools/gen_bricks_8px.py ("Order on the sheet IS the tile id the
 ## rules use, so do not reorder") — this is tile 5.
 const GEOMETRY_LAYER := "Collisions"
+## Paintable thought-hazard tiles — pass-through (no world collision), and the
+## kill check lives in ldtk_world.gd, not in physics.
+const THOUGHT_LAYER := "ThoughtHazards"
 ## The panel tiles, and the emission each one wears. Two, because the ceiling is
 ## painted in two orientations — `ceiling_flor` is a surface seen edge on and
 ## `ceiling` is the room's own roof seen from below — and their panels sit at
@@ -80,6 +83,11 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 		if layer.name.ends_with(VALUES_LAYER_SUFFIX):
 			layer.visible = false
 			layer.collision_enabled = false
+		elif layer.name == THOUGHT_LAYER:
+			layer.collision_enabled = false
+			var mat := CanvasItemMaterial.new()
+			mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+			layer.material = mat
 		elif Z_BANDS.has(layer.name):
 			layer.z_index = Z_BANDS[layer.name]
 		if layer.name == GEOMETRY_LAYER:
