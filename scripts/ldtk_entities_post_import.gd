@@ -20,6 +20,7 @@ const CONE_SPIKES_SCENE := preload("res://scenes/props/hazards/ConeSpikes.tscn")
 const THOUGHT_SCENES := {
 	"DarkThought": preload("res://scenes/props/hazards/DarkThought.tscn"),
 	"LightThought": preload("res://scenes/props/hazards/LightThought.tscn"),
+	"GreyThought": preload("res://scenes/props/hazards/GreyThought.tscn"),
 }
 const PLATFORM_SCENE := preload("res://scenes/props/platforms/Platform.tscn")
 const CRUMBLING_SCENE := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
@@ -129,7 +130,7 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			# field rather than its own entity. Two names, one prop: the tones
 			# are split so LDtk shows which is which, nothing more. See
 			# _build_thought.
-			"DarkThought", "LightThought":
+			"DarkThought", "LightThought", "GreyThought":
 				entity_layer.add_child(_build_thought(data))
 			"SlideZone":
 				entity_layer.add_child(_build_slide_zone(data))
@@ -144,7 +145,7 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			"ConveyorBelt_Left":
 				entity_layer.add_child(
 					_build_conveyor_belt(data, ConveyorBelt.Direction.LEFT))
-			# The boss chase (Level_13). Three entities: where the shadow starts,
+			# The boss chase (Level_14). Three entities: where the shadow starts,
 			# where he lunges, and where it ends.
 			"DarkshangSpawn":
 				entity_layer.add_child(_build_darkshang(data))
@@ -323,6 +324,7 @@ func _build_thought(data: Dictionary) -> Area2D:
 	match _field_enum(data, "Motion"):
 		"Horizontal": thought.motion = DarkThought.Motion.HORIZONTAL
 		"Circle": thought.motion = DarkThought.Motion.CIRCLE
+		"Linear": thought.motion = DarkThought.Motion.LINEAR
 		# Vertical, and also the empty string an untouched field arrives as —
 		# which is the prop's own default, so a thought placed before this field
 		# existed still moves rather than standing still looking configured.
@@ -333,6 +335,7 @@ func _build_thought(data: Dictionary) -> Area2D:
 	thought.speed = _field_float(data, "Speed", thought.speed)
 	thought.phase = _field_float(data, "Phase", thought.phase)
 	thought.clockwise = _field_float(data, "Clockwise", 1.0) > 0.0
+	thought.angle = _field_float(data, "Angle", thought.angle)
 	# Unset counts as ON: every thought placed before this field existed has no
 	# value for it, and a hazard that quietly went dark would be worse than one
 	# that ignored the setting.
@@ -450,6 +453,7 @@ func _build_safe_zone(data: Dictionary) -> Area2D:
 ## trigger in the "exit" group. LdtkWorld connects to that group and slides
 ## the camera to the next room — see scripts/ldtk_world.gd.
 func _build_exit(data: Dictionary) -> Area2D:
+	print("DEB IMP: Exit data fields for ", data.get("identifier"), ": ", data.fields)
 	var trigger := Area2D.new()
 	trigger.name = "Exit"
 	trigger.position = data.position
@@ -461,14 +465,20 @@ func _build_exit(data: Dictionary) -> Area2D:
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
 	var size := Vector2(data.size)
-	rect.size = size if size != Vector2.ZERO else Vector2(16, 32)
+	var original_size := size if size != Vector2.ZERO else Vector2(16, 32)
+	rect.size = original_size
 	shape.shape = rect
-	# Entity pivot is bottom-centre, so lift the box to sit on that point.
-	shape.position = Vector2(0, -rect.size.y * 0.5)
-	trigger.add_child(shape)
+	# Position collision shape and exit sign relative to the entity's actual pivot from LDtk.
+	var pivot: Vector2 = data.get("pivot", Vector2(0.5, 1.0))
+	shape.position = original_size * 0.5 - pivot * original_size
+
+	# Extend the collision shape horizontally by 16px (8px left, 8px right)
+	# so that players pressed against boundary walls still overlap with the trigger.
+	rect.size.x += 16.0
 
 	var sign: Node2D = EXIT_SIGN_SCENE.instantiate()
-	sign.position = Vector2(0, -rect.size.y - 4.0)  # hangs above the doorway
+	sign.position = Vector2(original_size.x * (0.5 - pivot.x), -pivot.y * original_size.y - 4.0)  # hangs above the doorway
+	trigger.add_child(shape)
 	trigger.add_child(sign)
 	return trigger
 

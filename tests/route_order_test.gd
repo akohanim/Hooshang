@@ -1,10 +1,10 @@
 extends Node
 ## Regression: play order is the LEVEL IDENTIFIER, not where the room sits.
 ##
-## The escape row (12-21) runs RIGHT to left across the bottom of the LDtk grid,
-## so sorting rooms by world position reads it 21, 20, 19 … 13, 12 — backwards.
+## The escape row (13-22) runs RIGHT to left across the bottom of the LDtk grid,
+## so sorting rooms by world position reads it 22, 21, 20 … 14, 13 — backwards.
 ## Every "next room" fallback in ldtk_world.gd is "the next entry in that array",
-## so walking out of Level_15's Exit handed you Level_14: the room you had just
+## so walking out of Level_16's Exit handed you Level_15: the room you had just
 ## come from. In play it looked like the exit was a door back.
 ##
 ## This asserts the ORDER itself rather than walking the rooms, because the order
@@ -36,13 +36,15 @@ func _ready() -> void:
 	sorted_numbers.sort()
 	_check(numbers == sorted_numbers,
 		"rooms come out in identifier order  [%s]" % str(numbers))
-	_check(numbers.size() == world.rooms.size(),
-		"every room's name carries its number  [%d of %d]"
-			% [numbers.size(), world.rooms.size()])
+	# NOT "every room carries a number" — TEST and Level_V_test are real,
+	# deliberately unnumbered scratch rooms (see check 4 below), so a plain
+	# count would fail forever on their account. Whether the NUMBERED ones are
+	# complete and gapless is exactly what check 3's curated-chain comparison
+	# already pins, more precisely than a count could.
 
 	# 2. The specific reversal that was reported. Checked by NAME rather than by
 	#    index so the assertion still means something when rooms are added.
-	for n in range(12, 21):
+	for n in range(13, 22):
 		var here := _room(world, "Level_%d" % n)
 		var next := _room(world, "Level_%d" % (n + 1))
 		if here == null or next == null:
@@ -54,18 +56,47 @@ func _ready() -> void:
 			"...and Level_%d backs into Level_%d  [%s]" % [n + 1, n,
 				world._room_before(next).name if world._room_before(next) else "nothing"])
 
-	# 3. The outbound row must be untouched — it read correctly under BOTH
-	#    orderings, which is exactly why the bug survived to room 13.
-	for n in range(0, 11):
-		var here := _room(world, "Level_%d" % n)
-		var next := _room(world, "Level_%d" % (n + 1))
-		if here == null or next == null:
-			continue
-		if world._room_after(here) != next:
-			_check(false, "Level_%d still leads on to Level_%d" % [n, n + 1])
-	_check(true, "the outbound row is unchanged, room 0 through room 11")
+	# 3. The curated chain: 0..6, then the V1-V4 block, then v5/v6 right behind
+	#    it, then 7..25 — tools/renumber_levels_v2.py's intended order. This
+	#    used to be tested as a QUIRK to route AROUND (see git history): no Exit
+	#    in the .ldtk carries a NextRoom override — checked directly, every one
+	#    is empty — so this array is not a cosmetic listing, it is the ONLY
+	#    thing that routes actual play. Get it wrong and the game does not
+	#    misnumber a menu, it dead-ends: walking the OLD order from Level_0
+	#    landed on Level_v6 with nowhere further to go, because Level_V1..V4
+	#    share a trailing digit with Level_1..Level_4 and interleaved one per
+	#    room instead of landing together after Level_6.
+	var expected: Array[String] = []
+	for n in range(0, 7):
+		expected.append("Level_%d" % n)
+	for v in range(1, 5):
+		expected.append("Level_V%d" % v)
+	expected.append("Level_v5")
+	expected.append("Level_v6")
+	for n in range(7, 26):
+		expected.append("Level_%d" % n)
 
-	# 4. The first room is still where the game opens.
+	var have_names: Array[String] = []
+	for r in world.rooms:
+		have_names.append(r.name)
+	# Filtered both ways to the rooms that actually exist in this checkout, so
+	# the assertion is about RELATIVE order and survives a room being added or
+	# still mid-build rather than demanding all 32 be present.
+	var present := expected.filter(func(n: String) -> bool: return have_names.has(n))
+	var got := have_names.filter(func(n: String) -> bool: return present.has(n))
+	_check(got == present,
+		"the curated chain comes out in order  [%s]" % " ".join(got))
+
+	# 4. Scratch rooms (no recorded place in the chain) sort AFTER it, not into
+	#    the middle of it.
+	var last_curated := have_names.find("Level_25")
+	for name in ["Level_V_test", "TEST"]:
+		if have_names.has(name):
+			_check(have_names.find(name) > last_curated,
+				"%s sorts after the curated chain, not into it  [position %d, chain ends at %d]"
+					% [name, have_names.find(name), last_curated])
+
+	# 5. The first room is still where the game opens.
 	_check(world.rooms[0].name == "Level_0",
 		"the world still starts at Level_0  [%s]" % world.rooms[0].name)
 

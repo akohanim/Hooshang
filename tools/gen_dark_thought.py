@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""The thought sprites: a small cloud with a hot red rim, four frames, in two
-tones — a black one and a pale one.
+"""The thought sprites: a small cloud with a hot red rim, four frames, in
+three tones — a black one, a pale one, and a neutral grey between them.
 
-Writes two 64x16 sheets of four 16x16 frames each, into assets/hazards/ (what
-the game draws) and ldtk/art/ (what the LDtk editor previews):
+Writes three 64x16 sheets of four 16x16 frames each, into assets/hazards/
+(what the game draws) and ldtk/art/ (what the LDtk editor previews):
 
     dark_thought.png    64x16, four frames left to right, looping
     light_thought.png   the same four frames, body ramped pale instead of black
+    grey_thought.png    the same four frames again, body ramped neutral grey
 
-ONE SCRIPT, TWO PALETTES. The pale thought is the black one recoloured and
-nothing else — same source, same cut, same reduction, same breath, same rim —
-so the two are generated together from one pipeline rather than by a second
-script that would be free to drift out of step with this one. See TONES.
+ONE SCRIPT, THREE PALETTES. The pale and grey thoughts are the black one
+recoloured and nothing else — same source, same cut, same reduction, same
+breath, same rim — so all three are generated together from one pipeline
+rather than by separate scripts that would be free to drift out of step with
+each other. See TONES.
 
 Source: assets/hazards/dark_thought/source/dark_thought_strip.png — Pixellab
 (create_image_pixflux, job 7e72c25f-2c08-42d3-87a5-678c300f2a2e), asked for a
@@ -131,12 +133,20 @@ BODY_PALE_LIT = (255, 253, 248)
 RIM_DARK = (122, 20, 18)
 RIM_LIT = (236, 60, 42)
 
+## The GREY thought's body: the NEUTRAL feeling-tone, between the unpleasant
+## (dark) and the pleasant (light). A desaturated mid-grey, kept faintly cool at
+## the shadow end for the same reason the pale body is — so the red rim has
+## something to sit against, rather than turning the whole sprite pink.
+BODY_GREY_DARK = (72, 70, 82)
+BODY_GREY_LIT = (150, 146, 158)
+
 ## Sheet name -> body ramp. The rim is deliberately NOT in here: "the same red
-## outline" is the point of the pale variant, so there is only one rim palette
-## and no way to change one without changing both.
+## outline" is the point of every variant, so there is only one rim palette and
+## no way to change one without changing all three.
 TONES = {
     "dark_thought": (BODY_DARK, BODY_LIT),
     "light_thought": (BODY_PALE_DARK, BODY_PALE_LIT),
+    "grey_thought": (BODY_GREY_DARK, BODY_GREY_LIT),
 }
 
 
@@ -231,10 +241,10 @@ def main():
           % (img.width, img.height, len(boxes),
              boxes[0][2] - boxes[0][0], boxes[0][3] - boxes[0][1]))
 
-    # The two tones come off the SAME cut and the same reduction, and differ by
-    # nothing but the body ramp. Two scripts would let them drift — a breath
-    # retimed in one and not the other is two hazards that no longer read as the
-    # same object, which is the one thing they have to keep doing.
+    # All three tones come off the SAME cut and the same reduction, and differ
+    # by nothing but the body ramp. Separate scripts would let them drift — a
+    # breath retimed in one and not the others is hazards that no longer read
+    # as the same object, which is the one thing they have to keep doing.
     for name, (body_dark, body_lit) in TONES.items():
         sheet = Image.new("RGBA", (CELL * FRAMES, CELL), (0, 0, 0, 0))
         for i in range(FRAMES):
@@ -251,6 +261,57 @@ def main():
             path = os.path.join(ROOT, folder, name + ".png")
             sheet.save(path)
             print("wrote %s  %dx%d" % (path, sheet.width, sheet.height))
+
+    verify_rim_identity()
+
+
+def verify_rim_identity():
+    """Every rim pixel must be byte-identical across every pair of sheets, and
+    the vast majority of body pixels must differ — the contract that makes
+    three tones read as the same hazard in three moods, not three props.
+
+    A handful of coincidentally identical body pixels is allowed (two ramps CAN
+    land on the same RGB at one luminance by chance) but 95%+ must differ.
+    """
+    sheets = {}
+    for name in TONES:
+        p = os.path.join(ROOT, "assets", "hazards", name + ".png")
+        sheets[name] = Image.open(p).convert("RGBA").load()
+    w, h = CELL * FRAMES, CELL
+
+    names = list(TONES)
+    for i, a_name in enumerate(names):
+        for b_name in names[i + 1:]:
+            apx, bpx = sheets[a_name], sheets[b_name]
+            rim_ok = rim_total = body_changed = body_total = 0
+            for x in range(w):
+                for y in range(h):
+                    a, b = apx[x, y], bpx[x, y]
+                    if a[3] <= CUTOFF and b[3] <= CUTOFF:
+                        continue
+                    edge = a[3] > CUTOFF and any(
+                        not (0 <= x + dx < w and 0 <= y + dy < h
+                             and apx[x + dx, y + dy][3] > CUTOFF)
+                        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+                    if edge:
+                        rim_total += 1
+                        if a == b:
+                            rim_ok += 1
+                    elif a[3] > CUTOFF and b[3] > CUTOFF:
+                        body_total += 1
+                        if a != b:
+                            body_changed += 1
+            pct = 100.0 * body_changed / max(body_total, 1)
+            print("  %-14s vs %-14s  rim %d/%d identical, body %d/%d changed (%.0f%%)"
+                  % (a_name, b_name, rim_ok, rim_total,
+                     body_changed, body_total, pct))
+            if rim_ok != rim_total:
+                raise SystemExit("!! rim differs between %s and %s: %d/%d match"
+                                 % (a_name, b_name, rim_ok, rim_total))
+            if pct < 95.0:
+                raise SystemExit("!! too few body pixels differ between %s and "
+                                 "%s: %.1f%%" % (a_name, b_name, pct))
+    print("VERIFIED: rim byte-identical across all tones, bodies distinct")
 
 
 if __name__ == "__main__":

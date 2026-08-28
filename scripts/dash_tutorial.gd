@@ -82,14 +82,11 @@ var ledge_top_y := 0.0
 ##
 ## Skipped outright if he already has the dash, so a retry — or a level-select
 ## drop-in — goes straight to the lesson instead of granting it twice.
-@export var gift_lines: Array[String] = [
-	"Some walls won't yield to a jump. Take this, and dash.",
-	"Press the X key to dash.",
-]
+@export var gift_lines: Array[String] = []
 ## The lesson itself. One line, because a tutorial that talks longer than the
 ## move takes is a tutorial nobody reads twice.
 @export var lines: Array[String] = [
-	"Hold the way you want to go — up and onward — and dash.",
+	"Hold the way you want to go: up and onward, and dash!",
 ]
 
 var _world: LdtkWorld

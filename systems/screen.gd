@@ -77,6 +77,21 @@ func _ready() -> void:
 	viewport.name = "GameViewport"
 	viewport.size = GAME_SIZE
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# A SubViewport built in code does NOT pick up the project's own
+	# textures/canvas_textures/default_texture_filter=0 (Nearest) setting —
+	# that only seeds the ROOT viewport. Every SubViewport has its own copy of
+	# this property and it starts on the engine's hardcoded default, Linear,
+	# regardless of the project setting. Silently, because nothing here ever
+	# asked the question: the whole world — every tile, every sprite, every
+	# UI bubble drawn inside it — has been rasterising SOFT instead of the
+	# crisp pixel art CLAUDE.md and every art tool in tools/ assumes, and nothing
+	# short of sampling actual rendered pixels caught it (a screenshot's own
+	# nearest-neighbour upscale on the way to disk, in room_shot.gd and
+	# elsewhere, just blows the blur up bigger — it cannot un-blend pixels that
+	# were already blended before it ran). token_viewport below already carries
+	# this exact line for the same reason; this was the one surface that didn't.
+	viewport.canvas_item_default_texture_filter = \
+		Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
 	# Positional sound (the musical tiles) needs a listener in the viewport that
 	# actually contains the AudioStreamPlayer2Ds, or they play silently.
 	viewport.audio_listener_enable_2d = true

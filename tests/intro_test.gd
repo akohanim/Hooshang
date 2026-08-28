@@ -320,8 +320,8 @@ func _ready() -> void:
 	_glow_peak = 0.0
 	_arrival_msec = 0
 	_arrival_gap = -1.0
-	var tile_room := _room_named("Level_6")
-	_check(tile_room != null, "the world has room 5 (Level_6)")
+	var tile_room := _room_named("Level_7")
+	_check(tile_room != null, "the world has room 5 (Level_7)")
 	if tile_room != null:
 		world._enter_room(tile_room, true)
 		await _frames(10)

@@ -93,20 +93,26 @@ const EMOTE_LINES := {
 ## worth being able to read off one export, and the tests ask for it here.
 @export var dash_room_name := "Level_2"
 ## Room holding the third encounter, at the mouth of the sounding tiles.
-@export var music_room_name := "Level_6"
+@export var music_room_name := "Level_7"
 ## Room holding the Darkshang encounter.
-@export var chase_room_name := "Level_13"
+@export var chase_room_name := "Level_14"
+## Room holding the V1 encounter.
+@export var v1_room_name := "Level_V1"
+## Room holding the V2 encounter.
+@export var v2_room_name := "Level_V2"
+## Room holding the V3 encounter.
+@export var v3_room_name := "Level_V3"
 ## Where that room's entrance leads once the shadow has been seen — the escape
 ## continuing, not the room he arrived from. "" leaves the doorway alone.
-@export var chase_way_back := "Level_14"
+@export var chase_way_back := "Level_15"
 
 @export_group("The collapse")
 ## First and last room of the escape that comes apart as he walks into it, by
 ## level number. The whole return row: the building is failing behind him the
 ## entire way home, not just once. Set them equal to collapse a single room, or
 ## first > last to turn the beat off.
-@export var collapse_first_room := 15
-@export var collapse_last_room := 24
+@export var collapse_first_room := 16
+@export var collapse_last_room := 25
 ## Beat of stillness before anything moves. He walks in, and for a moment nothing
 ## happens — the drop lands harder for having been waited for.
 @export var collapse_lead_in := 0.6
@@ -126,7 +132,7 @@ const EMOTE_LINES := {
 ## the glow back on every room change and on every death (it owns that reward's
 ## lifetime, scoped to one room and one life). Fighting that would break the
 ## tiles puzzle; re-granting on arrival costs one line and leaves it intact.
-@export var glow_rooms: Array[int] = [14, 18, 19, 20]
+@export var glow_rooms: Array[int] = [15, 19, 20, 21]
 
 @export_group("The collapsing building")
 ## Ambient shudder and falling debris across the escape, ramping from the first
@@ -135,8 +141,8 @@ const EMOTE_LINES := {
 ##
 ## Rooms outside first..last get nothing at all, so the outbound half of the Act
 ## is untouched.
-@export var ambience_first_room := 14
-@export var ambience_last_room := 23
+@export var ambience_first_room := 15
+@export var ambience_last_room := 24
 ## Strength in the first room and in the last, 0..1 (see CollapseAmbience).
 ## Starts gentle rather than at zero: room 12 is where he has just met Darkshang
 ## and the building should already feel wrong. Not lower than this — at 320x180
@@ -152,7 +158,7 @@ const EMOTE_LINES := {
 ## starts dropping the level's own props (`collapse_first_room`), so it is where
 ## the walls should start losing pieces too. Ends with the rest of the ambience,
 ## at `ambience_last_room`.
-@export var brick_first_room := 15
+@export var brick_first_room := 16
 @export var brick_first_strength := 0.3
 @export var brick_last_strength := 1.0
 ## Shape of the ramp between them. 1.0 is a straight line; above it the early
@@ -180,7 +186,7 @@ const EMOTE_LINES := {
 @export var blood_moon_glow: NodePath
 ## ANY FURTHER WINDOWS IN THE SAME ROOM, paired by index with `blood_moon_glows`.
 ##
-## Level_13's back wall carries two moons, and they are one sky: they must go
+## Level_14's back wall carries two moons, and they are one sky: they must go
 ## dark and come back red as a single event, not as two windows that happen to
 ## have been told the same thing. So this is a LIST driven from one call site in
 ## one frame (`_turn_the_moon`) rather than a second copy of the beat — two call
@@ -215,7 +221,7 @@ const EMOTE_LINES := {
 ## Set HERE rather than as a SafeZone entity in LDtk only because room 22 has no
 ## entities to spare and this is a fact about Act I's ending. A SafeZone dragged
 ## across the same line would do the identical job; see safe_zone_trigger.gd.
-@export var chase_ends_room := "Level_24"
+@export var chase_ends_room := "Level_25"
 @export var chase_ends_past_x := 100.0
 ## How long the shadow takes to thin out to nothing, in seconds.
 @export var dissolve_time := 1.6
@@ -249,7 +255,7 @@ const EMOTE_LINES := {
 ## a story fact about Act I rather than a fact about that room — moving it into
 ## LDtk would work identically, and this writes the same metadata the importer
 ## would have. "" leaves the Exit to the normal play order.
-@export var loop_room_name := "Level_24"
+@export var loop_room_name := "Level_25"
 @export var loop_to_room_name := "Level_0"
 
 @export_group("Waking")
@@ -369,6 +375,16 @@ func _ready() -> void:
 	else:
 		push_warning("Act1Beats: no room named '%s' — the tiles go unexplained."
 			% music_room_name)
+	var v1_room := _find_room(v1_room_name)
+	if v1_room != null:
+		_claim(v1_room, _play_level_v1_beat)
+	var v2_room := _find_room(v2_room_name)
+	if v2_room != null:
+		_claim(v2_room, _play_level_v2_beat)
+	var v3_room := _find_room(v3_room_name)
+	if v3_room != null:
+		_claim(v3_room, _play_level_v3_beat)
+
 	_wire_chase()
 	_wire_collapse()
 	_wire_loop_home()
@@ -607,16 +623,84 @@ func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.arm_room_door()
 
 
+# ------------------------------------------------------------- 4.5. vertical beats ----
+
+func _play_level_v1_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
+	player.input_locked = true
+	_rumi_trigger = trigger
+	_dialogue_vside = DialogueBox.VSide.TOP
+	player.look(1)  # face the visitor appearing on the right
+
+	# Rumi appears 24px to the right of the player.
+	var rumi_offset_x := player.global_position.x + 24.0 - trigger.global_position.x
+	await trigger.appear(rumi_offset_x)
+	trigger.breathe(true)
+
+	await _rumi("These are the thoughts you would rather not have, Hooshang jaan.", "serene")
+	await _rumi("You cannot strike them down.[p] There is nothing here to strike.", "serene")
+	await _rumi("Let it come, watch it travel,[p] and step where it is not.", "serene")
+
+	trigger.breathe(false)
+	await trigger.vanish()
+	player.input_locked = false
+	trigger.arm_room_door()
+
+
+func _play_level_v2_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
+	player.input_locked = true
+	_rumi_trigger = trigger
+	_dialogue_vside = DialogueBox.VSide.TOP
+	player.look(1)  # face the visitor appearing on the right
+
+	# Rumi appears 24px to the right of the player.
+	var rumi_offset_x := player.global_position.x + 24.0 - trigger.global_position.x
+	await trigger.appear(rumi_offset_x)
+	trigger.breathe(true)
+
+	await _rumi("And these jaan, are the thoughts you like.", "warm_open")
+	await _hooshang("...These ones are going to kill me too, aren’t they?", "wary")
+	await _rumi("Examine them and you will find they are made of the same thing.", "wistful")
+	await _rumi("Craving is the heavier of the two.[p] Fear, at least, you already know you shouldn’t chase.", "serene")
+
+	trigger.breathe(false)
+	await trigger.vanish()
+	player.input_locked = false
+	trigger.arm_room_door()
+
+
+func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
+	player.input_locked = true
+	_rumi_trigger = trigger
+	_dialogue_vside = DialogueBox.VSide.TOP
+	player.look(1)  # face the visitor appearing on the right
+
+	# Rumi appears 24px to the right of the player.
+	var rumi_offset_x := player.global_position.x + 24.0 - trigger.global_position.x
+	await trigger.appear(rumi_offset_x)
+	trigger.breathe(true)
+
+	await _rumi("Now both. Watch how they travel.[p] One rises and falls. One crosses. One circles you in the dark.", "serene")
+	await _rumi("Do not sort them, jaan. Pleasant, unpleasant —[p] both are only weather.", "warm_open")
+	await _rumi("Meet them the same way, and the way through opens on its own.", "serene")
+	await _hooshang("Weather. Right.[p] ...And I just walk through the weather.", "flat")
+	await _rumi("You have been walking through it your whole life, jaan.[p] Today you do it on purpose.", "warm_open")
+
+	trigger.breathe(false)
+	await trigger.vanish()
+	player.input_locked = false
+	trigger.arm_room_door()
+
+
 # ------------------------------------------------------------- 5. chase ----
 
 ## Meeting Darkshang re-points the room's entrance.
 ##
-## Level_13 is walked into from the left and the reveal turns Hooshang round, so
+## Level_14 is walked into from the left and the reveal turns Hooshang round, so
 ## the way out is the way he came — but the room behind him is not where the
-## escape goes. Level_14 hangs below the row and is authored right to left (its
+## escape goes. Level_15 hangs below the row and is authored right to left (its
 ## PlayerStart is at its right end, its Exit at its left), which is the chase
 ## continuing. Without this, running back out of the boss room undoes the room
-## you just entered and drops you in Level_12 with a shadow behind you.
+## you just entered and drops you in Level_13 with a shadow behind you.
 ##
 ## Hung off the encounter rather than set at load, because before it there is
 ## nothing to run from: the doorway is ordinary backtracking then and should stay

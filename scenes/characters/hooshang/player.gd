@@ -216,6 +216,27 @@ const HALF_HEIGHT := 6.0
 ## Fade-in when the ability is granted.
 @export var glow_grant_time := 0.8
 
+@export_group("Lemon Glow")
+## The 'z' ability: spend one lemon for this many seconds of light. Its own
+## timer and its own light (LemonGlowLight) rather than a rebinding of the
+## Glow group above — that one is NoteSequence's, and NoteSequence revokes it
+## on every room change in the whole game (see note_sequence.gd), not just its
+## own puzzle room. Sharing GlowLight would mean walking through any door
+## snuffs out a lemon you just spent.
+@export var lemon_glow_time := 30.0
+## Same shape as glow_radius_cells/glow_energy/glow_color above, for this
+## light instead.
+@export var lemon_glow_radius_cells := 10.4
+@export var lemon_glow_energy := 1.25
+@export var lemon_glow_color := Color(0.85, 1.0, 0.3)
+## Once this many seconds are left, the light starts blinking to warn it is
+## about to run out.
+@export var lemon_glow_flicker_time := 3.0
+## Blink rate in that window, full on/off cycles per second. A square wave
+## rather than randf() static — deterministic, so a test can count blinks
+## instead of eyeballing a monitor.
+@export var lemon_glow_flicker_speed := 6.0
+
 @export_group("Wall")
 ## Max downward speed while sliding on a wall (much slower than free fall).
 @export var wall_slide_max_speed := 60.0
@@ -348,6 +369,8 @@ var wall_lock_timer := 0.0      # reduced air control after wall jump
 var wall_jump_timer := 0.0      # how long the wall-jump kick animation still has to run
 var boost_timer := 0.0          # while > 0, handed-over momentum decays gently
 var jump_hold_timer := 0.0      # how much sustained thrust the held jump has left
+var invulnerable_timer := 0.0   # ignores hazard collision queries briefly after respawning
+var _lemon_glow_timer := 0.0    # seconds left on a lemon-bought glow; 0 = not running
 
 var dash_dir := Vector2.RIGHT
 
@@ -380,10 +403,12 @@ var slide_speed := 0.0          # px/s it has built to so far
 @onready var camera: Camera2D = $Camera2D
 @onready var juice: Juice = $Juice
 @onready var glow_light: PointLight2D = $GlowLight
+@onready var lemon_glow_light: Sprite2D = $LemonGlowLight
 
 
 func _ready() -> void:
 	_apply_glow(has_glow)
+	_apply_lemon_glow()
 	var shape: CollisionShape2D = $CollisionShape2D
 	# DUPLICATED. A sub-resource in a PackedScene is shared by every instance of
 	# it, so without this a squeeze would narrow every player ever made from this
@@ -396,6 +421,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
+	if invulnerable_timer > 0.0:
+		invulnerable_timer = maxf(invulnerable_timer - delta, 0.0)
 	# Dash hitstop: freeze everything for a few frames, then resume.
 	# Engine.time_scale (see juice.hitstop()) does NOT shrink this `delta` —
 	# it changes how often fixed-delta physics ticks happen in real time, not
@@ -421,6 +448,8 @@ func _physics_process(delta: float) -> void:
 			jump_buffer_timer = jump_buffer_time
 		if Input.is_action_just_pressed("dash") and _try_dash():
 			return  # dash starts next frame, after the freeze-frames
+		if Input.is_action_just_pressed("glow"):
+			_try_lemon_glow()
 
 	_tick_squeeze()
 
@@ -454,6 +483,9 @@ func _tick_timers(delta: float) -> void:
 	wall_lock_timer = maxf(wall_lock_timer - delta, 0.0)
 	wall_jump_timer = maxf(wall_jump_timer - delta, 0.0)
 	jump_hold_timer = maxf(jump_hold_timer - delta, 0.0)
+	if _lemon_glow_timer > 0.0:
+		_lemon_glow_timer = maxf(_lemon_glow_timer - delta, 0.0)
+		_apply_lemon_glow()
 
 
 # ---------------------------------------------------------------- states ----
@@ -505,9 +537,19 @@ func _state_wall_slide(delta: float) -> void:
 	if jump_buffer_timer > 0.0:
 		_do_wall_jump(wall_dir)
 		return
-	# Slide down slowly; keep a nudge into the wall so contact is maintained.
 	velocity.y = minf(velocity.y + fall_gravity * delta, wall_slide_max_speed)
-	velocity.x = wall_dir * 20.0
+	# In the squeeze/chimney case he is already centred by _tick_squeeze() and
+	# there is no lateral force pulling him off it, so nothing needs to push
+	# him into either wall. Nudging him anyway is actively harmful here: if
+	# _walled_both_sides() ever locked onto a side that is only briefly real
+	# (a stair tread's lip, say), this nudge is what pinned him against its
+	# fading sliver of contact for many extra frames rather than falling
+	# straight through and clearing it in one — the nudge was the feedback
+	# loop that kept a wrong wall_dir looking confirmed.
+	if not squeezing:
+		# Ordinary single-wall slide: keep a nudge into the wall so contact is
+		# maintained (real contact, not the squeeze's floor-gap pinch).
+		velocity.x = wall_dir * 20.0
 
 
 # ------------------------------------------------------------- helpers ----
@@ -609,12 +651,43 @@ func _try_buffered_jump() -> bool:
 
 
 ## Which side has a wall within wall_jump_check_distance: -1 left, 1 right, 0 none.
+##
+## Short-circuits on the first side it finds, which is the right question for
+## its original caller (_state_air's wall-jump buffer: "is there a wall on
+## EITHER side to kick off"). It is the WRONG question for the squeeze/chimney
+## wall-slide below, which needs to know which side specifically, and cannot
+## tell "walled on the near side only" from "walled on both" -- see
+## _walled_both_sides(), which answers that instead.
 func _near_wall_dir() -> int:
 	if test_move(global_transform, Vector2(-wall_jump_check_distance, 0.0)):
 		return -1
 	if test_move(global_transform, Vector2(wall_jump_check_distance, 0.0)):
 		return 1
 	return 0
+
+
+## True only when there is solid within wall_jump_check_distance on BOTH
+## sides at once -- the genuine one-cell-chimney situation the squeeze
+## wall-slide below is built for ("he is against both walls at once and
+## there is no steering off either of them").
+##
+## This is NOT the same question _near_wall_dir() answers. That function
+## checks left, and RETURNS the moment it finds something -- correct for "is
+## there a wall on either side" (the wall-jump buffer), wrong for deciding
+## whether he is truly PINNED. A one-cell shaft that is only two-sided for a
+## few pixels before one wall drops away (a stair tread's lip, say) reads as
+## walled via _near_wall_dir() the whole time he is anywhere near the lip,
+## because it never even checks the other side once the first test_move
+## succeeds. Measured: that let a squeeze-triggered slide lock onto the
+## SHORT-LIVED side and then, because the squeeze continuation check trusts
+## "he can't steer off either wall" and skips is_on_wall() entirely (it has
+## to -- see the note there), keep reporting WALL_SLIDE for several frames
+## while he drifted into open air on that side, is_on_wall() already false,
+## with the real wall still standing untouched on the other side the whole
+## time.
+func _walled_both_sides() -> bool:
+	return test_move(global_transform, Vector2(-wall_jump_check_distance, 0.0)) \
+		and test_move(global_transform, Vector2(wall_jump_check_distance, 0.0))
 
 
 func _do_wall_jump(from_wall_dir: int) -> void:
@@ -708,11 +781,21 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		# In a one-cell slot he is against both walls at once and there is no
 		# steering off either of them, so the usual "let go and you fall" does not
 		# apply — he rides it down until he leaves the slot or heads back up.
+		#
+		# "Against both walls" has to be CHECKED, not assumed from squeezing
+		# alone: squeezing only means his narrowed box still doesn't fit at full
+		# width, which one lingering wall can cause on its own (see
+		# _walled_both_sides()'s own note). Skipping to is_on_wall() instead is
+		# not an option either — in a genuine chimney there is a pixel of
+		# clearance either side and it is FALSE the whole way down (see the FALL
+		# branch below) — so this checks proximity on both sides at once, which
+		# is true throughout a real chimney and false the moment only one side
+		# still has anything.
 		if squeezing:
-			if velocity.y < 0.0:
+			if velocity.y < 0.0 or not _walled_both_sides():
 				state = State.FALL
-		# Let go, ran out of wall, or moving up -> back to normal air.
-		elif not is_on_wall() or input_x * wall_dir <= 0.0 or velocity.y < 0.0:
+		# Let go, ran out of wall, moving up, or facing away from the wall -> back to normal air.
+		elif not is_on_wall() or input_x * wall_dir <= 0.0 or velocity.y < 0.0 or facing != wall_dir:
 			state = State.FALL
 	elif state == State.FALL:
 		# A slot is a chimney, and he goes down it as one WITHOUT being asked.
@@ -720,16 +803,23 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		# either wall — there is a pixel of clearance on both sides — so
 		# is_on_wall() is false all the way down and the ordinary rule below
 		# would let him free-fall between two walls he is practically resting on.
-		if squeezing and velocity.y > 0.0:
-			var near := _near_wall_dir()
-			if near != 0:
-				wall_dir = near
-				state = State.WALL_SLIDE
-				velocity.y = minf(velocity.y, wall_slide_max_speed)
-		# Falling, touching a wall, and pushing into it -> wall slide.
+		#
+		# Entry requires _walled_both_sides(), not just _near_wall_dir() != 0.
+		# _near_wall_dir() short-circuits on whichever side it checks first
+		# (left), so a slot that is only two-sided for a few pixels — a stair
+		# tread's lip ending right where a real wall continues past it — reads
+		# as walled the whole time he is near the lip, and locks wall_dir onto
+		# the side about to vanish rather than the wall that is actually there.
+		# Requiring both sides confirms this is a real pinch, not a coincidence
+		# of check order.
+		if squeezing and velocity.y > 0.0 and _walled_both_sides():
+			wall_dir = _near_wall_dir()
+			state = State.WALL_SLIDE
+			velocity.y = minf(velocity.y, wall_slide_max_speed)
+		# Falling, touching a wall, pushing into it, and facing it -> wall slide.
 		elif velocity.y > 0.0 and is_on_wall_only():
 			var wd := -signf(get_wall_normal().x)
-			if input_x != 0.0 and signf(input_x) == wd:
+			if input_x != 0.0 and signf(input_x) == wd and facing == int(wd):
 				wall_dir = int(wd)
 				state = State.WALL_SLIDE
 				velocity.y = minf(velocity.y, wall_slide_max_speed)
@@ -876,12 +966,48 @@ func _keep_footing() -> void:
 ## and the whole point here is to ask about a narrower footprint than the one
 ## Godot supports him on.
 func _ground_under(dx: float) -> bool:
+	return _floor_collider_at(dx) != null
+
+
+## The collider directly below his feet, `dx` px to the side of his centre — or
+## null if the ray finds nothing there. Split out from _ground_under because
+## is_on_solid_ground needs to know WHAT was found, not just that something was.
+func _floor_collider_at(dx: float) -> Object:
 	var space := get_world_2d().direct_space_state
 	var from := global_position + Vector2(dx, HALF_HEIGHT - 1.0)
 	var query := PhysicsRayQueryParameters2D.create(
 		from, from + Vector2(0.0, footing_width + 2.0), collision_mask)
 	query.exclude = [get_rid()]
-	return not space.intersect_ray(query).is_empty()
+	var hit := space.intersect_ray(query)
+	return hit.get("collider") if not hit.is_empty() else null
+
+
+## Is he on the floor, and is what he is standing on actually going to stay
+## there? A CrumblingPlatform is on layer 1 like everything else he can stand
+## on, so is_on_floor() alone cannot tell a real floor from a ledge that is
+## about to give way out from under him. Used by Lemon's strawberry-rule
+## landing check: a fruit grabbed on the way down should not bank on a panel
+## that is itself mid-collapse.
+##
+## Probed at his centre AND both edges — the same spread _keep_footing uses —
+## not just his centre. A single centre ray used to say "solid" every time it
+## found NOTHING at all, on the theory that no collider in the way meant no
+## crumbling one either. That is exactly backwards astride the SEAM between two
+## adjacent CrumblingPlatforms: his centre ray drops straight through the gap
+## between their boxes, finds nothing, and used to read that miss as solid
+## ground — which is how walking from one collapsing platform onto another
+## banked a lemon without his feet ever finding brick. A miss now counts for
+## nothing; only an actual non-crumbling collider does, and the edge probes
+## catch what the centre one fell through.
+func is_on_solid_ground() -> bool:
+	if not is_on_floor():
+		return false
+	var half := _box.size.x * 0.5 if _box != null else HALF_WIDTH
+	for dx in [0.0, -half, half]:
+		var collider := _floor_collider_at(dx)
+		if collider != null and collider is not CrumblingPlatform:
+			return true
+	return false
 
 
 ## The ONE place player visuals are decided (future palette/power-mode hook).
@@ -932,11 +1058,15 @@ func _update_visual() -> void:
 # anything new in the 0.15s before it respawns.
 
 func die() -> void:
-	if state == State.DEAD:
+	if state == State.DEAD or invulnerable_timer > 0.0:
 		return
 	state = State.DEAD
 	velocity = Vector2.ZERO
 	visible = false
+	# Snaps off rather than lingering into the respawn — the lemon it cost is
+	# not refunded, same as every other run stat death does not undo.
+	_lemon_glow_timer = 0.0
+	_apply_lemon_glow()
 	# The burst is thrown BEFORE he is counted or announced, so it leaves from
 	# where he actually was. Purely cosmetic and nothing waits on it — see
 	# juice.on_death(); how long the game holds is death_time, below.
@@ -957,6 +1087,7 @@ func respawn(at: Vector2) -> void:
 	wall_lock_timer = 0.0
 	wall_jump_timer = 0.0
 	jump_hold_timer = 0.0
+	invulnerable_timer = 0.1
 	# Full width again. A life that starts squeezed starts him thinner than the
 	# grid, in a room that may have nothing narrow in it at all.
 	squeezing = false
@@ -1142,6 +1273,68 @@ func _apply_glow(on: bool) -> void:
 	glow_light.energy = glow_energy if on else 0.0
 	const TEXTURE_RADIUS := 64.0
 	glow_light.texture_scale = (glow_radius_cells * 8.0) / TEXTURE_RADIUS
+
+
+## The 'z' ability: spend one lemon for lemon_glow_time seconds of light.
+## Ignored while one is already running rather than refreshing it — pressing
+## again mid-glow costs nothing and buys nothing, so a nervous extra tap near
+## the end can't be mistaken for a second purchase.
+func _try_lemon_glow() -> void:
+	if _lemon_glow_timer > 0.0:
+		return
+	if not Collectibles.spend(1):
+		return
+	_lemon_glow_timer = lemon_glow_time
+	_apply_lemon_glow()
+
+
+## Push the timer onto LemonGlowLight: off, steady, or blinking through the
+## last lemon_glow_flicker_time seconds. Called every tick while the timer is
+## running and once from _ready so the light matches a timer of 0 at rest.
+##
+## PAINT, NOT A LIGHT — LemonGlowLight is a Sprite2D, not a PointLight2D, and
+## that is the fix for "the glow only shows up in shadow". A real Light2D
+## MULTIPLIES the surface it falls on, so it visibly brightens an unlit
+## stretch of room and does almost nothing crossing an already-lit patch near
+## a lamp or ceiling panel — which reads as exactly that complaint, patchy and
+## shadow-only, instead of a steady glow that follows him everywhere. It also
+## competes for this renderer's per-canvas-item light cap (16, see
+## DarkThought's own note on this), so a room already busy with fixtures can
+## drop it in silence. An UNSHADED, ADDITIVELY BLENDED sprite adds flat
+## instead, so it looks the same regardless of what is already lit beneath it,
+## is exempt from that light cap, and cannot be crushed by CanvasModulate 0.05
+## either (measured elsewhere in this project: the same sprite renders 0.047
+## shaded vs 1.000 unshaded under it). The material is built once, here,
+## rather than in the scene file, to keep the recipe in one place with the
+## comment explaining it.
+func _apply_lemon_glow() -> void:
+	if lemon_glow_light == null:
+		return
+	if lemon_glow_light.material == null:
+		var mat := CanvasItemMaterial.new()
+		mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+		mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		lemon_glow_light.material = mat
+	const TEXTURE_RADIUS := 64.0
+	lemon_glow_light.scale = Vector2.ONE * (lemon_glow_radius_cells * 8.0) / TEXTURE_RADIUS
+	# What a light gets for free by multiplying the wall's own colour, an
+	# additive sprite has to be scaled back down to match — at equal energy it
+	# would otherwise land roughly 1/albedo too bright (same calibration
+	# DarkThought's halo uses, off the same office-brick albedo).
+	const PAINT_GAIN := 0.35
+	var gain := lemon_glow_energy * PAINT_GAIN
+	lemon_glow_light.modulate = Color(
+		lemon_glow_color.r * gain, lemon_glow_color.g * gain,
+		lemon_glow_color.b * gain, 1.0)
+	var on := _lemon_glow_timer > 0.0
+	var lit := on
+	if on and _lemon_glow_timer <= lemon_glow_flicker_time:
+		# Half the cycle lit, half dark. Driven off the timer itself rather
+		# than an accumulating clock, so it can be set directly (as the test
+		# does) without ticking through real seconds first.
+		var phase := fmod(_lemon_glow_timer, 1.0 / lemon_glow_flicker_speed)
+		lit = phase >= 0.5 / lemon_glow_flicker_speed
+	lemon_glow_light.visible = lit
 
 
 ## Clamp the follow-camera to a level's bounds (pixels). Called by LevelBase.

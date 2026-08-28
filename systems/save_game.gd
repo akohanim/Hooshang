@@ -256,14 +256,14 @@ func practice(i: int, room: String) -> bool:
 ##
 ## The debug picker's problem, and the reason this exists rather than the picker
 ## just naming a room: a room dropped into cold is not the room a player reaches.
-## Level_17 entered raw has no dash (Hooshang.tscn's default is only true by
-## accident of the prefab), and — worse — an empty `way_back`, so Level_13's
-## doorway still points at Level_12 and the escape route is simply not there.
+## Level_18 entered raw has no dash (Hooshang.tscn's default is only true by
+## accident of the prefab), and — worse — an empty `way_back`, so Level_14's
+## doorway still points at Level_13 and the escape route is simply not there.
 ## Testing the back half of Act I that way tests a world no player will ever see.
 ##
 ## What "finished" means here, precisely:
 ##   - the DASH is his
-##   - the Darkshang re-route is in place, both halves, so 11 -> 12 -> 13 works
+##   - the Darkshang re-route is in place, both halves, so 12 -> 13 -> 14 works
 ##   - the shadow has been met, so the reveal does not replay on a backtrack
 ##   - the opening cutscene does not run, so Level_0 is walkable immediately
 ##
@@ -283,7 +283,7 @@ func open_finished(room: String) -> void:
 	_pending = {
 		"world_state": {
 			"has_dash": true,
-			"way_back": {"Level_13": "Level_14", "Level_14": "Level_13"},
+			"way_back": {"Level_14": "Level_15", "Level_15": "Level_14"},
 		},
 		"act1": {
 			"opening_played": true,

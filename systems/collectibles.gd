@@ -117,6 +117,24 @@ func collect(id: String, amount := 1, source: CanvasItem = null) -> void:
 		_land(amount)
 
 
+## Spend `amount` lemons on an ability (Player's lemon-glow). Returns false and
+## changes nothing if there aren't enough — a caller must check the return
+## value rather than assume a spend always succeeds.
+##
+## No flight to animate, so the shown number drops immediately rather than
+## trailing `total` — the same reasoning load_state() gives for a save with
+## nothing in the air to land.
+func spend(amount := 1) -> bool:
+	if amount <= 0 or total < amount:
+		return false
+	total -= amount
+	changed.emit(total)
+	_shown = total
+	_refresh()
+	_show_briefly()
+	return true
+
+
 ## Wipe the run — a fresh game, not a respawn. SaveGame.start_new() calls this.
 func reset() -> void:
 	total = 0

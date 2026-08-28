@@ -22,7 +22,7 @@ var beats: Act1Beats
 
 
 func _ready() -> void:
-	LdtkWorld.debug_start_room = "Level_14"
+	LdtkWorld.debug_start_room = "Level_15"
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	add_child(world)
 	await _frames(20)
@@ -37,12 +37,12 @@ func _ready() -> void:
 	# --- 3. the way home, checked before the walk ----------------------------
 	# Metadata, not behaviour, so it is readable without playing to room 22 —
 	# and it is what the room manager actually consults.
-	var last := _room("Level_24")
-	_check(last != null, "Level_24 exists")
+	var last := _room("Level_25")
+	_check(last != null, "Level_25 exists")
 	if last != null:
 		var exit := world._exit_in(last)
 		_check(exit != null and str(exit.get_meta("next_room", "")) == "Level_0",
-			"Level_24's Exit leads back to Level_0  [%s]"
+			"Level_25's Exit leads back to Level_0  [%s]"
 				% (str(exit.get_meta("next_room", "")) if exit else "no Exit"))
 		_check(world._next_room(exit) == _room("Level_0"),
 			"...and the room manager resolves it  [%s]" % (
@@ -99,7 +99,7 @@ func _ready() -> void:
 	if world.current_room == last:
 		await _go_forward()
 		_check(world.current_room == _room("Level_0"),
-			"walking out of Level_24 arrives in Level_0  [%s]" % world.current_room.name)
+			"walking out of Level_25 arrives in Level_0  [%s]" % world.current_room.name)
 
 	_finish()
 

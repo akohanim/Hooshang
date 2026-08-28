@@ -61,6 +61,48 @@ func _run() -> void:
 	_check(_spread(path, true) > 44.0,
 		"...and swings across  [%.1fpx of travel, want ~48]" % _spread(path, true))
 
+	# --- linear at an arbitrary angle ----------------------------------------
+	#
+	# 45 degrees: the swing is diagonal, so x and y travel are equal and every
+	# point lies on the line through the origin at that angle.
+	var diag := _spawn(origin, DarkThought.Motion.LINEAR, 40.0, 1.0, 0.0)
+	diag.angle = 45.0
+	await _frames(1)
+	path = _trace(diag)
+	var dx := _spread(path, true)
+	var dy := _spread(path, false)
+	_check(absf(dx - dy) < 0.5,
+		"linear 45: x and y travel equally  [%.1f x, %.1f y]" % [dx, dy])
+	_check(dx > 40.0, "...and it actually swings  [%.1fpx across]" % dx)
+	var off_line := 0.0
+	var dir := Vector2(cos(deg_to_rad(45.0)), sin(deg_to_rad(45.0)))
+	for p in path:
+		off_line = maxf(off_line, absf(p.x * dir.y - p.y * dir.x))
+	_check(off_line < 0.5,
+		"...every point on the 45-degree line  [worst %.3fpx off]" % off_line)
+	# Vertical IS linear at 90 and horizontal at 0 — prove the identity so a
+	# future refactor cannot quietly break the legacy modes.
+	var lin90 := _spawn(origin, DarkThought.Motion.LINEAR, 32.0, 1.0, 0.0)
+	lin90.angle = 90.0
+	var vert := _spawn(origin, DarkThought.Motion.VERTICAL, 32.0, 1.0, 0.0)
+	await _frames(1)
+	var v_gap := 0.0
+	for i in SAMPLES:
+		var t := float(i) / SAMPLES
+		v_gap = maxf(v_gap, _at(lin90, t).distance_to(_at(vert, t)))
+	_check(v_gap < EPS,
+		"...linear 90 traces the same path as VERTICAL  [%.4fpx apart]" % v_gap)
+	var lin0 := _spawn(origin, DarkThought.Motion.LINEAR, 24.0, 1.0, 0.0)
+	lin0.angle = 0.0
+	var horiz := _spawn(origin, DarkThought.Motion.HORIZONTAL, 24.0, 1.0, 0.0)
+	await _frames(1)
+	var h_gap := 0.0
+	for i in SAMPLES:
+		var t := float(i) / SAMPLES
+		h_gap = maxf(h_gap, _at(lin0, t).distance_to(_at(horiz, t)))
+	_check(h_gap < EPS,
+		"...linear 0 traces the same path as HORIZONTAL  [%.4fpx apart]" % h_gap)
+
 	# --- circle: constant radius, and the right way round --------------------
 	var ring := _spawn(origin, DarkThought.Motion.CIRCLE, 40.0, 1.0, 0.0)
 	await _frames(1)
@@ -133,6 +175,22 @@ func _run() -> void:
 	# Reachable through the group at all — reset_all finds it by group name, and
 	# a prop that never joined would fail every assertion above by doing nothing.
 	_check(runner.is_in_group("dark_thought"), "...found via the dark_thought group")
+
+	# A LINEAR thought resets the same way — it is on the same clock and the same
+	# reset path, but it walks a different offset function, so a mode-specific
+	# reset bug would hide unless a LINEAR one is driven and reset too.
+	var lin_runner := _spawn(origin, DarkThought.Motion.LINEAR, 32.0, 2.0, 0.0)
+	lin_runner.angle = 30.0
+	await _frames(1)
+	await _idle(12)
+	var lin_moved := lin_runner.position.distance_to(origin)
+	_check(lin_moved > 1.0,
+		"reset (linear): it had left the origin first  [%.1fpx out]" % lin_moved)
+	DarkThought.reset_all(get_tree())
+	_check(lin_runner.position.distance_to(origin) <= EPS,
+		"...and reset_all puts the linear thought back too  [%.3fpx off]"
+			% lin_runner.position.distance_to(origin))
+	lin_runner.queue_free()
 
 	# --- it does not fall when the room collapses ----------------------------
 	_check(runner.collapse_anchored(),
@@ -207,6 +265,7 @@ func _run() -> void:
 		"Vertical": DarkThought.Motion.VERTICAL,
 		"Horizontal": DarkThought.Motion.HORIZONTAL,
 		"Circle": DarkThought.Motion.CIRCLE,
+		"Linear": DarkThought.Motion.LINEAR,
 	}
 	for name: String in modes:
 		var qualified: String = "ThoughtMotion." + name
@@ -236,12 +295,35 @@ func _run() -> void:
 		"...while an unset field still falls back to VERTICAL  [%s]"
 			% DarkThought.Motion.keys()[unset.motion])
 	unset.free()
+	# The Angle field reaches the prop when it is set — same class of silent bug
+	# as Motion, since a field the hook never reads leaves the prop on its default
+	# and a linear thought points the wrong way with nothing to pull on.
+	var angled: DarkThought = hook._build_thought({
+		"identifier": "DarkThought",
+		"position": Vector2.ZERO, "size": Vector2(16.0, 16.0),
+		"fields": {"Motion": "ThoughtMotion.Linear", "Angle": 135.0,
+			"Amplitude": 32.0, "Speed": 1.0, "Phase": 0.0, "Clockwise": 1.0},
+	})
+	_check(angled.motion == DarkThought.Motion.LINEAR and absf(angled.angle - 135.0) < EPS,
+		"...and the Angle field reaches the prop  [motion %s, angle %.1f]"
+			% [DarkThought.Motion.keys()[angled.motion], angled.angle])
+	angled.free()
+	# An unset Angle keeps the prop's own default (0), so a thought placed before
+	# the field existed does not snap to some other direction.
+	var no_angle: DarkThought = hook._build_thought({
+		"identifier": "DarkThought",
+		"position": Vector2.ZERO, "size": Vector2(16.0, 16.0),
+		"fields": {"Motion": "ThoughtMotion.Linear"},
+	})
+	_check(absf(no_angle.angle) < EPS,
+		"...while an unset Angle stays at the prop's default  [%.1f]" % no_angle.angle)
+	no_angle.free()
 
-	# --- the two tones ------------------------------------------------------
+	# --- the three tones ----------------------------------------------------
 	#
-	# The pale thought is the dark one recoloured and NOTHING ELSE. Everything
-	# below is one of those two halves: that the colour really does change, and
-	# that nothing else does.
+	# Each tone is the dark one recoloured and NOTHING ELSE. Everything below is
+	# one of those two halves: that the colour really does change, and that
+	# nothing else does.
 	#
 	# The unshaded material is the part worth testing rather than eyeballing.
 	# Measured in Act I's own setup — CanvasModulate 0.05 with this prop's red
@@ -250,7 +332,8 @@ func _run() -> void:
 	# visible in a diff, and a pale thought that quietly lost its material would
 	# just look like a differently-coloured dark one.
 	var tones := {"DarkThought": DarkThought.Tone.DARK,
-		"LightThought": DarkThought.Tone.LIGHT}
+		"LightThought": DarkThought.Tone.LIGHT,
+		"GreyThought": DarkThought.Tone.GREY}
 	var made := {}
 	for id: String in tones:
 		var built: DarkThought = hook._build_thought({

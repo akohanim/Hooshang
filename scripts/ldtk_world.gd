@@ -17,8 +17,10 @@ extends Node2D
 ##   - touching an Exit slides the camera to the next room, and hangs a return
 ##     door on the edge you came in through so the Exit works BOTH ways
 ##
-## Room order is by world position (left to right, then top to bottom). An
-## Exit's NextRoom field overrides that when you want a non-linear jump.
+## Room order is play order — see rooms_in() below — which an Exit's NextRoom
+## field can override for a non-linear jump. None currently has one set: every
+## transition in the game runs on rooms_in()'s array order alone, which is why
+## that ordering has to be exactly right rather than just close.
 
 signal room_changed(room: Node2D)
 
@@ -147,6 +149,20 @@ func _ready() -> void:
 	_clamp_exit_signs()
 	_restore_state()
 	_enter_room(_start_room(), true)
+	# A room's return door is normally armed by _arm_return() as a SIDE EFFECT of
+	# walking into it — _slide_to_room calls it after a forward Exit, and
+	# _on_return_entered calls it after backtracking. Starting the world already
+	# IN a room (debug picker, "open as a finished player") skips both, so a
+	# restored way_back re-route is never wired to anything a player can walk
+	# into. That is invisible for every ordinary room — no Exit means no forward
+	# progress either way, so "no return door" reads as "look but don't touch,"
+	# exactly what a debug picker promises. It is NOT invisible for the boss
+	# room: Level_14 carries no Exit at all, its ONLY way onward is this door,
+	# and a "finished" player dropped there with the re-route already in
+	# `_way_back` would stand in a dead end with no way to reach Level_15 —
+	# no bug in the re-route itself would ever be reachable to test.
+	if _way_back.has(_start_room().name):
+		_arm_return(_room_before(_start_room()))
 
 
 ## What this world contributes to a save slot (see systems/save_game.gd).
@@ -201,12 +217,15 @@ func _restore_state() -> void:
 ## row, and stopped the moment the escape row was added: rooms 12-21 run RIGHT to
 ## left across the bottom of the grid, so position order reads them 21, 20, 19 …
 ## 13, 12 — precisely backwards. Every fallback in this file is "the next room in
-## this array", so walking out of Level_15's Exit sent you to Level_14, the room
+## this array", so walking out of Level_16's Exit sent you to Level_15, the room
 ## you had just come from.
 ##
 ## Position is kept as the tiebreak, so a room whose name carries no number (or
 ## two rooms sharing one) still lands somewhere stable rather than in whatever
-## order the scene tree happened to hold them.
+## order the scene tree happened to hold them. A handful of rooms carry no
+## number AT ALL but do have a real place in the sequence — see
+## INSERTED_ROOMS below play_index(), and read its comment before assuming a
+## trailing digit is enough to sort a new room correctly.
 ##
 ## Static, and taking the world as an argument, so the debug picker can list the
 ## rooms of a world without standing up a whole LdtkWorld (player, lights,
@@ -228,8 +247,34 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 	return found
 
 
-## The number in a room's identifier — the 13 in `Level_15`. Rooms without one
-## sort last, together, so they cannot silently displace the numbered sequence.
+## Rooms with no number of their own but a curated place in the sequence
+## anyway, inserted between two numbered rooms by hand rather than by anything
+## derivable from their name. Keyed by identifier; value is [the numbered room
+## they follow, their order among any others inserted at the same point].
+##
+## `Level_V1`..`Level_V4` are `tools/renumber_levels_v2.py`'s block, meant to
+## land between Level_6 and Level_7. `Level_v5`/`Level_v6` follow them, same
+## spot. THIS TABLE IS THE ONLY PLACE THAT SAYS SO — the .ldtk's own Exit
+## entities carry no NextRoom override for any of this (checked: every one is
+## empty), so index_in_name() below is not just how the debug picker numbers
+## things, it is the ONLY thing routing actual play through here. Get it wrong
+## and the game does not misnumber a menu, it walks into a dead end: that is
+## what an empty NextRoom chain plus the OLD digit-matching rule did — `V1`..
+## `V4` share their trailing digit with `Level_1`..`Level_4`, so the old sort
+## interleaved them one per numbered room instead of as a block, and `v5`/`v6`
+## (no recorded place at all under that rule) landed wherever their trailing
+## digit happened to collide too. Walking the result from Level_0 dead-ends at
+## Level_v6; Level_7 onward was unreachable by ordinary play.
+const INSERTED_ROOMS := {
+	"Level_V1": [6, 0], "Level_V2": [6, 1], "Level_V3": [6, 2], "Level_V4": [6, 3],
+	"Level_v5": [6, 4], "Level_v6": [6, 5],
+}
+
+## The number in a room's identifier — the 16 in `Level_16` — or an
+## INSERTED_ROOMS entry's position just past the room it follows. Rooms
+## matching neither sort last, together, so they cannot silently displace the
+## numbered sequence (Level_V_test, the greybox TEST room, and any future
+## scratch room fall here).
 static func play_index(room: Node) -> int:
 	return index_in_name(str(room.name))
 
@@ -238,14 +283,22 @@ static func play_index(room: Node) -> int:
 ## it left off in as a STRING — there is no node to ask when the menu is drawing
 ## a card for a world it hasn't loaded — and two copies of "which digits count"
 ## is exactly how a menu ends up numbering rooms differently from the game.
+##
+## Scaled by 100 so an inserted room can land strictly between a numbered room
+## and the next: Level_6 is 600, an insertion after it is 610-619, Level_7 is
+## 700 — comfortable room for a INSERTED_ROOMS entry to grow past ten without
+## a collision.
 static func index_in_name(name: String) -> int:
-	var digits := ""
-	for i in range(name.length() - 1, -1, -1):
-		var c := name[i]
+	if INSERTED_ROOMS.has(name):
+		var after: Array = INSERTED_ROOMS[name]
+		return int(after[0]) * 100 + 10 + int(after[1])
+	if not name.begins_with("Level_"):
+		return 1 << 30
+	var suffix := name.substr(6)
+	for c in suffix:
 		if c < "0" or c > "9":
-			break
-		digits = c + digits
-	return int(digits) if digits != "" else 1 << 30
+			return 1 << 30
+	return int(suffix) * 100 if suffix != "" else 1 << 30
 
 
 ## Room to open in: the first, unless the debug picker asked for another one.
@@ -510,6 +563,8 @@ func _room_before(room: Node2D) -> Node2D:
 func _on_exit_reached(body: Node2D, exit: Node2D) -> void:
 	if body != player or _transitioning:
 		return
+	if not current_room.is_ancestor_of(exit):
+		return  # Only allow exits inside the active room to be triggered
 	if _door_in(current_room) != null:
 		return  # the door handles this doorway — see _door_in above
 	var target := _next_room(exit)
@@ -556,11 +611,27 @@ func _arm_return(from_room: Node2D) -> void:
 	var rect := room_rect(current_room)
 	var shape: CollisionShape2D = _return_zone.get_child(0)
 	(shape.shape as RectangleShape2D).size = Vector2(16, rect.size.y)
-	# Which edge the door hangs on comes from where it LEADS, not from where you
-	# came in. Those are the same room in the ordinary case; when the story has
-	# re-pointed the way back they can differ, and it is the destination that has
-	# to be on the far side of the doorway you walk into.
-	var on_left := _return_room.position.x < current_room.position.x
+	# The edge the door hangs on comes from where you physically WALKED IN FROM
+	# (from_room), never from _return_room after _apply_way_back may have swapped
+	# it for the story's reroute target. Those are different rooms for a reason:
+	# Darkshang re-points the boss room's doorway at the escape row while the
+	# player is still standing where they walked in, and "the way out is the way
+	# he came" (act1_beats.gd) means the door stays on that same physical edge —
+	# it is only what lies beyond it that changes. Computing the edge from the
+	# REROUTE target instead (Level_15's own forward Exit, an unrelated doorway
+	# with no physical relationship to Level_14) is what used to fling the door
+	# to Level_14's far wall, past Darkshang's own spawn point, the moment the
+	# encounter fired.
+	#
+	# Normally from_room is physically adjacent, but for non-contiguous
+	# transition portals reached the ordinary way (like Level_V1 -> Level_2), we
+	# still need to look at which half of from_room its OWN forward Exit — the
+	# doorway that actually led here — is located in.
+	var on_left := from_room != null and from_room.position.x < current_room.position.x
+	var exit := _exit_in(from_room) if from_room != null else null
+	if exit != null:
+		var r_rect := room_rect(from_room)
+		on_left = exit.global_position.x > r_rect.get_center().x
 	var x := (rect.position.x + 6.0) if on_left else (rect.end.x - 6.0)
 	_return_zone.global_position = Vector2(x, rect.get_center().y)
 	_return_zone.monitoring = true
@@ -607,9 +678,9 @@ func _re_entry_point(room: Node2D) -> Vector2:
 ##
 ## The way back out of a room is normally the room behind it, which is right for
 ## every room that is walked through once in one direction. The Darkshang
-## encounter breaks that: Level_13 is entered from the left and the reveal turns
+## encounter breaks that: Level_14 is entered from the left and the reveal turns
 ## Hooshang round, so walking back out of it is the escape CONTINUING — into
-## Level_14, which hangs below the row and is itself authored right to left — and
+## Level_15, which hangs below the row and is itself authored right to left — and
 ## not an undo of the room he just arrived in.
 ##
 ## Kept as a room -> room map rather than a one-off overwrite of `_return_room`
@@ -628,9 +699,9 @@ func set_way_back(room: Node2D, to_room_name: String) -> void:
 	# Reciprocal, because a re-routed door is still a two-way door — the rule the
 	# whole room manager is built on. Without the return half, the room you land
 	# in falls back to layout order for what is behind IT, and layout order is the
-	# one thing already known to be wrong here: Level_14 is reached from Level_13
-	# but sits between Level_15 and the world's edge on the grid, so _room_before
-	# would hang its way back on Level_15 — forward, onto the same edge its own
+	# one thing already known to be wrong here: Level_15 is reached from Level_14
+	# but sits between Level_16 and the world's edge on the grid, so _room_before
+	# would hang its way back on Level_16 — forward, onto the same edge its own
 	# Exit already occupies.
 	_way_back[to_room_name] = room.name
 	# Re-hang the door that is already up. Without this the re-route would only
@@ -639,8 +710,19 @@ func set_way_back(room: Node2D, to_room_name: String) -> void:
 	# the destination in place also moves the strip to the right edge and covers
 	# the case where there was no door at all (a re-routed room with nothing
 	# behind it), which a bare assignment would leave unmonitored.
+	#
+	# _return_room can be null here — a room reached by dropping straight into
+	# it (debug_start_room, a "finished" open) rather than by walking in, so no
+	# earlier _arm_return ever ran. _room_before(room) is the same fallback
+	# _ready() uses for the identical case at world-boot: the array-order
+	# neighbour standing in for "the room he came from" when nothing recorded
+	# one. Passing null through unchanged used to fall back to a bare geometry
+	# comparison in _arm_return, which had no "came from" side to read and
+	# hung the door on the room's FAR wall instead of the one he is standing
+	# next to — invisible, since the strip has no art, and unreachable by
+	# walking the way the story says to.
 	if room == current_room:
-		_arm_return(_return_room)
+		_arm_return(_return_room if _return_room != null else _room_before(room))
 
 
 ## Swap the story's destination in for the current room's way back, if it has one.

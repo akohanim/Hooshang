@@ -32,6 +32,12 @@ energy = 0.0
 texture = ExtResource("4_light")
 texture_scale = 0.75
 
+[node name="LemonGlowLight" type="Sprite2D" parent="."]
+visible = false
+z_index = -1
+modulate = Color(0.85, 1, 0.3, 1)
+texture = ExtResource("4_light")
+
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0

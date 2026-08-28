@@ -9,6 +9,7 @@ extends Node
 ## Run:  godot --headless res://tests/lemon_test.tscn
 
 const LEMON := preload("res://scenes/props/Lemon.tscn")
+const CRUMBLING_PLATFORM := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
 
 var failures: Array[String] = []
 var world: LdtkWorld
@@ -197,6 +198,251 @@ func _ready() -> void:
 		"the counter has caught up by then  [%d]" % Points.shown())
 	_check(life >= 0.7 and life <= 1.6,
 		"the +1000 is up for about a second  [%.2fs]" % life)
+
+	# ---- Celeste strawberry rule: arm-then-land banks exactly once ---------
+	#
+	# Touching mid-air arms the fruit; it is NOT banked until the player is back
+	# on the ground. The total stays at zero while pending and goes to 1 on
+	# landing — and only 1, not 2.
+	Collectibles.reset()
+	world = Screen.load_scene("res://ldtk/Act1World.tscn")
+	await _frames(60)
+	p = world.player
+	p.input_locked = false
+	var ground_y := p.global_position.y
+
+	# Place the lemon 50px above the player (well in the air).
+	var air_lemon: Lemon = LEMON.instantiate()
+	air_lemon.position = Vector2(p.global_position.x, ground_y - 50)
+	world.add_child(air_lemon)
+	await _frames(5)
+	var air_id: String = air_lemon.collect_id()
+
+	# Teleport the player to the lemon — they overlap and are now airborne.
+	p.global_position = air_lemon.global_position
+	await _frames(3)
+
+	_check(air_lemon._pending,
+		"STRAWBERRY: touching mid-air arms the lemon")
+	_check(Collectibles.total == 0,
+		"STRAWBERRY: the total stays at 0 while pending  [%d]" % Collectibles.total)
+	_check(not Collectibles.is_taken(air_id),
+		"STRAWBERRY: the fruit is NOT in the taken set while pending")
+
+	# Wait for the player to fall (~19 frames for 50px at 980 px/s^2) and land.
+	await _frames(40)
+	_check(p.is_on_floor(), "STRAWBERRY: the player has landed  [y=%.1f]" % p.global_position.y)
+	_check(Collectibles.total == 1,
+		"STRAWBERRY: landing banks the fruit exactly once  [%d]" % Collectibles.total)
+	_check(Collectibles.is_taken(air_id),
+		"STRAWBERRY: the fruit IS in the taken set after banking")
+	# After banking the lemon frees itself (a short pop tween, then queue_free),
+	# which is itself proof it is no longer pending — a pending lemon never frees.
+	# If it is still mid-pop it must already have cleared _pending.
+	_check(not is_instance_valid(air_lemon) or not air_lemon._pending,
+		"STRAWBERRY: no longer pending after banking")
+
+	# ---- Celeste strawberry rule: arm-then-die restores --------------------
+	#
+	# A death while the fruit is armed un-arms it and puts it back exactly where
+	# it was — art, glow, bob and trigger. The player can then collect it again.
+	Collectibles.reset()
+	world = Screen.load_scene("res://ldtk/Act1World.tscn")
+	await _frames(60)
+	p = world.player
+	p.input_locked = false
+	ground_y = p.global_position.y
+
+	var death_lemon: Lemon = LEMON.instantiate()
+	death_lemon.position = Vector2(p.global_position.x, ground_y - 50)
+	world.add_child(death_lemon)
+	await _frames(5)
+	var death_id: String = death_lemon.collect_id()
+
+	# Arm the lemon mid-air.
+	p.global_position = death_lemon.global_position
+	await _frames(3)
+	_check(death_lemon._pending, "DEATH-RESTORE: armed before dying")
+
+	# Die while still airborne.
+	p.die()
+	await _frames(40)  # respawn delay (~9 frames) + settling
+
+	_check(not death_lemon._pending,
+		"DEATH-RESTORE: death un-arms the fruit")
+	_check(Collectibles.total == 0,
+		"DEATH-RESTORE: death did not bank the fruit  [%d]" % Collectibles.total)
+	_check(not Collectibles.is_taken(death_id),
+		"DEATH-RESTORE: the fruit is NOT in the taken set after death")
+	_check(is_instance_valid(death_lemon),
+		"DEATH-RESTORE: the lemon node survives the death")
+	if is_instance_valid(death_lemon):
+		_check(death_lemon.monitoring,
+			"DEATH-RESTORE: the trigger is re-armed after death")
+
+		# Re-collect: teleport the player to the restored lemon and wait for
+		# landing. The player respawned on the ground, so teleporting up puts
+		# them airborne again.
+		p.global_position = death_lemon.global_position
+		await _frames(40)
+		_check(Collectibles.total == 1,
+			"DEATH-RESTORE: the lemon can be re-collected  [%d]" % Collectibles.total)
+
+	# ---- Celeste strawberry rule: pending absent from save -----------------
+	#
+	# A pending lemon must NOT appear in Collectibles.save_state(), which is
+	# what the room-transition autosave captures. If it did, a save written
+	# while the player is airborne would bank a fruit they never earned.
+	Collectibles.reset()
+	world = Screen.load_scene("res://ldtk/Act1World.tscn")
+	await _frames(60)
+	p = world.player
+	p.input_locked = false
+	ground_y = p.global_position.y
+
+	var save_lemon: Lemon = LEMON.instantiate()
+	save_lemon.position = Vector2(p.global_position.x, ground_y - 50)
+	world.add_child(save_lemon)
+	await _frames(5)
+	var save_id: String = save_lemon.collect_id()
+
+	# Arm the lemon mid-air.
+	p.global_position = save_lemon.global_position
+	await _frames(3)
+	_check(save_lemon._pending, "SAVE: armed for save test")
+
+	var state := Collectibles.save_state()
+	var taken_in_save: Array = state.get("taken", [])
+	_check(not taken_in_save.has(save_id),
+		"SAVE: a pending lemon is absent from Collectibles.save_state()")
+	_check(int(state.get("total", 0)) == 0,
+		"SAVE: total in save is 0 while the lemon is still pending  [%s]"
+			% str(state.get("total")))
+
+	# ---- collapsing platforms are NOT solid ground -------------------------
+	#
+	# A CrumblingPlatform is a floor for movement (is_on_floor() reads true on
+	# it) but it is about to vanish, so it must not count as the "solid ground"
+	# the strawberry rule bank on. The fruit stays pending while he rests on
+	# one and only banks once he reaches real ground below it.
+	Collectibles.reset()
+	world = Screen.load_scene("res://ldtk/Act1World.tscn")
+	await _frames(60)
+	p = world.player
+	p.input_locked = false
+	ground_y = p.global_position.y
+
+	var crumb: CrumblingPlatform = CRUMBLING_PLATFORM.instantiate()
+	crumb.position = Vector2(p.global_position.x, ground_y - 40)
+	crumb.size = Vector2(24, 8)
+	world.add_child(crumb)
+	await _frames(2)
+
+	var crumb_lemon: Lemon = LEMON.instantiate()
+	crumb_lemon.position = Vector2(p.global_position.x, ground_y - 60)
+	world.add_child(crumb_lemon)
+	await _frames(5)
+
+	# Arm the lemon mid-air, above the platform.
+	p.global_position = crumb_lemon.global_position
+	await _frames(3)
+	_check(crumb_lemon._pending,
+		"CRUMBLING GROUND: armed mid-air, above the platform")
+
+	# Let him fall and land ON the crumbling platform.
+	var landed_on_crumb := false
+	for i in 90:
+		await _frames(1)
+		if p.is_on_floor():
+			landed_on_crumb = true
+			break
+	_check(landed_on_crumb, "CRUMBLING GROUND: falls and lands on the platform")
+	_check(not p.is_on_solid_ground(),
+		"CRUMBLING GROUND: the platform itself does not read as solid ground")
+	_check(crumb_lemon._pending,
+		"CRUMBLING GROUND: still pending while resting on the crumbling platform")
+	_check(Collectibles.total == 0,
+		"CRUMBLING GROUND: not banked while standing on a platform about to give way  [%d]"
+			% Collectibles.total)
+
+	# Wait for it to crumble and drop him through to real ground below.
+	var banked := false
+	for i in int((crumb.crumble_time + crumb.fall_time) * 60.0) + 60:
+		await _frames(1)
+		if Collectibles.total == 1:
+			banked = true
+			break
+	_check(banked, "CRUMBLING GROUND: banks once he reaches real ground below")
+	_check(p.is_on_solid_ground(),
+		"CRUMBLING GROUND: ...and that ground reads as solid  [on_floor=%s]"
+			% p.is_on_floor())
+
+	# ---- crossing the SEAM between two collapsing platforms ---------------
+	#
+	# is_on_solid_ground() used to probe with a single ray under his centre and
+	# treat a MISS as solid ground, on the theory that nothing in the way meant
+	# nothing crumbling either. That is backwards exactly at the seam between
+	# two adjacent CrumblingPlatforms: his centre ray drops through the gap
+	# between their two collision boxes, finds nothing, and used to read that
+	# as ground he could bank on — so walking from one onto the other banked a
+	# pending lemon without his feet ever finding brick. This walks the whole
+	# span and checks every frame, since the miss can land anywhere along it,
+	# not necessarily at the midpoint either test would think to sample.
+	Collectibles.reset()
+	world = Screen.load_scene("res://ldtk/Act1World.tscn")
+	await _frames(60)
+	p = world.player
+	p.input_locked = false
+	ground_y = p.global_position.y
+
+	var seam_y := ground_y - 40.0
+	var plat_a: CrumblingPlatform = CRUMBLING_PLATFORM.instantiate()
+	plat_a.size = Vector2(32, 8)
+	plat_a.position = Vector2(p.global_position.x - 16.0, seam_y)
+	world.add_child(plat_a)
+	var plat_b: CrumblingPlatform = CRUMBLING_PLATFORM.instantiate()
+	plat_b.size = Vector2(32, 8)
+	plat_b.position = Vector2(p.global_position.x + 16.0, seam_y)
+	world.add_child(plat_b)
+	await _frames(2)
+
+	var seam_lemon: Lemon = LEMON.instantiate()
+	seam_lemon.position = Vector2(plat_a.position.x, seam_y - 20.0)
+	world.add_child(seam_lemon)
+	await _frames(5)
+
+	# Arm mid-air, then let him fall and settle onto the first platform.
+	p.global_position = seam_lemon.global_position
+	await _frames(3)
+	_check(seam_lemon._pending, "SEAM: armed mid-air, above the first platform")
+	var settled := false
+	for i in 60:
+		await _frames(1)
+		if p.is_on_floor():
+			settled = true
+			break
+	_check(settled, "SEAM: falls and settles on the first platform")
+	_check(Collectibles.total == 0,
+		"SEAM: not banked on landing  [%d]" % Collectibles.total)
+
+	# Walk him across onto the second platform, checking EVERY physics frame.
+	var start_x := p.global_position.x
+	Input.action_press("move_right")
+	var banked_early := false
+	for i in 180:
+		await _frames(1)
+		if Collectibles.total != 0:
+			banked_early = true
+			break
+		if p.global_position.x >= plat_b.position.x:
+			break
+	Input.action_release("move_right")
+	_check(not banked_early,
+		"SEAM: crossing onto the second platform never banks it early")
+	_check(seam_lemon._pending, "SEAM: still pending after the crossing")
+	_check(p.global_position.x > start_x + 16.0 and p.is_on_floor(),
+		"SEAM: ...and he actually made the crossing  [x %.1f -> %.1f]"
+			% [start_x, p.global_position.x])
 
 	if failures.is_empty():
 		print("LEMON TEST: ALL PASS")

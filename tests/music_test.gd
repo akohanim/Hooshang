@@ -1,5 +1,5 @@
 extends Node
-## The musical-tile puzzle (room 6 / Level_7): the glow is earned by stepping all
+## The musical-tile puzzle (room 6 / Level_8): the glow is earned by stepping all
 ## five pads, once each, in order — and by nothing else.
 ##
 ## Written against two REPORTED bugs, both of which handed out the glow for a run
@@ -18,8 +18,8 @@ extends Node
 ## dying revokes the glow and resets the run, which would hide every failure.
 ## Run:  godot --headless res://tests/music_test.tscn
 
-## Room 6 in play order; "Level_7" is its LDtk identifier.
-const ROOM := "Level_7"
+## Room 6 in play order; "Level_8" is its LDtk identifier.
+const ROOM := "Level_8"
 ## Where the player is parked between steps: clear of every pad's skin, so each
 ## pad gets a clean arrival rather than one long overlap.
 const NEUTRAL := Vector2(1848, 300)
@@ -47,7 +47,7 @@ func _ready() -> void:
 	await _frames(30)
 	player = world.player
 	room = _room_named(ROOM)
-	_check(room != null, "the world has room 6 (Level_7)")
+	_check(room != null, "the world has room 6 (Level_8)")
 	if room == null:
 		return _finish()
 	world._enter_room(room, true)

@@ -21,6 +21,19 @@ func _ready() -> void:
 
 	_check(Screen.viewport.size == Screen.GAME_SIZE,
 		"the world renders into a %s viewport (got %s)" % [Screen.GAME_SIZE, Screen.viewport.size])
+	# A SubViewport built in code does NOT inherit the project's own
+	# textures/canvas_textures/default_texture_filter=0 setting — that only
+	# seeds the ROOT viewport. Every SubViewport starts on the ENGINE's
+	# hardcoded default (Linear) regardless of the project setting, silently:
+	# nothing errors, nothing warns, the world just rasterises soft instead of
+	# the crisp pixel art every art tool in tools/ assumes. This shipped once —
+	# the whole game, not just one prop — and was found by sampling actual
+	# rendered pixels (a screenshot's own nearest-neighbour upscale on the way
+	# to disk cannot un-blend pixels that were already blended before it ran).
+	_check(Screen.viewport.canvas_item_default_texture_filter
+			== Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST,
+		"the world viewport samples NEAREST, not the engine's Linear default  [%d]"
+			% Screen.viewport.canvas_item_default_texture_filter)
 	_check(world.get_viewport() == Screen.viewport,
 		"the loaded world is inside that viewport, not the window")
 	_check(Screen.current == world and Screen.current_path() != "",

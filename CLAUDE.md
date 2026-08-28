@@ -34,9 +34,33 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/intro_test.tscn` — Act I's beats:
     dialogue order, dashless start, room 1 grants nothing, room 2 grants dash
   - `Godot --headless --path . res://tests/screen_test.tscn` — UI and world stay
-    on separate render surfaces (restyling dialogue can't touch the game)
+    on separate render surfaces (restyling dialogue can't touch the game), and
+    the world's own SubViewport samples NEAREST — a SubViewport built in code
+    does NOT inherit the project's `default_texture_filter=0` setting (that
+    only seeds the ROOT viewport); every SubViewport starts on the ENGINE's
+    hardcoded Linear default regardless, silently. This shipped once: the
+    WHOLE GAME rasterised soft instead of crisp — not one prop, everything
+    inside `Screen.viewport` — and nothing errored or warned. Found by
+    sampling actual rendered pixels (a screenshot's own nearest-neighbour
+    upscale on the way to disk, in `room_shot.gd` and elsewhere, cannot
+    un-blend pixels that were already blended before it ran)
   - `Godot --headless --path . res://tests/lemon_test.tscn` — collectibles:
-    pickup, and the total surviving level changes and death
+    pickup, and the total surviving level changes and death. Also covers the
+    strawberry rule's ground check: a CrumblingPlatform reads as floor for
+    movement but not as the SOLID ground `Player.is_on_solid_ground()` asks
+    for, so a fruit armed above one stays pending until it gives way and he
+    reaches the real floor below
+  - `Godot --headless --path . res://tests/lemon_glow_test.tscn` — the 'z'
+    ability: spend one lemon for `lemon_glow_time` seconds of light on its
+    OWN node, LemonGlowLight, rather than the Glow group's GlowLight (that
+    one is NoteSequence's reward and it revokes on every room change in the
+    whole game — sharing it would snuff out a lemon you just spent the
+    moment you walk through any door). Pressing again while already lit
+    spends nothing. Blinks a warning through the last `lemon_glow_flicker_time`
+    seconds, off a square wave driven by the timer itself rather than an
+    accumulating clock, so it can be set directly and checked without ticking
+    through real seconds. Dying cuts it immediately and does not refund the
+    lemon
   - `Godot --headless --path . res://tests/death_test.tscn` — exactly one death
     counted per respawn, from a hazard and from the kill plane alike
   - `Godot --headless --path . res://tests/slide_test.tscn` — SlideZone: control
@@ -84,6 +108,13 @@ so the two agree now. The tiles are still placeholder art.
     diagonal-dash lesson: the prompt arrives at the dash point, a FLAT dash
     does not clear it and an up-forward one does, and only that room's
     crumbling panels are relaxed
+  - `Godot --headless --path . res://tests/jump_tutorial_test.tscn` — Level_1's
+    jump lesson: the prompt appears after `arm_distance` and not before,
+    FOLLOWS him rather than pinning him (unlike DashTutorial, nothing here
+    takes his controls), starts on the keyboard art and swaps live to the
+    controller art on a real joypad button — and back on a real keypress —
+    clears on an actual jump and not from anything else, and a death in the
+    room re-arms it measured from where he stands back up, not where he died
   - `Godot --headless --path . res://tests/cone_spikes_test.tscn` — the 8px
     conical spikes: all four facings build five cells from their OWN sheet with
     the kill box leaning towards the points, the lethal band stops exactly where
@@ -137,7 +168,31 @@ so the two agree now. The tiles are still placeholder art.
     thought-hazard tiles: the ThoughtHazards IntGrid layer imports as a
     pass-through TileMapLayer (collision disabled), the world caches it on room
     entry, an empty cell is not a hazard, a painted cell IS, and stepping into
-    one kills the player on the next physics tick
+    one kills the player on the next physics tick. **Also covers the per-cell
+    animation**: a painted cell actually cycles frames over time, two painted
+    cells read DIFFERENT frames at the same tick (decorrelated, not one shared
+    clock), and the same layout reproduces the same frame sequence on a fresh
+    scan (hashed from the cell coordinate, not RNG)
+  - `Godot --headless --path . res://tests/wall_slide_test.tscn` — a wall on
+    only ONE side must never read as a wall-slide on the other: falling next
+    to a lone wall always slides on the side it is actually on with
+    `is_on_wall()` genuinely true throughout, and holding away from the only
+    wall present never enters WALL_SLIDE at all. **Also covers the
+    squeeze/chimney entry specifically**, which is what was actually broken
+    and reported from play in Level_1: a one-cell shaft mouth that is
+    two-sided for only a few pixels (a stair tread's lip ending right where a
+    real wall keeps going) used to lock `wall_dir` onto the side about to
+    vanish — `_near_wall_dir()` short-circuits on whichever side it checks
+    first, which is the right question for its OTHER caller (the wall-jump
+    buffer's "is there a wall on either side") and the wrong one here — and
+    then drag him sideways into open air toward it, because the squeeze
+    continuation check deliberately skips `is_on_wall()` (a genuine chimney
+    has ~1px of clearance either side and is never actually touching, see
+    `chimney_test.tscn`) so nothing caught the wrong side once it was locked
+    in. Fixed by `_walled_both_sides()` — checks BOTH sides, no
+    short-circuit — replacing `_near_wall_dir()` for the squeeze path, and by
+    no longer nudging him wall-ward at all while squeezing, since a chimney
+    already centres him with nothing pulling him off it
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -152,6 +207,20 @@ so the two agree now. The tiles are still placeholder art.
   position — which this used to do — reads that row backwards, and every "next
   room" fallback then hands you the room you just left. Renumber when you insert
   a room, and re-letter that room's lights with it (`LIGHTING.md`).
+  **This is not cosmetic.** No Exit in the `.ldtk` carries a NextRoom
+  override — checked directly, every one is empty — so `LdtkWorld.rooms`'s
+  array order is not just how the debug picker numbers things, it is the ONLY
+  thing that routes actual play from one room to the next. A handful of rooms
+  (`Level_V1`..`Level_V4`, `Level_v5`, `Level_v6`) carry no number of their own
+  but do have a real place in the sequence, between `Level_6` and `Level_7` —
+  `tools/renumber_levels_v2.py`'s block, extended since. Trailing-digit sorting
+  cannot place those on its own (`Level_V1` shares its digit with `Level_1`,
+  which is exactly the bug this note used to be about: they interleaved one per
+  numbered room instead of landing together, and the walk from `Level_0` dead-
+  ended at `Level_v6` with rooms 7-25 unreachable). They are pinned by hand in
+  `LdtkWorld.INSERTED_ROOMS` instead — read that table's own comment, and add to
+  it rather than trusting a new room's digits, before assuming a fifth one will
+  sort itself into place.
 - **A renamed level needs the import CACHE cleared, not just a re-import.**
   Deleting `ldtk/levels/*.scn` is not enough — the world scene itself is cached
   in `.godot/imported/hooshang_claude.ldtk-*`, and a stale one loaded two rooms
@@ -243,6 +312,39 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   (`has_dash`); cutscenes use `input_locked`; all visuals go through
   `_update_visual()`. Cosmetic asks come in via methods (`flash()`,
   `set_camera_limits()`), not reach-ins.
+  **Jump is 'c' only now** — 'z' used to be a second jump key (and the key the
+  dialogue box/pause menu/main menu all read as "confirm", since they check the
+  `jump` action rather than a raw keycode) but is now its own `glow` action: the
+  lemon-glow ability below. A controller still has two ways to jump (button 0
+  and the stick's own jump binding are untouched); it is specifically the
+  SECOND keyboard key that moved.
+  **The lemon glow (`glow` action, 'z') is its own node, LemonGlowLight, not
+  the Glow group's GlowLight.** That one belongs to NoteSequence (the musical-
+  tile puzzle's reward) and NoteSequence revokes it on every room change in the
+  whole game, not just leaving its own room (`note_sequence.gd`) — sharing it
+  would mean walking through any door snuffs out a lemon you just spent.
+  `_try_lemon_glow()` spends one lemon (`Collectibles.spend()`) for
+  `lemon_glow_time` seconds, ignored while one is already running rather than
+  refreshing it. The last `lemon_glow_flicker_time` seconds blink as a warning,
+  off a square wave read straight from the countdown (`_apply_lemon_glow()`)
+  rather than an accumulating clock, so a test can set the timer directly. Dying
+  snaps it off immediately and does not refund the lemon — same as every other
+  run stat a death does not undo.
+  **LemonGlowLight is a Sprite2D, not a Light2D — it SHIPPED as a PointLight2D
+  and was wrong.** A real light MULTIPLIES the surface it falls on, so it
+  visibly brightened an unlit stretch of room and did almost nothing crossing
+  an already-lit patch near a lamp or ceiling panel, which played back as "the
+  player only glows in shadow" rather than a steady glow that follows him
+  everywhere — the same trap DarkThought's halo documents, plus it was
+  competing for this renderer's per-canvas-item light cap (16) in rooms already
+  busy with fixtures. `_apply_lemon_glow()` now builds it as unshaded and
+  additively blended, same recipe as that halo: adds flat instead of
+  multiplying, so it reads the same regardless of what is already lit beneath
+  it, is exempt from the light cap, and cannot be crushed by CanvasModulate
+  0.05 either. Flicker is now `.visible` on/off rather than an energy of 0;
+  brightness lives in `.modulate`, scaled down by the same `PAINT_GAIN` (0.35,
+  office-brick albedo) that halo uses, since paint at equal energy lands
+  roughly 1/albedo too bright next to the light it replaced.
 - `scripts/level_base.gd` — `LevelBase`: camera limits, checkpoint group wiring,
   kill plane (`kill_y`), fast respawn (~0.15s), R = retry, and exit wiring — any
   Area2D in the `exit` group advances the game (see below). Levels `extends
@@ -261,6 +363,10 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   pickup the fruit flies from where it was taken into the counter, and the
   DISPLAYED number ticks over on arrival — `total` banks immediately, so nothing
   else ever waits on the animation (`Collectibles.shown()` is the display).
+  `spend(amount)` is the other direction — Player's lemon-glow ability pays with
+  it — and fails (returns false, changes nothing) rather than letting `total` go
+  negative; unlike a pickup there is nothing in flight, so the shown number
+  drops immediately instead of trailing `total`.
 - `systems/points.gd` — `Points` autoload: the run's SCORE, top-left under the
   fruit count. Not the fruit count times 1000: Collectibles counts lemons and a
   save is really about which fruit are still out there, so the two are separate
@@ -273,6 +379,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `Player.die()` calls `Deaths.record()` — the player reports its own death
   rather than the counter hunting for a player, which would race every level's
   different build order.
+- `systems/input_device.gd` — `InputDevice` autoload: which kind of input he
+  was last seen using, keyboard/mouse or a controller. Godot has no "which
+  device is active" query, only events, so this just watches every one that
+  arrives via `_input()` and remembers the last KIND — a joypad BUTTON or a
+  stick past `AXIS_DEADZONE`, not every axis event, since those fire
+  continuously at rest with centering noise that would flap the reading back
+  and forth for no reason. Exists for on-screen prompts that have to show a
+  keyboard key on a keyboard and a controller button on a pad; first (and so
+  far only) user is `JumpTutorial`.
 - `systems/save_game.gd` — `SaveGame` autoload: three slots in
   `user://saves/slot_N.json`, versioned by a `schema` field and written
   tmp-then-rename so an alt-F4 mid-write costs the newest save and not the slot.
@@ -357,10 +472,14 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   red rim, drifting a repeating path through the air and lethal to touch. ONE
   entity with fields, deliberately not four like the spike strips — direction
   there is a binary you can forget to set and the failure is silent, whereas the
-  motion here is NUMBERS (`Motion`, `Amplitude`, `Speed`, `Phase`, `Clockwise`),
-  two thoughts in one room can legitimately want different paths, and one whose
-  mode nobody set still visibly drifts. **The placed point is the CENTRE of the
-  path in all three modes** — a CIRCLE orbits it rather than starting on it. The
+  motion here is NUMBERS (`Motion`, `Amplitude`, `Speed`, `Phase`, `Clockwise`,
+  `Angle`), two thoughts in one room can legitimately want different paths, and
+  one whose mode nobody set still visibly drifts. **The placed point is the
+  CENTRE of the path in all modes** — a CIRCLE orbits it rather than starting on
+  it. `Motion` is `VERTICAL / HORIZONTAL / CIRCLE / LINEAR`; LINEAR swings along
+  an arbitrary `Angle` (degrees, 0 = +X), and VERTICAL/HORIZONTAL are just LINEAR
+  at 90/0 kept as their own values so every already-placed thought is unchanged.
+  The
   red rim is DRAWN as well as lit: a `PointLight2D` alone is not enough against
   office walls already at 255 in the red channel, the case `LIGHTING.md` records
   for Rumi's gift. Anchored against `RoomCollapse` (it is floating, not resting),
@@ -368,13 +487,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   cycle at the start — called from both of `ldtk_world.gd`'s reset sites, beside
   `CrumblingPlatform.reset_all`. Art from `tools/gen_dark_thought.py`, the entity
   from `tools/ldtk_add_dark_thought.py`.
-  `hazards/LightThought.tscn` is the SAME PROP in the other tone — the same
-  script, path, fields and kill box, `tone = LIGHT` — and the sheets are two
-  palettes off one generator, so the two cannot drift apart. Two LDtk entities
-  rather than a Tone field purely so the editor SHOWS which you placed
-  (`tools/ldtk_add_light_thought.py`, which builds its definition from the
-  DarkThought one and checks it key-for-key rather than transcribing the
-  fieldDef shape a second time).
+  `hazards/LightThought.tscn` and `hazards/GreyThought.tscn` are the SAME PROP in
+  the other two tones — the same script, path, fields and kill box,
+  `tone = LIGHT` / `tone = GREY` — and the three sheets are three palettes off one
+  generator, so they cannot drift apart. Grey is the NEUTRAL feeling-tone beside
+  the unpleasant (dark) and pleasant (light). Three LDtk entities rather than a
+  Tone field purely so the editor SHOWS which you placed
+  (`tools/ldtk_add_light_thought.py` and `tools/ldtk_add_grey_thought.py`, each
+  building its definition from the DarkThought one and checking it key-for-key
+  rather than transcribing the fieldDef shape again).
   **Both clouds are drawn UNSHADED and the halo is PAINT, not a light** — and
   that is the fix for glows that appeared in some rooms and not others. This
   renderer lights any one canvas item from **at most 16 lights** and drops the
@@ -468,20 +589,33 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `tools/gen_bricks_8px.py` — the four 8px wall tiles (fill, top, left,
   corner). Four is the WHOLE tileset: no tile in the world is hand-placed, and
   the four auto-rules never ask for anything else.
-- `tools/gen_thought_tiles.py` — the four 8px paintable hazard tiles (fill, top
-  edge, left edge, top-left corner), the same layout as the bricks. The body is
-  the DarkThought's dark purple-black; exposed edges carry a 1px hot-red rim
-  with BUBBLY CONTOURS — per-column/row offsets that create cloud-like organic
-  edges rather than straight lines. The contour profiles start and end at the
-  same offset (the seam value) so adjacent tiles tile cleanly; the corner uses
-  both profiles (AND). Auto-rules with flipX/flipY give all eight edge and
-  corner variants. Painted on the `ThoughtHazards` IntGrid layer;
-  `tools/ldtk_add_thought_tiles.py` adds the layer, its tileset, and auto-rules
-  to the LDtk project. `ldtk_level_post_import.gd` disables collision on the
-  layer (pass-through) AND sets `LIGHT_MODE_UNSHADED` via a `CanvasItemMaterial`
-  — without it, `CanvasModulate` 0.05 crushes the dark pixels to invisible, the
-  same trap `DarkThought`, `SunShaft` and `WallPattern` all document.
-  `ldtk_world.gd` checks tile overlap each frame to kill the player.
+- `tools/gen_thought_tiles.py` — the ANIMATED 8px paintable hazard tiles: SIX
+  frames × four tile types (fill, top edge, left edge, corner) on a 32×48 sheet.
+  Contour SHAPES are static — what animates is a travelling brightness wave
+  along the red rim, and (fill tiles only) a pair of dot eyes and a small oval
+  mouth that fade in and back out across two of the six frames, giving the
+  sludge mass a haunted, living quality. Auto-rules with flipX/flipY give all
+  eight edge and corner variants from the four drawn tile types. Painted on
+  the `ThoughtHazards` IntGrid layer; `tools/ldtk_add_thought_tiles.py` adds
+  the layer, its tileset, and auto-rules to the LDtk project.
+  **The six rows are NOT a Godot animation** — `ldtk_level_post_import.gd`
+  disables collision on the layer (pass-through), sets `LIGHT_MODE_UNSHADED`
+  via a `CanvasItemMaterial` (without it `CanvasModulate` 0.05 crushes the dark
+  pixels to invisible, the same trap `DarkThought`, `SunShaft` and
+  `WallPattern` all document), and attaches
+  `scripts/ldtk_thought_hazard_layer.gd` (`ThoughtHazardLayer`) to the layer
+  node — the same "script survives packing, a connection made at import time
+  does not" rule `LdtkDoor`/`LdtkRumiTrigger` already use. Godot's own tile
+  animation is ONE shared clock per atlas tile, so every painted cell would
+  breathe and blink in lockstep — a room full of sludge pulsing as one grid
+  rather than many small living things. `ThoughtHazardLayer` instead treats
+  the six rows as six ordinary addressable tiles and drives every painted cell
+  on its OWN clock, at its OWN speed (0.85–1.15x), started at its OWN phase —
+  both HASHED from the cell's coordinate (not RNG: a room has to look the same
+  way every time you walk into it, the same reason `DarkThought.reset_all()`
+  exists), so two cells never coincidentally sync and the whole layout is
+  reproducible run to run. `ldtk_world.gd` checks tile overlap each frame to
+  kill the player, unrelated to which frame is currently drawn.
 - `tools/gen_cone_spikes.py` — the 8px cone sheets, four facings from one drawn
   floor sheet, same transform table as `gen_glass_spikes.py`. The PALETTE and
   proportions are measured off a Pixellab generation; the bitmap is not reused,
@@ -492,8 +626,8 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   entirely made of. `tools/ldtk_add_cone_spikes.py` adds the four entities and
   their four 8px tilesets, as TEXT rather than a json round trip — see its
   docstring for why that matters on a 1MB project file.
-- `tools/gen_dark_thought.py` — the drifting clouds, BOTH tones, cut from one
-  generated strip.
+- `tools/gen_dark_thought.py` — the drifting clouds, ALL THREE tones, cut from
+  one generated strip.
   Three things it has to do that a crop-and-resize does not. The frames are cut
   by CONNECTIVITY: Pixellab returned EIGHT stamps on a 40px pitch rather than the
   five asked for, and the two on the ends are clipped by the canvas edge, so
@@ -507,11 +641,15 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   the loop is a BREATH, a 12/13/12/11px height cycle inside a fixed cell, rather
   than the sideways roil the strip suggests — the prop is already travelling, so
   a drawn offset reads as the sprite lagging its hitbox.
-  It writes `dark_thought.png` and `light_thought.png` from one cut and one
-  reduction, differing only in the body ramp — verified: all 160 rim pixels are
-  byte-identical between the sheets and all 429 body pixels changed. Two scripts
-  would let a retimed breath land in one and not the other, which is two hazards
-  that no longer read as the same object.
+  It writes `dark_thought.png`, `light_thought.png` and `grey_thought.png` from
+  ONE cut and ONE reduction, differing only in the body ramp (grey is the third,
+  NEUTRAL feeling-tone between the unpleasant dark and the pleasant light) —
+  verified in the same run: every rim pixel is byte-identical across all three
+  sheets and 95%+ of body pixels differ between each pair. One script for all
+  three tones, because separate scripts would let a retimed breath land in one
+  and not the others, which is hazards that no longer read as the same object.
+  (A wobbly-circle PROCEDURAL rewrite was tried and reverted — it read as
+  blobs rather than clouds; this Pixellab-cut version is the one that ships.)
 - `tools/gen_lemon.py` — the lemon collectible, cut from a generated bounce
   sheet. Two things it has to do that a crop-and-resize does not. The source is
   a JPEG with the **transparency checkerboard baked in as pixels**, and JPEG

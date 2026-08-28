@@ -90,7 +90,7 @@ ENUM = "ThoughtMotion"
 ## the order — but keeping them in step means a reader can put the two side by
 ## side, which is the only thing that catches a value added to one and not the
 ## other.
-MOTIONS = ["Vertical", "Horizontal", "Circle"]
+MOTIONS = ["Vertical", "Horizontal", "Circle", "Linear"]
 ## LDtk stores a value's editor colour as a plain int. White, like every value
 ## in the four enums already here.
 ENUM_COLOR = 16777215
@@ -117,6 +117,9 @@ FIELDS = [
      "Circle only: 1 goes clockwise on screen, 0 anticlockwise. A number and "
      "not a checkbox — see the note at the top of "
      "tools/ldtk_add_dark_thought.py."),
+    ("Angle", 0.0,
+     "Linear only: the direction of travel in degrees. 0 = right (+X), "
+     "90 = down (+Y). Vertical is Linear at 90, Horizontal is Linear at 0."),
 ]
 
 

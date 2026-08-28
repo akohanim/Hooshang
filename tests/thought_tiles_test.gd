@@ -70,7 +70,88 @@ func _run() -> void:
 		else:
 			_check("tile source exists on the layer", false)
 
+		# --- per-cell randomized animation ---------------------------------
+		#
+		# Godot's own tile animation is ONE shared clock per atlas tile — every
+		# painted cell plays the identical frame at the identical instant,
+		# world-wide. scripts/ldtk_thought_hazard_layer.gd fixes this by driving
+		# each cell on its OWN clock and OWN speed, hashed from its coordinate.
+		# Prove three things: painted cells actually change frame over time (it
+		# still animates), different cells read different frames at the same
+		# tick (decorrelated — not secretly one shared clock with an offset that
+		# happens to look different), and the SAME layout reproduces the SAME
+		# frame sequence on a fresh scan (hashed, not RNG — a room has to look
+		# the same way every time you walk into it).
+		if source_id != -1:
+			var coords: Array[Vector2i] = []
+			for i in 8:
+				coords.append(Vector2i(i, 0))
+
+			var anim_a := _build_anim_layer(layer.tile_set, source_id, coords)
+			add_child(anim_a)
+			await get_tree().process_frame
+
+			var frames_over_time: Array[Array] = []
+			for tick in 200:  # ~3.3s of physics time — several cycles at any speed
+				anim_a._process(1.0 / 60.0)
+				var frames: Array[int] = []
+				for c in coords:
+					frames.append(anim_a.get_cell_atlas_coords(c).y)
+				frames_over_time.append(frames)
+
+			var seen: Dictionary = {}
+			for frames in frames_over_time:
+				seen[frames[0]] = true
+			_check("thought tiles: a painted cell actually animates over time  "
+					+ "[%d distinct frames seen]" % seen.size(), seen.size() > 1)
+
+			var diverged := false
+			for frames in frames_over_time:
+				for f in frames:
+					if f != frames[0]:
+						diverged = true
+						break
+				if diverged:
+					break
+			_check("...and different cells read different frames at the same tick "
+					+ "(decorrelated, not one shared clock)", diverged)
+
+			# Reproducibility: a second, freshly scanned layer painted the SAME
+			# way must land on the exact same frame per cell after the same
+			# number of ticks — the phase comes from the cell coordinate, not
+			# from anything that could differ between runs.
+			var anim_b := _build_anim_layer(layer.tile_set, source_id, coords)
+			add_child(anim_b)
+			await get_tree().process_frame
+			for tick in 200:
+				anim_b._process(1.0 / 60.0)
+
+			var reproduced := true
+			for c in coords:
+				if anim_a.get_cell_atlas_coords(c) != anim_b.get_cell_atlas_coords(c):
+					reproduced = false
+					break
+			_check("...and the same layout reproduces the same frames on a fresh "
+					+ "scan (hashed, not random)", reproduced)
+
+			anim_a.queue_free()
+			anim_b.queue_free()
+
 	_finish()
+
+
+## A standalone TileMapLayer, painted at `coords` with the fill tile and
+## carrying the real animation driver — built fresh so its _ready() scans a
+## known, controlled set of cells rather than whatever the TEST room happens
+## to have painted at import time.
+func _build_anim_layer(tile_set: TileSet, source_id: int,
+		coords: Array[Vector2i]) -> TileMapLayer:
+	var l := TileMapLayer.new()
+	l.tile_set = tile_set
+	for c in coords:
+		l.set_cell(c, source_id, Vector2i(0, 0))
+	l.set_script(load("res://scripts/ldtk_thought_hazard_layer.gd"))
+	return l
 
 
 func _check(what: String, ok: bool) -> void:

@@ -58,7 +58,7 @@ const REACH := 512.0
 ##
 ## One tile, not a hair's breadth. A ConveyorBelt's collision box stops a few
 ## pixels short of the bottom of its cell, so EVERY belt in the game reads as
-## hovering 3-9px up — measured in Level_15, where a 2px threshold called eight
+## hovering 3-9px up — measured in Level_16, where a 2px threshold called eight
 ## floor-level belts airborne and dropped them by single digits. That is the
 ## "whole room twitches" failure this constant exists to prevent, and the honest
 ## line is the grid the rooms are built on: less than a cell of air under it and
@@ -140,7 +140,7 @@ static func _airborne_in(room: Node2D) -> Array[Node2D]:
 	# ConveyorBelt carries a walkable floor on layer 1, and a NoteTile is a solid
 	# body outright, so a prop hanging above one measures its landing as "resting
 	# on that" — and then the thing under it falls too, leaving it stranded in
-	# mid-air with the collapse already finished. Level_16 and Level_20 each ended
+	# mid-air with the collapse already finished. Level_17 and Level_21 each ended
 	# a collapse with four props still hanging, for exactly this.
 	#
 	# Nothing that is itself coming down counts as ground. Only the room does.

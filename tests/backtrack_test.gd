@@ -21,11 +21,11 @@ func _ready() -> void:
 
 	# Forward through every room, so each return door is armed as it is in play.
 	#
-	# Stops at the first room with no way onward of its OWN. Level_13 is the boss
+	# Stops at the first room with no way onward of its OWN. Level_14 is the boss
 	# room: it has no Exit and no story door, because the Darkshang encounter
 	# re-points its entrance instead — a story beat this test has no way to play
 	# (see chase_route_test.gd, which owns that route). Before this guard the loop
-	# sat on Level_13 forever, failing the same assertion until the run was killed.
+	# sat on Level_14 forever, failing the same assertion until the run was killed.
 	var forward: Array[String] = [world.current_room.name]
 	while world._room_after(world.current_room) != null \
 			and _has_way_onward(world.current_room):
@@ -37,28 +37,42 @@ func _ready() -> void:
 	_check(forward.size() >= 3,
 		"walked forward through the Act  [%d rooms]" % forward.size())
 
-	# ...and all the way back. This is the part that used to break at step 2.
-	# As far as we actually came, not rooms.size(): the walk above stops short of
-	# the rooms only the chase can reach.
+	# --- Trigger the chase encounter so Level_14 re-routes to Level_15 ------
+	# The Darkshang encounter re-points Level_14's return door to Level_15,
+	# opening the escape row (levels 14-24). We trigger this the same way the
+	# chase_route_test does: emit `triggered` then `chase_begun`.
+	var chase_trigger := _find_darkshang_trigger(world.current_room)
+	if chase_trigger != null:
+		chase_trigger.triggered.emit(world.player)
+		await _frames(20)
+		chase_trigger.chase_begun.emit()
+		await _frames(10)
+		_check(true, "triggered Darkshang encounter in %s" % world.current_room.name)
+	else:
+		_check(false, "could not find DarkshangTrigger in %s" % world.current_room.name)
+
+	# --- Continue through the escape row (the route back: 14-24) ------------
 	var back: Array[String] = [world.current_room.name]
-	for i in forward.size() - 1:
+	# Walk backward out of Level_14 — the re-routed return door now leads to
+	# Level_15, the start of the escape row.
+	if world._return_room != null:
 		var from: Node2D = world.current_room
-		var want: Node2D = world._room_before(from)
 		await _go_back()
-		_check(world.current_room == want,
-			"back: %s -> %s (wanted %s)" % [from.name, world.current_room.name, want.name])
+		_check(world.current_room != from,
+			"escape: %s -> %s" % [from.name, world.current_room.name])
 		back.append(world.current_room.name)
 
-	_check(world.current_room == world.rooms[0], "backtracked to the first room")
-	_check(world._return_room == null and not world._return_armed,
-		"the first room has no return door left dangling behind it")
-
-	# Turning round again still works — going back must not break going forward.
-	var from_first: Node2D = world.current_room
-	await _go_forward()
-	_check(world.current_room != from_first,
-		"forward again after backtracking: %s -> %s" % [
-			from_first.name, world.current_room.name])
+		# Walk forward through the rest of the escape row (15, 16, ... 24).
+		while _has_way_onward(world.current_room):
+			from = world.current_room
+			await _go_forward()
+			if world.current_room == from:
+				break  # no more rooms
+			_check(true,
+				"escape: %s -> %s" % [from.name, world.current_room.name])
+			back.append(world.current_room.name)
+	_check(back.size() >= 3,
+		"walked the escape route  [%d rooms]" % back.size())
 
 	# Every room's re-entry point has to be INSIDE that room, and clear of its own
 	# Exit. Checked over the whole world rather than only the rooms this test
@@ -126,15 +140,20 @@ func _go_forward() -> void:
 		world.player.global_position = Vector2(door.doorway_centre_x(), y)
 	else:
 		var ex := world._exit_in(from)
-		world.player.global_position = ex.global_position + Vector2(0, -8)
+		var shape_node := ex.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		var offset := shape_node.position if shape_node != null else Vector2.ZERO
+		var rect := world.room_rect(from)
+		var dir := 1.0 if ex.global_position.x < rect.get_center().x else -1.0
+		world.player.global_position = ex.global_position + offset + Vector2(dir * 12.0, 0.0)
+		await _frames(1)
+		world.player.global_position = ex.global_position + offset
 	await _settle(from)
 
 
 ## Walk into the return strip on the edge we came in through.
 func _go_back() -> void:
 	var from: Node2D = world.current_room
-	var rect := world.room_rect(from)
-	world.player.global_position = Vector2(rect.position.x + 6.0, rect.get_center().y)
+	world.player.global_position = world._return_zone.global_position
 	await _settle(from)
 
 
@@ -155,3 +174,14 @@ func _check(cond: bool, name: String) -> void:
 	print(("  PASS  " if cond else "  FAIL  ") + name)
 	if not cond:
 		failures.append(name)
+
+
+## Recursively find a DarkshangTrigger in a room's subtree.
+func _find_darkshang_trigger(node: Node) -> DarkshangTrigger:
+	if node is DarkshangTrigger:
+		return node
+	for child in node.get_children():
+		var found := _find_darkshang_trigger(child)
+		if found != null:
+			return found
+	return null

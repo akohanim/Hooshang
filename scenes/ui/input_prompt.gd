@@ -44,7 +44,11 @@ func _ready() -> void:
 
 
 ## Float it in over `at` (a world position — the spot he is standing on).
-func show_at(at: Vector2) -> void:
+## `texture` defaults to the dash art so DashTutorial's existing call needs no
+## change; a lesson with more than one picture (JumpTutorial's keyboard vs.
+## controller art) passes its own.
+func show_at(at: Vector2, texture: Texture2D = ART) -> void:
+	_sprite.texture = texture
 	global_position = at + Vector2(0.0, -lift)
 	_sprite.position.y = pop_from
 	var t := create_tween().set_parallel()
@@ -52,6 +56,14 @@ func show_at(at: Vector2) -> void:
 	t.tween_property(_sprite, "position:y", 0.0, pop_time) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	t.chain().tween_callback(_start_bob)
+
+
+## Swap the picture on a prompt that is already up — JumpTutorial calls this
+## when InputDevice reports he switched between keyboard and controller mid
+## display, so the badge he is looking at never lies about what to press.
+func set_texture(texture: Texture2D) -> void:
+	if _sprite != null:
+		_sprite.texture = texture
 
 
 func _start_bob() -> void:

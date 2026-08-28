@@ -30,7 +30,7 @@ var shadow: Darkshang
 
 
 func _ready() -> void:
-	LdtkWorld.debug_start_room = "Level_13"
+	LdtkWorld.debug_start_room = "Level_14"
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	Screen.set_scene(world)
 	for i in 30:
@@ -45,7 +45,7 @@ func _ready() -> void:
 	for node in get_tree().get_nodes_in_group("darkshang"):
 		if node is Darkshang:
 			shadow = node
-	_check(shadow != null, "Level_13 has a Darkshang")
+	_check(shadow != null, "Level_14 has a Darkshang")
 	if shadow == null:
 		return _finish()
 	_check(shadow.entry_hold_distance > 0.0,

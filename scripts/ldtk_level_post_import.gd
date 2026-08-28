@@ -34,6 +34,12 @@ const GEOMETRY_LAYER := "Collisions"
 ## Paintable thought-hazard tiles — pass-through (no world collision), and the
 ## kill check lives in ldtk_world.gd, not in physics.
 const THOUGHT_LAYER := "ThoughtHazards"
+## The runtime driver that gives each painted cell its own animation clock —
+## see the script's own header for why this cannot be Godot's built-in tile
+## animation. Attached here, not connected here: a script survives being
+## packed into the saved .scn, the way LdtkDoor and LdtkRumiTrigger are also
+## swapped onto their nodes at import time.
+const THOUGHT_LAYER_SCRIPT := preload("res://scripts/ldtk_thought_hazard_layer.gd")
 ## The panel tiles, and the emission each one wears. Two, because the ceiling is
 ## painted in two orientations — `ceiling_flor` is a surface seen edge on and
 ## `ceiling` is the room's own roof seen from below — and their panels sit at
@@ -88,6 +94,7 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 			var mat := CanvasItemMaterial.new()
 			mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 			layer.material = mat
+			layer.set_script(THOUGHT_LAYER_SCRIPT)
 		elif Z_BANDS.has(layer.name):
 			layer.z_index = Z_BANDS[layer.name]
 		if layer.name == GEOMETRY_LAYER:

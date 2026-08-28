@@ -119,7 +119,7 @@ func _check_room(room: Node2D) -> bool:
 	# Measured only while he is still IN this room. A launch that ends badly
 	# drops him past the kill plane, and the respawn that follows puts him at the
 	# run's checkpoint — which can be in another row of rooms entirely. Left
-	# unguarded that lands in `peak` as a reading of THIS room's ceiling: Level_15
+	# unguarded that lands in `peak` as a reading of THIS room's ceiling: Level_16
 	# reported a head height of 242 against a ceiling of 800, "706px of reach",
 	# from a jump that never left the floor.
 	var reach: Rect2 = world.room_rect(room).grow(CELL * 4.0)

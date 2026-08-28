@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/SunShaft.tscn" id="12_shaft"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/WallPattern.tscn" id="13_wallpat"]
 [ext_resource type="Script" uid="uid://r7t5ujuaujk5" path="res://scripts/dash_tutorial.gd" id="14_dashtut"]
+[ext_resource type="Script" path="res://scripts/jump_tutorial.gd" id="15_jumptut"]
 
 [node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
@@ -52,7 +53,7 @@ position = Vector2(3752, 220)
 position = Vector2(4852, 220)
 
 [node name="MoonWindowRoom11B" parent="Backdrop" unique_id=78536781 instance=ExtResource("8_moon")]
-position = Vector2(5152, 220)
+position = Vector2(5153, 220)
 
 [node name="MoonWindowRoom8" parent="Backdrop" unique_id=1137299729 instance=ExtResource("8_moon")]
 position = Vector2(2652, 220)
@@ -407,7 +408,10 @@ blood_moon_glow = NodePath("../Lights/MoonGlowRoom11")
 blood_moon_windows = Array[NodePath]([NodePath("../Backdrop/MoonWindowRoom11B")])
 blood_moon_glows = Array[NodePath]([NodePath("../Lights/MoonGlowRoom11B")])
 
-[node name="EditorPreview" parent="." unique_id=1043774659 instance=ExtResource("2_ldtk")]
+[node name="EditorPreview" parent="." unique_id=1629788210 instance=ExtResource("2_ldtk")]
 
 [node name="DashTutorial" type="Node" parent="." unique_id=2009312701]
 script = ExtResource("14_dashtut")
+
+[node name="JumpTutorial" type="Node" parent="." unique_id=2158342719]
+script = ExtResource("15_jumptut")

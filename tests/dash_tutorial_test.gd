@@ -69,7 +69,12 @@ func _ready() -> void:
 	# game's job.
 	_check(not tut.lines.is_empty(), "Rumi has something to say  [%d lines]"
 		% tut.lines.size())
-	_check(not tut.gift_lines.is_empty(), "...including the hand-over  [%d lines]"
+	# The hand-over itself is WORDLESS on purpose (see _give_the_dash): he
+	# steps over, swells, and the dash is Hooshang's with no line ahead of it.
+	# Asserting gift_lines stays empty pins that as the design rather than
+	# leaving a check here that used to demand a line silently stop meaning
+	# anything.
+	_check(tut.gift_lines.is_empty(), "...and the hand-over is wordless  [%d lines]"
 		% tut.gift_lines.size())
 	tut.lines = []
 	tut.gift_lines = []

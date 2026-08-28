@@ -22,18 +22,20 @@ extends Hazard
 ## Art: tools/gen_dark_thought.py.
 
 ## Which path it walks. VERTICAL and HORIZONTAL swing +/- `amplitude` either side
-## of where it was placed; CIRCLE orbits it at `amplitude` radius.
-enum Motion { VERTICAL, HORIZONTAL, CIRCLE }
+## of where it was placed; CIRCLE orbits it at `amplitude` radius; LINEAR swings
+## along an arbitrary `angle`.
+enum Motion { VERTICAL, HORIZONTAL, CIRCLE, LINEAR }
 
 ## Which of the two it is. Same hazard, same path, same rim — the body is black
 ## or it is pale, and that is the whole difference. A field rather than a second
 ## class for exactly that reason: two scripts would be free to drift, and a
 ## thought that no longer moves like the other one is not a recolour any more.
-enum Tone { DARK, LIGHT }
+enum Tone { DARK, LIGHT, GREY }
 
 const SHEETS := {
 	Tone.DARK: preload("res://assets/hazards/dark_thought.png"),
 	Tone.LIGHT: preload("res://assets/hazards/light_thought.png"),
+	Tone.GREY: preload("res://assets/hazards/grey_thought.png"),
 }
 const GLOW := preload("res://assets/light_radial.png")
 
@@ -63,6 +65,11 @@ const ART := Vector2(16.0, 12.0)
 @export var phase := 0.0
 ## CIRCLE only: which way round it goes. On screen, where +Y points down.
 @export var clockwise := true
+## LINEAR only: the direction of travel in degrees. 0 = along +X (right),
+## 90 = along +Y (down on screen). VERTICAL is LINEAR at 90, HORIZONTAL is
+## LINEAR at 0 — those keep their own enum values for every already-placed
+## thought.
+@export var angle := 0.0
 
 ## Black cloud or pale one. Nothing else about the prop changes with it: the
 ## path, the speed, the glow and the kill box are all the same either way.
@@ -293,6 +300,9 @@ func _offset(t: float) -> Vector2:
 			# on screen is clockwise. Anticlockwise is that mirrored in y.
 			var y := sin(theta) if clockwise else -sin(theta)
 			return Vector2(cos(theta), y) * amplitude
+		Motion.LINEAR:
+			var rad := deg_to_rad(angle)
+			return Vector2(cos(rad), sin(rad)) * sin(theta) * amplitude
 		_:
 			return Vector2(0.0, sin(theta) * amplitude)
 

@@ -1,71 +1,67 @@
 #!/usr/bin/env python3
-"""Paintable dark-thought hazard tiles for the ThoughtHazards IntGrid layer.
+"""Animated paintable dark-thought hazard tiles for the ThoughtHazards layer.
 
-FOUR tiles on a 32×8 sheet, the same count and layout as the brick tileset:
+SIX frames × four tile types (fill, top edge, left edge, corner) on a 32×48
+sheet.  The contour SHAPES are fixed — the body outline does not morph.  What
+animates is:
 
-    0  fill        2  left edge
-    1  top edge    3  top-left corner
+  1. **Rim flow** — a travelling brightness wave along the red edge, so the
+     outline appears to ripple without changing shape.
+  2. **Ghostly faces** — two dot eyes and a small oval mouth that fade in on
+     the FILL tile for two frames then fade back out, giving the sludge mass
+     a haunted, living quality.
 
-Auto-rules with flipX/flipY give all eight edge and corner variants from these
-four. The order on the sheet IS the tile id the rules reference.
-
-The body is the same dark purple-black as the DarkThought entity sprite
-(sampled from ldtk/art/dark_thought.png). The exposed-edge rim is the same
-hot red. **The edges are BUBBLY** — cloud-like organic contours with two lobes
-rather than straight lines — so a painted cluster reads as an amorphous dark
-mass, not a grid of boxes.
-
-Each contour profile starts and ends at the same offset (the SEAM value), so
-adjacent tiles of the same type connect seamlessly. The corner tile uses BOTH
-contour profiles (AND), producing a smooth concave corner. The fill tile is
-fully opaque interior.
+Based on a PixelLab-generated dark sludge animation (PixelLab jobs c5410b67,
+9c39797a, 87060ee6).  Palette derived from the PixelLab frames: body
+(8,4,10)–(50,30,50), rim (215,70,80).
 
 Re-run after editing: python3 tools/gen_thought_tiles.py
 """
+import math
 import os
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "ldtk", "art")
 CELL = 8
-
-# Sampled from ldtk/art/dark_thought.png — the body ramp.
-BODY_DARK = (12, 8, 15)
-BODY_MID = (22, 14, 22)
-BODY_LIGHT = (35, 20, 32)
-
-# The hot red rim, sampled from the same sheet.
-RIM_HOT = (215, 53, 38)
-RIM_MID = (150, 30, 24)
+FRAMES = 6
 
 # ---------------------------------------------------------------------------
-# Contour profiles — how many pixels from the exposed edge the body starts.
-# Column 0 and column 7 MUST match (the seam), so adjacent tiles tile cleanly.
-# Lower values = body extends further toward the edge (bump peaks at 0).
+# Palette — derived from PixelLab analysis
 # ---------------------------------------------------------------------------
+BODY_DARK  = (8, 4, 10)
+BODY_MID   = (30, 18, 33)
+BODY_LIGHT = (50, 30, 50)
 
-# Top edge: gentle undulation — two bumps, shallow valley between them.
-# Max recession is 2px, bumps extend 1px past baseline. The bubbly quality
-# comes from the irregularity, not the depth.
-CONTOUR_TOP = [1, 0, 0, 1, 2, 0, 0, 1]
+RIM_HOT = (215, 70, 80)
+RIM_DIM = (120, 35, 45)
 
-# Left edge: same gentle treatment.
+# Face — dim red glow, visible against the dark body
+FACE_COLOR = (150, 50, 55)
+FACE_EYES  = {(2, 2), (5, 2)}
+FACE_MOUTH = {(3, 5), (4, 5)}
+FACE_PIXELS = FACE_EYES | FACE_MOUTH
+# Per-frame face visibility: 0 = hidden, 1 = fully visible
+FACE_VIS = [0.0, 0.0, 0.4, 1.0, 0.6, 0.0]
+
+# ---------------------------------------------------------------------------
+# Contour profiles (STATIC — the same in every frame)
+# ---------------------------------------------------------------------------
+CONTOUR_TOP  = [1, 0, 0, 1, 2, 0, 0, 1]
 CONTOUR_LEFT = [1, 0, 0, 1, 1, 0, 0, 1]
 
 
 def _hash(x: int, y: int) -> float:
-    """Repeatable 0-1 noise keyed to tile-local coordinates."""
     h = ((x * 7 + y * 13 + x * y * 3) * 2654435761) & 0xFFFF
     return (h % 100) / 99.0
 
 
 def _lerp(a: tuple, b: tuple, t: float) -> tuple:
-    return tuple(int(a[i] + (b[i] - a[i]) * max(0.0, min(1.0, t)))
-                 for i in range(3))
+    t = max(0.0, min(1.0, t))
+    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(len(a)))
 
 
 def _body_color(x: int, y: int) -> tuple:
-    """Smoky interior color with subtle noise."""
     t = _hash(x, y)
     if t < 0.4:
         c = _lerp(BODY_DARK, BODY_MID, t / 0.4)
@@ -75,83 +71,98 @@ def _body_color(x: int, y: int) -> tuple:
 
 
 # ---------------------------------------------------------------------------
-# Body masks — whether pixel (x, y) is body for each tile type.
-# Out-of-bounds queries model what the NEIGHBOR tile would have at that spot.
+# Body masks (same every frame — contours are static)
 # ---------------------------------------------------------------------------
-
-def _body_top(x: int, y: int) -> bool:
+def _body_top(x, y):
     if 0 <= x < CELL and 0 <= y < CELL:
         return y >= CONTOUR_TOP[x]
-    if y < 0:
-        return False  # exposed edge above
-    return True  # body on other three sides
+    return y >= 0
 
-
-def _body_left(x: int, y: int) -> bool:
+def _body_left(x, y):
     if 0 <= x < CELL and 0 <= y < CELL:
         return x >= CONTOUR_LEFT[y]
-    if x < 0:
-        return False  # exposed edge to the left
-    return True
+    return x >= 0
 
-
-def _body_corner(x: int, y: int) -> bool:
+def _body_corner(x, y):
     if 0 <= x < CELL and 0 <= y < CELL:
         return y >= CONTOUR_TOP[x] and x >= CONTOUR_LEFT[y]
     if y < 0 or x < 0:
-        return False  # exposed edges above and left
+        return False
     return True
 
+def _body_fill(x, y):
+    return True
 
-def _body_fill(x: int, y: int) -> bool:
-    return True  # fully surrounded
-
-
-TILE_TYPES = {
-    "fill": _body_fill,
-    "top": _body_top,
-    "left": _body_left,
+BODY_FNS = {
+    "fill":   _body_fill,
+    "top":    _body_top,
+    "left":   _body_left,
     "corner": _body_corner,
 }
 
 
-def _rim_distance(body_fn, x: int, y: int) -> int:
-    """Distance from the nearest transparent pixel. -1 if not body."""
+def _is_rim(body_fn, x, y):
     if not body_fn(x, y):
-        return -1
-    # Check immediate neighbors (4-connected only for a crisper 1px outline)
+        return False
     for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
         if not body_fn(x + dx, y + dy):
-            return 0
-    return 1  # interior
+            return True
+    return False
 
 
-def draw_tile(name: str) -> Image.Image:
-    """Render one 8×8 tile with organic contours and red rim."""
-    body_fn = TILE_TYPES[name]
+# ---------------------------------------------------------------------------
+# Rim flow — a sine-wave brightness travelling diagonally across the rim
+# ---------------------------------------------------------------------------
+def _rim_color(x: int, y: int, frame: int) -> tuple:
+    phase = (x * 0.9 + y * 0.6) + frame * (math.tau / FRAMES)
+    t = (math.sin(phase) + 1.0) / 2.0
+    return _lerp(RIM_DIM, RIM_HOT, t) + (255,)
+
+
+# ---------------------------------------------------------------------------
+# Tile rendering
+# ---------------------------------------------------------------------------
+TILE_TYPES = ["fill", "top", "left", "corner"]
+
+
+def draw_tile(tile_type: str, frame: int) -> Image.Image:
+    body_fn = BODY_FNS[tile_type]
     img = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
     px = img.load()
 
     for y in range(CELL):
         for x in range(CELL):
-            d = _rim_distance(body_fn, x, y)
-            if d < 0:
-                continue  # transparent
-            if d == 0:
-                px[x, y] = RIM_HOT + (255,)
-            else:
-                px[x, y] = _body_color(x, y)
+            if not body_fn(x, y):
+                continue
+
+            if _is_rim(body_fn, x, y):
+                px[x, y] = _rim_color(x, y, frame)
+                continue
+
+            # Ghostly face on fill tiles only
+            if tile_type == "fill" and (x, y) in FACE_PIXELS:
+                vis = FACE_VIS[frame]
+                if vis > 0:
+                    base = _body_color(x, y)[:3]
+                    px[x, y] = _lerp(base, FACE_COLOR, vis) + (255,)
+                    continue
+
+            px[x, y] = _body_color(x, y)
+
     return img
 
 
-# Sheet order: fill, top, left, corner — matches the auto-rule tile IDs.
-TILES = ["fill", "top", "left", "corner"]
-
-sheet = Image.new("RGBA", (CELL * len(TILES), CELL), (0, 0, 0, 0))
-for i, name in enumerate(TILES):
-    sheet.paste(draw_tile(name), (i * CELL, 0))
+# ---------------------------------------------------------------------------
+# Build the sheet: 4 columns × 6 rows = 32×48 px
+# ---------------------------------------------------------------------------
+sheet = Image.new("RGBA", (CELL * len(TILE_TYPES), CELL * FRAMES), (0, 0, 0, 0))
+for frame in range(FRAMES):
+    for col, tile_type in enumerate(TILE_TYPES):
+        tile = draw_tile(tile_type, frame)
+        sheet.paste(tile, (col * CELL, frame * CELL))
 
 os.makedirs(OUT, exist_ok=True)
 path = os.path.join(OUT, "thought_tiles.png")
 sheet.save(path)
-print("wrote %s  %dx%d  (%s)" % (path, sheet.width, sheet.height, ", ".join(TILES)))
+print("wrote %s  %dx%d  (%d frames × %d tiles)"
+      % (path, sheet.width, sheet.height, FRAMES, len(TILE_TYPES)))

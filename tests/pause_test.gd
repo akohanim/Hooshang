@@ -197,7 +197,7 @@ func _check_retry() -> void:
 	_check(Pause.selected == PauseMenu.Item.RETRY,
 		"holding down moves the cursor to Retry (%d)" % Pause.selected)
 
-	_press(KEY_Z)  # jump = confirm, same key the dialogue box advances on
+	_press(KEY_C)  # jump = confirm, same key the dialogue box advances on
 	await _frames(5)
 	_check(not get_tree().paused and not Pause.open, "choosing Retry lets go of the pause")
 
