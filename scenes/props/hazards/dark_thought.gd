@@ -129,6 +129,16 @@ var _origin := Vector2.ZERO
 ## Seconds since it was placed or last reset. The path is a function of this and
 ## nothing else — see `_process`.
 var _clock := 0.0
+## True while a black & white mushroom's power has turned every dark/light
+## thought's warning glow off world-wide — see set_glow_suppressed() and
+## Player.consume_mushroom(). Kept separate from `glow` (the per-instance
+## authored field) so switching it back off does not have to remember whether
+## the level author had THIS instance's glow on or off to start with.
+var _glow_suppressed := false
+## True once a grey thought has been eaten by the power and dissolved — see
+## _dissolve(). Cleared by reset(), the same "comes back on a room entry or a
+## respawn" rule every other per-visit prop state in this game follows.
+var _removed := false
 
 
 func _ready() -> void:
@@ -238,7 +248,7 @@ const PAINT_GAIN := 0.35
 func _apply_glow() -> void:
 	if _halo == null:
 		return
-	_halo.visible = glow
+	_halo.visible = glow and not _glow_suppressed
 	_halo.scale = Vector2.ONE * light_scale
 	var gain := light_energy * PAINT_GAIN
 	_halo.modulate = Color(light_color.r * gain, light_color.g * gain,
@@ -260,6 +270,54 @@ func _apply_tone() -> void:
 	# carrying for light.
 	if _sprite.material == null:
 		_sprite.material = _unshaded(false)
+
+
+## Overrides Hazard's plain "touch it, die". A black & white mushroom's power
+## (Player.has_thought_immunity()) makes every tone of thought harmless to
+## touch, but not the SAME harmless: dark and light clouds are simply passed
+## through — the power's world-wide glow suppression (set_glow_suppressed) is
+## the only thing that changes about them, and that already happened the
+## instant the mushroom was eaten, not per-touch. A grey one is eaten in turn,
+## the same way the mushroom itself was: it dissolves out of the room rather
+## than merely going quiet, which is the "removes grey clouds" half of the
+## power as opposed to the "pass through black & white" half.
+func _on_body_entered(body: Node2D) -> void:
+	if body is Player and (body as Player).has_thought_immunity():
+		if tone == Tone.GREY:
+			_dissolve()
+		return
+	super._on_body_entered(body)
+
+
+## A grey thought eaten by the power: fades out and stops killing. It does
+## NOT free itself — the room has to present the way it was first found on a
+## retry (see reset()), the same reason a dropped CrumblingPlatform comes
+## back rather than staying gone.
+func _dissolve() -> void:
+	if _removed:
+		return
+	_removed = true
+	# Deferred — this runs inside Hazard's own body_entered flush (the same
+	# restriction mushroom.gd's _on_pickup note explains), and a direct write
+	# here errors and silently fails to apply.
+	set_deferred("monitoring", false)
+	var t := create_tween().set_parallel()
+	if _sprite != null:
+		t.tween_property(_sprite, "modulate:a", 0.0, 0.25)
+	if _halo != null:
+		t.tween_property(_halo, "modulate:a", 0.0, 0.25)
+
+
+## Turn every dark/light thought's warning halo off (or back on) at once — the
+## black & white power neutralising them world-wide the instant it is eaten,
+## rather than one cloud dimming only once it has been touched. Grey ones are
+## excluded: they are eaten on contact instead of merely dimmed (_dissolve).
+static func set_glow_suppressed(tree: SceneTree, on: bool) -> void:
+	for node in tree.get_nodes_in_group("dark_thought"):
+		var thought := node as DarkThought
+		if thought != null and thought.tone != Tone.GREY:
+			thought._glow_suppressed = on
+			thought._apply_glow()
 
 
 ## The kill box, inside the art. Hazard's own version writes to a ColorRect and
@@ -324,8 +382,14 @@ func _frame(i: int) -> AtlasTexture:
 func reset() -> void:
 	_clock = 0.0
 	position = _origin
+	# Undo an eaten grey thought's dissolve, same "comes back on a room entry
+	# or a respawn" rule the cycle reset above already follows.
+	_removed = false
+	monitoring = true
 	if _sprite != null:
 		_sprite.texture = _frame(0)
+		_sprite.modulate.a = 1.0
+	_apply_glow()
 
 
 ## Reset every dark thought in the tree.

@@ -55,8 +55,13 @@ func _ready() -> void:
 		"restyling the dialogue leaves the game viewport untouched (%s)" % Screen.viewport.size)
 	_check(world.player.visual.scale == before_scale,
 		"restyling the dialogue leaves the player's sprite untouched")
+	# Let the entrance finish before dismissing it, or line_finished fires
+	# before say()'s own "await line_finished" is even reached and dismisses
+	# nothing — see dialogue_placement_test.gd's _say()/_close() for the
+	# same fix, with the reasoning written out in full.
+	await _frames(int(maxf(Dialogue.entrance_time, Dialogue.portrait_entrance_time) * 60.0))
 	Dialogue.line_finished.emit()
-	await _frames(5)
+	await _frames(int(Dialogue.entrance_time * 60.0) + 5)
 
 	# Polled input (the controller reads Input directly).
 	var x0 := world.player.global_position.x

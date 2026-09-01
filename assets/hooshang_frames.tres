@@ -40,6 +40,14 @@
 [ext_resource type="Texture2D" uid="uid://q68k7lcyof6m" path="res://assets/hooshang_sprites/chubby/Wall_Slide/east/frame_001.png" id="91_ws1"]
 [ext_resource type="Texture2D" uid="uid://c72qsyvg6nepe" path="res://assets/hooshang_sprites/chubby/Wall_Slide/east/frame_002.png" id="92_ws2"]
 [ext_resource type="Texture2D" uid="uid://cnlnafmil8xqq" path="res://assets/hooshang_sprites/chubby/Wall_Land/east/frame_000.png" id="95_wl0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_000.png" id="100_climb0"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_001.png" id="100_climb1"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_002.png" id="100_climb2"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_003.png" id="100_climb3"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_004.png" id="100_climb4"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_005.png" id="100_climb5"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_006.png" id="100_climb6"]
+[ext_resource type="Texture2D" path="res://assets/hooshang_sprites/chubby/Climb/east/frame_007.png" id="100_climb7"]
 
 [resource]
 animations = [{
@@ -204,5 +212,34 @@ animations = [{
 }],
 "loop": true,
 "name": &"wall_slide",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("100_climb0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb7")
+}],
+"loop": true,
+"name": &"climb",
 "speed": 8.0
 }]

@@ -70,7 +70,11 @@ const RUMI_FACES := {
 	"sorrowful": preload("res://assets/portraits/rumi_sorrowful.png"),
 	"urgent": preload("res://assets/portraits/rumi_urgent.png"),
 	"warm_open": preload("res://assets/portraits/rumi_warm_open.png"),
-	"wistful": preload("res://assets/portraits/rumi_wistful.png"),
+	# "wistful" has no drawing of its own in the current art pass — no reference
+	# was ever supplied for it — so it points at sorrowful, the nearest already-
+	# drawn state emotionally (both are reflective/melancholy) rather than
+	# leaving one state on the old portrait set while the other four moved on.
+	"wistful": preload("res://assets/portraits/rumi_sorrowful.png"),
 }
 
 const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
@@ -211,8 +215,8 @@ const EMOTE_LINES := {
 ## Hooshang is past it the shadow stops dead where it stands — still there, still
 ## visible in the doorway, no longer coming — and nothing can restart it.
 ##
-## The line is the cubicle bulb's world x (`CubicleBulbRoom22`, x = 100). He
-## arrives at the right of room 22 at x = 200 and walks LEFT toward his desk, so
+## The line is the cubicle bulb's world x (`CubicleBulbRoom25`, x = 100). He
+## arrives at the right of room 25 at x = 200 and walks LEFT toward his desk, so
 ## "past" is a smaller x: he crosses under the dead office light and that is the
 ## moment it is over. Deliberately a NUMBER and not a lookup of the lamp — this
 ## script has no business reaching into the Lights node by name — but move the
@@ -669,7 +673,11 @@ func _play_level_v2_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 
 func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
-	player.input_locked = true
+	# freeze(), not a bare input_locked — input_locked alone leaves gravity and
+	# any existing run speed / jump arc running, so a player who reaches this
+	# trigger still moving visibly slides or sails through the first moment of
+	# the conversation instead of standing still for it. See Player.freeze().
+	player.freeze()
 	_rumi_trigger = trigger
 	_dialogue_vside = DialogueBox.VSide.TOP
 	player.look(1)  # face the visitor appearing on the right
@@ -687,7 +695,7 @@ func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 
 	trigger.breathe(false)
 	await trigger.vanish()
-	player.input_locked = false
+	player.unfreeze()
 	trigger.arm_room_door()
 
 
@@ -837,7 +845,7 @@ func _wire_collapse() -> void:
 	# Whatever room the world opened in — the debug picker drops straight into
 	# room 16, and it should be lit and shaking on arrival like any other way in.
 	if _world.current_room != null:
-		_apply_room_mood(_world.current_room, LdtkWorld.play_index(_world.current_room))
+		_apply_room_mood(_world.current_room, LdtkWorld.play_index(_world.current_room) / 100)
 
 	if collapse_first_room > collapse_last_room:
 		return
@@ -867,7 +875,12 @@ func _build_ambience() -> void:
 func _on_room_changed(room: Node2D) -> void:
 	var arriving_from := _last_room
 	_last_room = room
-	var here := LdtkWorld.play_index(room)
+	# play_index() is scaled by 100 (LdtkWorld.index_in_name) so an inserted
+	# room can land between two numbered ones — but every export in this
+	# section (collapse_first_room, glow_rooms, ambience_first_room, ...) is
+	# still written as the plain LEVEL NUMBER (16, not 1600). Undo the scale
+	# here, once, rather than rescaling every export to match it.
+	var here := LdtkWorld.play_index(room) / 100
 	_apply_room_mood(room, here)
 	if here < collapse_first_room or here > collapse_last_room:
 		return
@@ -875,8 +888,10 @@ func _on_room_changed(room: Node2D) -> void:
 		return
 	# Only on the way THROUGH, and only from the room before it. Backtracking
 	# into a room ahead of him would otherwise pull its ceiling down while he is
-	# walking the wrong way, and the beat would play out of order.
-	if arriving_from == null or LdtkWorld.play_index(arriving_from) != here - 1:
+	# walking the wrong way, and the beat would play out of order. Asked of the
+	# world's own room order (_room_before) rather than "here - 1": with
+	# INSERTED_ROOMS in play, adjacent play_index values are not always 1 apart.
+	if arriving_from == null or _world._room_before(room) != arriving_from:
 		return
 	_collapsed[room.name] = true
 	_play_collapse(room)

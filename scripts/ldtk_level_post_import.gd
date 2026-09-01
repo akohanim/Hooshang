@@ -40,6 +40,12 @@ const THOUGHT_LAYER := "ThoughtHazards"
 ## packed into the saved .scn, the way LdtkDoor and LdtkRumiTrigger are also
 ## swapped onto their nodes at import time.
 const THOUGHT_LAYER_SCRIPT := preload("res://scripts/ldtk_thought_hazard_layer.gd")
+## A level's LDtk background image (`bgRelPath`) imports as a plain Sprite2D
+## named "BG Image" — see level.gd in the addon. This script makes it lag the
+## camera instead of tracking it 1:1; see its own header for why that is a
+## repositioning script and not a ParallaxLayer.
+const BG_IMAGE_NODE := "BG Image"
+const BG_PARALLAX_SCRIPT := preload("res://scripts/parallax_backdrop.gd")
 ## The panel tiles, and the emission each one wears. Two, because the ceiling is
 ## painted in two orientations — `ceiling_flor` is a surface seen edge on and
 ## `ceiling` is the room's own roof seen from below — and their panels sit at
@@ -82,6 +88,9 @@ const Z_BANDS := {"Background": -1, "Foreground": 1}
 
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
+	var bg := level.get_node_or_null(BG_IMAGE_NODE)
+	if bg is Sprite2D:
+		bg.set_script(BG_PARALLAX_SCRIPT)
 	for child in level.get_children():
 		if child is not TileMapLayer:
 			continue

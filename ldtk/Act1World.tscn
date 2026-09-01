@@ -13,7 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/SunShaft.tscn" id="12_shaft"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/WallPattern.tscn" id="13_wallpat"]
 [ext_resource type="Script" uid="uid://r7t5ujuaujk5" path="res://scripts/dash_tutorial.gd" id="14_dashtut"]
-[ext_resource type="Script" path="res://scripts/jump_tutorial.gd" id="15_jumptut"]
+[ext_resource type="Script" uid="uid://ccm2pxtqdvvev" path="res://scripts/jump_tutorial.gd" id="15_jumptut"]
 
 [node name="Act1World" type="Node2D" unique_id=2070936003]
 script = ExtResource("1_world")
@@ -27,15 +27,15 @@ color = Color(0.05, 0.05, 0.065, 1)
 [node name="MoonWindowRoom3" parent="Backdrop" unique_id=337326383 instance=ExtResource("8_moon")]
 position = Vector2(800, 220)
 
-[node name="MoonWindowRoom12" parent="Backdrop" unique_id=838411554 instance=ExtResource("8_moon")]
-position = Vector2(4000, 860)
+[node name="MoonWindowRoom15" parent="Backdrop" unique_id=838411554 instance=ExtResource("8_moon")]
+position = Vector2(4000, 1244)
 moon_color = Color(0.72, 0.17, 0.15, 1)
 sky_color = Color(0.125, 0.052, 0.125, 1)
 shadow_amount = 0.85
 halo_amount = 0.75
 
-[node name="MoonWindowRoom13" parent="Backdrop" unique_id=1846213278 instance=ExtResource("8_moon")]
-position = Vector2(3500, 860)
+[node name="MoonWindowRoom16" parent="Backdrop" unique_id=1846213278 instance=ExtResource("8_moon")]
+position = Vector2(3500, 1244)
 moon_color = Color(0.79, 0.22, 0.17, 1)
 sky_color = Color(0.1383, 0.06, 0.1258, 1)
 shadow_color = Color(0.37, 0.2167, 0.5933, 1)
@@ -43,26 +43,26 @@ shadow_amount = 0.72
 halo_color = Color(0.625, 0.395, 0.8483, 1)
 halo_amount = 0.7
 
-[node name="MoonWindowRoom9" parent="Backdrop" unique_id=225271873 instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom11" parent="Backdrop" unique_id=225271873 instance=ExtResource("8_moon")]
 position = Vector2(3052, 220)
 
-[node name="MoonWindowRoom10" parent="Backdrop" unique_id=1192060187 instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom12" parent="Backdrop" unique_id=1192060187 instance=ExtResource("8_moon")]
 position = Vector2(3752, 220)
 
-[node name="MoonWindowRoom11" parent="Backdrop" unique_id=78536780 instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom14" parent="Backdrop" unique_id=78536780 instance=ExtResource("8_moon")]
 position = Vector2(4852, 220)
 
-[node name="MoonWindowRoom11B" parent="Backdrop" unique_id=78536781 instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom14B" parent="Backdrop" unique_id=78536781 instance=ExtResource("8_moon")]
 position = Vector2(5153, 220)
 
-[node name="MoonWindowRoom8" parent="Backdrop" unique_id=1137299729 instance=ExtResource("8_moon")]
+[node name="MoonWindowRoom10" parent="Backdrop" unique_id=1137299729 instance=ExtResource("8_moon")]
 position = Vector2(2652, 220)
 
 [node name="MoonWindowRoom6" parent="Backdrop" unique_id=1500267559 instance=ExtResource("8_moon")]
 position = Vector2(2052, 220)
 
-[node name="MoonWindowRoom21" parent="Backdrop" unique_id=1229201285 instance=ExtResource("8_moon")]
-position = Vector2(480, 860)
+[node name="MoonWindowRoom24" parent="Backdrop" unique_id=1229201285 instance=ExtResource("8_moon")]
+position = Vector2(480, 1244)
 moon_color = Color(1, 0.62, 0.38, 1)
 sky_color = Color(0.205, 0.1, 0.13, 1)
 shadow_color = Color(0.52, 0.3, 0.46, 1)
@@ -70,8 +70,8 @@ shadow_amount = 0.05
 halo_color = Color(1, 0.62, 0.34, 1)
 halo_amount = 0.38
 
-[node name="MoonWindowRoom14" parent="Backdrop" unique_id=1572729505 instance=ExtResource("8_moon")]
-position = Vector2(2700, 860)
+[node name="MoonWindowRoom17" parent="Backdrop" unique_id=1572729505 instance=ExtResource("8_moon")]
+position = Vector2(2700, 1244)
 moon_color = Color(0.85, 0.28, 0.19, 1)
 sky_color = Color(0.1517, 0.068, 0.1267, 1)
 shadow_color = Color(0.4, 0.2333, 0.5667, 1)
@@ -79,8 +79,8 @@ shadow_amount = 0.6
 halo_color = Color(0.7, 0.44, 0.7467, 1)
 halo_amount = 0.64
 
-[node name="MoonWindowRoom15" parent="Backdrop" unique_id=1602855732 instance=ExtResource("8_moon")]
-position = Vector2(2300, 860)
+[node name="MoonWindowRoom18" parent="Backdrop" unique_id=1602855732 instance=ExtResource("8_moon")]
+position = Vector2(2300, 1244)
 moon_color = Color(0.9, 0.34, 0.22, 1)
 sky_color = Color(0.165, 0.076, 0.1275, 1)
 shadow_color = Color(0.43, 0.25, 0.54, 1)
@@ -88,8 +88,8 @@ shadow_amount = 0.48
 halo_color = Color(0.775, 0.485, 0.645, 1)
 halo_amount = 0.58
 
-[node name="MoonWindowRoom17" parent="Backdrop" unique_id=86389677 instance=ExtResource("8_moon")]
-position = Vector2(1700, 860)
+[node name="MoonWindowRoom20" parent="Backdrop" unique_id=86389677 instance=ExtResource("8_moon")]
+position = Vector2(1700, 1244)
 moon_color = Color(0.95, 0.45, 0.28, 1)
 sky_color = Color(0.1783, 0.084, 0.1283, 1)
 shadow_color = Color(0.46, 0.2667, 0.5133, 1)
@@ -97,8 +97,8 @@ shadow_amount = 0.3
 halo_color = Color(0.85, 0.53, 0.5433, 1)
 halo_amount = 0.48
 
-[node name="MoonWindowRoom18" parent="Backdrop" unique_id=1701450846 instance=ExtResource("8_moon")]
-position = Vector2(1350, 900)
+[node name="MoonWindowRoom21" parent="Backdrop" unique_id=1701450846 instance=ExtResource("8_moon")]
+position = Vector2(1350, 1284)
 moon_color = Color(0.98, 0.54, 0.34, 1)
 sky_color = Color(0.1917, 0.092, 0.1292, 1)
 shadow_color = Color(0.49, 0.2833, 0.4867, 1)
@@ -106,45 +106,45 @@ shadow_amount = 0.2
 halo_color = Color(0.925, 0.575, 0.4417, 1)
 halo_amount = 0.44
 
-[node name="DawnWindowRoom22" parent="Backdrop" unique_id=39210986 instance=ExtResource("11_dawn")]
-position = Vector2(176, 848)
+[node name="DawnWindowRoom25" parent="Backdrop" unique_id=39210986 instance=ExtResource("11_dawn")]
+position = Vector2(176, 1232)
 
-[node name="WallPatternRoom1" parent="Backdrop" unique_id=121778928 instance=ExtResource("13_wallpat")]
+[node name="WallPatternRoom3" parent="Backdrop" unique_id=121778928 instance=ExtResource("13_wallpat")]
 position = Vector2(700, 250)
 color = Color(0.78, 0.3, 0.95, 1)
 texture_scale = 0.9
 pattern_scale = 0.9
 
-[node name="WallPatternRoom5" parent="Backdrop" unique_id=78019596 instance=ExtResource("13_wallpat")]
+[node name="WallPatternRoom6" parent="Backdrop" unique_id=78019596 instance=ExtResource("13_wallpat")]
 position = Vector2(1975, 250)
 color = Color(0.78, 0.3, 0.95, 1)
 texture_scale = 0.9
 pattern_scale = 0.9
 phase = 4.3
 
-[node name="WallPatternRoom9" parent="Backdrop" unique_id=2142124590 instance=ExtResource("13_wallpat")]
+[node name="WallPatternRoom12" parent="Backdrop" unique_id=2142124590 instance=ExtResource("13_wallpat")]
 position = Vector2(3980, 248)
 color = Color(0.78, 0.3, 0.95, 1)
 texture_scale = 0.9
 pattern_scale = 0.9
 phase = 9.1
 
-[node name="WallPatternRoom14" parent="Backdrop" unique_id=1354074499 instance=ExtResource("13_wallpat")]
-position = Vector2(2960, 888)
+[node name="WallPatternRoom17" parent="Backdrop" unique_id=1354074499 instance=ExtResource("13_wallpat")]
+position = Vector2(2960, 1272)
 color = Color(0.78, 0.3, 0.95, 1)
 texture_scale = 0.9
 pattern_scale = 0.9
 phase = 2.7
 
-[node name="WallPatternRoom18" parent="Backdrop" unique_id=756527122 instance=ExtResource("13_wallpat")]
-position = Vector2(1492, 884)
+[node name="WallPatternRoom21" parent="Backdrop" unique_id=756527122 instance=ExtResource("13_wallpat")]
+position = Vector2(1492, 1268)
 color = Color(0.78, 0.3, 0.95, 1)
 texture_scale = 0.9
 pattern_scale = 0.9
 phase = 11.5
 
-[node name="WallPatternRoom21" parent="Backdrop" unique_id=1296203881 instance=ExtResource("13_wallpat")]
-position = Vector2(340, 890)
+[node name="WallPatternRoom24" parent="Backdrop" unique_id=1296203881 instance=ExtResource("13_wallpat")]
+position = Vector2(340, 1274)
 color = Color(0.78, 0.3, 0.95, 1)
 texture_scale = 0.9
 pattern_scale = 0.9
@@ -168,8 +168,8 @@ phase = 1.7
 [node name="HooshangCubicle" parent="Props" unique_id=1980069411 instance=ExtResource("10_cube")]
 position = Vector2(-784, 256)
 
-[node name="HooshangCubicleRoom22" parent="Props" unique_id=236443452 instance=ExtResource("10_cube")]
-position = Vector2(48, 896)
+[node name="HooshangCubicleRoom25" parent="Props" unique_id=236443452 instance=ExtResource("10_cube")]
+position = Vector2(48, 1280)
 
 [node name="Lights" type="Node2D" parent="." unique_id=1945229334]
 
@@ -190,56 +190,56 @@ light_energy = 0.7
 light_scale = 0.9
 screen_size = Vector2(7, 6)
 
-[node name="MoonGlowRoom1" parent="Lights" unique_id=2044158423 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom4" parent="Lights" unique_id=2044158423 instance=ExtResource("3_lamp")]
 position = Vector2(1069, 367)
 light_color = Color(0.47319007, 0.60152256, 0.89444286, 1)
 light_energy = 3.0
 light_scale = 5.0
 show_body = false
 
-[node name="MoonGlowRoom7" parent="Lights" unique_id=1789340282 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom10" parent="Lights" unique_id=1789340282 instance=ExtResource("3_lamp")]
 position = Vector2(2652, 224)
 light_color = Color(0.47319007, 0.60152256, 0.89444286, 1)
 light_energy = 3.0
 light_scale = 5.0
 show_body = false
 
-[node name="MoonGlowRoom8" parent="Lights" unique_id=1316375696 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom11" parent="Lights" unique_id=1316375696 instance=ExtResource("3_lamp")]
 position = Vector2(3052, 224)
 light_color = Color(0.47319007, 0.60152256, 0.89444286, 1)
 light_energy = 3.0
 light_scale = 5.0
 show_body = false
 
-[node name="MoonGlowRoom9" parent="Lights" unique_id=226183173 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom12" parent="Lights" unique_id=226183173 instance=ExtResource("3_lamp")]
 position = Vector2(3752, 224)
 light_color = Color(0.47319007, 0.60152256, 0.89444286, 1)
 light_energy = 3.0
 light_scale = 5.0
 show_body = false
 
-[node name="MoonGlowRoom12" parent="Lights" unique_id=687062173 instance=ExtResource("3_lamp")]
-position = Vector2(4000, 860)
+[node name="MoonGlowRoom15" parent="Lights" unique_id=687062173 instance=ExtResource("3_lamp")]
+position = Vector2(4000, 1244)
 light_color = Color(0.86, 0.16, 0.26, 1)
 light_energy = 1.9
 light_scale = 2.8
 show_body = false
 
-[node name="MoonGlowRoom13" parent="Lights" unique_id=109391604 instance=ExtResource("3_lamp")]
-position = Vector2(3500, 860)
+[node name="MoonGlowRoom16" parent="Lights" unique_id=109391604 instance=ExtResource("3_lamp")]
+position = Vector2(3500, 1244)
 light_color = Color(0.8833, 0.2533, 0.29, 1)
 light_energy = 1.9
 light_scale = 3.0
 show_body = false
 
-[node name="TileLampRoom4" parent="Lights" unique_id=1745046324 instance=ExtResource("3_lamp")]
+[node name="TileLampRoom6" parent="Lights" unique_id=1745046324 instance=ExtResource("3_lamp")]
 position = Vector2(1704, 214)
 light_color = Color(1, 0.87, 0.66, 1)
 light_energy = 0.0
 light_scale = 1.3
 cable_length = 38.0
 
-[node name="MoonGlowRoom5" parent="Lights" unique_id=995142792 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom6" parent="Lights" unique_id=995142792 instance=ExtResource("3_lamp")]
 position = Vector2(2052, 224)
 light_color = Color(0.62, 0.74, 1, 1)
 light_energy = 1.3
@@ -253,111 +253,111 @@ light_energy = 1.3
 light_scale = 1.6
 show_body = false
 
-[node name="MoonGlowRoom11" parent="Lights" unique_id=1111313830 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom14" parent="Lights" unique_id=1111313830 instance=ExtResource("3_lamp")]
 position = Vector2(4852, 224)
 light_color = Color(0.62, 0.74, 1, 1)
 light_energy = 1.3
 light_scale = 1.6
 show_body = false
 
-[node name="MoonGlowRoom11B" parent="Lights" unique_id=1111313831 instance=ExtResource("3_lamp")]
+[node name="MoonGlowRoom14B" parent="Lights" unique_id=1111313831 instance=ExtResource("3_lamp")]
 position = Vector2(5152, 224)
 light_color = Color(0.62, 0.74, 1, 1)
 light_energy = 1.3
 light_scale = 1.6
 show_body = false
 
-[node name="SpawnMonitorRoom5" parent="Lights" unique_id=1506925432 instance=ExtResource("9_mon")]
+[node name="SpawnMonitorRoom6" parent="Lights" unique_id=1506925432 instance=ExtResource("9_mon")]
 position = Vector2(1952, 318)
 light_energy = 1.0
 light_scale = 1.0
 
-[node name="MoonGlowRoom21" parent="Lights" unique_id=1734358091 instance=ExtResource("3_lamp")]
-position = Vector2(480, 864)
+[node name="MoonGlowRoom24" parent="Lights" unique_id=1734358091 instance=ExtResource("3_lamp")]
+position = Vector2(480, 1248)
 light_color = Color(1, 0.72, 0.44, 1)
 light_energy = 3.2
 light_scale = 3.0
 show_body = false
 
-[node name="MoonGlowRoom15" parent="Lights" unique_id=2025521353 instance=ExtResource("3_lamp")]
-position = Vector2(2300, 864)
+[node name="MoonGlowRoom18" parent="Lights" unique_id=2025521353 instance=ExtResource("3_lamp")]
+position = Vector2(2300, 1248)
 light_color = Color(0.93, 0.44, 0.35, 1)
 light_energy = 2.4
 light_scale = 2.4
 show_body = false
 
-[node name="MoonGlowRoom14" parent="Lights" unique_id=1982534935 instance=ExtResource("3_lamp")]
-position = Vector2(2700, 864)
+[node name="MoonGlowRoom17" parent="Lights" unique_id=1982534935 instance=ExtResource("3_lamp")]
+position = Vector2(2700, 1248)
 light_color = Color(0.9067, 0.3467, 0.32, 1)
 light_energy = 2.2
 light_scale = 3.2
 show_body = false
 
-[node name="MoonGlowRoom17" parent="Lights" unique_id=1156392887 instance=ExtResource("3_lamp")]
-position = Vector2(1700, 864)
+[node name="MoonGlowRoom20" parent="Lights" unique_id=1156392887 instance=ExtResource("3_lamp")]
+position = Vector2(1700, 1248)
 light_color = Color(0.9533, 0.5333, 0.38, 1)
 light_energy = 2.4
 light_scale = 1.8
 show_body = false
 
-[node name="MoonGlowRoom18" parent="Lights" unique_id=1912036220 instance=ExtResource("3_lamp")]
-position = Vector2(1350, 900)
+[node name="MoonGlowRoom21" parent="Lights" unique_id=1912036220 instance=ExtResource("3_lamp")]
+position = Vector2(1350, 1284)
 light_color = Color(0.9767, 0.6267, 0.41, 1)
 light_scale = 2.4
 show_body = false
 
-[node name="EclipseChillRoom12" parent="Lights" unique_id=610348744 instance=ExtResource("3_lamp")]
-position = Vector2(4000, 860)
+[node name="EclipseChillRoom15" parent="Lights" unique_id=610348744 instance=ExtResource("3_lamp")]
+position = Vector2(4000, 1244)
 light_color = Color(0.42, 0.26, 0.88, 1)
 light_energy = 1.5
 light_scale = 1.5
 show_body = false
 
-[node name="EclipseChillRoom13" parent="Lights" unique_id=537789949 instance=ExtResource("3_lamp")]
-position = Vector2(3500, 860)
+[node name="EclipseChillRoom16" parent="Lights" unique_id=537789949 instance=ExtResource("3_lamp")]
+position = Vector2(3500, 1244)
 light_color = Color(0.46, 0.28, 0.82, 1)
 light_energy = 1.1
 light_scale = 1.4
 show_body = false
 
-[node name="EclipseChillRoom14" parent="Lights" unique_id=1990051870 instance=ExtResource("3_lamp")]
-position = Vector2(2700, 860)
+[node name="EclipseChillRoom17" parent="Lights" unique_id=1990051870 instance=ExtResource("3_lamp")]
+position = Vector2(2700, 1244)
 light_color = Color(0.5, 0.3, 0.74, 1)
 light_energy = 0.7
 light_scale = 1.3
 show_body = false
 
-[node name="DawnGlowRoom22" parent="Lights" unique_id=645968790 instance=ExtResource("3_lamp")]
-position = Vector2(176, 850)
+[node name="DawnGlowRoom25" parent="Lights" unique_id=645968790 instance=ExtResource("3_lamp")]
+position = Vector2(176, 1234)
 light_color = Color(1, 0.72156864, 0.42352942, 1)
 light_energy = 2.6
 light_scale = 1.25
 show_body = false
 
-[node name="DawnSpillRoom22a" parent="Lights" unique_id=1013606261 instance=ExtResource("3_lamp")]
-position = Vector2(96, 866)
+[node name="DawnSpillRoom25a" parent="Lights" unique_id=1013606261 instance=ExtResource("3_lamp")]
+position = Vector2(96, 1250)
 light_color = Color(1, 0.827451, 0.6392157, 1)
 light_energy = 0.5
 light_scale = 2.4
 show_body = false
 
-[node name="DawnSpillRoom22b" parent="Lights" unique_id=1151680300 instance=ExtResource("3_lamp")]
-position = Vector2(16, 872)
+[node name="DawnSpillRoom25b" parent="Lights" unique_id=1151680300 instance=ExtResource("3_lamp")]
+position = Vector2(16, 1256)
 light_color = Color(1, 0.85882354, 0.7019608, 1)
 light_energy = 0.34
 light_scale = 2.0
 show_body = false
 
-[node name="SunShaftRoom22" parent="Lights" unique_id=1918346679 instance=ExtResource("12_shaft")]
-position = Vector2(174, 844)
+[node name="SunShaftRoom25" parent="Lights" unique_id=1918346679 instance=ExtResource("12_shaft")]
+position = Vector2(174, 1228)
 beam_energy = 2.1
 beam_scale = 1.5
 angle_degrees = 69.0
 beam_count = 3
 beam_spacing = 27.0
 
-[node name="CubicleBulbRoom22" parent="Lights" unique_id=1401408378 instance=ExtResource("3_lamp")]
-position = Vector2(100, 852)
+[node name="CubicleBulbRoom25" parent="Lights" unique_id=1401408378 instance=ExtResource("3_lamp")]
+position = Vector2(100, 1236)
 light_color = Color(0.8627451, 0.91764706, 0.81960785, 1)
 light_energy = 0.6
 light_scale = 1.3
@@ -366,8 +366,8 @@ flickers = true
 flicker_amount = 0.55
 flicker_speed = 11.0
 
-[node name="CubicleMonitorRoom22" parent="Lights" unique_id=687709952 instance=ExtResource("9_mon")]
-position = Vector2(53, 879)
+[node name="CubicleMonitorRoom25" parent="Lights" unique_id=687709952 instance=ExtResource("9_mon")]
+position = Vector2(53, 1263)
 light_energy = 0.55
 light_scale = 0.8
 screen_size = Vector2(7, 6)
@@ -403,15 +403,15 @@ autoplay = true
 
 [node name="Act1Beats" type="Node" parent="." unique_id=1256093015]
 script = ExtResource("7_beats")
-blood_moon_window = NodePath("../Backdrop/MoonWindowRoom11")
-blood_moon_glow = NodePath("../Lights/MoonGlowRoom11")
-blood_moon_windows = Array[NodePath]([NodePath("../Backdrop/MoonWindowRoom11B")])
-blood_moon_glows = Array[NodePath]([NodePath("../Lights/MoonGlowRoom11B")])
+blood_moon_window = NodePath("../Backdrop/MoonWindowRoom14")
+blood_moon_glow = NodePath("../Lights/MoonGlowRoom14")
+blood_moon_windows = Array[NodePath]([NodePath("../Backdrop/MoonWindowRoom14B")])
+blood_moon_glows = Array[NodePath]([NodePath("../Lights/MoonGlowRoom14B")])
 
-[node name="EditorPreview" parent="." unique_id=1629788210 instance=ExtResource("2_ldtk")]
+[node name="EditorPreview" parent="." unique_id=1546167206 instance=ExtResource("2_ldtk")]
 
 [node name="DashTutorial" type="Node" parent="." unique_id=2009312701]
 script = ExtResource("14_dashtut")
 
-[node name="JumpTutorial" type="Node" parent="." unique_id=2158342719]
+[node name="JumpTutorial" type="Node" parent="." unique_id=-2136624577]
 script = ExtResource("15_jumptut")

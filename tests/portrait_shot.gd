@@ -35,7 +35,9 @@ func _ready() -> void:
 		return
 	box.say("Hooshang", "This doesn't feel like my cubicle.", Color(1, 1, 1, 1), tex,
 		DialogueBox.Side.LEFT, DialogueBox.VSide.TOP)
-	for i in 4:
+	# Past say()'s own float-in, or every shot below is grabbed mid-entrance,
+	# squashed toward zero height rather than at its resting frame.
+	for i in int(maxf(box.entrance_time, box.portrait_entrance_time) * 60.0) + 4:
 		await get_tree().process_frame
 
 	var dir := ProjectSettings.globalize_path(out) if out.begins_with("user://") else out

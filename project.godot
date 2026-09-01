@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 Screen="*res://systems/screen.gd"
 InputDevice="*res://systems/input_device.gd"
 Dialogue="*res://scenes/ui/DialogueBox.tscn"
+VoiceBlips="*res://systems/voice_blips.gd"
 Game="*res://systems/game.gd"
 Collectibles="*res://systems/collectibles.gd"
 Deaths="*res://systems/deaths.gd"

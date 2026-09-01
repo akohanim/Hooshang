@@ -148,6 +148,23 @@ func _ready() -> void:
 	# test is "which frame for which state", and a wall-clock version of this
 	# would be both slow and flaky. The blink clock is pushed out of the way
 	# first, so what is measured here is the speech cycle and only that.
+	# _say() above only waits out its OWN copy of the entrance timer; say()'s
+	# internal SceneTreeTimer for the same duration can resolve a frame or two
+	# later, so the page's first _begin_page() (which is what actually turns
+	# _revealing on) may not have run yet. Reading state mid-race caught the
+	# portrait still parked on the REST frame from the entrance wait and
+	# recorded it as a stray "mouth position" the instant the manual loop
+	# below took over — wait for the real signal instead of assuming the
+	# margin above was enough, then give the real _process() loop enough
+	# frames to actually step the mouth at least once (LOOP_FRAME_TIME is
+	# 0.125s, ~8 physics frames — revealing turning on this instant does not
+	# mean the mouth has moved off rest THIS instant, any more than it would
+	# for a player watching the box).
+	var guard := 0
+	while not box._revealing and guard < 30:
+		await _frames(1)
+		guard += 1
+	await _frames(15)
 	talk = _ints(box._loop["talk"])
 	rest = int(box._loop.get("rest", 0))
 	box._revealing = true
@@ -226,14 +243,24 @@ func _frame_of(node: TextureRect) -> int:
 
 ## Show a line and let a frame of layout land, without waiting on a real button
 ## press — the same fire-and-close pattern dialogue_placement_test.gd uses.
+##
+## Waits out the float-in first — say() now holds the line off until its own
+## entrance animation finishes, and the portrait's get_global_rect() below is
+## read off its actual SCALE, not just its offsets; checked mid-tween it would
+## still be squashed toward zero height rather than at the resting size this
+## test means to measure.
 func _say(box: DialogueBox, text: String, side: int, face: Texture2D) -> void:
 	box.say("Hooshang", text, Color(1, 1, 1, 1), face, side, DialogueBox.VSide.TOP)
-	await _frames(3)
+	await _frames(int(maxf(box.entrance_time, box.portrait_entrance_time) * 60.0) + 3)
 
 
+## Loops rather than emitting once — see dialogue_placement_test.gd's _close()
+## for why a single emit is not enough once a line can paginate.
 func _close(box: DialogueBox) -> void:
-	box.line_finished.emit()
-	await _frames(2)
+	while box._active:
+		box.line_finished.emit()
+		await _frames(3)
+	await _frames(int(box.entrance_time * 60.0) + 3)
 
 
 func _frames(n: int) -> void:

@@ -34,6 +34,7 @@ func _ready() -> void:
 		_check(world.current_room != from,
 			"forward: %s -> %s" % [from.name, world.current_room.name])
 		forward.append(world.current_room.name)
+		await _check_respawn_survives_return_door(world.current_room)
 	_check(forward.size() >= 3,
 		"walked forward through the Act  [%d rooms]" % forward.size())
 
@@ -148,6 +149,30 @@ func _go_forward() -> void:
 		await _frames(1)
 		world.player.global_position = ex.global_position + offset
 	await _settle(from)
+
+
+## Regression: a respawn TELEPORTS the player straight to the checkpoint,
+## which the physics engine cannot tell apart from having just walked there.
+## If a room's own spawn point sits inside its (already armed) return-door
+## strip, that looks exactly like walking back into the door, and dying or
+## retrying the moment you arrive in such a room bounced you straight into
+## the room behind — found in Level_v6, whose PlayerStart sits 16px off the
+## edge it is entered through, inside the 16px return strip that starts 6px
+## in. Calls _resolve_return_arming() directly (what
+## LdtkWorld._on_player_died() now does after every respawn) rather than
+## driving a full player.die() cycle — the death/respawn timers tick on IDLE
+## process, which this test's physics-frame-paced _frames() has no reliable
+## way to wait out (see CLAUDE.md on that exact mismatch), where the overlap
+## check itself is plain physics and fast to drive directly.
+func _check_respawn_survives_return_door(room: Node2D) -> void:
+	if world._return_room == null:
+		return  # no door armed yet (the very first room) — nothing to bounce off
+	world.player.global_position = world.spawn_point_for(room)
+	world.player.velocity = Vector2.ZERO
+	await world._resolve_return_arming()
+	_check(world.current_room == room,
+		"respawning at %s's own spawn point doesn't bounce him to the room behind  [now in %s]"
+			% [room.name, world.current_room.name])
 
 
 ## Walk into the return strip on the edge we came in through.

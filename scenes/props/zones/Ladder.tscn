@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/zones/ladder.gd" id="1_ladder"]
+
+[node name="Ladder" type="Area2D"]
+script = ExtResource("1_ladder")
+height = 16.0

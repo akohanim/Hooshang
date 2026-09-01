@@ -3,7 +3,7 @@ extends Node
 ## the last door leads home.
 ##
 ## Three things that are each invisible in play until they are wrong:
-##   1. Each of rooms 13-22 collapses ONCE, on the way through. A room that
+##   1. Each of rooms 16-25 collapses ONCE, on the way through. A room that
 ##      collapses on arrival from the wrong side would drop its ceiling while he
 ##      is walking backwards; a room that collapses twice would re-drop props
 ##      that are already on the floor, which does nothing visible and hides that
@@ -11,7 +11,7 @@ extends Node
 ##   2. Nothing collapses on the OUTBOUND row. The beat is keyed to a range of
 ##      room numbers, and a range is exactly the kind of thing that quietly grows
 ##      an off-by-one.
-##   3. Room 22's Exit leads to Level_0. Left to play order it runs off the end
+##   3. Room 25's Exit leads to Level_0. Left to play order it runs off the end
 ##      of the world and returns nothing, so the last door of the game does
 ##      nothing at all — which reads as a broken door, not as an ending.
 ## Run:  godot --headless res://tests/escape_test.tscn
@@ -51,7 +51,7 @@ func _ready() -> void:
 	# --- 1. walk the row, one room at a time ---------------------------------
 	var fell := {}
 	var pads_before := _pad_positions()
-	for n in range(13, 23):
+	for n in range(16, 26):
 		var room := _room("Level_%d" % n)
 		if room == null:
 			continue

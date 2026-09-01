@@ -75,8 +75,15 @@ FAT = os.path.join(SPRITES, "chubby")
 ## thin pack (Dash, Two-Footed_Jump) and nothing references them: "dash" in the
 ## .tres is the Slide clip. They are warped anyway when --all-directions is
 ## passed, so the folder never half-matches.
+##
+## Climb/east is the one clip in this list that is NOT actually east-facing —
+## it holds a BACK view (Pixellab's "north" rotation, generated via
+## animate_character), because climbing a ladder means facing INTO it, away
+## from the camera, and a side profile cannot show that. It lives under
+## "east" anyway rather than a "north" folder of its own, so this scanner and
+## the .tres path scheme need no special case for one clip out of nine.
 CLIPS = ["Breathing_Idle", "Falling", "Jumping", "Running", "Slide",
-         "Wall_Jump", "Wall_Land", "Wall_Slide"]
+         "Wall_Jump", "Wall_Land", "Wall_Slide", "Climb"]
 
 ## A pixel is "him" at or above this alpha. The pack is hard-cut already
 ## (gen_wall_slide.py's ALPHA_CUT), so this only has to ignore stray dust.

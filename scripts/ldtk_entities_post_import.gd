@@ -25,6 +25,7 @@ const THOUGHT_SCENES := {
 const PLATFORM_SCENE := preload("res://scenes/props/platforms/Platform.tscn")
 const CRUMBLING_SCENE := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
 const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
+const LADDER_SCENE := preload("res://scenes/props/zones/Ladder.tscn")
 const CONVEYOR_BELT_SCENE := preload("res://scenes/props/zones/ConveyorBelt.tscn")
 const DARKSHANG_SCENE := preload("res://scenes/props/chase/Darkshang.tscn")
 const SURGE_POINT_SCENE := preload("res://scenes/props/chase/SurgePointTrigger.tscn")
@@ -35,8 +36,10 @@ const CEILING_PANEL_SCENE := preload("res://scenes/props/lighting/CeilingPanel.t
 const RUMI_TRIGGER_SCRIPT := preload("res://scripts/ldtk_rumi_trigger.gd")
 const LDTK_DOOR_SCRIPT := preload("res://scripts/ldtk_door.gd")
 const EXIT_SIGN_SCENE := preload("res://scenes/props/ExitSign.tscn")
+const EXIT_CEILING_SIGN_SCENE := preload("res://scenes/props/ExitSignCeiling.tscn")
 const NOTE_TILE_SCENE := preload("res://scenes/props/NoteTile.tscn")
 const LEMON_SCENE := preload("res://scenes/props/Lemon.tscn")
+const MYSTERY_BOX_SCENE := preload("res://scenes/props/MysteryBox.tscn")
 const RUMI_FRAMES := preload("res://assets/rumi_frames.tres")
 const RUMI_LIGHT_TEXTURE := preload("res://assets/light_radial.png")
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
@@ -159,6 +162,16 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(_build_rumi_trigger(data))
 			"Exit":
 				entity_layer.add_child(_build_exit(data))
+			# A ceiling-mounted twin of Exit — same trigger, group and NextRoom
+			# meta, just an 8x16 sign hanging from the ceiling instead of a
+			# doorway. See _build_exit_ceiling.
+			"ExitCeiling":
+				entity_layer.add_child(_build_exit_ceiling(data))
+			# A climbable rail. Stretch it vertically in LDtk; width is fixed at
+			# one cell. See scenes/props/zones/ladder.gd for how gripping it
+			# works.
+			"Ladder":
+				entity_layer.add_child(_build_ladder(data))
 			# Hand-placed collectible. Nothing to configure — the prefab owns its
 			# own art, pickup rule and pop; the running total lives in the
 			# Collectibles autoload so it survives the room and the level.
@@ -166,6 +179,11 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				var pom: Area2D = LEMON_SCENE.instantiate()
 				pom.position = data.position
 				entity_layer.add_child(pom)
+			# The Mario-style "?" block. Not resizable — like DarkThought, the
+			# art is a fixed 16x16, so a dragged handle could only ever promise
+			# a bigger block than the one that is actually solid.
+			"MysteryBox":
+				entity_layer.add_child(_build_mystery_box(data))
 			# Five separate entities (MusicNote1..MusicNote5) rather than one
 			# with an index field: LDtk colours entities per DEFINITION, so a
 			# shared one draws every tile the same and any instance whose field
@@ -350,6 +368,23 @@ func _build_thought(data: Dictionary) -> Area2D:
 	return thought
 
 
+## A Mario-style "?" block, at the point it was placed. `MushroomType` picks
+## which power a bump gives up — read with _field_enum, not _field_str, for
+## the same reason _build_thought reads Motion that way: an LDtk enum crosses
+## the boundary QUALIFIED ("MushroomType.BlackWhite"), never bare, and
+## matching the bare name against that misses every value and silently falls
+## through to the default.
+func _build_mystery_box(data: Dictionary) -> MysteryBox:
+	var box: MysteryBox = MYSTERY_BOX_SCENE.instantiate()
+	box.position = data.position
+	match _field_enum(data, "MushroomType"):
+		# Only one power exists today; the explicit branch (rather than just
+		# the fallback below) is what a second one slots into.
+		"BlackWhite": box.mushroom_type = Mushroom.MushroomType.BLACK_WHITE
+		_: box.mushroom_type = Mushroom.MushroomType.BLACK_WHITE
+	return box
+
+
 ## A stretch of floor that will not hold him. Unlike the spike entities, this one
 ## DOES read fields: angle, control_strength and speed_ramp are tuning, and
 ## tuning belongs on the instance — two chutes in one room can legitimately want
@@ -481,6 +516,44 @@ func _build_exit(data: Dictionary) -> Area2D:
 	trigger.add_child(shape)
 	trigger.add_child(sign)
 	return trigger
+
+
+## A ceiling-mounted twin of _build_exit — same trigger, same "exit" group,
+## same NextRoom meta, so it advances the room exactly like the floor Exit.
+## Only the art and the anchor differ: pivot is centre like every other sized
+## entity here (Exit itself is the one legacy exception, pivot 0/0), so
+## `data.position` is already the box's centre and nothing needs offsetting —
+## the sign is simply the whole fixture, centred on the trigger.
+func _build_exit_ceiling(data: Dictionary) -> Area2D:
+	var trigger := Area2D.new()
+	trigger.name = "ExitCeiling"
+	trigger.position = data.position
+	trigger.collision_layer = 8  # layer 4 "triggers"
+	trigger.collision_mask = 2  # player only
+	trigger.add_to_group("exit", true)  # persistent so it survives packing
+	trigger.set_meta("next_room", _field_str(data, "NextRoom"))
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	var size := Vector2(data.size)
+	rect.size = size if size != Vector2.ZERO else Vector2(8, 16)
+	shape.shape = rect
+
+	var sign: Node2D = EXIT_CEILING_SIGN_SCENE.instantiate()
+	trigger.add_child(shape)
+	trigger.add_child(sign)
+	return trigger
+
+
+## A climbable rail, at the height it was dragged to. `position` is the
+## entity's centre, like every other sized entity here; Ladder centres its own
+## box and rungs on that too.
+func _build_ladder(data: Dictionary) -> Ladder:
+	var ladder: Ladder = LADDER_SCENE.instantiate()
+	ladder.position = data.position
+	var drawn := Vector2(data.size)
+	ladder.height = drawn.y if drawn.y > 0.0 else ladder.height
+	return ladder
 
 
 ## LDtk field values come through as `null` when the field exists but hasn't

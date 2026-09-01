@@ -77,6 +77,11 @@ const DUST_SHEET := preload("res://assets/effects/dust_puff.png")
 const DUST_CELL := 8.0
 const DUST_SHAPES := 3
 
+## Reused rather than a sheet of its own — a mushroom-power sparkle is the
+## same "soft additive glow" LemonGlowLight and DarkThought's halo already
+## use this texture for, just at a tiny scale and tinted warm.
+const SPARKLE_TEXTURE := preload("res://assets/light_radial.png")
+
 @export_group("Dust")
 @export var dust_enabled := true
 ## Puffs a full-strength burst throws. Scaled down for gentler ones.
@@ -130,6 +135,25 @@ const DUST_SHAPES := 3
 @export var death_shake_strength := 0.9
 @export var death_shake_time := 0.18
 
+@export_group("Mushroom Sparkle")
+## While a mushroom's power is running, spawn one twinkle at roughly this
+## interval, in seconds.
+@export var sparkle_interval := 0.12
+## Warm gold-white, additive — reads as a shimmer rather than a solid sprite.
+## Alpha here is the starting opacity.
+@export var sparkle_color := Color(1.0, 0.95, 0.65, 0.9)
+## How far from his centre a twinkle can appear, px.
+@export var sparkle_radius := 9.0
+## How big a twinkle starts, as a scale of the (reused) radial light texture.
+@export var sparkle_scale := 0.09
+## How long one twinkle takes to grow and fade.
+@export var sparkle_life := 0.4
+## In the power's own flicker window (Player.mushroom_power_flicker_time),
+## spawn at this fraction of the normal rate — SPARSER rather than dimmer,
+## the same "still unmistakably there, but visibly running out" cue
+## lemon_glow_flicker_speed gives with a blink instead.
+@export_range(0.0, 1.0) var sparkle_warning_rate := 0.35
+
 @export_group("Camera")
 ## Landings slower than this barely squash at all.
 @export var landing_squash_min_speed := 160.0
@@ -152,6 +176,8 @@ const DUST_SHAPES := 3
 var _squash_tween: Tween
 var _trail_timer := 0.0
 var _turn_cooldown := 0.0
+var _sparkle_timer := 0.0
+var _sparkle_material: CanvasItemMaterial
 
 # The camera has TWO independent shake channels, summed into Camera2D.offset once
 # a frame by _process. Nothing else in the project writes that offset.
@@ -414,6 +440,54 @@ func _spawn_puff(world: Node, at: Vector2, away: Vector2, strength: float, index
 	t.tween_property(puff, "modulate:a", 0.0, life) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	t.chain().tween_callback(puff.queue_free)
+
+
+# ------------------------------------------------------ mushroom sparkle ----
+
+## Call every physics frame while Player._mushroom_power_timer is running.
+## `warning` thins the spawn rate rather than dimming it — see
+## sparkle_warning_rate — as the power's own countdown nears the end.
+func mushroom_sparkle_tick(delta: float, warning: bool) -> void:
+	_sparkle_timer -= delta
+	if _sparkle_timer > 0.0:
+		return
+	_sparkle_timer = sparkle_interval / maxf(sparkle_warning_rate if warning else 1.0, 0.01)
+	_spawn_sparkle()
+
+
+## A single twinkle near him, grown and faded out in place. Parented to the
+## ROOM and pinned into the playable z band for the same two reasons dust and
+## the dash trail are (see _spawn_dust) — levels live in Screen's sub-viewport,
+## so current_scene is the wrong surface and the wrong scale, and a sprite
+## carried as the player's own child would drag it along mid-fade instead of
+## letting it hang in place where it appeared.
+func _spawn_sparkle() -> void:
+	var world := _player.get_parent()
+	if world == null:
+		return
+	if _sparkle_material == null:
+		_sparkle_material = CanvasItemMaterial.new()
+		_sparkle_material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+		_sparkle_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	var img := Sprite2D.new()
+	img.texture = SPARKLE_TEXTURE
+	img.material = _sparkle_material
+	img.modulate = sparkle_color
+	img.global_position = _player.global_position + Vector2(
+		randf_range(-sparkle_radius, sparkle_radius),
+		randf_range(-sparkle_radius, sparkle_radius))
+	img.scale = Vector2.ONE * sparkle_scale
+	img.z_as_relative = false
+	img.z_index = 0
+	world.add_child(img)
+	world.move_child(img, _player.get_index())
+
+	var t := img.create_tween().set_parallel()
+	t.tween_property(img, "scale", Vector2.ONE * sparkle_scale * 1.6, sparkle_life) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	t.tween_property(img, "modulate:a", 0.0, sparkle_life) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	t.chain().tween_callback(img.queue_free)
 
 
 func _spawn_afterimage() -> void:

@@ -14,7 +14,7 @@ extends CharacterBody2D
 
 signal died
 
-enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD }
+enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB, DEAD }
 
 ## Half of the 9x12 hitbox in Hooshang.tscn — his NORMAL width. Kept here because
 ## the footing check has to probe at the box's own edges; if the shape is ever
@@ -237,6 +237,15 @@ const HALF_HEIGHT := 6.0
 ## instead of eyeballing a monitor.
 @export var lemon_glow_flicker_speed := 6.0
 
+@export_group("Mushroom Power")
+## How long an eaten mushroom's power lasts, in seconds.
+@export var mushroom_power_time := 30.0
+## Once this many seconds are left, the sparkle thins out to warn the power
+## is about to run out — the same job lemon_glow_flicker_time does for its
+## own countdown, just spent on spawn rate instead of a blink (see
+## Juice.mushroom_sparkle_tick).
+@export var mushroom_power_flicker_time := 5.0
+
 @export_group("Wall")
 ## Max downward speed while sliding on a wall (much slower than free fall).
 @export var wall_slide_max_speed := 60.0
@@ -257,6 +266,11 @@ const HALF_HEIGHT := 6.0
 ## Sized to the clip (5 frames at 14fps = 0.36s) so it reads fully before the
 ## normal jump/fall pose takes over; shorten it to cut the kick short.
 @export var wall_jump_anim_time := 0.36
+
+@export_group("Climb")
+## Vertical speed while gripping a ladder, px/s — both directions use this,
+## since nothing here asks for climbing up and down at different rates.
+@export var climb_speed := 60.0
 
 @export_group("Footing")
 ## How much solid ground he needs under his MIDDLE to keep standing, in px
@@ -371,6 +385,11 @@ var boost_timer := 0.0          # while > 0, handed-over momentum decays gently
 var jump_hold_timer := 0.0      # how much sustained thrust the held jump has left
 var invulnerable_timer := 0.0   # ignores hazard collision queries briefly after respawning
 var _lemon_glow_timer := 0.0    # seconds left on a lemon-bought glow; 0 = not running
+## Which power an eaten mushroom granted, and how long it has left — 0 means
+## none is running. Only meaningful while the timer is > 0; see
+## consume_mushroom() and has_thought_immunity().
+var mushroom_power_type: Mushroom.MushroomType = Mushroom.MushroomType.BLACK_WHITE
+var _mushroom_power_timer := 0.0
 
 var dash_dir := Vector2.RIGHT
 
@@ -393,6 +412,13 @@ var slide_dir := Vector2.ZERO   # unit vector he is being dragged along
 var slide_control := 1.0        # multiplier on steering while inside, 1 = full
 var slide_accel := 0.0          # px/s^2 the drag builds at
 var slide_speed := 0.0          # px/s it has built to so far
+
+# Ladders. Same split as slide zones: the ladder decides who is gripping it
+# and when (touching it and reaching up or down — see ladder.gd), and hands
+# over to enter_ladder()/exit_ladder(); everything that actually moves him
+# while he climbs lives here, in one frame order.
+var ladder_zone: Node = null    # which ladder, so a second one leaving can't clear it
+var ladder_x := 0.0             # the rail's x his box is held to while climbing
 
 # The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
 # with its feet offset-pinned to the bottom of the 9x12 hitbox. It lives
@@ -464,6 +490,8 @@ func _physics_process(delta: float) -> void:
 			_state_dash(delta)
 		State.WALL_SLIDE:
 			_state_wall_slide(delta)
+		State.CLIMB:
+			_state_climb(delta, input_x)
 
 	if sliding():
 		_apply_slide(delta)
@@ -486,6 +514,11 @@ func _tick_timers(delta: float) -> void:
 	if _lemon_glow_timer > 0.0:
 		_lemon_glow_timer = maxf(_lemon_glow_timer - delta, 0.0)
 		_apply_lemon_glow()
+	if _mushroom_power_timer > 0.0:
+		_mushroom_power_timer = maxf(_mushroom_power_timer - delta, 0.0)
+		juice.mushroom_sparkle_tick(delta, _mushroom_power_timer <= mushroom_power_flicker_time)
+		if _mushroom_power_timer <= 0.0:
+			_end_mushroom_power()
 
 
 # ---------------------------------------------------------------- states ----
@@ -550,6 +583,36 @@ func _state_wall_slide(delta: float) -> void:
 		# Ordinary single-wall slide: keep a nudge into the wall so contact is
 		# maintained (real contact, not the squeeze's floor-gap pinch).
 		velocity.x = wall_dir * 20.0
+
+
+## Gripping a ladder: no gravity, steering locked to the rail, vertical speed
+## answers move_up/move_down directly. Two ways off — jump to hop away from it,
+## or reach the floor at its base and push a direction to just walk off.
+## Anything else (climbing above the top, dropping below the bottom) ends the
+## grip the same way it started: the ladder notices the overlap is gone and
+## calls exit_ladder (see ladder.gd), not this function.
+func _state_climb(delta: float, input_x: float) -> void:
+	if jump_buffer_timer > 0.0:
+		jump_buffer_timer = 0.0
+		velocity = Vector2(facing * max_run_speed * 0.6, -jump_speed * 0.6)
+		jump_hold_timer = 0.0
+		_clear_ladder()
+		state = State.JUMP
+		juice.on_jump()
+		return
+	if is_on_floor() and input_x != 0.0:
+		_clear_ladder()
+		state = State.RUN
+		return
+	var vertical := 0.0 if input_locked else Input.get_axis("move_up", "move_down")
+	velocity.y = vertical * climb_speed
+	# Snapped to the rail via velocity, not a direct position write — everything
+	# that moves him goes through move_and_slide, the same rule enter_slide's
+	# own note gives for why a zone never writes velocity from outside this
+	# frame.
+	const CLIMB_SNAP_SPEED := 400.0
+	velocity.x = clampf((ladder_x - global_position.x) / delta, -CLIMB_SNAP_SPEED, CLIMB_SNAP_SPEED) \
+		if delta > 0.0 else 0.0
 
 
 # ------------------------------------------------------------- helpers ----
@@ -706,6 +769,8 @@ func _try_dash() -> bool:
 		return false  # ability not unlocked yet (see Level 1's Rumi scene)
 	if sliding():
 		return false  # the slide owns him until he is out of it
+	if climbing():
+		return false  # the ladder owns him until he lets go (jump)
 	if state == State.DASH or state == State.DEAD:
 		return false
 	if not dash_available or dash_cooldown_timer > 0.0:
@@ -1030,6 +1095,26 @@ func _update_visual() -> void:
 			visual.play("dash")  # forward lunge burst, one-shot
 		State.WALL_SLIDE:
 			visual.play("wall_slide")  # dedicated Slide pose
+		State.CLIMB:
+			# The one clip drawn from BEHIND rather than in profile — he faces
+			# into the ladder, away from the camera, which a side view cannot
+			# show. flip_h above still applies to it harmlessly (a back view
+			# mirrors near-symmetrically either way).
+			#
+			# One clip, played BACKWARDS for the way down rather than a second
+			# generation — a climb is symmetric, reaching up to go up and
+			# reaching up (in reverse) to lower himself down. speed_scale's
+			# sign picks the direction; play("climb") is safe to call every
+			# frame here (same-name replay does not reset the frame or
+			# speed_scale — verified empirically, not from the docs), and
+			# pausing right after it is what freezes him mid-reach the instant
+			# he stops climbing rather than looping in place like a treadmill.
+			visual.play("climb")
+			# velocity.y < 0 is UP (screen -y): the clip was authored reaching
+			# up, so that direction is forward; > 0 is down, played in reverse.
+			visual.speed_scale = 1.0 if velocity.y < 0.0 else -1.0
+			if is_zero_approx(velocity.y):
+				visual.pause()
 	# Dash availability tint (our stand-in for Celeste's hair color):
 	# normal colors = dash ready, cool blue tint = dash spent.
 	if state != State.DASH:
@@ -1067,6 +1152,12 @@ func die() -> void:
 	# not refunded, same as every other run stat death does not undo.
 	_lemon_glow_timer = 0.0
 	_apply_lemon_glow()
+	# Same snap for an eaten mushroom's power — its world-side effects (a
+	# suppressed thought glow, see _end_mushroom_power) must not survive into
+	# a room he has not earned the immunity in yet.
+	if _mushroom_power_timer > 0.0:
+		_mushroom_power_timer = 0.0
+		_end_mushroom_power()
 	# The burst is thrown BEFORE he is counted or announced, so it leaves from
 	# where he actually was. Purely cosmetic and nothing waits on it — see
 	# juice.on_death(); how long the game holds is death_time, below.
@@ -1164,6 +1255,42 @@ func _clear_slide() -> void:
 	slide_speed = 0.0
 
 
+# --------------------------------------------------------------- ladders ----
+# The API a Ladder drives him through (scenes/props/zones/ladder.gd). The
+# ladder decides who is gripping it and when; this node is the only thing
+# that moves him while he climbs.
+
+func climbing() -> bool:
+	return ladder_zone != null
+
+
+## Grip a ladder: gravity off, steering locked to the rail at `center_x`, and
+## vertical speed answers move_up/move_down directly (see _state_climb). The
+## ladder calls this — touching it and reaching up or down — the same split
+## enter_slide uses; this node only does the moving.
+func enter_ladder(zone: Node, center_x: float) -> void:
+	if state == State.DEAD or climbing():
+		return
+	ladder_zone = zone
+	ladder_x = center_x
+	velocity = Vector2.ZERO
+	state = State.CLIMB
+
+
+## Let go, if `zone` is the one holding him — mirrors exit_slide. The check
+## matters for the same reason it does there: two ladders close enough to
+## overlap should not let the one he already left steal the release.
+func exit_ladder(zone: Node) -> void:
+	if ladder_zone == zone:
+		_clear_ladder()
+
+
+func _clear_ladder() -> void:
+	ladder_zone = null
+	if state == State.CLIMB:
+		state = State.FALL
+
+
 # ------------------------------------------------------------- cosmetics ----
 # Small API so other nodes ask the player to do a thing, rather than reaching
 # into its child sprite/camera directly.
@@ -1221,20 +1348,49 @@ func tremor(amplitude: float) -> void:
 ##
 ## `input_locked` alone is not this — that takes his controls away and leaves him
 ## falling, which is right for a cutscene he walks into and wrong for one where
-## the floor is the thing being dramatic.
+## the floor is the thing being dramatic (or, same idea, one where he might
+## still be carrying run speed or a jump arc the instant a trigger fires and
+## visibly slides or sails through the first moment of it — see freeze()).
 func hold(seconds: float) -> void:
 	if seconds <= 0.0:
 		return
-	var locked := input_locked
-	input_locked = true
-	velocity = Vector2.ZERO
-	set_physics_process(false)
+	freeze()
 	await get_tree().create_timer(seconds).timeout
 	if not is_inside_tree():
 		return
+	unfreeze()
+
+
+## freeze()/unfreeze() split out of hold() so a beat of INDETERMINATE length —
+## a Rumi conversation, dismissed at the player's own pace rather than after a
+## fixed number of seconds — can use the exact same hard stop. hold() above is
+## just these two calls either side of a timer.
+##
+## Re-entrant on the physics side (calling freeze() again while already frozen
+## is a harmless no-op), but the pair is not designed to NEST with a bare
+## `input_locked = ...` assignment in between — whichever call made this
+## true is the one whose unfreeze() should run.
+var _frozen := false
+var _pre_freeze_locked := false
+
+
+func freeze() -> void:
+	if _frozen:
+		return
+	_frozen = true
+	_pre_freeze_locked = input_locked
+	input_locked = true
+	velocity = Vector2.ZERO
+	set_physics_process(false)
+
+
+func unfreeze() -> void:
+	if not _frozen:
+		return
+	_frozen = false
 	set_physics_process(true)
 	velocity = Vector2.ZERO
-	input_locked = locked
+	input_locked = _pre_freeze_locked
 
 
 ## Turn the glow on (the musical-tile sequence's reward), fading it up rather
@@ -1335,6 +1491,36 @@ func _apply_lemon_glow() -> void:
 		var phase := fmod(_lemon_glow_timer, 1.0 / lemon_glow_flicker_speed)
 		lit = phase >= 0.5 / lemon_glow_flicker_speed
 	lemon_glow_light.visible = lit
+
+
+## Eat a mushroom's power. Its own timer, not a rebinding of anything else —
+## a second mushroom simply refills it to the full duration rather than being
+## ignored, unlike the lemon glow's "already running" rule: a mushroom is a
+## free pickup out in the world, not a spent resource, so there is nothing to
+## protect against wasting.
+func consume_mushroom(type: Mushroom.MushroomType) -> void:
+	mushroom_power_type = type
+	_mushroom_power_timer = mushroom_power_time
+	if type == Mushroom.MushroomType.BLACK_WHITE:
+		DarkThought.set_glow_suppressed(get_tree(), true)
+	flash(Color(2.2, 2.2, 2.6))
+
+
+## True while an eaten mushroom's power makes a thought hazard harmless to
+## touch — dark/light clouds pass through (dark_thought.gd's _on_body_entered
+## override), a grey one dissolves on contact instead of killing (same
+## override), and the paintable thought-hazard tiles stop killing
+## (ldtk_world.gd's _in_thought_tile check).
+func has_thought_immunity() -> bool:
+	return _mushroom_power_timer > 0.0 \
+		and mushroom_power_type == Mushroom.MushroomType.BLACK_WHITE
+
+
+## The power's world-side effects, undone — called when its timer reaches 0,
+## whether that is the countdown running out or a death cutting it short.
+func _end_mushroom_power() -> void:
+	if mushroom_power_type == Mushroom.MushroomType.BLACK_WHITE:
+		DarkThought.set_glow_suppressed(get_tree(), false)
 
 
 ## Clamp the follow-camera to a level's bounds (pixels). Called by LevelBase.

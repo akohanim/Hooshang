@@ -45,8 +45,22 @@ extends CanvasLayer
 ##
 ## FUTURE: multi-line conversations = await say() in sequence. Rumi still uses a
 ## tinted stand-in; give him a portrait set and pass it the same way as Hooshang.
+##
+## VOICE. The reveal also drives systems/voice_blips.gd (the `VoiceBlips`
+## autoload) — Celeste-style synthesized syllable blips, one per revealed
+## character, banked per speaker+portrait-state. See _voice_key and
+## _voice_new_chars: it reuses the exact key _set_rig/_set_loop already derive
+## from the portrait texture's filename, so a beat that names a state gets a
+## voice for free and never has to know this exists.
 
 signal line_finished
+## Fired once per say() call — around the banner's own open/close, not the
+## page-by-page reveal inside it. A multi-line conversation is a sequence of
+## calls, so this fires once per LINE; see LdtkWorld's music-ducking listener
+## for how a fast fade smooths that back into one continuous duck rather than
+## flickering between lines.
+signal dialogue_opened
+signal dialogue_closed
 
 ## Which end of the banner the portrait sits at. A speaker's face belongs on the
 ## side of the screen they are actually standing on, so a conversation reads as
@@ -71,8 +85,11 @@ enum VSide { TOP, BOTTOM }
 const CANVAS_WIDTH := 1280.0
 const CANVAS_HEIGHT := 720.0
 
-## Reveal speed of the typewriter effect, in characters per second.
-@export var chars_per_second := 40.0
+## Reveal speed of the typewriter effect, in characters per second. Slower
+## than a first pass (was 40, measured against real Celeste footage to land
+## exactly on its pace) — this is a deliberate step below that reference
+## rather than a correction of it, at the user's own request.
+@export var chars_per_second := 28.0
 ## A beat inside a line — "(a breath)" in a script. Put PAUSE_MARK where it
 ## falls and the typewriter holds there for this long; the mark itself is never
 ## drawn. Stage directions get PLAYED rather than printed, which is the same
@@ -81,6 +98,20 @@ const CANVAS_HEIGHT := 720.0
 ## than a breath. One mark per line.
 @export var pause_time := 0.5
 const PAUSE_MARK := "[p]"
+## How long the box takes to unroll open on each line. Celeste's own boxes do
+## not slide on screen — they GROW open from the screen edge they sit flush
+## against, portrait and all, and shut the same way going out. Measured
+## against a reference clip: the box's height visibly closes toward its
+## anchored edge on the way out, not the box translating off-screen. See
+## _grow_in.
+@export var entrance_time := 0.22
+## Same, for the portrait and the name riding on it. Longer than the box and
+## eased with an OVERSHOOT (TRANS_BACK, see _grow_in's caller) rather than a
+## flat grow, so the character arrives with a little bounce of its own instead
+## of just unrolling to a stop in lockstep with the panel — this is the
+## "floating in" a player actually notices as a character doing something,
+## not a panel resizing.
+@export var portrait_entrance_time := 0.32
 ## Weight added to the UI font. Godot's default font ships in one weight; a
 ## little synthetic emboldening is what gives the Celeste-ish solid look.
 @export_range(0.0, 1.0) var font_weight := 0.28
@@ -187,6 +218,41 @@ var _reveal_accum := 0.0
 ## Character index the reveal holds at, or -1 for none / already spent.
 var _pause_at := -1
 var _pause_left := 0.0
+
+## Voice pool key for the current line's speaker+state ("hooshang_annoyed"),
+## derived from the portrait texture's filename same as _set_rig/_set_loop's
+## own lookup key — or "" with no portrait (system text), which VoiceBlips
+## treats as silence. See systems/voice_blips.gd.
+var _voice_key := ""
+## How many characters of the current PAGE have already fired a voice blip.
+## _process() only ever voices the slice past this, once per revealed
+## character; _begin_page() resets it for every new page.
+var _voiced_upto := 0
+## True right after an "emphasized" tier blip, so the next one can't also be
+## emphasized — the thread's "reduced probability of emphasized, never
+## back-to-back" rule.
+var _last_tier_emphasized := false
+## Chance any one revealed character fires an "emphasized" blip instead of a
+## "passing" one, when the last one wasn't already emphasized.
+const EMPHASIS_CHANCE := 0.15
+
+## Every Tween the float-in/close animation currently has running, so the next
+## call can kill them all before it starts its own. See _kill_anim_tweens.
+var _anim_tweens: Array[Tween] = []
+## Bumped at the top of every say(), and captured by that call as its own
+## "am I still the one in charge" ticket — checked after every await inside
+## it. say() is written for sequential, always-awaited use (the class's own
+## usage note: "await Dialogue.say() in sequence"), and never needed this
+## while it changed nothing after its one await on line_finished. It floats
+## the box in and out now, over several real awaits, and a call that starts
+## before an earlier one has actually finished its own close no longer just
+## fights it for the same nodes' scale (killing the OLDER call's animation
+## tweens fixes that much) — the OLDER call's own coroutine is still alive
+## underneath, and once ITS wait elapses it would go right on writing
+## `visible = false` over whatever the newer call has since put on screen.
+## This is what stops a stale continuation from touching anything once a
+## newer call has superseded it, rather than merely not crashing while it does.
+var _generation := 0
 
 @onready var banner: ColorRect = $Banner
 ## The Persian border bands. TrimTop hugs the banner's leading edge and never
@@ -325,6 +391,32 @@ func _apply_font() -> void:
 func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		portrait_texture: Texture2D = null, side: int = Side.LEFT,
 		vside: int = VSide.TOP) -> void:
+	# banner/trim/portrait/name/text are ONE set of nodes shared by every
+	# call to say(), not fresh per line — so a call that starts while the
+	# PREVIOUS line's close animation is still mid-flight used to leave that
+	# old tween free to keep writing to the same nodes' `scale` underneath
+	# this one's fresh entrance. Two tweens racing on the same property is
+	# exactly how a line ends up rendered at whatever scale the older,
+	# unkilled tween happened to leave it at when the read landed — measured,
+	# text_label specifically was still being driven toward 0 by a stale
+	# close well after its own entrance had supposedly finished, which is
+	# what "most of the dialogue text doesn't even appear" was.
+	#
+	# Killing that stale tween stops it from fighting the new one, but leaves
+	# scale wherever it happened to be the instant it was killed — anywhere
+	# from 1 (fresh interrupt) to 0 (nearly closed already), not necessarily
+	# 0. Nothing clears text_label's TEXT or visible_characters until
+	# _begin_page() runs, well after the entrance wait below — so a call that
+	# interrupts a previous line's close used to show the OLD line's full
+	# text at that frozen, partial scale for the whole entrance, which read
+	# as a flash of garbled/partially-rendered text right as the box opened.
+	# Snapping it to fully collapsed here, before anything can be drawn,
+	# is what text_label's own entrance would have left it at if it had one
+	# (see the FLOAT IN note below for why it doesn't).
+	_kill_anim_tweens()
+	text_label.scale = Vector2.ZERO
+	_generation += 1
+	var my_gen := _generation
 	name_label.text = speaker
 	name_label.visible = speaker != ""
 	var show_portrait := portrait_tint.a > 0.0 or portrait_texture != null
@@ -343,6 +435,10 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		_set_rig(portrait.texture)
 	else:
 		_set_rig(null)
+	# Same lookup key the rig/loop use, so a state that already has a
+	# portrait gets a voice for free — see systems/voice_blips.gd.
+	_voice_key = "" if not show_portrait or portrait.texture == null \
+		else portrait.texture.resource_path.get_file().get_basename()
 	var pages := _paginate(text)
 	# Sized ONCE for the whole speech, not per page. The box stays up between
 	# pages, so a per-page height would be seen as the banner growing and
@@ -350,13 +446,123 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	# because it normally happens while the box is hidden.
 	_fit_banner(_rows_in(pages[0]) if pages.size() == 1 else max_lines)
 	_place_vside(vside)
-	_active = true
 	visible = true
+	dialogue_opened.emit()
+
+	# FLOAT IN. Box and character both grow open from the edge the banner is
+	# flush against — see _grow_in — rather than simply appearing. The
+	# character group gets its own bouncier ease so it reads as arriving
+	# rather than being dragged along with a resizing panel.
+	var top_anchor := vside == VSide.TOP
+	for node in [banner, trim_top, trim_bottom]:
+		_grow_in(node, top_anchor, entrance_time, Tween.TRANS_CUBIC, Tween.EASE_OUT)
+	var char_nodes: Array = [portrait_frame, portrait_back, portrait, name_label] \
+		if show_portrait else [name_label]
+	for node in char_nodes:
+		_grow_in(node, top_anchor, portrait_entrance_time, Tween.TRANS_BACK, Tween.EASE_OUT)
+	# Text waits for the unroll to finish — typing over a box still opening
+	# reads as the words outrunning the scene it is arriving into. A plain
+	# timer, not a tracked Tween: this wait has to survive _kill_anim_tweens()
+	# if a LATER call to say() interrupts this one and kills the visual
+	# tweens out from under it — a tracked tween used for both the visual AND
+	# the pacing meant killing one killed the other, which is how a call that
+	# arrived while a previous line was still finishing its close ended up
+	# stuck forever on an await that would now never resolve (see the note on
+	# _kill_anim_tweens's call site for the full story). Not process_always:
+	# this is meant to pause with the game exactly like the typewriter does.
+	# PHYSICS, not idle: idle process runs on the WALL-CLOCK delta between
+	# frames, which in a headless run has no reason to land anywhere near
+	# 1/60s per frame — measured, a 0.32s wait took 30 idle frames to clear,
+	# not the ~19 a fixed 60fps step would predict. Physics ticks are fixed-
+	# step by definition, which is what makes "N frames" a meaningful budget
+	# at all — every other timed system in this project already counts on
+	# that (CLAUDE.md's test list is built entirely out of physics_frame
+	# waits), and this is the one corner of DialogueBox that now needs it too.
+	await get_tree().create_timer(
+		maxf(entrance_time, portrait_entrance_time), false, true).timeout
+	if my_gen != _generation:
+		return  # superseded mid-entrance; the newer call owns the box now
+	# text_label sits OUT of the entrance group above (nothing to grow open —
+	# it has no text yet), but the PREVIOUS line's close tweens its scale:y to
+	# 0 and nothing ever tweened it back. Every line after the first was
+	# therefore typing into a node still scaled to zero height — present,
+	# advancing visible_characters correctly, rendering nothing. Reset here,
+	# right before it gets real content, rather than folding it into
+	# _grow_in's animation, which would run it through a pointless grow-open
+	# over an empty string.
+	text_label.scale = Vector2.ONE
+
+	_active = true
 	for page in pages:
 		_begin_page(page)
 		await line_finished
-	visible = false
+		if my_gen != _generation:
+			return  # superseded while waiting on this page; not ours to close
+
+	# CLOSE the same way it opened: collapsed shut toward the edge, not a
+	# hard cut to invisible. No overshoot on the way out — a bounce reads as
+	# arriving, not as leaving. text_label joins the shut-down group here
+	# though it never opened WITH one: it had nothing drawn to shrink at
+	# entrance time, but by now the page is fully typed, and closing every
+	# OTHER node around a text block that just stayed put would leave the
+	# words hanging in the air after their banner has gone.
 	_active = false
+	arrow.visible = false
+	# text_label never ran through _grow_in (nothing to shrink at entrance
+	# time), so its pivot was never pointed at the anchored edge the way
+	# every other node's was — set it here or it collapses toward its own
+	# top regardless of which edge the box is actually flush against.
+	text_label.pivot_offset = Vector2(
+		text_label.size.x * 0.5, 0.0 if top_anchor else text_label.size.y)
+	for node in [banner, trim_top, trim_bottom, text_label] + char_nodes:
+		var t := create_tween()
+		t.set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+		t.tween_property(node, "scale:y", 0.0, entrance_time) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		_anim_tweens.append(t)
+	# Plain timer again, for the same reason the entrance wait above is one —
+	# this has to keep counting even if a call that arrives before it elapses
+	# kills the visual tweens it is timing. Physics, not idle — see the note
+	# on the entrance wait above.
+	await get_tree().create_timer(entrance_time, false, true).timeout
+	if my_gen != _generation:
+		return  # a newer line is up by now; do not hide IT
+	visible = false
+	dialogue_closed.emit()
+
+
+## Grow `node` open from zero height at whichever edge it is flush against —
+## its own top if `top_anchor`, its own bottom otherwise — up to its full,
+## already-computed resting size. `pivot_offset` decides where `scale` is
+## applied from; setting it to that edge and animating `scale:y` from 0 to 1
+## is what makes the node unroll FROM the edge rather than scale from its
+## centre.
+##
+## This is what Celeste's own dialogue box does, not a slide from off-screen —
+## checked against a reference clip, where the box's height visibly closes
+## toward its anchored edge on the way out (portrait compressing into an
+## ever-thinner band before it vanishes) rather than the box translating
+## across the screen.
+func _grow_in(node: Control, top_anchor: bool, duration: float,
+		trans: Tween.TransitionType, ease: Tween.EaseType) -> void:
+	node.pivot_offset = Vector2(node.size.x * 0.5, 0.0 if top_anchor else node.size.y)
+	node.scale = Vector2(1.0, 0.0)
+	var t := create_tween()
+	t.set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+	t.tween_property(node, "scale:y", 1.0, duration).set_trans(trans).set_ease(ease)
+	_anim_tweens.append(t)
+
+
+## Stop every Tween the float-in/close animation currently has running, and
+## forget them. Called first thing in say(), before anything else touches a
+## node — see the note at that call site for what happens if a leftover
+## tween from the previous line is still alive when this one starts setting
+## up its own.
+func _kill_anim_tweens() -> void:
+	for t in _anim_tweens:
+		if t != null and t.is_valid():
+			t.kill()
+	_anim_tweens.clear()
 
 
 ## Set one page going: strip its breath mark, note where it sat, and start the
@@ -374,6 +580,8 @@ func _begin_page(raw: String) -> void:
 	arrow.visible = false
 	_reveal_accum = 0.0
 	_revealing = true
+	_voiced_upto = 0
+	_last_tier_emphasized = false
 
 
 ## Break a line into pages of at most `max_lines` rows.
@@ -729,12 +937,37 @@ func _process(delta: float) -> void:
 		_pause_left = pause_time
 		_pause_at = -1  # one beat per line, and it has now been spent
 		text_label.visible_characters = int(_reveal_accum)
+		_voice_new_chars(text_label.visible_characters)
 		return
 	text_label.visible_characters = int(_reveal_accum)
+	_voice_new_chars(text_label.visible_characters)
 	if text_label.visible_characters >= text_label.text.length():
 		text_label.visible_characters = -1  # -1 = show everything
 		_revealing = false
 		arrow.visible = true  # "press to advance" cue
+		if _voice_key != "":
+			VoiceBlips.blip(_voice_key, "ending")
+
+
+## Voice every newly revealed, non-whitespace character since the last call —
+## called from both places _process() advances visible_characters, so a blip
+## never fires twice for the same character and never fires at all while
+## paused or between pages (this is only ever called from inside the reveal
+## branch). Silent outright when there is no portrait: see _voice_key.
+func _voice_new_chars(new_count: int) -> void:
+	if _voice_key == "":
+		return
+	var text := text_label.text
+	new_count = mini(new_count, text.length())
+	for i in range(_voiced_upto, new_count):
+		if text[i].strip_edges() == "":
+			continue
+		var tier := "passing"
+		if not _last_tier_emphasized and randf() < EMPHASIS_CHANCE:
+			tier = "emphasized"
+		_last_tier_emphasized = tier == "emphasized"
+		VoiceBlips.blip(_voice_key, tier)
+	_voiced_upto = new_count
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -751,6 +984,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_pause_at = -1
 			_pause_left = 0.0
 			arrow.visible = true
+			# One "ending" blip rather than racing a blip through every
+			# skipped character, which would sound like a chirp burst.
+			if _voice_key != "":
+				VoiceBlips.blip(_voice_key, "ending")
 		else:
 			# Second press: dismiss.
 			line_finished.emit()

@@ -72,6 +72,29 @@ signal room_changed(room: Node2D)
 ## Delay between death and respawn. Kept tiny for a Celeste-fast retry loop.
 @export var respawn_delay := 0.15
 
+@export_group("Music")
+## How far background music ducks while a dialogue line is on screen, in dB
+## below whatever the Music node was authored at (so this is a RELATIVE drop,
+## not an absolute volume — an Act that authors its track quieter or louder
+## still ducks by the same felt amount). Listens to Dialogue's own
+## dialogue_opened/dialogue_closed rather than reaching into DialogueBox, so
+## it costs this world nothing to add a line anywhere.
+@export var music_duck_db := 14.0
+## Fade time each way. Generous on purpose: say() closes and reopens the
+## banner between every LINE of a conversation (not just between separate
+## conversations), and a fade this long never fully recovers in that gap — so
+## a multi-line exchange reads as one continuous duck rather than the music
+## flickering back up between lines. See _duck_music/_unduck_music.
+@export var music_duck_fade := 0.35
+## The Music node's own AUTHORED volume — captured once, so ducking always
+## returns to whatever THIS world's track was actually mixed at rather than a
+## hardcoded assumption. Missing "Music" child (a world with no track, or a
+## test world) is not an error: _music simply stays null and both handlers
+## below no-op.
+@onready var _music: AudioStreamPlayer = $Music if has_node("Music") else null
+var _music_base_db := 0.0
+var _music_tween: Tween
+
 ## Name of the room to open in, instead of the first one.
 ##
 ## Named for the debug picker, which is what first needed it, but it is now the
@@ -142,6 +165,10 @@ func _ready() -> void:
 			d.walked_through.connect(_on_door_walked.bind(d))
 	for cp in get_tree().get_nodes_in_group("checkpoint"):
 		cp.activated.connect(_on_checkpoint_activated)
+	if _music != null:
+		_music_base_db = _music.volume_db
+		Dialogue.dialogue_opened.connect(_duck_music)
+		Dialogue.dialogue_closed.connect(_unduck_music)
 
 	if rooms.is_empty():
 		push_error("LdtkWorld: the world scene has no rooms.")
@@ -453,6 +480,7 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	# be at.
 	CrumblingPlatform.reset_all(get_tree())
 	DarkThought.reset_all(get_tree())
+	MysteryBox.reset_all(get_tree())
 	_thought_layer = room.get_node_or_null("ThoughtHazards") as TileMapLayer
 	room_changed.emit(room)
 
@@ -466,7 +494,7 @@ func _physics_process(_delta: float) -> void:
 	if player.global_position.y > rect.end.y + kill_margin:
 		player.die()
 		return
-	if _in_thought_tile():
+	if _in_thought_tile() and not player.has_thought_immunity():
 		player.die()
 		return
 
@@ -505,6 +533,15 @@ func _on_player_died() -> void:
 	await get_tree().create_timer(
 		maxf(respawn_delay, player.death_time), false).timeout
 	player.respawn(_checkpoint)
+	# A respawn TELEPORTS him straight to the checkpoint, which the physics
+	# engine cannot tell apart from having just walked there — so if the
+	# checkpoint happens to sit inside an already-armed return-door strip (see
+	# _resolve_return_arming's note; Level_v6 is the room this was found in),
+	# the door would otherwise fire and bounce him straight into the room
+	# behind the instant he respawns. Re-run the same "landed inside it? wait
+	# for body_exited" check a fresh arrival already gets. Harmless where
+	# there is nothing to overlap — one more overlap query and two frames.
+	await _resolve_return_arming()
 	# Put the room's crumbling platforms back BEFORE he lands, not after: a
 	# retry that starts with the floor already missing is a room that gets
 	# harder every time you fail it, which turns a retry loop into a restart.
@@ -516,6 +553,9 @@ func _on_player_died() -> void:
 	# of step just looks like bad luck. Every retry gets the pattern the room was
 	# built around.
 	DarkThought.reset_all(get_tree())
+	# And the same again for a block already popped: retrying a room should not
+	# find its mystery boxes spent from an attempt that just ended in death.
+	MysteryBox.reset_all(get_tree())
 
 
 ## A story door in a room OWNS that room's doorway: you leave by walking
@@ -635,9 +675,25 @@ func _arm_return(from_room: Node2D) -> void:
 	var x := (rect.position.x + 6.0) if on_left else (rect.end.x - 6.0)
 	_return_zone.global_position = Vector2(x, rect.get_center().y)
 	_return_zone.monitoring = true
+	await _resolve_return_arming()
 
-	# You normally arrive clear of the strip, so arm as soon as we can confirm
-	# that; if you did land inside it, body_exited arms it when you leave.
+
+## You normally arrive clear of the strip, so arm as soon as we can confirm
+## that; if you did land inside it, wait for body_exited to arm it once you
+## actually walk clear — checked twice a physics frame apart, since a body
+## just placed by script has not been through collision processing yet.
+##
+## Shared by _arm_return (a fresh arrival can land inside the strip — a room
+## whose PlayerStart sits close to the edge it was entered through) and by
+## _on_player_died (see the note there: a respawn TELEPORTS the player, which
+## looks to the physics engine exactly like walking in, so a checkpoint that
+## happens to sit inside an already-armed strip would otherwise fire the
+## backtrack the instant he respawns — measured, this is exactly what made
+## dying/retrying in Level_v6 bounce straight back to Level_v5: its
+## PlayerStart sits 16px off the edge it's entered through, and the strip
+## that hangs there is 16px wide starting 6px in, so the two overlap by a
+## couple of pixels).
+func _resolve_return_arming() -> void:
 	_return_armed = false
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -859,3 +915,26 @@ func _slide_to_room(target: Node2D, arrive_at := Vector2.INF) -> void:
 	cam.reset_smoothing()
 	player.input_locked = false
 	_transitioning = false
+
+
+## Fade the music down while a dialogue line is on screen. Kills any
+## in-flight duck/restore tween first — Dialogue fires dialogue_opened again
+## for every LINE of a conversation, which can land while the previous
+## line's restore tween is still animating back up, and starting a fresh
+## tween from wherever THAT one currently sits (rather than fighting it) is
+## what keeps the music smoothly ducked instead of stuttering between lines.
+func _duck_music() -> void:
+	if _music_tween and _music_tween.is_valid():
+		_music_tween.kill()
+	_music_tween = create_tween()
+	_music_tween.tween_property(_music, "volume_db",
+		_music_base_db - music_duck_db, music_duck_fade)
+
+
+## Fade back to the track's own authored volume once the box has fully
+## closed. Same race as _duck_music above, same fix.
+func _unduck_music() -> void:
+	if _music_tween and _music_tween.is_valid():
+		_music_tween.kill()
+	_music_tween = create_tween()
+	_music_tween.tween_property(_music, "volume_db", _music_base_db, music_duck_fade)

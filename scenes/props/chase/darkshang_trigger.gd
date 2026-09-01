@@ -58,7 +58,9 @@ const FACES := {
 	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
 }
 const RUMI_FACES := {
-	"wistful": preload("res://assets/portraits/rumi_wistful.png"),
+	# "wistful" aliases to sorrowful here too — see act1_beats.gd's RUMI_FACES,
+	# same reasoning: no drawing of its own in the current art pass.
+	"wistful": preload("res://assets/portraits/rumi_sorrowful.png"),
 	"sorrowful": preload("res://assets/portraits/rumi_sorrowful.png"),
 	"urgent": preload("res://assets/portraits/rumi_urgent.png"),
 }

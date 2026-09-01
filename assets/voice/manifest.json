@@ -1,0 +1,57 @@
+{
+  "hooshang_annoyed": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "hooshang_dazed": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "hooshang_hesitant": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "hooshang_shocked": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "hooshang_skeptical": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "hooshang_vulnerable": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "rumi_serene": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "rumi_sorrowful": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "rumi_urgent": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "rumi_warm_open": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "rumi_wistful": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  }
+}

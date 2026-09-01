@@ -118,6 +118,30 @@ func _ready() -> void:
 			% box.banner.offset_bottom)
 	await _close(box)
 
+	# --- interrupting a still-CLOSING line doesn't flash its old text --------
+	#
+	# Every _say() above fires and closes cleanly, one full cycle at a time —
+	# none of them exercise what happens when a NEW line starts while an
+	# OLDER one's close animation is still mid-flight. _kill_anim_tweens()
+	# stops that old tween from fighting the new one, but used to leave
+	# text_label's scale wherever the kill happened to land (anywhere from 1,
+	# a fresh interrupt, down to 0, an almost-finished close) rather than
+	# snapped to 0 — and nothing clears text_label's TEXT until _begin_page()
+	# runs, well after the new entrance. The old line's full text sat at that
+	# frozen, partial scale for the whole new entrance: a flash of the wrong,
+	# garbled-looking text the instant the box opened.
+	await _say(box, "The interrupted line.", DialogueBox.Side.LEFT, DialogueBox.VSide.TOP)
+	box.line_finished.emit()  # dismiss it — this starts its close animation
+	await _frames(3)          # let that close tween actually get moving
+	# Fired WITHOUT awaiting the close above, on purpose — this is the race.
+	box.say("Hooshang", "The interrupting line.", Color(1, 1, 1, 1), null,
+		DialogueBox.Side.LEFT, DialogueBox.VSide.TOP)
+	_check(is_zero_approx(box.get_node("TextLabel").scale.y),
+		"a line that interrupts a still-closing one starts text_label fully hidden  [scale.y=%.3f]"
+			% box.get_node("TextLabel").scale.y)
+	await _frames(int(maxf(box.entrance_time, box.portrait_entrance_time) * 60.0) + 3)
+	await _close(box)
+
 	if failures.is_empty():
 		print("DIALOGUE PLACEMENT TEST: ALL PASS")
 	else:
@@ -127,20 +151,56 @@ func _ready() -> void:
 
 ## Show a line and let one frame of layout land, without waiting on a real
 ## button press — the same fire-and-close pattern tests/screen_test.gd uses.
+##
+## Waits out the float-IN first. say() now holds the line off until its own
+## entrance animation finishes (up to portrait_entrance_time) before it is
+## listening for a dismiss at all — _fit_banner/_place_vside have already set
+## every offset this test checks by the time say() is called, so the numbers
+## below are correct from frame one, but emitting line_finished before the
+## entrance has actually reached its "await line_finished" leaves nothing
+## listening and the next call hangs forever waiting on a signal that already
+## fired into the void.
 func _say(box: DialogueBox, text: String, side: int, vside: int,
 		tint := Color(1, 1, 1, 1)) -> void:
 	box.say("Hooshang", text, tint, null, side, vside)
-	await _frames(3)
+	await _frames(int(maxf(box.entrance_time, box.portrait_entrance_time) * 60.0) + 3)
+	# The bug that shipped: text_label's CLOSE tween scales it to zero height
+	# and nothing ever tweened it back, so every line after the first was
+	# typing into a node still scaled to nothing — text_label.text held the
+	# right string the whole time, which is exactly why checking offsets and
+	# text content (everything else in this file) never caught it. This is
+	# the one check here that looks at what a player actually SEES rather
+	# than the layout math behind it, and it runs on every call — the second,
+	# third, fourth... _say() in this file is the regression case, not the
+	# first.
+	_check(is_equal_approx(box.get_node("TextLabel").scale.y, 1.0),
+		"the text is actually visible, not scaled to zero from a previous line's close  [scale.y=%.3f]"
+			% box.get_node("TextLabel").scale.y)
 
 
+## Loops rather than emitting once: a line long enough to paginate needs one
+## line_finished per PAGE, not per say() call, and emitting into a box that
+## is not currently listening (between pages, or before it is) is a safe
+## no-op — so this just keeps trying until _active actually drops, which is
+## say()'s own signal that every page is done and its close has begun.
 func _close(box: DialogueBox) -> void:
-	box.line_finished.emit()
-	await _frames(2)
+	while box._active:
+		box.line_finished.emit()
+		await _frames(3)
+	# ...and out: say() does not set visible = false until its own close
+	# animation (entrance_time) has played.
+	await _frames(int(box.entrance_time * 60.0) + 3)
 
 
+## PHYSICS frames, not idle/process ones. say()'s float-in/close now runs on
+## Tween.TWEEN_PROCESS_PHYSICS and process_in_physics SceneTreeTimers
+## specifically because idle process has no fixed relationship to wall-clock
+## time in a headless run — measured, a 0.32s wait took 30 idle frames to
+## clear once, 19 another time. Physics ticks are fixed-step, which is the
+## only way "N frames" is a number this file can reason about at all.
 func _frames(n: int) -> void:
 	for i in n:
-		await get_tree().process_frame
+		await get_tree().physics_frame
 
 
 func _check(cond: bool, name: String) -> void:

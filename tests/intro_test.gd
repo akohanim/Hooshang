@@ -90,16 +90,17 @@ const MEETING_FACES: Array[String] = [
 	"hesitant",
 ]
 
-## The second encounter, in order. Two lines with the gift BETWEEN them: he names
-## the need and hands the ability over, and only then names the key — so the
-## button is taught to someone who already has the thing it operates.
-const GIFT: Array[String] = [
-	"Some walls won't yield to a jump. Take this, and dash.",
-	"Press the X key to dash.",
-]
-## Whether Hooshang already had the dash as each GIFT line went up. This is what
-## pins the gift to the MIDDLE of the exchange rather than either end of it.
-const GIFT_HAS_DASH: Array[bool] = [false, true]
+## The second encounter, in order. WORDLESS now: the scene opens with the gift
+## itself — Rumi steps over and hands the dash across with nothing said first —
+## and only the lesson line follows it, so the button is taught to someone who
+## already has the thing it operates. Empty rather than deleted, so a stale
+## copy of the old two-line hand-over cannot silently come back: see
+## DashTutorial.gift_lines, which this has to keep matching.
+const GIFT: Array[String] = []
+## Whether Hooshang already had the dash as each GIFT line went up — trivially
+## true now that there is nothing to check before the gift, but kept as the
+## same shape as GIFT so the two can be zipped without a special case.
+const GIFT_HAS_DASH: Array[bool] = []
 
 ## The third encounter, at the mouth of the sounding tiles. He complains into the
 ## dark BEFORE Rumi turns up — the complaint is what Rumi answers by appearing —
@@ -286,10 +287,10 @@ func _ready() -> void:
 	var expect: Array[String] = GIFT.duplicate()
 	expect.append_array(tut.lines)
 	_check(lines == expect, "the dash lines, in order  [got %s]" % str(lines))
-	_check(speakers == ["Rumi", "Rumi", "Rumi"],
+	_check(speakers == ["Rumi"],
 		"all spoken by Rumi  [got %s]" % str(speakers))
-	_check(dash_when_said == [false, true, true],
-		"the gift lands BETWEEN the first two — offer, touch, then the key  [got %s]"
+	_check(dash_when_said == [true],
+		"the gift is wordless, so the one line that IS said comes after it  [got %s]"
 			% str(dash_when_said))
 	_check(sides == _sides_for(speakers, _rumi_on_right == 1),
 		"his face is on his side of the screen here too  [Rumi %s, got %s]" % [
@@ -409,9 +410,25 @@ func _check_lines_fit() -> void:
 	var size: int = label.get_theme_font_size("font_size")
 	var spacing := float(label.get_theme_constant("line_spacing"))
 	var clipped: Array[String] = []
+	# This loop only cares about wrapping geometry, which _fit_banner sets
+	# synchronously before say() ever awaits anything — but say() now floats
+	# the box in and out on its own timer (entrance_time/portrait_entrance_time),
+	# and this loop's one-frame-per-line pace fires line_finished long before
+	# that entrance is even reached, let alone listening. Zeroed for the
+	# length of this check and restored after, so dozens of lines do not turn
+	# into dozens of unresolved awaits stacking up on the same singleton.
+	var saved_entrance := box.entrance_time
+	var saved_portrait_entrance := box.portrait_entrance_time
+	box.entrance_time = 0.0
+	box.portrait_entrance_time = 0.0
 	for text in WAKING + MEETING + GIFT + TILES:
 		# With a portrait, which is the narrower and therefore worse case.
 		box.say("Hooshang", text, Color(1, 1, 1, 1))
+		# One frame for _fit_banner's offsets (set synchronously, before any
+		# await inside say()) and a second to clear the zero-length entrance
+		# tween/interval so say() has actually reached "await line_finished"
+		# by the time this emits it below.
+		await get_tree().process_frame
 		await get_tree().process_frame
 		var width := label.offset_right - label.offset_left
 		var wrapped := font.get_multiline_string_size(
@@ -423,6 +440,9 @@ func _check_lines_fit() -> void:
 				needed, label.offset_bottom - label.offset_top, text.substr(0, 32)])
 		box.line_finished.emit()
 		await get_tree().process_frame
+		await get_tree().process_frame
+	box.entrance_time = saved_entrance
+	box.portrait_entrance_time = saved_portrait_entrance
 	_check(clipped.is_empty(),
 		"every line fits its banner  %s" % ("" if clipped.is_empty() else str(clipped)))
 
@@ -507,17 +527,31 @@ func _check_gift(who: String) -> void:
 
 
 ## Let the scene play, recording each new line and pressing on through it.
+##
+## Keyed on text_label ALONE, not name+text together. say() now sets the
+## speaker's name and floats the box in BEFORE text_label gets the new
+## page's text — that gap is the whole point of the entrance (the character
+## arrives, THEN speaks) — so a key combining both caught that in-between
+## moment (new name, still the PREVIOUS line's text) as a spurious extra
+## line every time. Reading name_label.text only once text has actually
+## changed still gets the right speaker for each captured line, since it is
+## read fresh at that moment rather than latched from when the key changed.
 func _run_scene(max_frames: int) -> void:
 	var box: CanvasLayer = Dialogue
 	var name_label: Label = box.get_node("NameLabel")
 	var text_label: Label = box.get_node("TextLabel")
-	var seen := ""
+	# Seeded with whatever is ALREADY showing, not "". say()'s close now keeps
+	# the box visible (mid-shrink) for entrance_time after line_finished, so
+	# the previous section's last line can still be on screen, unchanged, when
+	# this call's polling starts — a fresh "" would read that leftover content
+	# as a brand-new line the instant this loop takes its first sample.
+	var seen := text_label.text
 	for i in max_frames:
 		await _frames(1)
 		_sample_staging()
 		if not box.visible:
 			continue
-		var key := "%s|%s" % [name_label.text, text_label.text]
+		var key := text_label.text
 		if key != seen:
 			seen = key
 			lines.append(text_label.text)

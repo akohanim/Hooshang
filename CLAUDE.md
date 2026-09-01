@@ -193,6 +193,39 @@ so the two agree now. The tiles are still placeholder art.
     short-circuit — replacing `_near_wall_dir()` for the squeeze path, and by
     no longer nudging him wall-ward at all while squeezing, since a chimney
     already centres him with nothing pulling him off it
+  - `Godot --headless --path . res://tests/voice_blip_test.tscn` — the
+    Celeste-style dialogue VOICE: synthesized syllable blips (see
+    `tools/gen_voice_blips.py`, `systems/voice_blips.gd`) retriggered as the
+    typewriter reveals each character. Covers the manifest loading off
+    res://, blips firing only while a page with a portrait is actually
+    revealing (silence for system text with no portrait, silence during a
+    `[p]` pause hold, silence between pages waiting on a press), a page
+    completing playing one ENDING-tier blip, "emphasized" never landing
+    twice in a row (a structural guarantee from `_last_tier_emphasized`, not
+    a probabilistic check), a pool never repeating the same clip twice in a
+    row, and switching portrait state mid-conversation switching which
+    key's pool gets used — driven by `box._process(delta)` called directly
+    with a synthetic delta, the same by-hand trick `thought_tiles_test.gd`
+    and `portrait_anim_test.gd` use, and for the same reason: idle-process
+    delta has no fixed relationship to wall-clock frames in a headless run
+  - `Godot --headless --path . res://tests/mystery_box_test.tscn` — the
+    Mario-style "?" block: solid always, and a bump only counts when the hit
+    is genuinely UPWARD (`velocity.y < 0`) — resting or drifting against the
+    underside does nothing. The sensor that detects it stands PROUD a few
+    pixels below the solid box's own underside (mystery_box.gd's own note
+    explains why: it has to see him before the solid collision has a chance
+    to zero his velocity, the same problem CrumblingPlatform's skin solves
+    from the other side). One mushroom per life of the box; both come back
+    together on `reset_all`. The mushroom itself: rises straight out with no
+    gravity, then drops into walking right with gravity on, reversing off a
+    wall and simply falling off a ledge rather than avoiding one. And the
+    power an eaten one grants: 30s of thought-hazard immunity — a dark/light
+    cloud is passed through and every one of them has its warning glow
+    suppressed WORLD-WIDE the instant it is eaten (not per touch), a grey one
+    dissolves out of the room on contact instead of killing (and comes back
+    on the same `reset_all` sweep), and the paintable `ThoughtHazards` tiles
+    stop killing too. A death cuts the power immediately, same as the lemon
+    glow.
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -438,6 +471,54 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `SceneTreeTimer` (`create_timer(t, false)`) in both `level_base.gd` and
   `ldtk_world.gd` — the default keeps counting through a pause and would respawn
   him behind the menu.
+- `systems/voice_blips.gd` — the `VoiceBlips` autoload: Celeste-style dialogue
+  VOICE. Not recorded speech — short syllables synthesized by
+  `tools/gen_voice_blips.py` (pure stdlib formant synthesis, deterministic,
+  same recipe as `gen_note_audio.py`), banked per speaker+portrait-STATE and
+  per TIER (`passing` most of the time, rarer `emphasized`, one `ending` per
+  page) under `assets/voice/<speaker>/<state>/`, indexed by
+  `assets/voice/manifest.json` (loaded as a `Resource`, same reasoning as
+  `DialogueBox._load_rigs()` — missing/corrupt manifest is silence
+  everywhere, not a crash). `DialogueBox` retriggers `VoiceBlips.blip(key,
+  tier)` once per newly revealed, non-whitespace character — see the VOICE
+  note at the top of `dialogue_box.gd`. **`key` is the exact same string
+  `_set_rig`/`_set_loop` already derive from the portrait texture's
+  filename** ("hooshang_annoyed", "rumi_wistful", ...), so a beat that
+  already names a state gets a voice for free and never has to know this
+  exists. One shared, retriggered `AudioStreamPlayer` rather than a pool per
+  speaker — this game only ever shows one speaker at a time. `blip()` never
+  repeats the same clip twice in a row for the same `(key, tier)` pool (one
+  retry, which is guaranteed to land elsewhere since it shifts the index by
+  1 mod the pool size), and `DialogueBox` never rolls "emphasized" twice in a
+  row either (`_last_tier_emphasized`) — both are the thread's own "no
+  consecutive duplicate syllables, reduced emphasis" rules. See
+  `voice_blip_test.tscn`.
+  **Casting**: Hooshang is the SHARPER, less settled voice (brighter
+  formants, a faster/thinner attack, more pronounced vibrato — a wavering
+  pitch is what "unsure" sounds like without needing real words). Rumi is
+  deliberately the opposite pole on every axis — a base register well below
+  Hooshang's, checked so Rumi's brightest/highest state never reaches
+  Hooshang's darkest/lowest one, darker formants, a slower/shallower vibrato,
+  longer decay, and a quiet sub-octave layer (`sub` in `gen_voice_blips.py`'s
+  `VOICES`) mixed in purely for chest weight — the "wise sage" register a
+  plain low fundamental alone doesn't quite sell. See the module docstring's
+  CASTING note for the full reasoning.
+- `scripts/ldtk_world.gd` (`LdtkWorld`) also ducks that Act's background
+  MUSIC while dialogue is on screen — `@export_group("Music")`'s
+  `music_duck_db`/`music_duck_fade`, listening to `Dialogue`'s
+  `dialogue_opened`/`dialogue_closed` signals rather than DialogueBox
+  reaching into the world. **The fade is deliberately slow (0.35s) relative
+  to how fast those signals actually fire**: `say()` closes and reopens the
+  whole banner between every LINE of a conversation, not just between
+  separate conversations, so a fade this long never fully recovers in the
+  gap between one line's close and the next line's open — a multi-line
+  exchange reads as one continuously ducked passage rather than the music
+  flickering back up between lines. Ducking restores to whatever the
+  `Music` child's own AUTHORED `volume_db` was (captured once in `_ready()`),
+  not a hardcoded absolute, so a louder- or quieter-mixed Act's track still
+  ducks by the same felt amount. A world with no `Music` child (a test world,
+  say) simply never connects the signals — `_music` stays null and nothing
+  fires.
 - `scenes/props/` — `Checkpoint.tscn`, `hazards/Hazard.tscn` (both @tool,
   size-exported), `lighting/LampFixture.tscn` (reusable lamp; joins `lights`).
   `lighting/SunShaft.tscn` is the third light source after `LampFixture` and
@@ -509,6 +590,30 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   multiplies the surface under it, paint does not, so at equal energy paint
   lands ~1/albedo too bright. `Glow` in LDtk (1/0, unset = on) turns it off.
   Full numbers and the per-item cap: `LIGHTING.md`.
+  `MysteryBox.tscn` is the Mario-style "?" block — bump it from underneath
+  (jumping or dashing into its underside; see mystery_box.gd for exactly what
+  counts as a hit) and `Mushroom.tscn` rises out of it and walks off to the
+  right, gravity on, bouncing off a wall and falling off a ledge rather than
+  avoiding one — Super Mario 3's beat. `MushroomType` (LDtk field, currently
+  just `BlackWhite`) picks which power a given box hands out; a new colour is
+  a new palette in `tools/gen_mushroom.py`, a new value in
+  `Mushroom.MushroomType`, and a new branch in `_build_mystery_box` — three
+  places, not a fourth. The block is SOLID always, even once spent — only the
+  face changes — and comes back (unspent, idle face) on the same room-entry
+  and respawn sweep as `CrumblingPlatform`/`DarkThought` (`reset_all`).
+  **The black & white mushroom** grants 30s of thought-hazard immunity
+  (`Player.has_thought_immunity()`) and sparkles him for the duration
+  (`Juice.mushroom_sparkle_tick`, thinning out rather than blinking as it
+  nears the end — the same warning job `lemon_glow_flicker_time` does with a
+  blink instead). While it runs: a `DarkThought`/`LightThought` is passed
+  through and EVERY one of them has its warning glow turned off WORLD-WIDE
+  the instant the mushroom is eaten (`DarkThought.set_glow_suppressed`), not
+  one cloud at a time as each is touched; a `GreyThought` dissolves out of the
+  room on contact instead of killing him (and comes back on the same
+  `reset_all` sweep as everything else with per-visit state); and the
+  paintable `ThoughtHazards` tiles stop killing (`ldtk_world.gd`'s
+  `_in_thought_tile` check). A death cuts the power immediately, the same way
+  dying does not refund a spent lemon. See `mystery_box_test.tscn`.
   `backdrop/WallPattern.tscn` is the Persian rosette that blooms on the office
   walls. A LIGHT, not paint — `CanvasModulate` 0.05 would eat a painted one, the
   same trap `SunShaft` documents — with the ornament in the cookie's alpha so one
@@ -773,6 +878,23 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   (tilemap bytes + node layout, incl. prefab instances). Re-running OVERWRITES
   hand-edits to the generated `.tscn`. Levels are dark (CanvasModulate ~0.09) +
   `LampFixture` instances.
+- `tools/gen_voice_blips.py` — the dialogue voice blips ->
+  `assets/voice/<speaker>/<state>/*.wav` + `assets/voice/manifest.json` (see
+  `systems/voice_blips.gd`). Pure stdlib (`wave`/`struct`/`math`/`random`, no
+  numpy), matching `gen_note_audio.py`'s recipe. Every clip's RNG is seeded
+  from the string `"<speaker>:<state>:<tier>:<index>"`, so re-running
+  regenerates byte-identical files — checked directly (a hash diff on every
+  `.wav`) before this shipped. Additive harmonic synthesis rather than a real
+  formant filter: each harmonic of a per-clip-jittered `f0` is boosted by a
+  Gaussian bump wherever it lands near one of two formant centres, which are
+  themselves interpolated between a DARK/closed vowel pair and a BRIGHT/open
+  one by each STATE's own `brightness` — that interpolation is what gives
+  `hooshang_shocked` a different vowel colour than `hooshang_vulnerable`
+  rather than every clip being the same bell tone at a different pitch (which
+  is what this borrows its envelope shape from). STATE NAMES ARE NOT
+  INVENTED HERE: they are exactly `scripts/act1_beats.gd`'s `FACES` /
+  `RUMI_FACES` keys (minus the aliases that point at another state's
+  painting), so a state that already has a portrait gets a voice for free.
 
 ## Dialogue rules
 

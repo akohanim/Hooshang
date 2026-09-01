@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/light_radial.png" id="1_light"]
+
+[node name="ExitSignCeiling" type="Node2D"]
+
+[node name="Glow" type="PointLight2D" parent="."]
+color = Color(0.35, 1, 0.45, 1)
+energy = 0.25
+texture = ExtResource("1_light")
+texture_scale = 0.35
+
+[node name="Mount" type="ColorRect" parent="."]
+offset_left = -4.0
+offset_top = -8.0
+offset_right = 4.0
+offset_bottom = -6.0
+color = Color(0.82, 0.84, 0.85, 1)
+mouse_filter = 2
+
+[node name="Border" type="ColorRect" parent="."]
+offset_left = -4.0
+offset_top = -6.0
+offset_right = 4.0
+offset_bottom = 6.0
+color = Color(0.4, 0.95, 0.5, 1)
+mouse_filter = 2
+
+[node name="Panel" type="ColorRect" parent="."]
+offset_left = -3.0
+offset_top = -5.0
+offset_right = 3.0
+offset_bottom = 5.0
+color = Color(0.09, 0.5, 0.16, 1)
+mouse_filter = 2
+
+[node name="Arrow" type="Polygon2D" parent="."]
+color = Color(0.9, 1, 0.92, 1)
+polygon = PackedVector2Array(-1.5, -2.5, -1.5, 2.5, 0.5, 2.5, 0.5, 1, 2, 0, 0.5, -1, 0.5, -2.5)
