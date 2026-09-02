@@ -560,20 +560,6 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _rumi("...Later.[p] Yes, it's always later isn't it.", "wistful")
 
 	await _rumi("You have knocked on this door your whole life, from the inside.[p] Now it opens.", "warm_open")
-	await _rumi("You need not see the whole road, only the next step of it.", "serene")
-
-	# He reaches out — one hand, sleeve trailing light — and touches his chest.
-	# Something wrapped in cloth for fifty years comes loose. No ABILITY here,
-	# though: the dash is the second encounter's gift, one room later, where
-	# there is finally a gap that needs it.
-	await trigger.step_to(player.global_position.x)
-	await trigger.swell()
-	await trigger.give_to(player)
-	player.flash()
-	await _hold(0.45)
-
-	# He answers with Rumi still standing there, and only then does Rumi go.
-	await _hooshang("One step.[p] OK. One step I can probably do...", "hesitant")
 
 	await trigger.vanish()
 	player.input_locked = false
@@ -690,8 +676,6 @@ func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _rumi("Now both. Watch how they travel.[p] One rises and falls. One crosses. One circles you in the dark.", "serene")
 	await _rumi("Do not sort them, jaan. Pleasant, unpleasant —[p] both are only weather.", "warm_open")
 	await _rumi("Meet them the same way, and the way through opens on its own.", "serene")
-	await _hooshang("Weather. Right.[p] ...And I just walk through the weather.", "flat")
-	await _rumi("You have been walking through it your whole life, jaan.[p] Today you do it on purpose.", "warm_open")
 
 	trigger.breathe(false)
 	await trigger.vanish()
@@ -959,7 +943,11 @@ func _play_chase_end() -> void:
 	# The room with nothing in it. He does not speak into the moment the shadow
 	# vanishes — he speaks after enough silence to be sure of it.
 	await _hold(after_dissolve_pause)
-	await _hooshang("It's... gone?", "shocked")
+	# The moment he realizes the shadow is really gone — a startled little
+	# tremor on the one word that carries it. See the class doc's BBCODE
+	# EMPHASIS note in dialogue_box.gd for the tag syntax and why tags stay
+	# bare (no internal spaces).
+	await _hooshang("It's... [shake]gone[/shake]?", "shocked")
 
 	_rumi_trigger = LdtkRumiTrigger.staged(
 		Vector2(player.global_position.x + rumi_end_offset, player.global_position.y))
@@ -969,10 +957,16 @@ func _play_chase_end() -> void:
 	_rumi_trigger.breathe(true)
 	await _hold(arrival_pause)
 
-	await _rumi("No, jaan. A darkness grown this strong cannot be defeated overnight.[p] But stop watering it, and it stops growing.", "serene")
-	await _hooshang("So I never had to defeat it. I just had to stop feeding it.", "vulnerable")
-	await _rumi("Yes. The roots remain. It may green again someday, if ever you water it.[p] But you know the way of it now, you need only stop. Let the thought come, let it stand, let it go. Do not water it with your fear, and it withers on its own.", "wistful")
-	await _rumi("Come. Not every seed you carry grew into this.[p] Let me show you the ones that grew toward the light.", "warm_open")
+	await _rumi("No, jaan. A darkness grown this strong cannot be defeated overnight.[p] But [color=#ffd16b]stop watering it[/color], and it stops growing.", "serene")
+	# The thesis of the whole Act, so it gets the one un-subtle beat in the
+	# scene: a slow pulse on "stop", not a shake — this is a realization
+	# settling in, not a shock.
+	await _hooshang("So I never had to defeat it. I just had to [pulse]stop[/pulse] feeding it.", "vulnerable")
+	# The three-part mantra gets a shared, gentle wave — one continuous motion
+	# across "let it come, let it stand, let it go" rather than three separate
+	# effects, so it reads as one calm breath instead of a list.
+	await _rumi("Yes. The roots remain. It may green again someday, if ever you water it.[p] But you know the way of it now, you need only stop. [wave]Let the thought come, let it stand, let it go.[/wave] Do not water it with your fear, and it withers on its own.", "wistful")
+	await _rumi("Come. Not every seed you carry grew into this.[p] Let me show you the ones that grew toward [color=#ffd16b]the light[/color].", "warm_open")
 
 	await _play_act_two()
 

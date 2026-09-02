@@ -481,6 +481,7 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	CrumblingPlatform.reset_all(get_tree())
 	DarkThought.reset_all(get_tree())
 	MysteryBox.reset_all(get_tree())
+	MagicCarpet.reset_all(get_tree())
 	_thought_layer = room.get_node_or_null("ThoughtHazards") as TileMapLayer
 	room_changed.emit(room)
 
@@ -556,6 +557,9 @@ func _on_player_died() -> void:
 	# And the same again for a block already popped: retrying a room should not
 	# find its mystery boxes spent from an attempt that just ended in death.
 	MysteryBox.reset_all(get_tree())
+	# And a moving carpet: back to its placed point and the start of its cycle,
+	# same reasoning as DarkThought above.
+	MagicCarpet.reset_all(get_tree())
 
 
 ## A story door in a room OWNS that room's doorway: you leave by walking

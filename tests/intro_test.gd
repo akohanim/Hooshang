@@ -41,8 +41,6 @@ const MEETING: Array[String] = [
 	"Look — this really isn't a good time. I just lost my job. I'll get to all that. Later.",
 	"...Later. Yes. That is the word, isn't it.",
 	"You have knocked on this door your whole life, from the inside. Now it opens.",
-	"You need not see the whole road, only the next step of it.",
-	"One step. OK. One step I can probably do...",
 ]
 const MEETING_SPEAKERS: Array[String] = [
 	"Hooshang", "Hooshang", "Hooshang", "Hooshang",
@@ -54,8 +52,7 @@ const MEETING_SPEAKERS: Array[String] = [
 	"Hooshang",
 	"Rumi", "Rumi", "Rumi", "Rumi",
 	"Hooshang",
-	"Rumi", "Rumi", "Rumi",
-	"Hooshang",
+	"Rumi",
 ]
 ## The wordless beats, in order: he startles, waits for an answer that does not
 ## come, then deflates before admitting he might be concussed.
@@ -86,8 +83,7 @@ const MEETING_FACES: Array[String] = [
 	"skeptical",   # "unconvinced"
 	"", "", "", "",
 	"hesitant",    # "deflecting"
-	"", "", "",
-	"hesitant",
+	"", "",
 ]
 
 ## The second encounter, in order. WORDLESS now: the scene opens with the gift
@@ -222,15 +218,11 @@ func _ready() -> void:
 	_check(not world.player.input_locked, "control is returned after the meeting")
 	_check(_rumi_alpha(trigger) < 0.01, "Rumi has faded out again")
 	_check(_door_armed(), "Rumi leaving arms the story door")
-	# Staging: he must arrive at a distance and then close it. He used to
-	# materialise exactly on top of Hooshang (the player is standing ON the
-	# trigger when it fires), which left the reaching-out beat nothing to cross.
+	# Staging: he must arrive at a distance, not on top of Hooshang. He used to
+	# materialise exactly there (the player is standing ON the trigger when it
+	# fires), which read as the two of them occupying the same spot.
 	_check(_gap_on_arrival >= 16.0,
 		"Rumi arrives at a distance, not inside Hooshang  [%.0fpx]" % _gap_on_arrival)
-	_check(_gap_at_touch > 0.0 and _gap_at_touch < _gap_on_arrival,
-		"he closes that distance to reach out  [%.0fpx -> %.0fpx]" % [
-			_gap_on_arrival, _gap_at_touch])
-	_check_gift("the meeting")
 
 	# --- second encounter, room 2: the dash ---
 	lines.clear()
@@ -405,10 +397,10 @@ func _ready() -> void:
 ## numbers the game will.
 func _check_lines_fit() -> void:
 	var box: DialogueBox = Dialogue
-	var label: Label = box.get_node("TextLabel")
-	var font: Font = label.get_theme_font("font")
-	var size: int = label.get_theme_font_size("font_size")
-	var spacing := float(label.get_theme_constant("line_spacing"))
+	var label: RichTextLabel = box.get_node("TextLabel")
+	var font: Font = label.get_theme_font("normal_font")
+	var size: int = label.get_theme_font_size("normal_font_size")
+	var spacing := float(label.get_theme_constant("line_separation"))
 	var clipped: Array[String] = []
 	# This loop only cares about wrapping geometry, which _fit_banner sets
 	# synchronously before say() ever awaits anything — but say() now floats
@@ -431,8 +423,13 @@ func _check_lines_fit() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 		var width := label.offset_right - label.offset_left
+		# label.text carries a live [fade start length] BBCode wrapper while
+		# revealing (see DialogueBox._apply_page_text) plus whatever emphasis
+		# markup the line itself was authored with — strip both down to the
+		# plain rendered characters before measuring, or the tag markup reads
+		# as extra glyphs and inflates the wrap.
 		var wrapped := font.get_multiline_string_size(
-			label.text, HORIZONTAL_ALIGNMENT_CENTER, width, size)
+			box._strip_tags(label.text), HORIZONTAL_ALIGNMENT_CENTER, width, size)
 		var rows := maxi(int(round(wrapped.y / float(size))), 1)
 		var needed: float = wrapped.y + spacing * (rows - 1)
 		if needed > label.offset_bottom - label.offset_top:
@@ -528,7 +525,7 @@ func _check_gift(who: String) -> void:
 
 ## Let the scene play, recording each new line and pressing on through it.
 ##
-## Keyed on text_label ALONE, not name+text together. say() now sets the
+## Keyed on box._page_raw ALONE, not name+text together. say() now sets the
 ## speaker's name and floats the box in BEFORE text_label gets the new
 ## page's text — that gap is the whole point of the entrance (the character
 ## arrives, THEN speaks) — so a key combining both caught that in-between
@@ -536,25 +533,32 @@ func _check_gift(who: String) -> void:
 ## line every time. Reading name_label.text only once text has actually
 ## changed still gets the right speaker for each captured line, since it is
 ## read fresh at that moment rather than latched from when the key changed.
+##
+## Keyed on _page_raw rather than text_label.text: TextLabel now rewrites its
+## own `.text` every reveal frame with a moving [fade start length] BBCode
+## wrapper (see DialogueBox._apply_page_text), so the raw label text changes
+## constantly WITHIN a single page's reveal, not just between pages — sampling
+## that directly would read as a new line on nearly every frame. _page_raw is
+## the stable per-page value _apply_page_text is built from: set once by
+## _begin_page and unchanged until the next page.
 func _run_scene(max_frames: int) -> void:
-	var box: CanvasLayer = Dialogue
+	var box: DialogueBox = Dialogue
 	var name_label: Label = box.get_node("NameLabel")
-	var text_label: Label = box.get_node("TextLabel")
 	# Seeded with whatever is ALREADY showing, not "". say()'s close now keeps
 	# the box visible (mid-shrink) for entrance_time after line_finished, so
 	# the previous section's last line can still be on screen, unchanged, when
 	# this call's polling starts — a fresh "" would read that leftover content
 	# as a brand-new line the instant this loop takes its first sample.
-	var seen := text_label.text
+	var seen: String = box._page_raw
 	for i in max_frames:
 		await _frames(1)
 		_sample_staging()
 		if not box.visible:
 			continue
-		var key := text_label.text
+		var key: String = box._page_raw
 		if key != seen:
 			seen = key
-			lines.append(text_label.text)
+			lines.append(box._page_raw)
 			speakers.append(name_label.text if name_label.visible else "")
 			faces.append(_face_name())
 			sides.append(_portrait_side())

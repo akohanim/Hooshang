@@ -172,6 +172,16 @@ func _import(
 	var base_dir := source_file.get_base_dir() + "/"
 	var file_name := source_file.get_file()
 	var world_name := file_name.split(".")[0]
+	# PATCHED (Hooshang). Stashed into the already-global Util.options so
+	# tileset.gd's get_tileset() can namespace the shared per-tile-size
+	# resource by SOURCE PROJECT, not just tile size — see the matching patch
+	# there for why: two .ldtk projects on the same grid size (this project
+	# runs both Act 1 and Act 2 at 8px on purpose) otherwise collide on the
+	# exact same "tileset_8px.res" path, and re-importing either one silently
+	# rebuilds that shared file from only ITS OWN layers, wiping the other
+	# project's tile sources out from under it. Keep this through any addon
+	# update, same as the tileset.gd patch it pairs with.
+	Util.options["world_name"] = world_name
 
 	Util.timer_start(Util.DebugTime.LOAD)
 	var world_data := Util.parse_file(source_file)

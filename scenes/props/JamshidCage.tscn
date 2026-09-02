@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/jamshid_cage.gd" id="1_cage"]
+
+[node name="JamshidCage" type="StaticBody2D" groups=["jamshid_cage"]]
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("1_cage")

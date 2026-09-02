@@ -32,10 +32,26 @@ enum Motion { VERTICAL, HORIZONTAL, CIRCLE, LINEAR }
 ## thought that no longer moves like the other one is not a recolour any more.
 enum Tone { DARK, LIGHT, GREY }
 
+## Which sheet set `tone` is read from. Same pattern as `tone` itself — an
+## enum field picking among preset asset dicts — one axis further: Act 1's
+## office dread-cloud (SHEETS, the default, so every existing placement is
+## unaffected) or Act 2's rounder childhood-memory cloud (SHEETS_CHILDHOOD).
+## Path, kill logic, motion and glow are all unchanged either way — only which
+## texture dict _frame()/_apply_tone() reads.
+enum Palette { OFFICE, CHILDHOOD }
+
 const SHEETS := {
 	Tone.DARK: preload("res://assets/hazards/dark_thought.png"),
 	Tone.LIGHT: preload("res://assets/hazards/light_thought.png"),
 	Tone.GREY: preload("res://assets/hazards/grey_thought.png"),
+}
+## Act 2's rounder, candy-palette clouds (tools/gen_act2_thought.py) — same
+## FRAME/FRAMES contract as SHEETS, so _frame() need not change, only which
+## dict it reads. See `palette`.
+const SHEETS_CHILDHOOD := {
+	Tone.DARK: preload("res://assets/hazards/act2_dark_thought.png"),
+	Tone.LIGHT: preload("res://assets/hazards/act2_light_thought.png"),
+	Tone.GREY: preload("res://assets/hazards/act2_grey_thought.png"),
 }
 const GLOW := preload("res://assets/light_radial.png")
 
@@ -84,6 +100,12 @@ const ART := Vector2(16.0, 12.0)
 @export var tone: Tone = Tone.DARK:
 	set(value):
 		tone = value
+		_apply_tone()
+
+## See the Palette enum doc above.
+@export var palette: Palette = Palette.OFFICE:
+	set(value):
+		palette = value
 		_apply_tone()
 
 ## Whether it carries a halo at all. On by default, and on is what you want
@@ -365,9 +387,14 @@ func _offset(t: float) -> Vector2:
 			return Vector2(0.0, sin(theta) * amplitude)
 
 
+## Which sheet dict `palette` currently selects.
+func _sheets() -> Dictionary:
+	return SHEETS_CHILDHOOD if palette == Palette.CHILDHOOD else SHEETS
+
+
 func _frame(i: int) -> AtlasTexture:
 	var tex := AtlasTexture.new()
-	tex.atlas = SHEETS[tone]
+	tex.atlas = _sheets()[tone]
 	tex.region = Rect2(Vector2(i * FRAME.x, 0.0), FRAME)
 	return tex
 

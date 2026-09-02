@@ -37,6 +37,17 @@ const SHEETS := {
 	Facing.RIGHT: preload("res://assets/hazards/cone_spikes_right.png"),
 	Facing.LEFT: preload("res://assets/hazards/cone_spikes_left.png"),
 }
+## Act 2's warm amber/citrine crystal spikes (tools/gen_act2_cone_spikes.py) —
+## same 5-tile-per-facing layout, so _tile() need not change, only which dict
+## it reads. Same Palette idea as DarkThought's — see that enum's doc.
+const SHEETS_CHILDHOOD := {
+	Facing.UP: preload("res://assets/hazards/act2_cone_spikes.png"),
+	Facing.DOWN: preload("res://assets/hazards/act2_cone_spikes_down.png"),
+	Facing.RIGHT: preload("res://assets/hazards/act2_cone_spikes_right.png"),
+	Facing.LEFT: preload("res://assets/hazards/act2_cone_spikes_left.png"),
+}
+
+enum Palette { OFFICE, CHILDHOOD }
 
 ## ONE CELL. The whole point of this hazard against GlassSpikes' two.
 const CELL := 8.0
@@ -68,6 +79,12 @@ enum Tile { SINGLE, FIRST, MIDDLE_A, MIDDLE_B, LAST }
 	set(value):
 		facing = value
 		_update_extents()
+
+## See the Palette enum doc above (mirrors DarkThought.palette).
+@export var palette: Palette = Palette.OFFICE:
+	set(value):
+		palette = value
+		_rebuild(_row.get_child_count() if _row != null else 1)
 
 
 ## A strip BOLTED to a WALL does not come down when the room does — a ceiling
@@ -155,7 +172,8 @@ func _variant(i: int, cells: int) -> Tile:
 ## them out across it. Same five tiles, same order, one axis apart.
 func _tile(which: Tile) -> AtlasTexture:
 	var tex := AtlasTexture.new()
-	tex.atlas = SHEETS[facing]
+	var sheets := SHEETS_CHILDHOOD if palette == Palette.CHILDHOOD else SHEETS
+	tex.atlas = sheets[facing]
 	var step := int(which) * CELL
 	tex.region = Rect2(0.0, step, CELL, CELL) if _vertical() \
 		else Rect2(step, 0.0, CELL, CELL)

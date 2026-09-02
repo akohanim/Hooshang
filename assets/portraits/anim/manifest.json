@@ -1,1 +1,113 @@
-{}
+{
+  "hooshang_annoyed": {
+    "eyes": {
+      "frames": 3,
+      "rect": [
+        67,
+        98,
+        126,
+        36
+      ]
+    },
+    "mouth": {
+      "frames": 4,
+      "rect": [
+        54,
+        182,
+        152,
+        72
+      ]
+    }
+  },
+  "hooshang_dazed": {
+    "eyes": {
+      "frames": 3,
+      "rect": [
+        67,
+        98,
+        126,
+        36
+      ]
+    },
+    "mouth": {
+      "frames": 4,
+      "rect": [
+        54,
+        182,
+        152,
+        72
+      ]
+    }
+  },
+  "hooshang_hesitant": {
+    "eyes": {
+      "frames": 3,
+      "rect": [
+        67,
+        98,
+        126,
+        36
+      ]
+    },
+    "mouth": {
+      "frames": 4,
+      "rect": [
+        54,
+        182,
+        152,
+        72
+      ]
+    }
+  },
+  "hooshang_shocked": {
+    "mouth": {
+      "frames": 4,
+      "rect": [
+        54,
+        182,
+        152,
+        72
+      ]
+    }
+  },
+  "hooshang_skeptical": {
+    "eyes": {
+      "frames": 3,
+      "rect": [
+        67,
+        98,
+        126,
+        36
+      ]
+    },
+    "mouth": {
+      "frames": 4,
+      "rect": [
+        54,
+        182,
+        152,
+        72
+      ]
+    }
+  },
+  "hooshang_vulnerable": {
+    "eyes": {
+      "frames": 3,
+      "rect": [
+        67,
+        98,
+        126,
+        36
+      ]
+    },
+    "mouth": {
+      "frames": 4,
+      "rect": [
+        54,
+        182,
+        152,
+        72
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/zones/magic_carpet.gd" id="1_carpet"]
+
+[node name="MagicCarpet" type="Area2D" groups=["magic_carpet"]]
+script = ExtResource("1_carpet")
+size = Vector2(32, 8)

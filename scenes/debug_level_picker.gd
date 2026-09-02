@@ -22,15 +22,20 @@ extends CanvasLayer
 ## The room buttons are built at runtime from the world scene itself, so rooms
 ## added in LDtk show up here with no changes to this file.
 
-## The LDtk world. Its rooms each get their own button.
-const WORLD_SCENE := "res://ldtk/Act1World.tscn"
+## The LDtk worlds. Each gets a labelled button per room, so a second Act
+## shows up here with no changes beyond adding its entry to this dict.
+const WORLDS := {
+	"Act1": "res://ldtk/Act1World.tscn",
+	"Act2": "res://ldtk/Act2World.tscn",
+}
 
-## Hand-built scenes that aren't rooms of the LDtk world.
+## Hand-built scenes that aren't rooms of an LDtk world.
 const LEVELS := {
 	"Level1": "res://scenes/levels/act1_office/Level1Office.tscn",
 	"Level2": "res://scenes/levels/act1_office/Level2.tscn",
 	"LDtkOffice": "res://ldtk/Level_1_Office_Test.tscn",
-	"Act1World": WORLD_SCENE,
+	"Act1World": "res://ldtk/Act1World.tscn",
+	"Act2World": "res://ldtk/Act2World.tscn",
 	# Rendering prototype, not a level: a lemon drawn on a 640x360 layer
 	# over the 320x180 world. See tests/token_density.gd.
 	"TokenDensity": "res://tests/token_density.tscn",
@@ -91,15 +96,21 @@ func _restore_scale() -> void:
 	w.content_scale_factor = _saved_scale["factor"]
 
 
-## One button per room of the LDtk world, in play order.
+## One button per room of every world in WORLDS, in play order, labelled by
+## which Act it belongs to.
 ##
-## Act1World's rooms only exist once its LdtkWorld has instantiated the imported
-## .ldtk scene in _ready(), which hasn't happened here — so read the world scene
-## off the (tree-less) root instead of hardcoding the .ldtk path a second time,
-## and let LdtkWorld.rooms_in() decide the ordering so this list can't disagree
-## with the order the game actually plays them in.
+## A world's rooms only exist once its LdtkWorld has instantiated the imported
+## .ldtk scene in _ready(), which hasn't happened here — so read the world
+## scene off the (tree-less) root instead of hardcoding the .ldtk path a
+## second time, and let LdtkWorld.rooms_in() decide the ordering so this list
+## can't disagree with the order the game actually plays them in.
 func _build_room_buttons() -> void:
-	var holder := load(WORLD_SCENE).instantiate() as LdtkWorld
+	for world_label: String in WORLDS:
+		_build_room_buttons_for(world_label, WORLDS[world_label])
+
+
+func _build_room_buttons_for(world_label: String, world_path: String) -> void:
+	var holder := load(world_path).instantiate() as LdtkWorld
 	if holder == null:
 		return
 	var world_scene: PackedScene = holder.world_scene
@@ -111,16 +122,16 @@ func _build_room_buttons() -> void:
 	var rooms := LdtkWorld.rooms_in(world)
 	for i in rooms.size():
 		var btn := Button.new()
-		btn.text = "Room %d  —  %s" % [i + 1, rooms[i].name]
+		btn.text = "%s Room %d  —  %s" % [world_label, i + 1, rooms[i].name]
 		btn.add_theme_font_size_override("font_size", ROOM_FONT_SIZE)
-		btn.pressed.connect(_on_room_pressed.bind(rooms[i].name))
+		btn.pressed.connect(_on_room_pressed.bind(rooms[i].name, world_path))
 		$Scroll/Center/VBox/Rooms.add_child(btn)
 	world.free()
 
 
-func _on_room_pressed(room_name: String) -> void:
+func _on_room_pressed(room_name: String, world_path: String) -> void:
 	LdtkWorld.debug_start_room = room_name
-	_launch(WORLD_SCENE)
+	_launch(world_path)
 
 
 func _on_level_pressed(path: String) -> void:

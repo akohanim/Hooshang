@@ -27,7 +27,13 @@ func _ready() -> void:
 	# Never let a capture run touch a player's save (see systems/save_game.gd).
 	SaveGame.slot = -1
 	LdtkWorld.debug_start_room = room_name
-	world = load("res://ldtk/Act1World.tscn").instantiate()
+	# Act 2 rooms are always prefixed uniquely (CLAUDE.md's own naming rule,
+	# needed so the two Acts' rooms can never collide in the shared
+	# ldtk/levels/ folder) — currently "Act_2_" — which the same prefix picks
+	# which world to load here.
+	var world_path := "res://ldtk/Act2World.tscn" if room_name.begins_with("Act_2_") \
+		or room_name.begins_with("Act2_") else "res://ldtk/Act1World.tscn"
+	world = load(world_path).instantiate()
 	Screen.set_scene(world)
 	for i in 60:
 		if not world.rooms.is_empty():

@@ -52,6 +52,32 @@ extends CanvasLayer
 ## _voice_new_chars: it reuses the exact key _set_rig/_set_loop already derive
 ## from the portrait texture's filename, so a beat that names a state gets a
 ## voice for free and never has to know this exists.
+##
+## THE TEXT FADES IN, AND CAN CARRY BBCODE EMPHASIS. TextLabel is a
+## RichTextLabel (bbcode_enabled) rather than a plain Label so the typewriter
+## can be more than an on/off character count. Every reveal frame rewraps the
+## page in a [fade start length] BBCode tag whose window trails just behind
+## `visible_characters` (see _apply_page_text) — a run of newly-revealed
+## characters ramps up from transparent instead of popping in solid, over
+## fade_in_time seconds' worth of characters at the current chars_per_second.
+## A line passed to say() may ALSO embed real BBCode for dramatic emphasis —
+## [shake]word[/shake], [wave]word[/wave], [color=#ff4444]word[/color],
+## [pulse]word[/pulse], and so on (Godot's own built-in RichTextLabel effect
+## tags; see the engine docs for the full set and their parameters) — write
+## these directly into the string handed to say(). Use bare tags or `=value`
+## forms only (no spaces inside the brackets, e.g. `[shake]`, not
+## `[shake rate=20 level=5]`): pagination's own word-wrap fallback can land a
+## page break on any space in the line, and a tag with an internal space is a
+## single word by convention but would still get corrupted if a break landed
+## between its bracketed attributes. Reserve this for a handful of the most
+## dramatic beats — a shake or a color on every third word reads as noise, not
+## emphasis.
+##
+## Pagination, the pause mark, and voice-blip indexing all still work on the
+## PLAIN rendered text — a bbcode tag is stripped (_strip_tags) before any of
+## them count or measure characters, or a run of tag markup would read as
+## extra glyphs and wrap a line early, and a [p] breath placed after an
+## emphasis tag would land at the wrong rendered offset.
 
 signal line_finished
 ## Fired once per say() call — around the banner's own open/close, not the
@@ -88,8 +114,11 @@ const CANVAS_HEIGHT := 720.0
 ## Reveal speed of the typewriter effect, in characters per second. Slower
 ## than a first pass (was 40, measured against real Celeste footage to land
 ## exactly on its pace) — this is a deliberate step below that reference
-## rather than a correction of it, at the user's own request.
-@export var chars_per_second := 28.0
+## rather than a correction of it, at the user's own request. Slowed again
+## from 28 at a further request for a more deliberate, weightier read, which
+## also widens fade_in_time's per-character window (see below) since that is
+## expressed in characters-at-this-speed, not a fixed pixel or frame count.
+@export var chars_per_second := 22.0
 ## A beat inside a line — "(a breath)" in a script. Put PAUSE_MARK where it
 ## falls and the typewriter holds there for this long; the mark itself is never
 ## drawn. Stage directions get PLAYED rather than printed, which is the same
@@ -98,6 +127,12 @@ const CANVAS_HEIGHT := 720.0
 ## than a breath. One mark per line.
 @export var pause_time := 0.5
 const PAUSE_MARK := "[p]"
+## How long one character takes to fade from transparent to fully opaque as
+## the typewriter reveals it. Expressed as a duration rather than a fixed
+## character count so the fade always reads as "this many seconds", however
+## chars_per_second is tuned — see _begin_page, which turns this into
+## `_fade_window` (a character count) fresh for every page.
+@export var fade_in_time := 0.22
 ## How long the box takes to unroll open on each line. Celeste's own boxes do
 ## not slide on screen — they GROW open from the screen edge they sit flush
 ## against, portrait and all, and shut the same way going out. Measured
@@ -219,6 +254,26 @@ var _reveal_accum := 0.0
 var _pause_at := -1
 var _pause_left := 0.0
 
+## The current page's BBCode source: PAUSE_MARK stripped, any [shake]/[wave]/
+## [color]/... markup the line was authored with left intact. Rebuilt into
+## text_label.text every reveal frame wrapped in a moving [fade] window — see
+## _apply_page_text — rather than assigned once in _begin_page, which is why
+## it is kept around instead of just being local to that call.
+var _page_raw := ""
+## Rendered length of _page_raw with all bracket tags stripped — what the
+## reveal clock (_reveal_accum, chars_per_second) actually counts against,
+## since RichTextLabel's visible_characters counts rendered characters after
+## BBCode parsing, not raw source length.
+var _parsed_len := 0
+## How many trailing characters are mid-fade at once, in rendered characters —
+## recomputed every page from fade_in_time * chars_per_second (see _begin_page)
+## so it tracks the current reveal speed rather than a stale one.
+var _fade_window := 1
+## Strips BBCode-style `[...]` markup down to the plain characters that
+## actually render — see _strip_tags. Compiled once in _ready(); a RegEx
+## rebuilt every keystroke would be wasted work for something this hot.
+var _tag_re: RegEx
+
 ## Voice pool key for the current line's speaker+state ("hooshang_annoyed"),
 ## derived from the portrait texture's filename same as _set_rig/_set_loop's
 ## own lookup key — or "" with no portrait (system text), which VoiceBlips
@@ -261,7 +316,7 @@ var _generation := 0
 @onready var trim_top: TextureRect = $TrimTop
 @onready var trim_bottom: TextureRect = $TrimBottom
 @onready var name_label: Label = $NameLabel
-@onready var text_label: Label = $TextLabel
+@onready var text_label: RichTextLabel = $TextLabel
 @onready var arrow: Label = $Arrow
 @onready var portrait: TextureRect = $Portrait
 @onready var portrait_frame: ColorRect = $PortraitFrame
@@ -299,6 +354,7 @@ var _authored_v := {}
 
 func _ready() -> void:
 	visible = false
+	_tag_re = RegEx.create_from_string("\\[[^\\]]*\\]")
 	for node in _mirrored():
 		_authored[node] = Vector2(node.offset_left, node.offset_right)
 	_load_rigs()
@@ -379,7 +435,11 @@ func _apply_font() -> void:
 	fv.base_font = ThemeDB.fallback_font
 	fv.variation_embolden = font_weight
 	fv.spacing_glyph = letter_spacing
-	text_label.add_theme_font_override("font", fv)
+	# TextLabel is a RichTextLabel (see the class doc's BBCODE EMPHASIS note),
+	# which names its main font "normal_font"/"normal_font_size" rather than
+	# Label's "font"/"font_size" — name_label is a plain Label and keeps
+	# Label's own key.
+	text_label.add_theme_font_override("normal_font", fv)
 	name_label.add_theme_font_override("font", fv)
 
 
@@ -565,23 +625,64 @@ func _kill_anim_tweens() -> void:
 	_anim_tweens.clear()
 
 
-## Set one page going: strip its breath mark, note where it sat, and start the
-## typewriter from nothing.
+## Set one page going: strip its breath mark, note where it sat (in RENDERED
+## characters — see _strip_tags), and start the typewriter from nothing.
 ##
-## The mark is a timing instruction, not words. Its position in the raw string IS
-## its index in the stripped one, since everything before it is untouched — and
-## it is looked up PER PAGE, so a breath keeps the words it was written between
-## however the speech happens to break.
+## The mark is a timing instruction, not words. It is looked up PER PAGE, so a
+## breath keeps the words it was written between however the speech happens to
+## break. Its raw-string index cannot be used directly any more once a line
+## may carry [shake]/[wave]/[color] markup ahead of it — those tags are not
+## drawn, so the reveal clock (which counts rendered characters) would hold
+## early, at the mark's position INCLUDING the tag characters before it.
+## Stripping that prefix down to what actually renders is what keeps a breath
+## landing on the right word regardless of how much markup sits before it.
 func _begin_page(raw: String) -> void:
-	_pause_at = raw.find(PAUSE_MARK)
-	text_label.text = raw.replace(PAUSE_MARK, "") if _pause_at >= 0 else raw
+	var mark_idx := raw.find(PAUSE_MARK)
+	_pause_at = -1
+	if mark_idx >= 0:
+		_pause_at = _strip_tags(raw.substr(0, mark_idx)).length()
+	_page_raw = raw.replace(PAUSE_MARK, "") if mark_idx >= 0 else raw
+	_parsed_len = _strip_tags(_page_raw).length()
+	_fade_window = maxi(1, int(round(fade_in_time * chars_per_second)))
 	_pause_left = 0.0
-	text_label.visible_characters = 0
 	arrow.visible = false
 	_reveal_accum = 0.0
 	_revealing = true
 	_voiced_upto = 0
 	_last_tier_emphasized = false
+	_apply_page_text(0, _parsed_len <= 0)
+
+
+## Push the current reveal position to the label.
+##
+## While `done` is false, the page is rewrapped in a [fade start length]
+## BBCode tag whose window trails just behind `shown` — a character freshly
+## crossed by the typewriter starts transparent and ramps to opaque over
+## `_fade_window` characters' worth of reveal time, rather than popping in
+## solid the instant visible_characters reaches it. `done` drops the wrapper
+## entirely and hands text_label the plain page with visible_characters = -1
+## (show everything): [fade]'s own tail — everything past start+length —
+## renders at alpha 0, so leaving a stale window on a "fully revealed" line
+## would leave its last few characters invisible rather than merely undoing
+## the fade.
+func _apply_page_text(shown: int, done: bool) -> void:
+	if done:
+		text_label.text = _page_raw
+		text_label.visible_characters = -1
+		return
+	var start := maxi(0, shown - _fade_window)
+	text_label.text = "[fade start=%d length=%d]%s[/fade]" % [start, _fade_window, _page_raw]
+	text_label.visible_characters = shown
+
+
+## Strip every bracket tag — the breath mark and any dramatic-emphasis markup
+## an author wrote alike — down to the plain characters that actually render.
+## Pagination measures wrap width against this rather than the raw BBCode
+## source, or a run of tag characters would read as visible glyphs and wrap a
+## line early; voice blips and the pause mark are indexed against it for the
+## same reason.
+func _strip_tags(s: String) -> String:
+	return _tag_re.sub(s, "", true)
 
 
 ## Break a line into pages of at most `max_lines` rows.
@@ -595,7 +696,7 @@ func _begin_page(raw: String) -> void:
 ## Measured against the SPOKEN text — the breath mark is carried along so it stays
 ## with its words, but never counted, since it is not drawn.
 func _paginate(text: String) -> Array[String]:
-	if max_lines <= 0 or text_label.get_theme_font("font") == null:
+	if max_lines <= 0 or text_label.get_theme_font("normal_font") == null:
 		return [text]
 	if _rows_in(text) <= max_lines:
 		return [text]
@@ -669,17 +770,18 @@ func _sentences(text: String) -> Array[String]:
 	return out
 
 
-## How many rows `raw` wraps to in the text block, with the breath mark ignored.
+## How many rows `raw` wraps to in the text block, with the breath mark and any
+## BBCode emphasis markup ignored — see _strip_tags.
 func _rows_in(raw: String) -> int:
-	var font := text_label.get_theme_font("font")
+	var font := text_label.get_theme_font("normal_font")
 	if font == null:
 		return 1
-	var size := text_label.get_theme_font_size("font_size")
+	var size := text_label.get_theme_font_size("normal_font_size")
 	# offset_right/left rather than `size.x`: the left edge was just moved for
 	# this line's portrait, and the rect does not catch up until layout runs.
 	var width := text_label.offset_right - text_label.offset_left
 	var wrapped := font.get_multiline_string_size(
-		raw.replace(PAUSE_MARK, ""), HORIZONTAL_ALIGNMENT_CENTER, width, size)
+		_strip_tags(raw), HORIZONTAL_ALIGNMENT_CENTER, width, size)
 	return maxi(int(round(wrapped.y / float(size))), 1)
 
 
@@ -700,16 +802,16 @@ func _rows_in(raw: String) -> int:
 ## dialogue goes stale every time someone edits the script, which is exactly the
 ## kind of rot that makes the next reader distrust the reasoning around it.
 func _fit_banner(rows: int) -> void:
-	var font := text_label.get_theme_font("font")
+	var font := text_label.get_theme_font("normal_font")
 	if font == null:
 		return
-	var size := text_label.get_theme_font_size("font_size")
+	var size := text_label.get_theme_font_size("normal_font_size")
 	rows = clampi(rows, 1, max_lines)
 	# The font's own line height, not `size`. A 40px font draws taller than 40px
 	# once ascent and descent are counted, and sizing off the point size cuts the
 	# bottom row off — which is the exact bug _fit_banner was written to fix.
 	var needed: float = font.get_height(size) * rows \
-		+ float(text_label.get_theme_constant("line_spacing")) * (rows - 1)
+		+ float(text_label.get_theme_constant("line_separation")) * (rows - 1)
 	text_label.offset_bottom = text_label.offset_top \
 		+ maxf(needed + BANNER_PAD, MIN_TEXT_HEIGHT)
 	# The banner carries a band on its trailing edge as well as its leading one,
@@ -936,17 +1038,20 @@ func _process(delta: float) -> void:
 		_reveal_accum = float(_pause_at)
 		_pause_left = pause_time
 		_pause_at = -1  # one beat per line, and it has now been spent
-		text_label.visible_characters = int(_reveal_accum)
-		_voice_new_chars(text_label.visible_characters)
+		_apply_page_text(int(_reveal_accum), false)
+		_voice_new_chars(int(_reveal_accum))
 		return
-	text_label.visible_characters = int(_reveal_accum)
-	_voice_new_chars(text_label.visible_characters)
-	if text_label.visible_characters >= text_label.text.length():
-		text_label.visible_characters = -1  # -1 = show everything
+	var shown := int(_reveal_accum)
+	if shown >= _parsed_len:
+		_apply_page_text(_parsed_len, true)  # drop the fade wrapper — see its own doc
+		_voice_new_chars(_parsed_len)
 		_revealing = false
 		arrow.visible = true  # "press to advance" cue
 		if _voice_key != "":
 			VoiceBlips.blip(_voice_key, "ending")
+		return
+	_apply_page_text(shown, false)
+	_voice_new_chars(shown)
 
 
 ## Voice every newly revealed, non-whitespace character since the last call —
@@ -954,10 +1059,15 @@ func _process(delta: float) -> void:
 ## never fires twice for the same character and never fires at all while
 ## paused or between pages (this is only ever called from inside the reveal
 ## branch). Silent outright when there is no portrait: see _voice_key.
+##
+## Indexed against the PLAIN page text (_page_raw with tags stripped), not
+## text_label.text — that now carries a [fade ...] wrapper rebuilt every
+## frame (see _apply_page_text) whose own characters are not what got
+## revealed.
 func _voice_new_chars(new_count: int) -> void:
 	if _voice_key == "":
 		return
-	var text := text_label.text
+	var text := _strip_tags(_page_raw)
 	new_count = mini(new_count, text.length())
 	for i in range(_voiced_upto, new_count):
 		if text[i].strip_edges() == "":
@@ -978,8 +1088,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _revealing:
 			# First press: finish the reveal instantly. Skipping ahead skips the
 			# breath too — holding a reader at a dramatic beat they have just
-			# asked to skip past is the wrong way round.
-			text_label.visible_characters = -1
+			# asked to skip past is the wrong way round. Drops the [fade]
+			# wrapper the same way a natural finish does — _apply_page_text's
+			# own doc explains why leaving it on would hide the tail of the
+			# line rather than merely skip its animation.
+			_apply_page_text(_parsed_len, true)
 			_revealing = false
 			_pause_at = -1
 			_pause_left = 0.0

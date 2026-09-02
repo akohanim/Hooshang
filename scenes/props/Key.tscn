@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/key.gd" id="1_key"]
+[ext_resource type="Texture2D" path="res://assets/props/key/key.png" id="2_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_key"]
+size = Vector2(10, 14)
+
+[node name="Key" type="Area2D" groups=["key"]]
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_key")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_art")
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_key")

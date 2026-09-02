@@ -24,6 +24,10 @@ const THOUGHT_SCENES := {
 }
 const PLATFORM_SCENE := preload("res://scenes/props/platforms/Platform.tscn")
 const CRUMBLING_SCENE := preload("res://scenes/props/platforms/CrumblingPlatform.tscn")
+const SPRING_PLATFORM_SCENE := preload("res://scenes/props/platforms/SpringPlatform.tscn")
+const MAGIC_CARPET_SCENE := preload("res://scenes/props/zones/MagicCarpet.tscn")
+const KEY_SCENE := preload("res://scenes/props/Key.tscn")
+const JAMSHID_CAGE_SCENE := preload("res://scenes/props/JamshidCage.tscn")
 const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
 const LADDER_SCENE := preload("res://scenes/props/zones/Ladder.tscn")
 const CONVEYOR_BELT_SCENE := preload("res://scenes/props/zones/ConveyorBelt.tscn")
@@ -95,6 +99,11 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(_build_platform(data, PLATFORM_SCENE))
 			"CrumblingPlatform":
 				entity_layer.add_child(_build_platform(data, CRUMBLING_SCENE))
+			# Act 2's bounce pad. Same one-cell/@tool/tile-laying shape as
+			# Platform/CrumblingPlatform (SpringPlatform extends Platform), so
+			# it reuses the same builder — see spring_platform.gd.
+			"SpringPlatform":
+				entity_layer.add_child(_build_platform(data, SPRING_PLATFORM_SCENE))
 			"GlassSpikes":
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.UP))
 			"GlassSpikesCeiling":
@@ -148,6 +157,15 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			"ConveyorBelt_Left":
 				entity_layer.add_child(
 					_build_conveyor_belt(data, ConveyorBelt.Direction.LEFT))
+			# Act 2's rideable flying carpet — see _build_magic_carpet.
+			"MagicCarpet":
+				entity_layer.add_child(_build_magic_carpet(data))
+			# Act 2's quest key — see _build_key.
+			"Key":
+				entity_layer.add_child(_build_key(data))
+			# Act 2's locked barrier to Jamshid — see _build_jamshid_cage.
+			"JamshidCage":
+				entity_layer.add_child(_build_jamshid_cage(data))
 			# The boss chase (Level_14). Three entities: where the shadow starts,
 			# where he lunges, and where it ends.
 			"DarkshangSpawn":
@@ -304,6 +322,12 @@ func _build_cone_spikes(data: Dictionary, facing: ConeSpikes.Facing) -> Area2D:
 	var wall := facing == ConeSpikes.Facing.RIGHT or facing == ConeSpikes.Facing.LEFT
 	spikes.size = Vector2(ConeSpikes.CELL, drawn.y) if wall \
 		else Vector2(drawn.x, ConeSpikes.CELL)
+	# Same "unset/0 = Act 1's office look" convention as _build_thought's
+	# ChildhoodPalette read above — only Act 2's own copies of the four
+	# ConeSpikes* defs carry this field, so Act 1's placements are untouched.
+	spikes.palette = ConeSpikes.Palette.CHILDHOOD \
+		if _field_float(data, "ChildhoodPalette", 0.0) > 0.0 \
+		else ConeSpikes.Palette.OFFICE
 	return spikes
 
 
@@ -358,6 +382,14 @@ func _build_thought(data: Dictionary) -> Area2D:
 	# value for it, and a hazard that quietly went dark would be worse than one
 	# that ignored the setting.
 	thought.glow = _field_float(data, "Glow", 1.0) > 0.0
+	# Unset (or 0) counts as Act 1's office palette — see DarkThought.Palette's
+	# doc and tools/ldtk_add_act2_palette_field.py. Only Act 2's own copy of
+	# this entity def carries the field at all; Act 1 has no ChildhoodPalette
+	# field to read, so _field_float's fallback is what keeps every Act 1
+	# thought on the office look with zero change to its own placement data.
+	thought.palette = DarkThought.Palette.CHILDHOOD \
+		if _field_float(data, "ChildhoodPalette", 0.0) > 0.0 \
+		else DarkThought.Palette.OFFICE
 	# ABOVE THE ROOM'S OWN TILES, for the reason _build_ceiling_panel gives: the
 	# Entities layer is built before Collisions and both sit at z 0, so anything
 	# that passes in front of painted brick is drawn and then covered by the
@@ -403,6 +435,48 @@ func _build_slide_zone(data: Dictionary) -> Area2D:
 		_field_float(data, "control_strength", zone.control_strength), 0.0, 1.0)
 	zone.speed_ramp = maxf(_field_float(data, "speed_ramp", zone.speed_ramp), 0.0)
 	return zone
+
+
+## A rideable flying carpet. `position` is the entity's centre, like every
+## other sized entity here; MagicCarpet centres its box and tile-laying on
+## that too. Every field falls back to the prefab's own default, so a carpet
+## placed before a field existed still behaves (RIDE, drifting right) rather
+## than standing dead still.
+func _build_magic_carpet(data: Dictionary) -> Area2D:
+	var carpet: Area2D = MAGIC_CARPET_SCENE.instantiate()
+	carpet.position = data.position
+	carpet.size = Vector2(Vector2(data.size).x, MagicCarpet.TILE.y)
+	# CarpetPattern crosses the boundary QUALIFIED, same reason _build_thought
+	# reads Motion with _field_enum and not _field_str — see that function's
+	# doc for what happens if this is gotten wrong.
+	match _field_enum(data, "CarpetPattern"):
+		"Bob": carpet.pattern = MagicCarpet.CarpetPattern.BOB
+		"Sweep": carpet.pattern = MagicCarpet.CarpetPattern.SWEEP
+		"Bounce": carpet.pattern = MagicCarpet.CarpetPattern.BOUNCE
+		_: carpet.pattern = MagicCarpet.CarpetPattern.RIDE
+	carpet.speed = _field_float(data, "Speed", carpet.speed)
+	carpet.amplitude = absf(_field_float(data, "Amplitude", carpet.amplitude))
+	carpet.steer_range = absf(_field_float(data, "SteerRange", carpet.steer_range))
+	return carpet
+
+
+## One of the four quest keys, at the point it was placed. Not resizable —
+## like Lemon/MysteryBox, the art is a fixed size, so a dragged handle could
+## only ever promise a bigger pickup than the one that actually collects.
+func _build_key(data: Dictionary) -> Area2D:
+	var key: Area2D = KEY_SCENE.instantiate()
+	key.position = data.position
+	key.key_id = _field_str(data, "KeyID")
+	return key
+
+
+## The locked barrier to Jamshid. No fields — whether it is open is entirely
+## derived from Act2Quest.all_keys_collected() at runtime (see
+## jamshid_cage.gd), so there is nothing here to read from the instance.
+func _build_jamshid_cage(data: Dictionary) -> StaticBody2D:
+	var cage: StaticBody2D = JAMSHID_CAGE_SCENE.instantiate()
+	cage.position = data.position
+	return cage
 
 
 ## A stretch of floor that walks. Stretch the entity ALONG the floor row it

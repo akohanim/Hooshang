@@ -48,7 +48,7 @@ func _ready() -> void:
 	var before_scale: Vector2 = world.player.visual.scale
 	Dialogue.say("Hooshang", "A line long enough to wrap onto a second row of type.",
 		Color.WHITE)
-	Dialogue.text_label.add_theme_font_size_override("font_size", 96)
+	Dialogue.text_label.add_theme_font_size_override("normal_font_size", 96)
 	Dialogue.scale = Vector2(0.5, 0.5)
 	await _frames(10)
 	_check(Screen.viewport.size == before_size,

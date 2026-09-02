@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
+[ext_resource type="PackedScene" uid="uid://daejyl8ovusga" path="res://ldtk/hooshang_act2.ldtk" id="2_ldtk"]
+[ext_resource type="Script" path="res://scripts/act2_sky_backdrop.gd" id="3_sky"]
+
+[node name="Act2World" type="Node2D"]
+script = ExtResource("1_world")
+world_scene = ExtResource("2_ldtk")
+draw_room_backdrops = false
+room_backdrop_color = Color(0.85, 0.78, 0.6, 1)
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color(0.95, 0.9, 0.78, 1)
+
+[node name="Backdrop" type="Node2D" parent="."]
+
+[node name="SkyBackdrop" type="Node2D" parent="Backdrop"]
+script = ExtResource("3_sky")
+
+[node name="Props" type="Node2D" parent="."]
+
+[node name="Lights" type="Node2D" parent="."]
+
+[node name="EditorPreview" parent="." instance=ExtResource("2_ldtk")]

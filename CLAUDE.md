@@ -31,6 +31,23 @@ so the two agree now. The tiles are still placeholder art.
     rooms away, and that landed in the reading as "706px of reach"
   - `Godot --headless --path . res://tests/backtrack_test.tscn` — Exits work
     both ways all the way back, not just one room deep
+  - `Godot --headless --path . res://tests/level_v6_return_race_test.tscn` —
+    dying anywhere in Level_v6 past its entrance does not bounce him back to
+    Level_v5. It has no Checkpoint of its own, so every death in it respawns
+    him at the same PlayerStart the return door hangs off, which overlaps the
+    return strip by a couple of pixels (see `backtrack_test.gd`'s note and
+    `LdtkWorld._resolve_return_arming`) — walking clear of the strip once arms
+    the door, and a LATER death then TELEPORTS him straight back inside it.
+    `Area2D.overlaps_body()` reflects its MONITORING CACHE, which lags a
+    teleport (a plain `global_position` assignment, not `move_and_slide`) by an
+    extra physics step — measured, `body_entered` for a respawn landing back
+    inside an already-armed strip fired on the THIRD physics frame after the
+    teleport, one frame later than the two-frame wait `_resolve_return_arming`
+    used to check it with, so that function read "clear" on stale
+    information, armed the door, and then the real signal arrived a frame
+    late and fired it. Fixed by checking a plain Rect2
+    (`LdtkWorld._return_strip_rect`, against `Player.hitbox_rect()`) instead —
+    nothing there depends on the physics server's own cache catching up
   - `Godot --headless --path . res://tests/intro_test.tscn` — Act I's beats:
     dialogue order, dashless start, room 1 grants nothing, room 2 grants dash
   - `Godot --headless --path . res://tests/screen_test.tscn` — UI and world stay
@@ -324,6 +341,58 @@ Tooling:
   character, 8×8 tile) — default prompts skew retro.
 - **Godot Light2D:** prototype new lighting in an isolated test scene first;
   it's finicky on the first pass (blend modes, masks, normal maps, energy/range).
+
+**Act 2's watercolor convention — every new Act 2 GAMEPLAY entity (tileset,
+hazards, props) must follow this, not just look "warm and Persian."** Settled
+by `experiments/act2_watercolor/README.md`'s own side-by-side test: a heavy-
+bleed watercolor generation is gorgeous at concept resolution and turns to mud
+the moment it is reduced to this project's actual 8px-tile / small-prop scale
+— soft edges either survive as blurry smears or flatten into banding, neither
+of which still reads as "watercolor" once small, it just reads as noisy. The
+**pulled-back** direction (watercolor-influenced gradient shading, but crisp
+pixel edges and restrained bleed) is the one that survives reduction, and is
+this project's standing rule for anything gameplay-critical, tiled, or reduced
+small — which is every entity, prop, and tile sheet. The reverse case — a
+one-off, non-tiled, native-resolution SET-PIECE backdrop that is never
+squeezed onto the 8px grid at all (the same exemption `SunShaft`/`WallPattern`
+already carry, and the recipe Act 2's own sky backdrop follows, see
+`tools/gen_act2_sky_backdrop.py`) — is the ONLY place heavy bleed is fair
+game, because nothing there forces a harsh reduction to fight.
+
+**The established pipeline** (worked example: `tools/gen_act2_tileset_8px.py`;
+also `gen_act2_thought.py`, `gen_act2_thought_tiles.py`, `gen_act2_cone_spikes.py`,
+`gen_spring_platform.py`, `gen_magic_carpet.py`, `gen_key.py`,
+`gen_jamshid_cage.py` — every existing Act 2 entity generator follows it
+already, so copy the pattern from whichever is closest to what you're adding):
+
+1. Generate a Pixellab source SWATCH (`create_image_pixflux`), explicitly
+   asking for the **pulled-back** language, not hard bleed — e.g. "detailed
+   pixel art with watercolor-influenced soft gradient shading, clean crisp
+   pixel edges, restrained painterly bleed, not flat 8-bit NES retro," plus
+   Persian-ornament framing where relevant ("Persian miniature painting
+   flat-perspective linework," "khatam marquetry") and the warm palette
+   language ("ochre gold turquoise and terracotta" / "cobalt and rose"). Save
+   it under that asset's own `.../source/<name>.png`, matching every other
+   Pixellab-sourced asset in this project.
+2. **Geometry/shape code stays 100% procedural and untouched.** Never crop or
+   reduce a Pixellab bitmap into the final small art directly — the same
+   lesson `gen_cone_spikes.py`'s own header already recorded for Act 1 (a
+   downsampled photo/generation cannot hold a 1px spike apex, a seamless
+   brick joint, or a static six-frame contour); only the COLOUR RAMP comes
+   from Pixellab, the drawing logic (coursing, taper, motif shapes) is the
+   same hand-written PIL it always was.
+3. Pull the palette from the source with a small `_ramp_from_source(path, n)`
+   helper (copy it from any of the files above — it reads the PNG back,
+   counts its most-common opaque colours, and sorts them by luminance),
+   rather than hand-picking hex values. This is what makes the art
+   reproducible: re-running the script re-reads the same source and rebuilds
+   the same ramp. An accent colour the frequency ranking misses (a trim fleck
+   that never ranks in the top stops) is picked out by a hue filter instead
+   of by rank — see `gen_act2_tileset_8px.py`'s `_TEAL` for the pattern.
+4. Keep every existing output path, pixel dimension, and frame/tile layout
+   contract EXACTLY as the entity's consuming Godot script or LDtk auto-rule
+   already expects (fill/top/left/corner tile order, frame counts, etc.) —
+   this pass changes colour only, never the mechanical contract.
 
 ## Project conventions
 
@@ -813,6 +882,40 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   measured, both peak on the same frames. The blink frame is kept OUT of `talk`,
   which is what lets the mouth run off the typewriter and the blink run off its
   own clock without the two fighting over a frame.
+- `tools/gen_hooshang_portraits.py` — Hooshang's SECOND portrait pass, replacing
+  the painted set above wholesale. Source art arrived differently from Rumi's:
+  six JPEGs in `assets/portraits/hooshang/raw/`, each an 11-pose PixelLab
+  contact sheet (4x3 grid + a text-label cell) for one state, rather than one
+  raw generation per pose — so this script PICKS cells instead of patching
+  frames, with the picks recorded in `POSES` (state -> source sheet, rest cell,
+  talk cells, blink cell) rather than re-derived by eye on every run. Grid
+  boundaries are measured per sheet from the grey gutter (a few px of JPEG
+  drift between files), and each cropped cell goes through
+  `gen_rumi_portraits.flood_background` to swap its cream backdrop for the
+  office near-black — reused at a WIDER stability margin (`MAX_DRIFT` 0.02, not
+  Rumi's 0.01), because these are JPEGs and even a clean cell carries enough
+  compression noise to drift the fill share ~1-1.5 points with no actual leak;
+  every cell this script uses was checked visually before that number was
+  picked. **Three of six states ship with no blink** (skeptical, vulnerable,
+  shocked) — none of their sheets ever draw the eyes fully shut, and forcing a
+  squinty cell into the slot would make `gen_portrait_loops.py`'s own
+  edge-energy check report a blink that isn't one, same as `rumi_urgent` today.
+  **No cell with a hand in frame was used** — a hand that exists in only one
+  loop frame would flicker in and out every time the state starts or stops
+  talking, so the skeptical sheet's best-acted pose (chin-stroke) was left out
+  for exactly that reason; its second talk frame instead reuses the rest cell,
+  a plain open/shut mouth-flap. **This art's eyes sit lower than the default
+  EYE band assumes**: checked by finding the sclera row-by-row, they cluster at
+  y 112-127 across all six rest frames against the default's y 40-68 (tuned for
+  the painted set, and effectively sitting on this art's hairline) — so every
+  entry is written with its own `eye: [100, 140, 70, 196]`. **The `normal`
+  sheet fills the `hesitant` slot, not a new state**: five of the six delivered
+  files name existing states exactly (dazed/skeptical/annoyed/vulnerable/
+  shocked); `normal` is the only leftover with no match, and `hesitant` is the
+  only existing state with no new art, so one fills the other rather than
+  hesitant staying painted while its five siblings switch styles. The FACES key
+  is still `"hesitant"` — only the art moved.
+  Re-run after replacing any raw sheet, then re-run `gen_portrait_loops.py`.
 - `tools/gen_portrait_frames.py` — SUPERSEDED for Hooshang by the loops above,
   and kept for any future face that wants patch overlays instead. Note its
   strips in `assets/portraits/anim/` are warped from the OLD paintings, which
@@ -914,6 +1017,23 @@ test rather than being noticed months later in play.
 - **Every line types at the same speed.** No per-line `chars_per_second`. A line
   that reveals at its own rate reads as a different KIND of text rather than a
   quieter one — say it with the words and the portrait instead.
+- **Revealed text fades in, and a line may carry BBCode emphasis.** `TextLabel`
+  is a `RichTextLabel` (`bbcode_enabled`), not a plain `Label`: every reveal
+  frame rewraps the page in a `[fade start length]` tag whose window trails
+  just behind `visible_characters`, so a freshly-typed run of characters ramps
+  up from transparent instead of popping in solid — see
+  `DialogueBox._apply_page_text`. A line handed to `say()` may also embed
+  Godot's own built-in effect tags directly — `[shake]word[/shake]`,
+  `[wave]...[/wave]`, `[color=#ffd16b]word[/color]`, `[pulse]word[/pulse]` —
+  for a handful of the most dramatic beats (see the Act I ending in
+  `act1_beats.gd`'s `_play_chase_end` for worked examples). **Tags must stay
+  bare or `=value`, never `[tag attr=1 attr=2]`** — pagination's word-wrap
+  fallback can land a page break on any space in the line, and a tag with an
+  internal space is one token by convention but would still corrupt if a break
+  landed between its attributes. Pagination, the `[p]` breath mark, and the
+  voice blips all still index against the PLAIN rendered text
+  (`DialogueBox._strip_tags`), never the raw BBCode source — see that method's
+  doc for why a tag ahead of a `[p]` would otherwise shift the breath.
 - **A speaker's face sits on the side they are standing on.** Pass
   `DialogueBox.Side`; `LdtkRumiTrigger.portrait_side()` derives it from where the
   sprite actually is, so it cannot disagree with the screen. Hooshang is the

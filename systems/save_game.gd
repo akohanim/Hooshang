@@ -214,6 +214,7 @@ func start_new(i: int) -> void:
 	_visited = {}
 	_play_seconds = 0.0
 	Collectibles.reset()
+	Act2Quest.reset()
 	Deaths.reset()
 	Points.reset()
 	Game.current_index = 0
@@ -276,6 +277,7 @@ func open_finished(room: String) -> void:
 	_visited = {}
 	_play_seconds = 0.0
 	Collectibles.reset()
+	Act2Quest.reset()
 	Deaths.reset()
 	Points.reset()
 	Game.current_index = 0
@@ -371,6 +373,7 @@ func _apply(payload: Dictionary) -> void:
 		_visited[name] = true
 	_play_seconds = float(payload.get("play_seconds", 0.0))
 	Collectibles.load_state(payload.get("collectibles", {}))
+	Act2Quest.load_state(payload.get("act2_quest", {}))
 	Deaths.load_state(payload.get("deaths", {}))
 	Points.load_state(payload.get("points", {}))
 	Game.current_index = int(payload.get("game_index", 0))
@@ -396,6 +399,7 @@ func _gather() -> Dictionary:
 		"game_index": Game.current_index,
 		"visited": _visited.keys(),
 		"collectibles": Collectibles.save_state(),
+		"act2_quest": Act2Quest.save_state(),
 		"deaths": Deaths.save_state(),
 		"points": Points.save_state(),
 	}

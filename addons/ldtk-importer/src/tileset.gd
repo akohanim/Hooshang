@@ -100,6 +100,21 @@ static func build_tilesets(
 
 static func get_tileset(tile_size: int,base_dir: String) -> TileSet:
 	var tileset_name := "tileset_%spx" % [str(tile_size)]
+	# PATCHED (Hooshang). Upstream names this resource by tile size ALONE, so
+	# two .ldtk projects sharing a grid size collide on one file and each
+	# import silently rebuilds it from only that project's own layers — the
+	# other project's tile sources vanish out from under it with no error
+	# anywhere. Confirmed by direct testing: re-importing hooshang_claude.ldtk
+	# after hooshang_act2.ldtk wiped Act 2's wall/sludge tilesets from the
+	# shared file. world_name (stashed onto Util.options by the matching patch
+	# in ldtk-importer.gd's _import()) is the source .ldtk's own filename stem
+	# ("hooshang_claude" / "hooshang_act2"), so each project now gets its own
+	# resource and can never step on another project's. Falls back to the
+	# unqualified name if world_name is ever absent (a caller that built a
+	# TileSet outside a real import), which is the exact upstream behaviour.
+	var world_name: String = Util.options.get("world_name", "")
+	if world_name != "":
+		tileset_name += "_" + world_name
 	var path := base_dir + "tilesets/" + tileset_name + ".res"
 
 	if not (Util.options.force_tileset_reimport):

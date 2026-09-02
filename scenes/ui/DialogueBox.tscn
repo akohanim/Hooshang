@@ -95,15 +95,20 @@ theme_override_font_sizes/font_size = 24
 text = "Rumi"
 vertical_alignment = 1
 
-[node name="TextLabel" type="Label" parent="."]
+[node name="TextLabel" type="RichTextLabel" parent="."]
 offset_left = 256.0
 offset_top = 54.0
 offset_right = 1244.0
 offset_bottom = 200.0
-theme_override_colors/font_color = Color(0.95, 0.96, 0.99, 1)
-theme_override_constants/line_spacing = 8
-theme_override_font_sizes/font_size = 40
+theme_override_colors/default_color = Color(0.95, 0.96, 0.99, 1)
+theme_override_constants/line_separation = 8
+theme_override_font_sizes/normal_font_size = 40
+bbcode_enabled = true
 text = ""
+mouse_filter = 2
+focus_mode = 0
+scroll_active = false
+shortcut_keys_enabled = false
 horizontal_alignment = 1
 autowrap_mode = 2
 

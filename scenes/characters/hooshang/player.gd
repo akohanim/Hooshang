@@ -1230,6 +1230,28 @@ func add_momentum(dx: float) -> void:
 	boost_timer = boost_time
 
 
+## Hand him a hard upward launch — a spring platform's bounce, not a jump he
+## chose. Same shape as add_momentum (a method rather than a prop writing
+## velocity.y itself, STYLE_GUIDE §4), but for the vertical axis: nothing else
+## in player.gd currently injects vertical velocity from outside.
+##
+## Lands him in State.JUMP so the existing rise/fall/apex gravity flies the arc
+## exactly like a real jump — no new gravity or height code. Deliberately does
+## NOT set jump_hold_timer, so _apply_jump_hold() has nothing to hold: the
+## bounce is one fixed impulse, un-extendable by holding the button, which is
+## what keeps it reading as the platform launching him rather than an ordinary
+## jump that happened to start high. Buffer/coyote timers are cleared so a jump
+## queued just before landing can't fight the launch on the very next frame.
+func bounce(vy: float) -> void:
+	if state == State.DEAD:
+		return
+	velocity.y = -absf(vy)
+	jump_hold_timer = 0.0
+	jump_buffer_timer = 0.0
+	coyote_timer = 0.0
+	state = State.JUMP
+
+
 func enter_slide(zone: Node, direction: Vector2, control: float, ramp: float) -> void:
 	if direction == Vector2.ZERO:
 		return

@@ -1,0 +1,37 @@
+[remap]
+
+importer="ldtk.import"
+type="PackedScene"
+uid="uid://daejyl8ovusga"
+path="res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"
+
+[deps]
+
+files=["res://ldtk/tilesets/tileset_8px_hooshang_act2.res", "res://ldtk/levels/Act_2_Level_0.scn", "res://ldtk/levels/Act_2_Level_Showcase.scn", "res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"]
+
+source_file="res://ldtk/hooshang_act2.ldtk"
+dest_files=["res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn", "res://ldtk/tilesets/tileset_8px_hooshang_act2.res", "res://ldtk/levels/Act_2_Level_0.scn", "res://ldtk/levels/Act_2_Level_Showcase.scn", "res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"]
+
+[params]
+
+World=""
+group_world_layers=false
+Level=""
+pack_levels=true
+Layer=""
+layers_always_visible=false
+Tileset=""
+tileset_custom_data=false
+integer_grid_tilesets=false
+atlas_texture_type=0
+Entity=""
+resolve_entityrefs=true
+use_entity_placeholders=false
+Post Import=""
+tileset_post_import="res://scripts/ldtk_tileset_post_import.gd"
+entities_post_import="res://scripts/ldtk_entities_post_import.gd"
+level_post_import="res://scripts/ldtk_level_post_import.gd"
+world_post_import=""
+Debug=""
+force_tileset_reimport=true
+verbose_output=false
