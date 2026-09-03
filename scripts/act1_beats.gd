@@ -35,6 +35,11 @@ const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ## Hooshang's face per line. Each beat names the state it wants rather than a
 ## file, so re-cutting the portrait sheet never touches the dialogue.
 const FACES := {
+	"neutral": preload("res://assets/portraits/hooshang_neutral.png"),
+	"happy": preload("res://assets/portraits/hooshang_happy.png"),
+	"angry": preload("res://assets/portraits/hooshang_angry.png"),
+	"sad": preload("res://assets/portraits/hooshang_sad.png"),
+	"surprised": preload("res://assets/portraits/hooshang_surprised.png"),
 	"dazed": preload("res://assets/portraits/hooshang_dazed.png"),
 	"hesitant": preload("res://assets/portraits/hooshang_hesitant.png"),
 	"skeptical": preload("res://assets/portraits/hooshang_skeptical.png"),
@@ -954,6 +959,14 @@ func _play_chase_end() -> void:
 	_world.add_child(_rumi_trigger)
 	await get_tree().process_frame        # let its _ready build the glow
 	await _rumi_trigger.appear()
+	# appear()'s own flip_h logic assumes a walked-into trigger (facing back
+	# toward wherever the player already is) — this one is STAGED away from
+	# the player instead (see the class doc above), so that assumption does
+	# not hold. rumi_end_offset is positive, so set both faces by hand: he
+	# stands to Hooshang's right, and this is their final exchange — they
+	# face each other for it, not out toward the empty room.
+	player.look(1)
+	_rumi_trigger.get_node("Rumi").flip_h = true
 	_rumi_trigger.breathe(true)
 	await _hold(arrival_pause)
 

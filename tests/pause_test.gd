@@ -210,14 +210,13 @@ func _check_retry() -> void:
 	_check(player.state != Player.State.DEAD, "with the respawn actually arriving")
 
 
-## Escape already belongs to two things that are not levels: the debug level
-## picker, which is the main scene and never goes through Screen at all, and the
-## token density prototype, which does go through Screen but has no player and
-## uses Escape to leave (tests/token_density.gd). Neither may lose its key.
+## Escape already belongs to something that is not a level: the debug level
+## picker, which is the main scene and never goes through Screen at all. It may
+## not lose its key to Pause.
 ##
-## Stood up as a bare world rather than by loading either of them, because what
-## decides the answer is the absence of a player, and that is the one thing both
-## of those scenes have in common.
+## Stood up as a bare, playerless world rather than by loading the picker
+## itself, because what decides the answer is the absence of a player, not
+## anything specific to that one scene.
 func _check_leaves_playerless_scenes_alone() -> void:
 	Screen.set_scene(Node2D.new())
 	await _frames(5)

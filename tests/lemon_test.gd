@@ -156,13 +156,12 @@ func _ready() -> void:
 			_tokens_on_surface().size(), baseline_tokens])
 
 	# The requirement: the count carries from level to level.
-	Screen.load_scene("res://scenes/levels/act1_office/Level2.tscn")
+	world = Screen.load_scene("res://ldtk/Act1World.tscn")
 	await _frames(40)
 	_check(Collectibles.total == 1,
 		"the total survives loading another level (total=%d)" % Collectibles.total)
 
 	# Death must not refund or reset it either.
-	world = Screen.load_scene("res://ldtk/Act1World.tscn")
 	await _frames(60)
 	world.player.die()
 	await _frames(40)

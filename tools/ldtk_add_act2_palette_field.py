@@ -16,7 +16,7 @@ A NUMBER, NOT A CHECKBOX — same reasoning ldtk_add_dark_thought.py gives for
 Clockwise/Glow: LDtk has only ever written String and Float fields in this
 project, and a Bool built from a guessed shape crashed the editor once already.
 
-Only hooshang_act2.ldtk is touched. hooshang_claude.ldtk (Act 1) has no field
+Only hooshang_act2.ldtk is touched. hooshang_act1.ldtk (Act 1) has no field
 named ChildhoodPalette and never will — its own DarkThought/ConeSpikes
 placements simply have no override for a field that does not exist there,
 which is exactly what leaves every existing Act 1 room unaffected.

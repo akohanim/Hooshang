@@ -27,18 +27,14 @@ extends CanvasLayer
 const WORLDS := {
 	"Act1": "res://ldtk/Act1World.tscn",
 	"Act2": "res://ldtk/Act2World.tscn",
+	"Act3": "res://ldtk/Act3World.tscn",
 }
 
 ## Hand-built scenes that aren't rooms of an LDtk world.
 const LEVELS := {
-	"Level1": "res://scenes/levels/act1_office/Level1Office.tscn",
-	"Level2": "res://scenes/levels/act1_office/Level2.tscn",
-	"LDtkOffice": "res://ldtk/Level_1_Office_Test.tscn",
 	"Act1World": "res://ldtk/Act1World.tscn",
 	"Act2World": "res://ldtk/Act2World.tscn",
-	# Rendering prototype, not a level: a lemon drawn on a 640x360 layer
-	# over the 320x180 world. See tests/token_density.gd.
-	"TokenDensity": "res://tests/token_density.tscn",
+	"Act3World": "res://ldtk/Act3World.tscn",
 }
 
 ## Font size for the generated room buttons, matching the ones in the scene.

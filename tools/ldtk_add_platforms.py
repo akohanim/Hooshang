@@ -27,7 +27,7 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk", "hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk", "hooshang_act1.ldtk")
 APPLY = "--apply" in sys.argv
 
 ENTITIES = [
@@ -120,7 +120,7 @@ def main():
             json.dump(d, f, indent="\t")
         os.replace(tmp, LDTK)
         print("APPLIED. Re-import in Godot:")
-        print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn")
+        print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
         print("  Godot --headless --path . --import")
     else:
         print("DRY RUN — nothing written. Re-run with --apply")

@@ -48,7 +48,7 @@ from ldtk_add_ceiling_tile import block, ldtk_running
 import ldtk_add_dark_thought as dt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk", "hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk", "hooshang_act1.ldtk")
 APPLY = "--apply" in sys.argv
 
 ENTITY = "LightThought"
@@ -182,8 +182,8 @@ def main():
     os.replace(tmp, LDTK)
     print("\nAPPLIED. The hook that BUILDS this changed too, so the .ldtk needs")
     print("touching or Godot will not re-read it:")
-    print("  touch ldtk/hooshang_claude.ldtk")
-    print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/*.scn")
+    print("  touch ldtk/hooshang_act1.ldtk")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/*.scn")
     print("  Godot --headless --path . --import")
 
 

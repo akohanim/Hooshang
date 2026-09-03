@@ -73,7 +73,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ldtk_add_ceiling_tile import block, ldtk_running
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk", "hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk", "hooshang_act1.ldtk")
 APPLY = "--apply" in sys.argv
 
 ART = "art/dark_thought.png"
@@ -330,8 +330,8 @@ def main():
     os.replace(tmp, LDTK)
     print("\nAPPLIED. Re-import in Godot — and the hook that BUILDS this has")
     print("changed too, so the .ldtk needs touching or Godot will not re-read it:")
-    print("  touch ldtk/hooshang_claude.ldtk")
-    print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn")
+    print("  touch ldtk/hooshang_act1.ldtk")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
     print("  Godot --headless --path . --import")
 
 

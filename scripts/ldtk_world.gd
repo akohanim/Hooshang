@@ -38,7 +38,32 @@ signal room_changed(room: Node2D)
 @export var draw_room_backdrops := true
 ## Base colour of that panel, BEFORE the level's CanvasModulate darkens it —
 ## so pick something fairly bright here and let the modulate do the dimming.
+## Only used as a FALLBACK, when room_backdrop_texture is unset — see it below.
 @export var room_backdrop_color := Color(0.42, 0.3, 0.27)
+## Art for that panel, stretched to fill each room's own rect — Act I's dim,
+## desaturated office wash (assets/background/office_gradient_backdrop.png).
+## Takes over from room_backdrop_color whenever it is set (the default): a
+## painted gradient reads as atmosphere, a flat tint under it would only mud
+## the colours the art was already mixed with. Downsized from a 2048px source
+## (sips -z 512 512) — the gradient carries no fine detail to lose, and this
+## project's other backdrop art is sized the same way (night_sky.png is
+## 320x160). Kept at LINEAR filtering rather than the world viewport's default
+## NEAREST — see _add_backdrop's own note, the same reasoning DialogueBox's
+## Portrait node documents for a painted image over pixel art.
+@export var room_backdrop_texture: Texture2D = \
+	preload("res://assets/background/office_gradient_backdrop.png")
+## CanvasModulate colour for a room holding a musical-tile puzzle (NoteTile,
+## group "note_tile" — see scenes/props/NoteTile.tscn): those rooms show
+## nothing but their own hand-placed Light2D fixtures, no ambient fill at all.
+## Every other room gets whatever colour the world's own CanvasModulate node
+## was AUTHORED at (captured into _ambient_color below, once, in _ready() —
+## the same "capture the authored value" move _music_base_db makes for the
+## Music node) — so this script carries no opinion of its own on what "dim"
+## means, and Act II's CanvasModulate (a different mood entirely) is
+## untouched by this file simply because Act II has no note tiles to match.
+@export var music_room_color := Color.BLACK
+@onready var _canvas_modulate: CanvasModulate = $CanvasModulate
+var _ambient_color := Color.BLACK
 
 @export_group("Bounds")
 ## Cap every room with an invisible ceiling sitting just above its top edge.
@@ -141,6 +166,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	_ambient_color = _canvas_modulate.color
 	_world = world_scene.instantiate()
 	add_child(_world)
 
@@ -365,14 +391,14 @@ func _clamp_exit_signs() -> void:
 			break
 
 
-## Back wall for one room: a plain ColorRect behind every layer. Being a
-## CanvasItem it is lit by Light2D and dimmed by CanvasModulate, which is the
-## whole point — see draw_room_backdrops above.
+## Back wall for one room: room_backdrop_texture stretched to the room's rect,
+## or a plain ColorRect when no texture is set. Being a CanvasItem either way,
+## it is lit by Light2D and dimmed by CanvasModulate, which is the whole point
+## — see draw_room_backdrops above.
 func _add_backdrop(room: Node2D) -> void:
 	var r := room_rect(room)
-	var panel := ColorRect.new()
+	var panel: Control = _backdrop_panel()
 	panel.name = "RoomBackdrop"
-	panel.color = room_backdrop_color
 	panel.position = r.position - room.position  # room-local
 	panel.size = r.size
 	# Background band. Sibling order (move_child below) is what keeps it behind
@@ -386,6 +412,33 @@ func _add_backdrop(room: Node2D) -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	room.add_child(panel)
 	room.move_child(panel, 0)
+
+
+## The unsized, unpositioned backdrop node itself — a TextureRect painted with
+## room_backdrop_texture (stretched to whatever size _add_backdrop gives it,
+## same as the room it sits behind), or the old flat ColorRect when no texture
+## is set.
+##
+## LINEAR filtering, not the world viewport's default NEAREST: this is a
+## painted gradient, not pixel art, the same call DialogueBox's Portrait node
+## makes for the same reason (see its class doc's PORTRAIT FILTERING note) —
+## nearest-sampling a smooth low-frequency image stretched across a room would
+## show its 512px source grid as visible banding instead of the soft wash it
+## was painted as. Left at the texture's own colours (no modulate tint): the
+## art already carries Act I's dim, desaturated mood, and multiplying
+## room_backdrop_color over it would only mud a gradient that was mixed for
+## exactly this shot in the first place.
+func _backdrop_panel() -> Control:
+	if room_backdrop_texture == null:
+		var flat := ColorRect.new()
+		flat.color = room_backdrop_color
+		return flat
+	var tex := TextureRect.new()
+	tex.texture = room_backdrop_texture
+	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex.stretch_mode = TextureRect.STRETCH_SCALE
+	tex.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	return tex
 
 
 ## Throw away the editor's authoring copy of the world before it can wake up.
@@ -429,8 +482,23 @@ func _add_ceiling(room: Node2D) -> void:
 		+ Vector2(r.size.x * 0.5, -ceiling_thickness * 0.5)
 
 
-## Rect of a room in world space. LDtk rooms have no intrinsic size once
-## imported, so measure the widest tilemap the room actually uses.
+## Rect of a room in world space. Starts from the widest tilemap the room
+## actually uses, then grows to at least the room's own LDtk-declared size
+## (LDTKLevel.size — set on import straight from the level's pxWid/pxHei) if
+## that is bigger.
+##
+## The declared size alone used to be unreliable enough that this measured
+## tile content instead (LDtk rooms have no intrinsic size once imported —
+## see the addon's own LDTKLevel node, which DOES carry one now). Content
+## alone breaks the moment part of a room is deliberately empty air with
+## nothing painted in it — a climbing shaft, an open sky above a platforming
+## room — since get_used_rect() only ever sees painted cells: extending
+## Act_2_Level_0 upward into open sky left its camera limits, kill plane and
+## ceiling seal all still clamped to the highest painted row, so the new
+## space was there in LDtk but physically unreachable in play. Taking the
+## LARGER of the two keeps every already-painted room exactly as measured
+## before (declared size there is never smaller than content) and only
+## changes anything for a room whose real footprint reaches past its tiles.
 func room_rect(room: Node2D) -> Rect2:
 	var used := Rect2()
 	var found := false
@@ -446,6 +514,10 @@ func room_rect(room: Node2D) -> Rect2:
 				Vector2(cells.size * cell))
 			used = r if not found else used.merge(r)
 			found = true
+	if room is LDTKLevel and (room as LDTKLevel).size != Vector2i.ZERO:
+		var declared := Rect2(Vector2.ZERO, Vector2((room as LDTKLevel).size))
+		used = declared if not found else used.merge(declared)
+		found = true
 	if not found:
 		return Rect2(room.position, Vector2(320, 180))
 	return Rect2(used.position + room.position, used.size)
@@ -458,8 +530,21 @@ func spawn_point_for(room: Node2D) -> Vector2:
 	return room_rect(room).get_center()
 
 
+## Does this room hold a musical-tile puzzle? Checked against the "note_tile"
+## group (every NoteTile joins it, see scenes/props/NoteTile.tscn) rather than
+## a hardcoded room-name list, so a puzzle moved or added to a new room stays
+## correct without this file having to know its name.
+func _room_has_music_puzzle(room: Node2D) -> bool:
+	for tile in get_tree().get_nodes_in_group("note_tile"):
+		if room.is_ancestor_of(tile):
+			return true
+	return false
+
+
 func _enter_room(room: Node2D, snap: bool) -> void:
 	current_room = room
+	_canvas_modulate.color = \
+		music_room_color if _room_has_music_puzzle(room) else _ambient_color
 	_checkpoint = spawn_point_for(room)
 	var r := room_rect(room)
 	player.set_camera_limits(Rect2i(r))

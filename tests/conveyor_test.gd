@@ -473,7 +473,7 @@ func _release_all() -> void:
 ## touch.
 func _belts_in_ldtk() -> Dictionary:
 	var out := {"left": 0, "right": 0}
-	var raw := FileAccess.get_file_as_string("res://ldtk/hooshang_claude.ldtk")
+	var raw := FileAccess.get_file_as_string("res://ldtk/hooshang_act1.ldtk")
 	var project = JSON.parse_string(raw)
 	if project == null or not project.has("levels"):
 		return out

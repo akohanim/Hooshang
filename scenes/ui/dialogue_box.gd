@@ -337,6 +337,7 @@ var _generation := 0
 @onready var portrait_loop: TextureRect = $Portrait/Loop
 @onready var portrait_mouth: TextureRect = $Portrait/Mouth
 @onready var portrait_eyes: TextureRect = $Portrait/Eyes
+@onready var hooshang_animator: HooshangDialogueAnimator = $Portrait/HooshangAnimator if has_node("Portrait/HooshangAnimator") else null
 ## The scene's built-in stand-in, kept so a tinted speaker can go back to it
 ## after a line that supplied real art.
 @onready var _default_portrait: Texture2D = $Portrait.texture
@@ -589,6 +590,18 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		return  # a newer line is up by now; do not hide IT
 	visible = false
 	dialogue_closed.emit()
+
+
+## Dynamically drive Hooshang's 9-frame emotional sub-matrix animator
+func play_hooshang_expression(emotion: String, blink_rate: float = 0.25) -> void:
+	if hooshang_animator != null:
+		hooshang_animator.visible = true
+		hooshang_animator.play_expression(emotion, blink_rate)
+
+
+## Dynamic show_portrait API compatible with cutscene refactors
+func show_portrait(emotion: String) -> void:
+	play_hooshang_expression(emotion)
 
 
 ## Grow `node` open from zero height at whichever edge it is flush against —
@@ -974,6 +987,10 @@ func _animate_loop(delta: float) -> void:
 			_loop_left = LOOP_FRAME_TIME
 			_loop_step = (_loop_step + 1) % talk.size()
 			_show_frame(portrait_loop, int(talk[_loop_step]))
+		else:
+			var atlas := portrait_loop.texture as AtlasTexture
+			if atlas != null and atlas.region.position.x == float(_loop.get("rest", 0)) * atlas.region.size.x:
+				_show_frame(portrait_loop, int(talk[_loop_step]))
 		return
 	_show_frame(portrait_loop, int(_loop.get("rest", 0)))
 

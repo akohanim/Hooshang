@@ -14,7 +14,7 @@ field_def()/enum_def() helpers — verified there against LDtk's own serializer
 reinvented, so a form built from this still parses the way LDtk itself would
 have written it.
 
-hooshang_act2.ldtk is a small (~140KB) file, unlike the 2MB hooshang_claude.ldtk
+hooshang_act2.ldtk is a small (~140KB) file, unlike the 2MB hooshang_act1.ldtk
 ldtk_add_dark_thought.py has to avoid reformatting wholesale — so this uses the
 plain json.load/dump round trip tools/ldtk_add_platforms.py already uses, not
 that script's text-insertion trick.

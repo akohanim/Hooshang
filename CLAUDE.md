@@ -17,9 +17,6 @@ so the two agree now. The tiles are still placeholder art.
 - Movement test gym: `scenes/levels/TestLevel.tscn` (8 labeled sections, one per mechanic)
 - Headless tests (run after any player/level change, exit code 0 = pass):
   - `Godot --headless --path . res://tests/smoke_test.tscn` — movement physics
-  - `Godot --headless --path . res://tests/level1_test.tscn` — Level 1 beats
-  - `Godot --headless --path . res://tests/level2_test.tscn` — Level 2 jumps
-  - `Godot --headless --path . res://tests/flow_test.tscn` — Level 1→2 transition
   - `Godot --headless --path . res://tests/world_bounds_test.tscn` — LDtk rooms
     are sealed at the top (a jump+dash can't leave through the ceiling), and
     he cannot STAND out over a drop (`Player.footing_width`). Its launch point is
@@ -249,7 +246,7 @@ so the two agree now. The tiles are still placeholder art.
   world.** Godot re-imports a `.ldtk` when the `.ldtk` changes, not when the
   hook that builds its entities changes — so a newly handled (or renamed)
   entity stays raw data in `ldtk/levels/*.scn` and simply never appears, with
-  no error anywhere. `touch ldtk/hooshang_claude.ldtk` then `--import`.
+  no error anywhere. `touch ldtk/hooshang_act1.ldtk` then `--import`.
 - **Level identifiers ARE the play order**, and `LdtkWorld.rooms` is sorted by
   them. `Level_0` is the opening room. The world is no longer one left-to-right
   row: rooms 14-23 are the escape and run RIGHT to left along the bottom of the
@@ -273,9 +270,9 @@ so the two agree now. The tiles are still placeholder art.
   sort itself into place.
 - **A renamed level needs the import CACHE cleared, not just a re-import.**
   Deleting `ldtk/levels/*.scn` is not enough — the world scene itself is cached
-  in `.godot/imported/hooshang_claude.ldtk-*`, and a stale one loaded two rooms
+  in `.godot/imported/hooshang_act1.ldtk-*`, and a stale one loaded two rooms
   on top of each other at the same world x while every name looked right.
-  `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
+  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
 - **`addons/ldtk-importer/src/tileset.gd` carries a local PATCH, marked
   `PATCHED (Hooshang)`. Keep it through any addon update.** Upstream builds the
@@ -287,7 +284,7 @@ so the two agree now. The tiles are still placeholder art.
   held the paint: no error, no missing-tile warning, nothing to pull on. The
   patch is the comment's own stated intent — create in non-empty cells, remove
   in empty ones, leave the rest alone — which makes an import idempotent.
-  `force_tileset_reimport=true` is also set in `hooshang_claude.ldtk.import` as
+  `force_tileset_reimport=true` is also set in `hooshang_act1.ldtk.import` as
   a second line of defence; nothing is lost by rebuilding the TileSet, because
   the per-tile collision this project needs is re-applied on every import by
   `scripts/ldtk_tileset_post_import.gd`.
@@ -297,7 +294,7 @@ so the two agree now. The tiles are still placeholder art.
   handled ENTITY goes the same way, arriving as nothing while the hook that
   builds it plainly has a case for it. Restart the editor after changing
   anything in a `.import` OR in a post-import hook, and rebuild:
-  `rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn` then
+  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
 - **An LDtk ENUM field arrives QUALIFIED.** `field-util.gd`'s `__parse_enum`
   returns `"ThoughtMotion.Circle"`, never `"Circle"` — the regex there pulls the
@@ -308,7 +305,7 @@ so the two agree now. The tiles are still placeholder art.
   DarkThought drifted vertically whatever Motion said in LDtk. Read enum fields
   with `_field_enum()`, not `_field_str()`; `dark_thought_test` pins both the
   addon's output shape and the mapping.
-- **Keep LDtk closed while editing `hooshang_claude.ldtk` from code.** LDtk
+- **Keep LDtk closed while editing `hooshang_act1.ldtk` from code.** LDtk
   holds the whole project in memory and writes it back wholesale; it has
   already silently reverted one entity rename. Reload the project in LDtk after
   any scripted edit.
@@ -450,8 +447,9 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
 - `scripts/level_base.gd` — `LevelBase`: camera limits, checkpoint group wiring,
   kill plane (`kill_y`), fast respawn (~0.15s), R = retry, and exit wiring — any
   Area2D in the `exit` group advances the game (see below). Levels `extends
-  LevelBase` (see `scenes/levels/act1_office/level1_office.gd` for cutscene/
-  trigger patterns).
+  LevelBase`. Nothing currently does — the pre-LDtk hand-built levels that once
+  did (`Level1Office`, `Level2`) were retired once the real content moved into
+  the LDtk world, and `Game.LEVELS` (below) is empty as a result.
 - `systems/screen.gd` — `Screen` autoload: owns the two render surfaces. The
   world lives in a 320x180 `SubViewport` (pixel-art rasterisation, integer
   upscale); UI — dialogue, overlays, fades — sits on the window's own
@@ -509,10 +507,13 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   debug picker, level-select practice runs and every test run unbound, so
   nothing they do can touch a player's save.
 - `systems/game.gd` — `Game` autoload: level progression + Celeste-style fade
-  transitions. `Game.LEVELS` is the ordered scene list; reaching a level's exit
-  sign fades out, loads the next, fades in. The loaded level is the running
-  checkpoint (death respawns at its start; completed levels never replay).
-  `Game.test_mode = true` exercises progression without swapping scenes.
+  transitions, for `LevelBase`-derived scenes. `Game.LEVELS` is the ordered
+  scene list — currently EMPTY, since the two scenes it ever chained
+  (`Level1Office`, `Level2`) were retired once the LDtk world became the real
+  Act 1. `current_index`/`completed` still live here rather than being deleted
+  outright, because `SaveGame` persists them as part of a save's schema (see
+  below) — advance()/set_current() are otherwise dead code with nothing left
+  to call them.
 - `scenes/ui/` — `DialogueBox.tscn` (Celeste-style banner + portrait; registered
   as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint, face,
   side)`), `EmoteBubble.tscn` (world-space reaction bubble) and
@@ -739,18 +740,20 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   geometry is built against, and "floatier" is very easy to ship as "the 2-cell
   pillars no longer stop anybody". Runs headless:
   `Godot --headless --path . res://tests/feel_measure.tscn`
-  **Airtime is capped by Level 2's second gap**, which is a dash GATE — airtime
+  **Airtime used to be capped by Level 2's second gap**, a dash GATE — airtime
   times max_run_speed is horizontal reach, and past about +16% a plain running
-  jump clears a gap that exists to teach the dash (`level2_test` catches it).
-  **And Level 2's THIRD gap caps it from below, much more tightly.** It is a
-  94px gap with a 2-tile rise, authored so only a near-perfect apex jump+dash
-  clears it, which means the geometry has almost no headroom on the slow side:
-  measured by bisection, `max_run_speed` 86 still clears it and 82 does not — so
-  roughly **5% is all the slowing this level tolerates**. Below that he still
-  crosses the gap horizontally but arrives UNDER the platform lip and falls past
-  the edge, which is the rise he can no longer make in time rather than the
-  distance. Slowing him further means shortening or lowering P3 in
-  `tools/gen_level2.py`; nothing else in the game is this tight.
+  jump cleared a gap that existed to teach the dash. **And Level 2's THIRD gap
+  capped it from below, much more tightly**: a 94px gap with a 2-tile rise,
+  authored so only a near-perfect apex jump+dash cleared it — measured by
+  bisection, `max_run_speed` 86 still cleared it and 82 did not, so roughly 5%
+  was all the slowing that level tolerated. **This was all about the pre-LDtk
+  greybox `Level2.tscn` (built by `tools/gen_level2.py`), which is now
+  deleted** — the level and its `level2_test` regression check are both gone.
+  Whether the LDtk world's own `Level_2` room (the current dash-teaching room,
+  covered by `dash_tutorial_test`) carries an equally tight constraint on
+  `max_run_speed`/`apex_gravity_mult` has NOT been re-measured — treat this
+  whole note as historical until someone runs `feel_measure` against it and
+  confirms one way or the other.
 - `tools/ldtk_to_8px.py` — the one-shot 16px -> 8px grid migration, kept for the
   record because it documents what the conversion had to get right. It
   REGENERATES the auto-layer tiles rather than leaving that to LDtk (they live

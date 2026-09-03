@@ -63,6 +63,51 @@ func _run() -> void:
 		"...and no further than steer_range  [%.1fpx, range %.1f]"
 			% [risen, carpet.steer_range])
 
+	# --- steering must never shake him loose or push him sideways ---
+	# Regression: reversing the steer direction — or simply switching from
+	# holding UP to holding DOWN — used to eject the rider mid-ride with no
+	# jump, no dash and nothing else in the room to blame. See
+	# MagicCarpet._carry_body's doc comment for the actual mechanism: the
+	# carpet's own ZoneFloor moves (on the CPU side) a beat before the
+	# physics server's own copy of its transform catches up, so the rider's
+	# manual catch-up move collided with the very floor it was following.
+	# Holding UP alone (the block above) never showed it — catching up away
+	# from a stale, lower floor collides with nothing — which is why this
+	# drives DOWN, and a rapid up/down flip, too.
+	var ever_not_carried := false
+	var ever_airborne := false
+	var max_ride_vel_x := 0.0
+
+	Input.action_press("move_down")
+	for i in 60:
+		await _frames(1)
+		ever_not_carried = ever_not_carried or not carpet.carrying(player)
+		ever_airborne = ever_airborne or not player.is_on_floor()
+		max_ride_vel_x = maxf(max_ride_vel_x, absf(player.velocity.x))
+	Input.action_release("move_down")
+
+	for i in 60:  # rapid direction flips: the worst case for the stale-floor race
+		if i % 2 == 0:
+			Input.action_press("move_up")
+			Input.action_release("move_down")
+		else:
+			Input.action_press("move_down")
+			Input.action_release("move_up")
+		await _frames(1)
+		ever_not_carried = ever_not_carried or not carpet.carrying(player)
+		ever_airborne = ever_airborne or not player.is_on_floor()
+		max_ride_vel_x = maxf(max_ride_vel_x, absf(player.velocity.x))
+	Input.action_release("move_up")
+	Input.action_release("move_down")
+
+	_check(not ever_airborne,
+		"steering alone (up, down, or flipping fast) never lifts him off the floor")
+	_check(not ever_not_carried,
+		"...and never drops him out of carrying(), with nothing else in the room to blame")
+	_check(max_ride_vel_x < 1.0,
+		"...and never writes a surprise kick to his velocity.x while riding  [%.1f px/s]"
+			% max_ride_vel_x)
+
 	# --- airborne, it does not carry him ---
 	# input_locked comes off for this: a locked player never processes the
 	# jump action at all (see player.gd's jump handling), so testing "jumping

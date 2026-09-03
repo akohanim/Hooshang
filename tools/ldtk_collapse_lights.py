@@ -58,7 +58,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ldtk_add_ceiling_tile import array_end, ldtk_running
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk", "hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk", "hooshang_act1.ldtk")
 APPLY = "--apply" in sys.argv
 
 ROOMS = ["Level_14", "Level_15", "Level_16", "Level_17"]
@@ -325,7 +325,7 @@ def main():
     open(tmp, "w").write(out)
     os.replace(tmp, LDTK)
     print("\nAPPLIED. Re-import in Godot:")
-    print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
     print("  Godot --headless --path . --import")
 
 

@@ -46,7 +46,7 @@ import sys
 import uuid
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk/hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk/hooshang_act1.ldtk")
 APPLY = "--apply" in sys.argv
 
 TUTORIAL_OLD = 24
@@ -328,7 +328,7 @@ def main():
     for path, out in sorted(edits.items()):
         open(path, "w").write(out)
     print("APPLIED. Now:")
-    print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
     print("  Godot --headless --path . --import")
 
 

@@ -42,7 +42,7 @@ import os
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk", "hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk", "hooshang_act1.ldtk")
 OLD, NEW = 16, 8
 
 BRICK_TILESET_UID = 32

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cnrwx577guta"]
 
 [ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
-[ext_resource type="PackedScene" uid="uid://dc8v6mkhcimnl" path="res://ldtk/hooshang_claude.ldtk" id="2_ldtk"]
+[ext_resource type="PackedScene" uid="uid://dc8v6mkhcimnl" path="res://ldtk/hooshang_act1.ldtk" id="2_ldtk"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/LampFixture.tscn" id="3_lamp"]
 [ext_resource type="Script" uid="uid://cq0ixl1iodot6" path="res://scripts/note_sequence.gd" id="5_seq"]
 [ext_resource type="AudioStream" uid="uid://dygagb2v424do" path="res://assets/music/shur_circuit_climb.mp3" id="6_music"]
@@ -20,7 +20,7 @@ script = ExtResource("1_world")
 world_scene = ExtResource("2_ldtk")
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=331792219]
-color = Color(0.05, 0.05, 0.065, 1)
+color = Color(0.2304, 0.2448, 0.2592, 1)
 
 [node name="Backdrop" type="Node2D" parent="." unique_id=1311038231]
 

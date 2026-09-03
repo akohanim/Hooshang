@@ -35,7 +35,7 @@ a hazard set piece (`scenes/props/hazards/`), etc.
 res://scenes/
     props/       lighting/  furniture/  hazards/   (+ Checkpoint.tscn)
     characters/  hooshang/  rumi/
-    levels/      act1_office/  ...          (TestLevel.tscn is the movement gym)
+    levels/      TestLevel.tscn                     (the movement gym)
     ui/          DialogueBox.tscn  DebugOverlay.tscn
 res://scripts/   only scripts NOT co-located with a scene (e.g. level_base.gd)
 res://systems/   autoload singletons (see README there)
@@ -137,8 +137,8 @@ Celeste-style depth without touching gameplay. Standard structure:
   = navy backing + moon + frame) instanced in the midground — same prefab rule
   as §1.
 
-Dev aid: `tests/screenshot.tscn` renders a level windowed and saves viewport
-PNGs at chosen camera x positions — use it to check backdrops without the editor.
+Dev aid: `tests/room_shot.tscn` renders an LDtk room windowed and saves viewport
+PNGs — use it to check backdrops and lighting without the editor.
 
 ### Player state invariants
 
@@ -208,9 +208,10 @@ single `.ldtk` file commonly holds many levels as entries within it.
   those children to get serialized twice into the saved `.scn` (confirmed by
   instrumenting the hook: it's called exactly once and produces a clean
   4-child player, but the file Godot loads back has 8). Instead, spawn the
-  player at **runtime**: a tiny wrapper scene (e.g. `ldtk/Level_1_Office_Test.tscn`)
-  instances the generated level as a plain child and instances the player at
-  its `PlayerStart` marker in `_ready()`. The generated `.scn` stays pure
+  player at **runtime**: a wrapper node instances the generated level as a
+  plain child and instances the player at its `PlayerStart` marker in
+  `_ready()` — see `scripts/ldtk_world.gd`'s own `_ready()`/`_enter_room()` for
+  the pattern this project actually runs on. The generated `.scn` stays pure
   level-geometry-plus-markers, same as `entities_post_import` already
   produces correctly for simpler (non-nested) prefabs.
 - **The auto-generated `TileSet` has no collision by default**, even with
@@ -358,6 +359,6 @@ asserts the game viewport and the player's sprite are untouched.
 Run the headless tests (exit 0 = pass) and confirm a clean boot:
 
 ```
-Godot --headless --path . res://tests/smoke_test.tscn    # movement physics
-Godot --headless --path . res://tests/level1_test.tscn   # Level 1 beats
+Godot --headless --path . res://tests/smoke_test.tscn      # movement physics
+Godot --headless --path . res://tests/world_bounds_test.tscn  # LDtk rooms sealed
 ```

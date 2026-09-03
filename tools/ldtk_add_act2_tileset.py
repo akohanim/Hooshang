@@ -12,7 +12,7 @@ The existing auto-rules on both layers are left completely untouched: they
 reference tiles by POSITION (tileRectsIds), and both new sheets keep the exact
 same tile order as the ones they replace (fill/top/left/corner for the wall;
 the same 6-frame x 4-tile-type layout for the sludge), confirmed by reading
-hooshang_act2.ldtk's own rule data before writing this script. hooshang_claude.ldtk
+hooshang_act2.ldtk's own rule data before writing this script. hooshang_act1.ldtk
 (Act 1) is a completely separate file and is never opened here.
 
 LDTK MUST BE CLOSED — same reasoning as tools/ldtk_add_platforms.py.

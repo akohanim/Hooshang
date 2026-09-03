@@ -5,13 +5,15 @@ extends Node
 ## the next level, and fades back in. The currently-loaded level IS the running
 ## checkpoint: death respawns at its start (see LevelBase), and completed levels
 ## are never replayed — so passing an exit sign permanently banks progress.
+##
+## Empty now that the pre-LDtk hand-built levels (Level1Office, Level2) are
+## gone — nothing left extends LevelBase, so advance()/set_current() are dead
+## code paths kept only because SaveGame still persists current_index/completed
+## as part of a save's schema (see save_game.gd).
 
 signal level_changed(index: int)
 
-const LEVELS: Array[String] = [
-	"res://scenes/levels/act1_office/Level1Office.tscn",
-	"res://scenes/levels/act1_office/Level2.tscn",
-]
+const LEVELS: Array[String] = []
 
 ## Fade duration each way, seconds. Short = snappy, Celeste-like.
 @export var fade_time := 0.18
@@ -23,7 +25,6 @@ var completed := false
 
 var _busy := false
 var _fade: ColorRect
-var _banner: Label
 
 
 func _ready() -> void:
@@ -35,14 +36,6 @@ func _ready() -> void:
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(_fade)
-	_banner = Label.new()
-	_banner.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_banner.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_banner.add_theme_font_size_override("font_size", 16)
-	_banner.modulate = Color(1, 0.85, 0.4)
-	_banner.visible = false
-	layer.add_child(_banner)
 
 
 ## Sync the tracked index to whatever level is actually running, so launching a
@@ -77,16 +70,8 @@ func advance() -> void:
 		level_changed.emit(current_index)
 		await _fade_to(0.0)
 	else:
-		# No further level yet — a brief "escaped" beat, then restart the run.
+		# LEVELS is empty, so this is the only path advance() can take now.
 		completed = true
-		_banner.text = "YOU ESCAPED\n(for now)"
-		_banner.visible = true
-		await get_tree().create_timer(1.6).timeout
-		current_index = 0
-		Screen.load_scene(LEVELS[0])
-		await get_tree().process_frame
-		_banner.visible = false
-		await _fade_to(0.0)
 	_busy = false
 
 

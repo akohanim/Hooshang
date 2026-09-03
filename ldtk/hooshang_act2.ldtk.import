@@ -7,10 +7,10 @@ path="res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.
 
 [deps]
 
-files=["res://ldtk/tilesets/tileset_8px_hooshang_act2.res", "res://ldtk/levels/Act_2_Level_0.scn", "res://ldtk/levels/Act_2_Level_Showcase.scn", "res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"]
+files=["res://ldtk/tilesets/tileset_8px_hooshang_act2.res", "res://ldtk/levels/Act_2_Level_0.scn", "res://ldtk/levels/Act_2_Level_1.scn", "res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"]
 
 source_file="res://ldtk/hooshang_act2.ldtk"
-dest_files=["res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn", "res://ldtk/tilesets/tileset_8px_hooshang_act2.res", "res://ldtk/levels/Act_2_Level_0.scn", "res://ldtk/levels/Act_2_Level_Showcase.scn", "res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"]
+dest_files=["res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn", "res://ldtk/tilesets/tileset_8px_hooshang_act2.res", "res://ldtk/levels/Act_2_Level_0.scn", "res://ldtk/levels/Act_2_Level_1.scn", "res://.godot/imported/hooshang_act2.ldtk-3f8169cb47a540103e88c604b80d49aa.scn"]
 
 [params]
 

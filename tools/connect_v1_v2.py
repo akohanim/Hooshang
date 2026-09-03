@@ -2,7 +2,7 @@ import json
 import os
 
 def main():
-    ldtk_path = "ldtk/hooshang_claude.ldtk"
+    ldtk_path = "ldtk/hooshang_act1.ldtk"
     if not os.path.exists(ldtk_path):
         print(f"Error: {ldtk_path} not found")
         return

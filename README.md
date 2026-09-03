@@ -97,10 +97,11 @@ clobbered by a re-export from LDtk:
 - `ldtk_level_post_import.gd` — assigns draw bands and neutralises the
   importer's IntGrid debug swatch layers
 
-**2. Hand-built, Python-generated (legacy).** `scenes/levels/act1_office/*.tscn`
-are emitted by the generators in `tools/`. **Re-running a generator overwrites
-hand-edits to its `.tscn`** — change the generator, not the scene. These levels
-extend `scripts/level_base.gd` and chain through `Game.LEVELS`.
+**2. Hand-built, Python-generated (retired).** `scenes/levels/act1_office/*.tscn`
+(`Level1Office`, `Level2`) were emitted by `tools/gen_level1.py`/`gen_level2.py`
+and chained through `Game.LEVELS` via `scripts/level_base.gd`, before the real
+Act 1 content moved into the LDtk world above. Both scenes are now deleted;
+`Game.LEVELS` is empty and the generator scripts are orphaned.
 
 ---
 
@@ -135,8 +136,7 @@ res://
 │   │   ├── DialogueBox.tscn / dialogue_box.gd
 │   │   └── DebugOverlay.tscn / debug_overlay.gd     (F3)
 │   ├── levels/
-│   │   ├── TestLevel.tscn                 Movement gym, 8 mechanic sections
-│   │   └── act1_office/                   Generated levels + level1_office.gd
+│   │   └── TestLevel.tscn                 Movement gym, 8 mechanic sections
 │   └── debug_level_picker.tscn / .gd      Main scene during development
 │
 ├── scripts/                 Scripts with no single owning scene
@@ -148,7 +148,7 @@ res://
 │   └── level_base.gd        LevelBase, for hand-built levels
 │
 ├── ldtk/
-│   ├── hooshang_claude.ldtk        The LDtk project (edit in the LDtk app)
+│   ├── hooshang_act1.ldtk        The LDtk project (edit in the LDtk app)
 │   ├── Act1World.tscn              Playable Act I: world + lights + music + beats
 │   ├── levels/                     Imported room scenes (generated)
 │   ├── tilesets/                   Imported tilesets (generated)
@@ -335,8 +335,7 @@ level, or layering change.**
 
 ```bash
 GODOT=/path/to/Godot
-for t in smoke_test level1_test level2_test world_bounds_test \
-         flow_test backtrack_test intro_test screen_test; do
+for t in smoke_test world_bounds_test backtrack_test intro_test screen_test; do
   "$GODOT" --headless --path . res://tests/$t.tscn
 done
 ```
@@ -344,17 +343,14 @@ done
 | Suite | Covers |
 | --- | --- |
 | `smoke_test` | Movement physics: run, jump, dash, wall slide, death/respawn, and the airborne-ground-state invariant |
-| `level1_test` | Level 1 story beats |
-| `level2_test` | Level 2 jump calibration (which jumps genuinely need the dash) |
-| `flow_test` | Level 1 → Level 2 transition |
 | `world_bounds_test` | LDtk rooms are sealed at the top — a jump+dash can't leave through the ceiling |
 | `backtrack_test` | Exits work both ways, all the way back, not just one room deep |
 | `intro_test` | Act I dialogue order, portrait per line, dashless start, dash granted in room 2 |
 | `screen_test` | UI and world stay on separate surfaces; restyling dialogue can't touch the game |
 | `lemon_test` | Collectible pickup, and the total surviving level changes and death |
 
-`tests/screenshot.tscn` renders a level **windowed** and saves viewport PNGs —
-useful for checking visuals without opening the editor.
+`tests/room_shot.tscn` renders an LDtk room **windowed** and saves viewport
+PNGs — useful for checking visuals without opening the editor.
 
 ### Collectibles (lemons)
 
@@ -376,13 +372,11 @@ python3 tools/ldtk_entities.py
 
 ### Editing levels
 
-- **Level design** happens in the LDtk app on `ldtk/hooshang_claude.ldtk`.
+- **Level design** happens in the LDtk app on `ldtk/hooshang_act1.ldtk`.
   **Never hand-edit a `.ldtk` file**: LDtk keeps the whole project in memory and
   rewrites the entire file on save, so on-disk edits are silently reverted.
   Systemic fixes belong in the Godot import hooks, where they re-apply on every
   import.
-- **Generated levels** (`scenes/levels/act1_office/`) are written by
-  `tools/gen_level*.py`. Change the generator, not the `.tscn`.
 - If the editor is open, a headless `--import` may stall — retry once, or close
   the editor.
 

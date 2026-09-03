@@ -29,7 +29,7 @@ from ldtk_add_ceiling_tile import block, ldtk_running
 import ldtk_add_dark_thought as dt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK = os.path.join(ROOT, "ldtk", "hooshang_claude.ldtk")
+LDTK = os.path.join(ROOT, "ldtk", "hooshang_act1.ldtk")
 APPLY = "--apply" in sys.argv
 
 NEW_VALUE = "Linear"
@@ -180,8 +180,8 @@ def main():
         f.write(out)
     os.replace(tmp, LDTK)
     print("\nAPPLIED. Re-import after running ldtk_add_grey_thought.py too:")
-    print("  touch ldtk/hooshang_claude.ldtk")
-    print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/*.scn")
+    print("  touch ldtk/hooshang_act1.ldtk")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/*.scn")
     print("  Godot --headless --path . --import")
 
 

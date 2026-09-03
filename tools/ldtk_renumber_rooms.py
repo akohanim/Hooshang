@@ -139,7 +139,7 @@ def main():
     print("\n%d level-name references across %d files" % (total, touched))
     if APPLY:
         print("APPLIED. Now:")
-        print("  rm .godot/imported/hooshang_claude.ldtk-* ldtk/levels/Level_*.scn")
+        print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
         print("  Godot --headless --path . --import")
     else:
         print("DRY RUN — nothing written. Re-run with --apply")

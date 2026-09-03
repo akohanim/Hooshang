@@ -20,7 +20,7 @@ past Level_7 needs one, since no V-room's digit collides with 7-25.
 import json
 import os
 
-LDTK_PATH = "ldtk/hooshang_claude.ldtk"
+LDTK_PATH = "ldtk/hooshang_act1.ldtk"
 
 # old identifier -> new identifier. Only entries that actually change.
 RENAME = {"Level_25": "Level_6"}

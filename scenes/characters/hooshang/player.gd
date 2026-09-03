@@ -164,9 +164,9 @@ const HALF_HEIGHT := 6.0
 ## HOW MUCH AIRTIME IS AVAILABLE IS NOT A FREE CHOICE. Airtime times
 ## max_run_speed is horizontal reach, and Level 2's second gap is a dash GATE —
 ## it is supposed to be uncrossable without one. At +26% airtime a plain running
-## jump cleared it and the level stopped teaching the dash (level2_test catches
-## this). +16% is what that gap allows with the margin it was built with; more
-## hang than this needs the gap widened first.
+## jump cleared it and the level stopped teaching the dash. +16% is what that
+## gap allows with the margin it was built with; more hang than this needs the
+## gap widened first.
 @export_range(0.0, 1.0) var apex_gravity_mult := 0.36
 
 @export_group("Dash")

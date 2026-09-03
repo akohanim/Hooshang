@@ -3,7 +3,7 @@
 ref) — the tool this project needed the day a PlayerStart drifted 8px inside
 an editing session and nobody noticed.
 
-WHY THIS EXISTS. `git diff` on hooshang_claude.ldtk is close to useless for
+WHY THIS EXISTS. `git diff` on hooshang_act1.ldtk is close to useless for
 catching an accidental nudge: LDtk reformats large stretches of the file on
 every save (key ordering, float precision, list rewraps), so even a real
 2-pixel drift on one entity shows up buried inside an 800+ line diff of a 1MB
@@ -34,7 +34,7 @@ import sys
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LDTK_REL = "ldtk/hooshang_claude.ldtk"
+LDTK_REL = "ldtk/hooshang_act1.ldtk"
 LDTK = os.path.join(ROOT, LDTK_REL)
 
 

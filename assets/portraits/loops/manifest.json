@@ -60,5 +60,181 @@
       1,
       2
     ]
+  },
+  "hooshang_skeptical": {
+    "sheet": "hooshang_skeptical_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_dazed": {
+    "sheet": "hooshang_dazed_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_annoyed": {
+    "sheet": "hooshang_annoyed_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_hesitant": {
+    "sheet": "hooshang_hesitant_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_vulnerable": {
+    "sheet": "hooshang_vulnerable_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_shocked": {
+    "sheet": "hooshang_shocked_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_neutral": {
+    "sheet": "hooshang_neutral_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_happy": {
+    "sheet": "hooshang_happy_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_angry": {
+    "sheet": "hooshang_angry_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_sad": {
+    "sheet": "hooshang_sad_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
+  },
+  "hooshang_surprised": {
+    "sheet": "hooshang_surprised_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      256,
+      256
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3
   }
 }

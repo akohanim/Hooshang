@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/dialogue_box.gd" id="1_dlg"]
 [ext_resource type="Texture2D" path="res://assets/FREE_Samurai 2D Pixel Art v1.2/Sprites/IDLE.png" id="2_idle"]
 [ext_resource type="Texture2D" path="res://assets/ui/persian_trim.png" id="3_trim"]
+[ext_resource type="Script" path="res://scripts/hooshang_dialogue_animator.gd" id="4_animator"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_portrait"]
 atlas = ExtResource("2_idle")
@@ -84,6 +85,15 @@ texture_filter = 3
 visible = false
 expand_mode = 1
 mouse_filter = 2
+
+[node name="HooshangAnimator" type="Control" parent="Portrait"]
+texture_filter = 3
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("4_animator")
 
 [node name="NameLabel" type="Label" parent="."]
 offset_left = 256.0

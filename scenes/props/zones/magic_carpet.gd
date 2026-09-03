@@ -141,8 +141,48 @@ func _physics_process(delta: float) -> void:
 	for body in riders:
 		var riding := carrying(body)
 		if riding and not carry.is_zero_approx():
-			(body as CharacterBody2D).move_and_collide(carry)
+			_carry_body(body as CharacterBody2D, carry)
 		_settle_launch(body, riding)
+
+
+## Drag `body` along by `carry` — the exact displacement the carpet (and its
+## ZoneFloor child) just gave themselves two lines up in `_physics_process`.
+##
+## The exception with `_floor` here is load-bearing, not a style nicety. By
+## the time this runs, `position = _origin + _offset(delta)` has already
+## moved ZoneFloor's Node2D transform (a child's global transform updates the
+## instant a parent's `position` changes) — but the PHYSICS SERVER's own copy
+## of that StaticBody2D's transform does not catch up until the NEXT physics
+## step, one full frame behind. That is the exact lag CLAUDE.md's note on
+## `Area2D.overlaps_body()`'s monitoring cache already documents for the
+## Level_v6 return door; it shows up here too, just surfacing through
+## `move_and_collide`'s motion query instead of a `body_entered` signal.
+##
+## So without the exception, this call tests `carry` against the FLOOR'S
+## STALE, LAST-FRAME POSITION even though `carry` was sized to land the rider
+## exactly on the floor's brand-new one. Steering the carpet UP never showed
+## it — catching up away from a stale, lower floor collides with nothing —
+## but steering DOWN (or simply releasing UP after a run of it) drives the
+## rider straight into that stale collider: the motion is stopped a fraction
+## of a pixel in, leaving him hanging above where the real floor now is. The
+## very next frame reads him as airborne, `carrying()` goes false, and
+## `_settle_launch()` fires — launching him sideways at the carpet's own
+## drift speed with no jump or dash involved, which is the "shakes and
+## pushes him left/right just from steering up/down" this exists to fix.
+##
+## Scoped to just this one call (added, then removed right after) because
+## ZoneFloor must stay an entirely ordinary solid for every OTHER
+## interaction — walking onto the carpet from the side, landing on it from a
+## jump, the rider's own move_and_slide(). Only this specific "follow the
+## floor's own displacement" move must never be blocked by the floor it is
+## following.
+func _carry_body(body: CharacterBody2D, carry: Vector2) -> void:
+	if _floor == null:
+		body.move_and_collide(carry)
+		return
+	body.add_collision_exception_with(_floor)
+	body.move_and_collide(carry)
+	body.remove_collision_exception_with(_floor)
 
 
 ## Where the carpet sits relative to `_origin`, this frame. RIDE/BOUNCE drift
