@@ -11,10 +11,14 @@ lets this drop straight in as a tileset swap with zero script changes.
 
 What actually changes is the read: Act 1's sludge is a dread-mass with a hot
 red rim and a haunted face. Act 2 is a "negative cloud" from a happy childhood
-memory, not a nightmare — so the contour is rounder (no sharp corner notch),
-the rim is a soft candy-purple pulse instead of hot red, and the face reads as
-a pouty grump rather than something haunted. Still unmistakably a hazard (the
-rim is still the brightest, most saturated thing on the tile), just not scary.
+memory, not a nightmare — so the contour is rounder (no sharp corner notch)
+and the face reads as a pouty grump rather than something haunted. THE RIM,
+though, is the SAME hot red as Act 1's (RED RIM PASS, 2026-09 — see
+gen_act2_thought.py's header for the reasoning: a hazard that stops reading as
+dangerous at a glance is worse regardless of how playful its body is), not the
+softer candy-purple pulse an earlier pass gave it. Still unmistakably a hazard
+— the rim is still the brightest, most saturated thing on the tile, and now
+the same colour every other hazard in the game uses for that job.
 
 WATERCOLOR PASS (2026-09). PALETTE ONLY, CONTOUR/ANIMATION UNCHANGED — reads a
 Pixellab "pulled back" watercolor generation (see
@@ -37,12 +41,16 @@ lavender pink and plum", seed 2202) — the SAME source gen_act2_thought.py
 reads, so the painted tiles and the floating clouds are sampled from one
 image and cannot drift apart in tone. `_ramp_from_source()` sorts the
 source's most-common opaque colours by luminance; BODY_DARK/MID/LIGHT are its
-darkest/mid/lightest purple stops. RIM_HOT/RIM_DIM keep the project's
-established candy-pink rather than the source's own (more violet) brightest
-pixels, because the brief is explicit that the rim has to stay the brightest,
-most-saturated thing on the tile — the "spot the hazard fast" job — and
-gen_act2_thought.py's SAME two constants have to match these exactly (checked
-by tests/act2_hazards_test.gd against a hard "same rim, different body" rule).
+darkest/mid/lightest purple stops. RIM_HOT/RIM_DIM do NOT come from the
+source at all — as of the RED RIM PASS (2026-09) they are Act 1's own hot red
+(gen_dark_thought.py's RIM_LIT/RIM_DARK, copied byte-for-byte), not the
+source's violet-pink brightest pixels and not the project's earlier
+candy-pink either. The brief is explicit that the rim has to stay the
+brightest, most-saturated thing on the tile — the "spot the hazard fast" job
+— and, after this pass, the SAME colour that job uses everywhere else in the
+game. gen_act2_thought.py's SAME two constants are kept equal to these by
+hand; there is no automated check that they match (act2_hazards_test.gd
+proves the tiles still kill and draw Act 2's own sheet, not rim colour).
 
 Re-run after editing: python3 tools/gen_act2_thought_tiles.py
 """
@@ -75,16 +83,16 @@ def _ramp_from_source(path, n=8):
 _RAMP = _ramp_from_source(SOURCE)
 
 # ---------------------------------------------------------------------------
-# Palette — pastel/candy, not office dread-red. Body ramp sampled from the
-# Pixellab source (see header); rim kept at the project's established
-# candy-pink so it stays the brightest, most-saturated thing on the tile.
+# Palette — pastel/candy body, NOT a pastel rim. Body ramp sampled from the
+# Pixellab source (see header); rim is Act 1's hot red (RED RIM PASS, see
+# header) so the hazard still reads as dangerous regardless of body colour.
 # ---------------------------------------------------------------------------
 BODY_LIGHT = _RAMP[0]   # palest lavender highlight
 BODY_MID = _RAMP[2]     # solid mid purple
 BODY_DARK = _RAMP[-1]   # deepest plum shadow
 
-RIM_HOT = (255, 163, 224)
-RIM_DIM = (208, 103, 196)
+RIM_HOT = (236, 60, 42)
+RIM_DIM = (122, 20, 18)
 
 # Face — a small grump, not a haunted stare: darker than the body so it reads
 # as an expression rather than another glow.

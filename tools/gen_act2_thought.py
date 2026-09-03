@@ -18,9 +18,10 @@ existing frame math with zero script changes to the sprite side: 16x16 CELL,
 and settles across the loop, never past the cell, same as Act 1's.
 
 SAME RIM COLOUR AS THE SLUDGE TILES (tools/gen_act2_thought_tiles.py's RIM_HOT/
-RIM_DIM) — candy-pink rather than hot red — so the floating clouds and the
-painted "sludge" hazard read as the same family of thing at a glance, the way
-Act 1's clouds and its sludge tiles share the same red.
+RIM_DIM) — and, as of the RED RIM pass below, THE SAME RED AS ACT 1's, not a
+softer candy tint — so the floating clouds and the painted "sludge" hazard
+read as the same family of thing at a glance, the way Act 1's clouds and its
+sludge tiles share the same red.
 
 Three body ramps, one per tone, all sharing that one rim (same rule
 gen_dark_thought.py's TONES table follows — "the same outline" is the point of
@@ -48,6 +49,19 @@ other — dark reads unpleasant, light reads pleasant, grey sits neutral
 between them — per this header's own rule above. RIM_LIT/RIM_DARK are copied
 byte-for-byte from gen_act2_thought_tiles.py's RIM_HOT/RIM_DIM; see that
 file's header for where those numbers came from.
+
+RED RIM PASS (2026-09). The watercolor pass above had left the rim a soft
+candy-pink, on the reasoning that a rounder, pastel-bodied "passing bad mood"
+cloud should read as less severe than Act 1's dread-smoke. Reverted on
+explicit direction: a thought hazard that no longer reads as dangerous at a
+glance is a worse hazard, whatever the body colour says about its mood — so
+the rim goes back to being THE SAME HOT RED gen_dark_thought.py uses
+(RIM_DARK/RIM_LIT, copied byte-for-byte), on all three tones and on the
+CHILDHOOD-palette body colours unchanged. This also makes `_apply_glow()`'s
+default `light_color` (dark_thought.gd — hot red, doc'd there as "matching the
+rim the art is drawn with") actually true for CHILDHOOD clouds again; under
+the candy rim it was a mismatch nothing flagged. Body ramps, silhouette and
+breath loop are untouched — only the rim moved.
 
 Re-run after editing: python3 tools/gen_act2_thought.py
 """
@@ -79,10 +93,13 @@ def _ramp_from_source(path, n=8):
 
 _SLUDGE_RAMP = _ramp_from_source(SLUDGE_SOURCE)
 
-# Candy-pink rim — the SAME numbers as gen_act2_thought_tiles.py's RIM_HOT/
-# RIM_DIM, so the floating clouds and the painted sludge read as one family.
-RIM_LIT = (255, 163, 224)
-RIM_DARK = (208, 103, 196)
+# Hot red rim — RED RIM PASS (see header) — the SAME numbers as
+# gen_dark_thought.py's RIM_LIT/RIM_DARK (Act 1) and as
+# gen_act2_thought_tiles.py's RIM_HOT/RIM_DIM, so the floating clouds and the
+# painted sludge still read as one family, and this family still reads as
+# dangerous regardless of which Act's cloud it is.
+RIM_LIT = (236, 60, 42)
+RIM_DARK = (122, 20, 18)
 
 TONES = {
     # Sampled straight from the sludge source's darkest -> mid purple stops —

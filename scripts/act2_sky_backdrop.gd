@@ -38,26 +38,33 @@ extends Node2D
 const CENTER := preload("res://assets/backdrop/act2_sky/center.png")
 const EXTEND := preload("res://assets/backdrop/act2_sky/extend.png")
 
-## How far the art's own ground line (where the mountains meet the sky) sits
-## below CENTER's top edge, in the art's own pixels — measured off center.png,
-## not eyeballed. NOT simply "first non-blue pixel scanning down the centre
-## column": that column runs straight through the sun, and a first pass that
-## used it landed on the SUN's own edge (row 265) instead of the mountains,
-## which sit much lower — the sun and the pale-cream sky right around it read
-## as "non-sky" under a naive blue-vs-not check just as readily as the actual
-## ridge does. Re-measured by scanning several columns AWAY from the sun for
-## the first distinctly warm/orange (mountain) pixel, which agreed at ~485-532
-## depending on x (the ridge is irregular); 500 is representative.
-const GROUND_LINE_Y := 500.0
-
-## How far past the current room's own edge the sky should still visibly
-## cover, in px, so it never visibly runs out right at the room boundary.
+## CLEAR-SKY-AT-THE-FLOOR PASS (2026-09). This node used to anchor the art to
+## a measured "ground line" (where the source's mountains met the sky) and
+## nudge it down by `ground_offset_y` to buy some clear sky above the floor —
+## first 0px of margin, then a hand-tuned 31px that was still reported as not
+## enough. Both were fighting the same losing battle: the source painting's
+## own gap between its clouds and its mountains is real but THIN and
+## IRREGULAR (verified by scanning every column CENTER/EXTEND actually use —
+## the only row band that is clear sky at EVERY column is ~130px tall in
+## source pixels, ~32px once scaled down for the sun's own size — and some
+## individual columns come within single digits of pixels of each other).
+## No amount of sliding a fixed-height image up or down was going to turn
+## that into "at least 100px clear from the floor".
+##
+## So tools/gen_act2_sky_backdrop.py no longer includes the mountains in
+## center.png/extend.png AT ALL — the crop stops well inside that clear band
+## and the rest of the image height is flat sky colour, padded on until
+## there is 130px of guaranteed clear sky below the clouds (see that script's
+## own header for the measurement and why a flat pad beat mirroring real
+## pixels). That makes the art's own BOTTOM EDGE the ground line, always,
+## by construction — no separate measured constant to keep in sync with the
+## art, and nothing left for `ground_offset_y` to buy back.
 @export var margin := 96.0
-## Nudges where the art's ground line lands relative to the current room's
-## own bottom edge, in px (positive pushes the art down, i.e. buries more of
-## the mountains below the visible floor). 0 lines the ground line up with
-## that room's own floor — a reasonable first pass; retune per real level
-## layout once Act 2 has real rooms with their own floor heights.
+## General-purpose nudge, kept for future retuning (e.g. a room whose floor
+## sits somewhere other than its own rect's bottom edge) — NOT currently
+## needed for clear-sky margin, which the art now guarantees on its own (see
+## the CLEAR-SKY-AT-THE-FLOOR note above). 0 lines the art's own bottom edge
+## up exactly with the current room's floor.
 @export var ground_offset_y := 0.0
 
 var _world: LdtkWorld
@@ -96,12 +103,17 @@ func _rebuild(room: Node2D) -> void:
 	# top_level = true makes `position` a WORLD position regardless of where
 	# this node sits in the scene tree — so the tiles below are laid out
 	# directly in world space, the same coordinate room_rect() already
-	# returns. TOP-LEFT anchored (see _sprite — centered=false): GROUND_LINE_Y
-	# is measured DOWN from a tile's top edge, so a tile placed at
-	# y = ground_y - GROUND_LINE_Y puts its ground line exactly at ground_y.
+	# returns. TOP-LEFT anchored (see _sprite — centered=false): the art's own
+	# BOTTOM edge is the ground line now (see the CLEAR-SKY-AT-THE-FLOOR note
+	# above), so a tile placed at y = ground_y - CENTER.get_height() puts that
+	# bottom edge exactly at ground_y. Read straight from the texture rather
+	# than a hardcoded constant, so it can never drift out of sync with
+	# whatever tools/gen_act2_sky_backdrop.py last generated — and EXTEND is
+	# guaranteed the same height as CENTER by construction (see that script's
+	# header), so one measurement covers both.
 	var center_x := rect.position.x + rect.size.x * 0.5
 	var ground_y := rect.end.y + ground_offset_y
-	var top_y := ground_y - GROUND_LINE_Y
+	var top_y := ground_y - CENTER.get_height()
 
 	var center_w: float = CENTER.get_width()
 	var center := _sprite(CENTER, false)
