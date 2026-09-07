@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/characters/hooshang/player.gd" id="1_player"]
-[ext_resource type="SpriteFrames" path="res://assets/hooshang_frames.tres" id="2_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/hooshang/hooshang_frames.tres" id="2_frames"]
 [ext_resource type="PackedScene" path="res://scenes/characters/hooshang/Juice.tscn" id="3_juice"]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="4_light"]
 

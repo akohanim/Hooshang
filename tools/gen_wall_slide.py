@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """The wall slide: three frames cut from the painted sheet, plus the landing.
 
-Source: assets/hooshang_sprites/source/wall_slide_sheet.png — a 2x2 grid of
+Source: assets/characters/hooshang/sprites/source/wall_slide_sheet.png — a 2x2 grid of
 1024px cells on a flat opaque grey, with a title burned into the top-left.
-Output: 88x88 RGBA frames under assets/hooshang_sprites/animations/, laid out
+Output: 88x88 RGBA frames under assets/characters/hooshang/sprites/animations/, laid out
 the way every other clip in there already is:
 
     Wall_Slide/east/frame_000..002.png   the slide proper, a loop
     Wall_Land/east/frame_000.png         the bottom-right cell, see below
 
-assets/hooshang_frames.tres plays the three as 0-1-2-1 rather than 0-1-2. The
+assets/characters/hooshang/hooshang_frames.tres plays the three as 0-1-2-1 rather than 0-1-2. The
 dust builds across them, so a straight loop snaps a settled cloud back to first
 sparks once a second; running the middle pose again on the way out both hides
 that seam and reads as what he is doing — scrabbling for grip. (That note lives
@@ -55,7 +55,7 @@ import numpy as np
 from PIL import Image, ImageEnhance
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SPRITES = os.path.join(ROOT, "assets", "hooshang_sprites")
+SPRITES = os.path.join(ROOT, "assets", "characters", "hooshang", "sprites")
 SRC = os.path.join(SPRITES, "source", "wall_slide_sheet.png")
 ANIM = os.path.join(SPRITES, "animations")
 

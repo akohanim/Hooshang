@@ -35,17 +35,17 @@ const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ## Hooshang's face per line. Each beat names the state it wants rather than a
 ## file, so re-cutting the portrait sheet never touches the dialogue.
 const FACES := {
-	"neutral": preload("res://assets/portraits/hooshang_neutral.png"),
-	"happy": preload("res://assets/portraits/hooshang_happy.png"),
-	"angry": preload("res://assets/portraits/hooshang_angry.png"),
-	"sad": preload("res://assets/portraits/hooshang_sad.png"),
-	"surprised": preload("res://assets/portraits/hooshang_surprised.png"),
-	"dazed": preload("res://assets/portraits/hooshang_dazed.png"),
-	"hesitant": preload("res://assets/portraits/hooshang_hesitant.png"),
-	"skeptical": preload("res://assets/portraits/hooshang_skeptical.png"),
-	"annoyed": preload("res://assets/portraits/hooshang_annoyed.png"),
-	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
-	"shocked": preload("res://assets/portraits/hooshang_shocked.png"),
+	"neutral": preload("res://assets/characters/hooshang/portraits/hooshang_neutral.png"),
+	"happy": preload("res://assets/characters/hooshang/portraits/hooshang_happy.png"),
+	"angry": preload("res://assets/characters/hooshang/portraits/hooshang_angry.png"),
+	"sad": preload("res://assets/characters/hooshang/portraits/hooshang_sad.png"),
+	"surprised": preload("res://assets/characters/hooshang/portraits/hooshang_surprised.png"),
+	"dazed": preload("res://assets/characters/hooshang/portraits/hooshang_dazed.png"),
+	"hesitant": preload("res://assets/characters/hooshang/portraits/hooshang_hesitant.png"),
+	"skeptical": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
+	"annoyed": preload("res://assets/characters/hooshang/portraits/hooshang_annoyed.png"),
+	"vulnerable": preload("res://assets/characters/hooshang/portraits/hooshang_vulnerable.png"),
+	"shocked": preload("res://assets/characters/hooshang/portraits/hooshang_shocked.png"),
 	# Four states the beats ask for that have no drawing of their own, pointed at
 	# the nearest one that does. They are listed as their own states rather than
 	# the beats just saying "skeptical" twice, because the beat is where the
@@ -58,28 +58,28 @@ const FACES := {
 	# quiet ones — "This doesn't feel like my cubicle..." and "I can't see a
 	# thing." — and shocked is a startle, mouth open. Aliasing beat the
 	# alternative, which was one 8-bit head in the middle of six paintings.
-	"confused": preload("res://assets/portraits/hooshang_hesitant.png"),
-	"wary": preload("res://assets/portraits/hooshang_skeptical.png"),
-	"unconvinced": preload("res://assets/portraits/hooshang_skeptical.png"),
-	"deflecting": preload("res://assets/portraits/hooshang_hesitant.png"),
+	"confused": preload("res://assets/characters/hooshang/portraits/hooshang_hesitant.png"),
+	"wary": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
+	"unconvinced": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
+	"deflecting": preload("res://assets/characters/hooshang/portraits/hooshang_hesitant.png"),
 	# Deadpan. Aliased to skeptical because the line it serves is a dry
 	# restatement of something absurd, which is doubt with the inflection taken
 	# out — the nearest thing already drawn.
-	"flat": preload("res://assets/portraits/hooshang_skeptical.png"),
+	"flat": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
 }
 
 ## Rumi's face per line, same convention as Hooshang's: a beat names the state
 ## it wants rather than a file.
 const RUMI_FACES := {
-	"serene": preload("res://assets/portraits/rumi_serene.png"),
-	"sorrowful": preload("res://assets/portraits/rumi_sorrowful.png"),
-	"urgent": preload("res://assets/portraits/rumi_urgent.png"),
-	"warm_open": preload("res://assets/portraits/rumi_warm_open.png"),
+	"serene": preload("res://assets/characters/rumi/portraits/rumi_serene.png"),
+	"sorrowful": preload("res://assets/characters/rumi/portraits/rumi_sorrowful.png"),
+	"urgent": preload("res://assets/characters/rumi/portraits/rumi_urgent.png"),
+	"warm_open": preload("res://assets/characters/rumi/portraits/rumi_warm_open.png"),
 	# "wistful" has no drawing of its own in the current art pass — no reference
 	# was ever supplied for it — so it points at sorrowful, the nearest already-
 	# drawn state emotionally (both are reflective/melancholy) rather than
 	# leaving one state on the old portrait set while the other four moved on.
-	"wistful": preload("res://assets/portraits/rumi_sorrowful.png"),
+	"wistful": preload("res://assets/characters/rumi/portraits/rumi_sorrowful.png"),
 }
 
 const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")

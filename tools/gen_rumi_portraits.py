@@ -2,8 +2,8 @@
 """Rumi's dialogue portraits: normalise the raw generations into the set the
 dialogue box loads.
 
-Reads   assets/portraits/rumi/raw/<state>.png   (what Pixellab returned)
-Writes  assets/portraits/rumi_<state>.png       (what the game uses)
+Reads   assets/characters/rumi/portraits/raw/<state>.png   (what Pixellab returned)
+Writes  assets/characters/rumi/portraits/rumi_<state>.png       (what the game uses)
 
 WHAT THIS HAS TO FIX, and why it is a script rather than five hand edits.
 
@@ -50,8 +50,8 @@ from collections import deque
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW = os.path.join(ROOT, "assets", "portraits", "rumi", "raw")
-OUT = os.path.join(ROOT, "assets", "portraits")
+RAW = os.path.join(ROOT, "assets", "characters", "rumi", "portraits", "raw")
+OUT = os.path.join(ROOT, "assets", "characters", "rumi", "portraits")
 
 ## The states the dialogue asks for. `serene` and `warm_open` are used by
 ## scripts/dash_tutorial.gd today; the rest exist so a beat has somewhere to go
@@ -121,7 +121,7 @@ def main():
     missing = [s for s in STATES
                if not os.path.exists(os.path.join(RAW, s + ".png"))]
     if missing:
-        raise SystemExit("!! no raw for: %s (expected in assets/portraits/rumi/raw/)"
+        raise SystemExit("!! no raw for: %s (expected in assets/characters/rumi/portraits/raw/)"
                          % ", ".join(missing))
     for state in STATES:
         img = Image.open(os.path.join(RAW, state + ".png"))

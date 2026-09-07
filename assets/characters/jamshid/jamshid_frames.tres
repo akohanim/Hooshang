@@ -1,0 +1,52 @@
+[gd_resource type="SpriteFrames" load_steps=25 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/idle/frame_000.png" id="idle_0"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/idle/frame_001.png" id="idle_1"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/idle/frame_002.png" id="idle_2"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/idle/frame_003.png" id="idle_3"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_000.png" id="walk_0"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_001.png" id="walk_1"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_002.png" id="walk_2"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_003.png" id="walk_3"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_004.png" id="walk_4"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_005.png" id="walk_5"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_006.png" id="walk_6"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/walk/frame_007.png" id="walk_7"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/sit/frame_000.png" id="sit_0"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/sit/frame_001.png" id="sit_1"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/sit/frame_002.png" id="sit_2"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/sit/frame_003.png" id="sit_3"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_000.png" id="jump_0"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_001.png" id="jump_1"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_002.png" id="jump_2"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_003.png" id="jump_3"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_004.png" id="jump_4"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_005.png" id="jump_5"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_006.png" id="jump_6"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/jump/frame_007.png" id="jump_7"]
+
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": ExtResource("idle_0")},
+{"duration": 1.0, "texture": ExtResource("idle_1")},
+{"duration": 1.0, "texture": ExtResource("idle_2")},
+{"duration": 1.0, "texture": ExtResource("idle_3")}], "loop": true, "name": &"idle", "speed": 5},
+{"frames": [{"duration": 1.0, "texture": ExtResource("walk_0")},
+{"duration": 1.0, "texture": ExtResource("walk_1")},
+{"duration": 1.0, "texture": ExtResource("walk_2")},
+{"duration": 1.0, "texture": ExtResource("walk_3")},
+{"duration": 1.0, "texture": ExtResource("walk_4")},
+{"duration": 1.0, "texture": ExtResource("walk_5")},
+{"duration": 1.0, "texture": ExtResource("walk_6")},
+{"duration": 1.0, "texture": ExtResource("walk_7")}], "loop": true, "name": &"walk", "speed": 10},
+{"frames": [{"duration": 1.0, "texture": ExtResource("sit_0")},
+{"duration": 1.0, "texture": ExtResource("sit_1")},
+{"duration": 1.0, "texture": ExtResource("sit_2")},
+{"duration": 1.0, "texture": ExtResource("sit_3")}], "loop": true, "name": &"sit", "speed": 4},
+{"frames": [{"duration": 1.0, "texture": ExtResource("jump_0")},
+{"duration": 1.0, "texture": ExtResource("jump_1")},
+{"duration": 1.0, "texture": ExtResource("jump_2")},
+{"duration": 1.0, "texture": ExtResource("jump_3")},
+{"duration": 1.0, "texture": ExtResource("jump_4")},
+{"duration": 1.0, "texture": ExtResource("jump_5")},
+{"duration": 1.0, "texture": ExtResource("jump_6")},
+{"duration": 1.0, "texture": ExtResource("jump_7")}], "loop": false, "name": &"jump", "speed": 10}]

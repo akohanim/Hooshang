@@ -31,19 +31,11 @@ const TEXTURE_RADIUS := 64.0
 ## String field takes newlines.
 ##
 ## A line may open with a PORTRAIT STATE in parentheses — `(serene)`, `(urgent)`
-## — naming which of Act1Beats.RUMI_FACES he wears for it. That is the project's
-## dialogue rule and not a shortcut: a parenthetical in a script is an
-## instruction to the scene, never words anybody says, so it is read and STRIPPED
-## and can never reach the screen as text. The state is sticky, so a script that
-## names it once keeps it until it says otherwise, which is how a written script
-## reads. An optional leading speaker name and dash are tolerated too, so a
-## script can be pasted in exactly as it was written:
-##
-##     RUMI (serene) — These are the thoughts you would rather not have.
-##     You cannot strike them down.[p] There is nothing here to strike.
-##
-## `[p]` (DialogueBox.PAUSE_MARK) still works inside a line, and is a held
-## breath rather than a page break.
+## — naming which of Act1Beats.RUMI_FACES he wears for it, and may carry a
+## speaker heading ("RUMI — ") so a script can be pasted in exactly as it was
+## written. Both are read and stripped, never printed. See
+## scripts/dialogue_script.gd, which does the reading, for the full rules and
+## for why a parenthetical must never reach the screen.
 @export_multiline var dialogue_line: String = ""
 ## When a cutscene script owns this beat, it sets this so the trigger does NOT
 ## play its own one-line version — it just emits `triggered` and steps aside.
@@ -88,10 +80,9 @@ const TEXTURE_RADIUS := 64.0
 ## the ceiling and down onto Hooshang, like something thrown rather than handed
 ## across.
 ##
-## Kept small for a second reason. Rumi stops at arm's length, 14px, so every
-## pixel of this offset is a pixel the gift does NOT visibly cross: at 8 the mote
-## travelled 6px and read as a flicker rather than a journey.
-@export var gift_source_offset := Vector2(2.0, -2.0)
+## Matches the extended palm in the replacement's 96px frame at half scale.
+## At arm's length (14px), this still leaves 9px for the visible crossing.
+@export var gift_source_offset := Vector2(5.0, 5.0)
 
 @export_group("His own glow")
 ## How brightly Rumi's own BODY reads, separate from the pool he throws.
@@ -103,7 +94,7 @@ const TEXTURE_RADIUS := 64.0
 ## RUMI, which is the opposite of the note.
 @export var glow_energy := 1.9
 ## Size of that self-glow, as a texture_scale (radius = 64 x this). Only needs to
-## cover his sprite: 48px tall at 0.5 scale.
+## cover his sprite: a 96px padded frame with an 18px-tall rendered body.
 @export var glow_scale := 0.85
 ## Where it sits relative to his origin — his chest, so the light falls off
 ## towards his feet and hood rather than being flat.
@@ -132,7 +123,8 @@ var _feet_row_cache := -1.0
 
 ## Rumi's own art, for the runtime factory below. The post-import script holds
 ## the same two for the triggers it BAKES into ldtk/levels/*.scn.
-const RUMI_FRAMES := preload("res://assets/rumi_frames.tres")
+const RUMI_FRAMES := preload("res://assets/characters/rumi/rumi_frames.tres")
+const RUMI_MATERIAL := preload("res://assets/characters/rumi/sprites/rumi_material.tres")
 const RUMI_LIGHT_TEXTURE := preload("res://assets/light_radial.png")
 
 
@@ -212,10 +204,27 @@ static func staged(at: Vector2) -> LdtkRumiTrigger:
 
 
 func _ready() -> void:
+	# Imported rooms can hold a cached SpriteFrames resource. Bind the current
+	# shared art at runtime too, without rebuilding LDtk content.
+	_rumi.sprite_frames = RUMI_FRAMES
+	_rumi.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# The old samurai needed a strong coloured self-light to read as golden.
+	# On the approved art it clips the orange turban to yellow and the coat to
+	# neon green. Keep his body self-lit in its own palette; the surrounding
+	# aura and travelling gift still light the room normally.
+	_rumi.material = RUMI_MATERIAL
+	_rumi.modulate = Color(1, 1, 1, _rumi.modulate.a)
+	_rumi.play("idle")
+	_rumi.animation_finished.connect(_on_animation_finished)
 	collision_layer = 8  # layer 4 "triggers"
 	collision_mask = 2  # player only
 	body_entered.connect(_on_body_entered)
 	_build_glow()
+
+
+func _on_animation_finished() -> void:
+	if _rumi.animation == &"give_glow":
+		_rumi.play("idle")
 
 
 ## The light that makes Rumi himself luminous. Culled to him alone, so it lights
@@ -258,79 +267,13 @@ func _play_beat(player: Player) -> void:
 
 ## `dialogue_line` parsed into [{text, face}], in order.
 ##
-## Public and pure so a test can read a script without staging the whole beat —
-## the parsing is the part that can go quietly wrong, and the failure it makes is
-## a stage direction printed on screen as though Rumi said it.
+## The reading itself lives in DialogueScript (scripts/dialogue_script.gd) —
+## Jamshid's greeting is written the same way, and one parser is the only way
+## two speakers cannot disagree about what counts as a stage direction. Kept as
+## a method here because it is what the beat below and tests/rumi_script_test.gd
+## both call.
 func script_beats() -> Array[Dictionary]:
-	var beats: Array[Dictionary] = []
-	var face := ""
-	for raw: String in dialogue_line.split("\n"):
-		var line := _drop_heading(raw.strip_edges())
-		if line.is_empty():
-			continue
-		# The portrait state. A parenthetical is an instruction to the scene and
-		# never speech, so it is read and then removed — see the dialogue rules
-		# in CLAUDE.md. Sticky: it holds until a later line names another.
-		if line.begins_with("("):
-			var close := line.find(")")
-			if close > 0:
-				var state := line.substr(1, close - 1).strip_edges()
-				if _is_state(state):
-					face = state
-					line = _drop_dashes(line.substr(close + 1).strip_edges())
-					# A named state that is not a face he has would otherwise
-					# just show no portrait, which looks like the art failing to
-					# load rather than like a typo.
-					if not Act1Beats.RUMI_FACES.has(state):
-						push_warning("RumiTrigger: no portrait state '%s'" % state)
-		if line.is_empty():
-			continue
-		beats.append({"text": line, "face": face})
-	return beats
-
-
-## Drop a script's speaker heading ("RUMI — ", "RUMI (serene) — ").
-##
-## Both halves of the test matter. The heading has to be UPPERCASE, which is how
-## a script writes one and is what tells "RUMI" from a line that simply opens on
-## a name; and it has to be FOLLOWED by a parenthetical or a dash, so nothing is
-## taken off a line that merely starts with a shout.
-func _drop_heading(line: String) -> String:
-	var space := line.find(" ")
-	if space <= 0:
-		return line
-	var head := line.substr(0, space)
-	if head != head.to_upper() or not _is_state(head.to_lower()):
-		return line
-	var rest := line.substr(space + 1).strip_edges()
-	if rest.begins_with("(") or _starts_with_dash(rest):
-		return _drop_dashes(rest)
-	return line
-
-
-## The em dash a script puts between its heading and the words. Written as the
-## character rather than an escape on purpose: GDScript and the regex engine
-## disagree about \u, and this file got that wrong once already.
-func _starts_with_dash(line: String) -> bool:
-	return line.begins_with("—") or line.begins_with("–") or line.begins_with("-")
-
-
-func _drop_dashes(line: String) -> String:
-	var out := line
-	while _starts_with_dash(out):
-		out = out.substr(1).strip_edges()
-	return out
-
-
-## A bare word a state could be — lowercase letters and underscores, nothing
-## else. Keeps a genuine aside like "(he looks away)" from being read as one.
-func _is_state(text: String) -> bool:
-	if text.is_empty():
-		return false
-	for c: String in text:
-		if not ((c >= "a" and c <= "z") or c == "_"):
-			return false
-	return true
+	return DialogueScript.parse(dialogue_line, Act1Beats.RUMI_FACES, "RumiTrigger")
 
 
 # ------------------------------------------------------------- staging API ----
@@ -361,6 +304,7 @@ func portrait_side(other: Node2D) -> int:
 ## faint glow at the edge of the dark" is a different entrance from the one that
 ## lights a whole cubicle, and it is his light doing the acting.
 func appear(stand_x := 0.0, light_energy := 1.4) -> void:
+	_rumi.play("idle")
 	var rest_y := _ground_rest_y(stand_x) if snap_to_ground else 0.0
 	_rumi.position = Vector2(stand_x, rest_y - 10.0)
 	_rumi_light.position = Vector2(stand_x, rest_y - 19.0)
@@ -428,6 +372,7 @@ func _feet_row(tex: Texture2D) -> float:
 
 func vanish() -> void:
 	breathe(false)
+	_rumi.play("idle")
 	var t := create_tween().set_parallel()
 	t.tween_property(_rumi, "modulate:a", 0.0, 0.5)
 	t.tween_property(_rumi_light, "energy", 0.0, 0.5)
@@ -467,7 +412,7 @@ func breathe(on: bool) -> void:
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
-## Glide Rumi toward a world x, stopping `stop_short` px away so he ends up at
+## Walk Rumi toward a world x, stopping `stop_short` px away so he ends up at
 ## arm's length rather than standing inside Hooshang. The light travels with him
 ## — it's the light along his sleeves, so leaving it behind reads as a bug.
 ##
@@ -481,14 +426,18 @@ func step_to(world_x: float, stop_short := 14.0, duration := 0.8) -> void:
 		side = 1.0
 	_rumi.flip_h = side > 0.0  # keep looking at him while closing the gap
 	if absf(here - world_x) <= stop_short:
+		_rumi.play("idle")
 		return
 	var target_x := world_x + side * stop_short - global_position.x
+	_rumi.play("walk")
 	var t := create_tween().set_parallel()
 	t.tween_property(_rumi, "position:x", target_x, duration) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	t.tween_property(_rumi_light, "position:x", target_x, duration) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	await t.finished
+	if _rumi.animation == &"walk":
+		_rumi.play("idle")
 
 
 ## A swell of light, for the moment he reaches out.
@@ -505,12 +454,21 @@ func swell(to := 3.2, duration := 0.45) -> void:
 ## visibly MOVES from one of them to the other instead of each just flaring in
 ## place.
 ##
-## Awaits only the crossing, and returns on impact — the burst plays on
+## Awaits the hand-raising animation and crossing, and returns on impact — the burst plays on
 ## afterwards under its own tween. That way the caller regains control at the
 ## exact frame the gift lands, which is when the ability and the player's flash
 ## belong. This node stays cosmetic and never reaches into the player.
 func give_to(target: Node2D) -> void:
-	if target == null:
+	if not is_instance_valid(target):
+		return
+	_rumi.flip_h = target.global_position.x < _rumi.global_position.x
+	_rumi.play("give_glow")
+	# Release on the extended-hand pose (frame 3). The source sheet's gold
+	# particles are omitted from the actor atlas: the live mote below travels
+	# to the real recipient rather than playing a second, baked-in flight.
+	while _rumi.animation == &"give_glow" and _rumi.frame < 3:
+		await _rumi.frame_changed
+	if not is_instance_valid(target) or _rumi.animation != &"give_glow":
 		return
 	var gift := _make_gift()
 	var core: Sprite2D = gift.get_node("Core")

@@ -28,8 +28,10 @@ const SPRING_PLATFORM_SCENE := preload("res://scenes/props/platforms/SpringPlatf
 const MAGIC_CARPET_SCENE := preload("res://scenes/props/zones/MagicCarpet.tscn")
 const KEY_SCENE := preload("res://scenes/props/Key.tscn")
 const JAMSHID_CAGE_SCENE := preload("res://scenes/props/JamshidCage.tscn")
+const JAMSHID_NPC_SCENE := preload("res://scenes/characters/jamshid/JamshidNpc.tscn")
 const SLIDE_ZONE_SCENE := preload("res://scenes/props/zones/SlideZone.tscn")
 const LADDER_SCENE := preload("res://scenes/props/zones/Ladder.tscn")
+const POND_SCENE := preload("res://scenes/props/zones/Pond.tscn")
 const CONVEYOR_BELT_SCENE := preload("res://scenes/props/zones/ConveyorBelt.tscn")
 const DARKSHANG_SCENE := preload("res://scenes/props/chase/Darkshang.tscn")
 const SURGE_POINT_SCENE := preload("res://scenes/props/chase/SurgePointTrigger.tscn")
@@ -44,7 +46,7 @@ const EXIT_CEILING_SIGN_SCENE := preload("res://scenes/props/ExitSignCeiling.tsc
 const NOTE_TILE_SCENE := preload("res://scenes/props/NoteTile.tscn")
 const LEMON_SCENE := preload("res://scenes/props/Lemon.tscn")
 const MYSTERY_BOX_SCENE := preload("res://scenes/props/MysteryBox.tscn")
-const RUMI_FRAMES := preload("res://assets/rumi_frames.tres")
+const RUMI_FRAMES := preload("res://assets/characters/rumi/rumi_frames.tres")
 const RUMI_LIGHT_TEXTURE := preload("res://assets/light_radial.png")
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 
@@ -146,6 +148,9 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(_build_thought(data))
 			"SlideZone":
 				entity_layer.add_child(_build_slide_zone(data))
+			# Act 2's swimmable water — see _build_pond.
+			"Pond":
+				entity_layer.add_child(_build_pond(data))
 			# One entity per direction, so which way a belt runs is chosen by
 			# picking the right entity rather than by remembering a field — the
 			# same reason the note tiles are five and the glass spikes four. The
@@ -166,6 +171,11 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			# Act 2's locked barrier to Jamshid — see _build_jamshid_cage.
 			"JamshidCage":
 				entity_layer.add_child(_build_jamshid_cage(data))
+			# Jamshid himself, standing in a room with something to say — see
+			# _build_jamshid_npc. Nothing to do with JamshidCage above: that is
+			# the barrier his keys open, this is the cousin.
+			"Jamshid":
+				entity_layer.add_child(_build_jamshid_npc(data))
 			# The boss chase (Level_14). Three entities: where the shadow starts,
 			# where he lunges, and where it ends.
 			"DarkshangSpawn":
@@ -437,6 +447,20 @@ func _build_slide_zone(data: Dictionary) -> Area2D:
 	return zone
 
 
+## A swimmable pond. `position` is the entity's centre, like every other sized
+## entity here; Pond centres its own box and tile-laying on that too.
+##
+## FishCount crosses the boundary as a FLOAT and is rounded here, not read as
+## an Int — see tools/ldtk_add_pond.py's own note on why this project only
+## ever writes String/Float fields to an LDtk project from a script.
+func _build_pond(data: Dictionary) -> Area2D:
+	var pond: Area2D = POND_SCENE.instantiate()
+	pond.position = data.position
+	pond.size = Vector2(data.size)
+	pond.fish_count = maxi(roundi(_field_float(data, "FishCount", pond.fish_count)), 0)
+	return pond
+
+
 ## A rideable flying carpet. `position` is the entity's centre, like every
 ## other sized entity here; MagicCarpet centres its box and tile-laying on
 ## that too. Every field falls back to the prefab's own default, so a carpet
@@ -617,6 +641,24 @@ func _build_exit_ceiling(data: Dictionary) -> Area2D:
 	trigger.add_child(shape)
 	trigger.add_child(sign)
 	return trigger
+
+
+## Jamshid standing in a room, greeting Hooshang when he comes near.
+##
+## The entity's pivot is BOTTOM-centre, so `data.position` is the point his feet
+## stand on — which is also JamshidNpc's own origin (assets/characters/jamshid/README.md),
+## so the placed point needs no correction here. Everything about the beat comes
+## from fields, so a level author can move him or rewrite his line without
+## touching code; `FaceLeft` is a 1/0 Float and not a Bool for the reason
+## tools/ldtk_add_pond.py records — this project has only ever written String
+## and Float fields to an LDtk project from a script.
+func _build_jamshid_npc(data: Dictionary) -> JamshidNpc:
+	var npc: JamshidNpc = JAMSHID_NPC_SCENE.instantiate()
+	npc.position = data.position
+	npc.dialogue_line = _field_str(data, "DialogueLine")
+	npc.trigger_radius = _field_float(data, "TriggerRadius", npc.trigger_radius)
+	npc.facing_left = not is_zero_approx(_field_float(data, "FaceLeft", 1.0))
+	return npc
 
 
 ## A climbable rail, at the height it was dragged to. `position` is the

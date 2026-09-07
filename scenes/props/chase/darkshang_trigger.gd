@@ -54,15 +54,15 @@ const EDITOR_TINT := Color(0.61, 0.30, 1.0, 0.22)
 ## (CLAUDE.md, dialogue rules). Two maps rather than one so the two of them can
 ## both own a "sorrowful" later without colliding.
 const FACES := {
-	"shocked": preload("res://assets/portraits/hooshang_shocked.png"),
-	"vulnerable": preload("res://assets/portraits/hooshang_vulnerable.png"),
+	"shocked": preload("res://assets/characters/hooshang/portraits/hooshang_shocked.png"),
+	"vulnerable": preload("res://assets/characters/hooshang/portraits/hooshang_vulnerable.png"),
 }
 const RUMI_FACES := {
 	# "wistful" aliases to sorrowful here too — see act1_beats.gd's RUMI_FACES,
 	# same reasoning: no drawing of its own in the current art pass.
-	"wistful": preload("res://assets/portraits/rumi_sorrowful.png"),
-	"sorrowful": preload("res://assets/portraits/rumi_sorrowful.png"),
-	"urgent": preload("res://assets/portraits/rumi_urgent.png"),
+	"wistful": preload("res://assets/characters/rumi/portraits/rumi_sorrowful.png"),
+	"sorrowful": preload("res://assets/characters/rumi/portraits/rumi_sorrowful.png"),
+	"urgent": preload("res://assets/characters/rumi/portraits/rumi_urgent.png"),
 }
 const HOOSHANG_PALE := Color(1.0, 1.0, 1.0, 1.0)
 const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)

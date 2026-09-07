@@ -1,0 +1,9 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/source/idle.png" id="1"]
+
+[resource]
+atlas = ExtResource("1")
+region = Rect2(581, 18, 273, 754)
+margin = Rect2(266, 96, 527, 146)
+filter_clip = true

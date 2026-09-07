@@ -192,7 +192,7 @@ scene = f"""[gd_scene load_steps=11 format=3]
 [ext_resource type="PackedScene" path="res://scenes/checkpoint.tscn" id="4_checkpoint"]
 [ext_resource type="PackedScene" path="res://scenes/debug_overlay.tscn" id="5_debug"]
 [ext_resource type="PackedScene" path="res://scenes/dialogue_box.tscn" id="6_dialogue"]
-[ext_resource type="SpriteFrames" path="res://assets/hooshang_frames.tres" id="7_frames"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/hooshang/hooshang_frames.tres" id="7_frames"]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="8_light"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rumi"]

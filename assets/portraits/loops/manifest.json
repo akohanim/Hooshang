@@ -236,5 +236,90 @@
       2
     ],
     "blink": 3
+  },
+  "jamshid_friendly": {
+    "sheet": "../../characters/jamshid/source/jamshid_friendly.png",
+    "frames": 4,
+    "frame_size": [
+      443.5,
+      887
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true
+  },
+  "jamshid_joyful": {
+    "sheet": "../../characters/jamshid/source/jamshid_joyful.png",
+    "frames": 4,
+    "frame_size": [
+      443.5,
+      887
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true
+  },
+  "jamshid_worried": {
+    "sheet": "../../characters/jamshid/source/jamshid_worried.png",
+    "frames": 4,
+    "frame_size": [
+      443.5,
+      887
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true
+  },
+  "jamshid_sad": {
+    "sheet": "../../characters/jamshid/source/jamshid_sad.png",
+    "frames": 4,
+    "frame_size": [
+      443.5,
+      887
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true
+  },
+  "jamshid_determined": {
+    "sheet": "../../characters/jamshid/source/jamshid_determined.png",
+    "frames": 4,
+    "frame_size": [
+      443.5,
+      887
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true
   }
 }

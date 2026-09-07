@@ -1,0 +1,356 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://rm3kk2lr82dl"]
+
+[ext_resource type="Texture2D" uid="uid://bf1agx8m7wbfc" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_000.png" id="30_idle0"]
+[ext_resource type="Texture2D" uid="uid://iu5e6fw6fkrn" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_001.png" id="31_idle1"]
+[ext_resource type="Texture2D" uid="uid://jyk4r6vjiq34" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_002.png" id="32_idle2"]
+[ext_resource type="Texture2D" uid="uid://du4es86x5bhny" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_003.png" id="33_idle3"]
+[ext_resource type="Texture2D" uid="uid://sh003xxr3l2v" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_000.png" id="40_run0"]
+[ext_resource type="Texture2D" uid="uid://cmtn6t2qohh62" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_001.png" id="41_run1"]
+[ext_resource type="Texture2D" uid="uid://8u5ikhbkb4dh" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_002.png" id="42_run2"]
+[ext_resource type="Texture2D" uid="uid://6icmc3qcjldn" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_003.png" id="43_run3"]
+[ext_resource type="Texture2D" uid="uid://duq6app32kcth" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_004.png" id="44_run4"]
+[ext_resource type="Texture2D" uid="uid://wasjch0medo" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_005.png" id="45_run5"]
+[ext_resource type="Texture2D" uid="uid://d386c2nowiw7y" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_000.png" id="50_jump0"]
+[ext_resource type="Texture2D" uid="uid://e47eslghc823" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_001.png" id="51_jump1"]
+[ext_resource type="Texture2D" uid="uid://bvgxb5fex1yju" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_002.png" id="52_jump2"]
+[ext_resource type="Texture2D" uid="uid://dnn6w3kdgikpn" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_003.png" id="53_jump3"]
+[ext_resource type="Texture2D" uid="uid://dso48hlry5byx" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_004.png" id="54_jump4"]
+[ext_resource type="Texture2D" uid="uid://ct53ccgbdmd83" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_005.png" id="55_jump5"]
+[ext_resource type="Texture2D" uid="uid://4thk1xalcysl" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_006.png" id="56_jump6"]
+[ext_resource type="Texture2D" uid="uid://qwnsl8xobajn" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_007.png" id="57_jump7"]
+[ext_resource type="Texture2D" uid="uid://bwihr5keypiig" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_008.png" id="58_jump8"]
+[ext_resource type="Texture2D" uid="uid://cc1phbitach3m" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_000.png" id="60_fall0"]
+[ext_resource type="Texture2D" uid="uid://hmpiugj8cgul" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_001.png" id="61_fall1"]
+[ext_resource type="Texture2D" uid="uid://dlwfh815qaktq" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_002.png" id="62_fall2"]
+[ext_resource type="Texture2D" uid="uid://b0gvpj75c3uxc" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_003.png" id="63_fall3"]
+[ext_resource type="Texture2D" uid="uid://c4awa3mfp1nj2" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_004.png" id="64_fall4"]
+[ext_resource type="Texture2D" uid="uid://bv17ue1faameq" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_005.png" id="65_fall5"]
+[ext_resource type="Texture2D" uid="uid://clf60x47yd21a" path="res://assets/characters/hooshang/sprites/chubby/Slide/east/frame_000.png" id="70_slide0"]
+[ext_resource type="Texture2D" uid="uid://0lwx78r6ybmc" path="res://assets/characters/hooshang/sprites/chubby/Slide/east/frame_001.png" id="71_slide1"]
+[ext_resource type="Texture2D" uid="uid://btai07tf7n87a" path="res://assets/characters/hooshang/sprites/chubby/Slide/east/frame_002.png" id="72_slide2"]
+[ext_resource type="Texture2D" uid="uid://nr1jhvtymhge" path="res://assets/characters/hooshang/sprites/chubby/Slide/east/frame_003.png" id="73_slide3"]
+[ext_resource type="Texture2D" uid="uid://bl5636msfjm4t" path="res://assets/characters/hooshang/sprites/chubby/Slide/east/frame_004.png" id="74_slide4"]
+[ext_resource type="Texture2D" uid="uid://cjxfvxcxe3n7m" path="res://assets/characters/hooshang/sprites/chubby/Slide/east/frame_005.png" id="75_slide5"]
+[ext_resource type="Texture2D" uid="uid://cd67l7x5qiv0c" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_000.png" id="80_wj0"]
+[ext_resource type="Texture2D" uid="uid://lh0x0uiikqbf" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_001.png" id="80_wj1"]
+[ext_resource type="Texture2D" uid="uid://c2fcdky03s5e0" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_002.png" id="80_wj2"]
+[ext_resource type="Texture2D" uid="uid://dqu7p1xtunijn" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_003.png" id="80_wj3"]
+[ext_resource type="Texture2D" uid="uid://dhijuopfbkq1i" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_004.png" id="80_wj4"]
+[ext_resource type="Texture2D" uid="uid://cxn3w5v4vckgg" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_000.png" id="90_ws0"]
+[ext_resource type="Texture2D" uid="uid://q68k7lcyof6m" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_001.png" id="91_ws1"]
+[ext_resource type="Texture2D" uid="uid://c72qsyvg6nepe" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_002.png" id="92_ws2"]
+[ext_resource type="Texture2D" uid="uid://cnlnafmil8xqq" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_000.png" id="95_wl0"]
+[ext_resource type="Texture2D" uid="uid://dl8aukap0kkn0" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_000.png" id="100_climb0"]
+[ext_resource type="Texture2D" uid="uid://wnle1bxxiktn" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_001.png" id="100_climb1"]
+[ext_resource type="Texture2D" uid="uid://b3ujh5or565v7" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_002.png" id="100_climb2"]
+[ext_resource type="Texture2D" uid="uid://bxyx4vwqry22l" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_003.png" id="100_climb3"]
+[ext_resource type="Texture2D" uid="uid://c27sgb1fwocwk" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_004.png" id="100_climb4"]
+[ext_resource type="Texture2D" uid="uid://dnsyfe3800me7" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_005.png" id="100_climb5"]
+[ext_resource type="Texture2D" uid="uid://c1jgh5a6p7o50" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_006.png" id="100_climb6"]
+[ext_resource type="Texture2D" uid="uid://bappahj7cwikd" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_007.png" id="100_climb7"]
+[ext_resource type="Texture2D" uid="uid://c36fbhnm46ts0" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_000.png" id="110_swim0"]
+[ext_resource type="Texture2D" uid="uid://cy6ro6wuapsbs" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_001.png" id="110_swim1"]
+[ext_resource type="Texture2D" uid="uid://b4blrvgnewaao" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_002.png" id="110_swim2"]
+[ext_resource type="Texture2D" uid="uid://dtfif6gcg3qe0" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_003.png" id="110_swim3"]
+[ext_resource type="Texture2D" uid="uid://bf8oumu71r73a" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_004.png" id="110_swim4"]
+[ext_resource type="Texture2D" uid="uid://c32qohqrx1cy7" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_005.png" id="110_swim5"]
+[ext_resource type="Texture2D" uid="uid://cft26br40a4jy" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_000.png" id="115_swimidle0"]
+[ext_resource type="Texture2D" uid="uid://bdt4sj7tv7pb4" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_001.png" id="115_swimidle1"]
+[ext_resource type="Texture2D" uid="uid://32oltxooujqx" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_002.png" id="115_swimidle2"]
+[ext_resource type="Texture2D" uid="uid://cwsra1qrofmyt" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_003.png" id="115_swimidle3"]
+[ext_resource type="Texture2D" uid="uid://bmrs8q2sucw1q" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_004.png" id="115_swimidle4"]
+[ext_resource type="Texture2D" uid="uid://o22dfvt5kwhs" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_005.png" id="115_swimidle5"]
+[ext_resource type="Texture2D" uid="uid://yrb1rqimayie" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_000.png" id="120_exitwater0"]
+[ext_resource type="Texture2D" uid="uid://bi1ymt04tcpn8" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_001.png" id="120_exitwater1"]
+[ext_resource type="Texture2D" uid="uid://cqdfu4qxgrvf6" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_002.png" id="120_exitwater2"]
+[ext_resource type="Texture2D" uid="uid://cq3mehjjqyikm" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_003.png" id="120_exitwater3"]
+[ext_resource type="Texture2D" uid="uid://d185uun5w1778" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_004.png" id="120_exitwater4"]
+[ext_resource type="Texture2D" uid="uid://170b6n2hp21s" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_005.png" id="120_exitwater5"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("100_climb0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("100_climb7")
+}],
+"loop": true,
+"name": &"climb",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("70_slide0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("71_slide1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("72_slide2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("73_slide3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("74_slide4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("75_slide5")
+}],
+"loop": false,
+"name": &"dash",
+"speed": 30.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("120_exitwater0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_exitwater1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_exitwater2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_exitwater3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_exitwater4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("120_exitwater5")
+}],
+"loop": false,
+"name": &"exit_water",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("60_fall0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("61_fall1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("62_fall2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("63_fall3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("64_fall4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("65_fall5")
+}],
+"loop": true,
+"name": &"fall",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("30_idle0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_idle1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_idle2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("33_idle3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("50_jump0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("51_jump1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("52_jump2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("53_jump3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("54_jump4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("55_jump5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("56_jump6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("57_jump7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("58_jump8")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 11.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("40_run0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("41_run1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("42_run2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("43_run3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("44_run4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("45_run5")
+}],
+"loop": true,
+"name": &"run",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("110_swim0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("110_swim1")
+}],
+"loop": true,
+"name": &"swim",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("115_swimidle0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("115_swimidle1")
+}],
+"loop": true,
+"name": &"swim_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("80_wj0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("80_wj4")
+}],
+"loop": false,
+"name": &"wall_jump",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("95_wl0")
+}],
+"loop": false,
+"name": &"wall_land",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("90_ws0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_ws1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("92_ws2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("91_ws1")
+}],
+"loop": true,
+"name": &"wall_slide",
+"speed": 8.0
+}]

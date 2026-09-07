@@ -21,8 +21,8 @@ extends Node
 ##
 ## Run:  godot --headless res://tests/voice_blip_test.tscn
 
-const ANNOYED := preload("res://assets/portraits/hooshang_annoyed.png")
-const VULNERABLE := preload("res://assets/portraits/hooshang_vulnerable.png")
+const ANNOYED := preload("res://assets/characters/hooshang/portraits/hooshang_annoyed.png")
+const VULNERABLE := preload("res://assets/characters/hooshang/portraits/hooshang_vulnerable.png")
 
 var failures: Array[String] = []
 var _blips: Array[Dictionary] = []

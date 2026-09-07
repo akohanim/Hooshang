@@ -1,13 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/dialogue_box.gd" id="1_dlg"]
-[ext_resource type="Texture2D" path="res://assets/FREE_Samurai 2D Pixel Art v1.2/Sprites/IDLE.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://assets/characters/rumi/sprites/portrait.png" id="2_idle"]
 [ext_resource type="Texture2D" path="res://assets/ui/persian_trim.png" id="3_trim"]
 [ext_resource type="Script" path="res://scripts/hooshang_dialogue_animator.gd" id="4_animator"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_portrait"]
-atlas = ExtResource("2_idle")
-region = Rect2(34, 45, 28, 26)
 
 [node name="DialogueBox" type="CanvasLayer"]
 layer = 95
@@ -59,7 +55,7 @@ offset_left = 42.0
 offset_top = 6.0
 offset_right = 214.0
 offset_bottom = 178.0
-texture = SubResource("AtlasTexture_portrait")
+texture = ExtResource("2_idle")
 expand_mode = 1
 stretch_mode = 5
 mouse_filter = 2

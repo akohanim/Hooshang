@@ -37,7 +37,7 @@ const EMOTION_ALIASES := {
 	"flat": "neutral",
 }
 
-const SPRITE_BASE_PATH := "res://sprites/hooshang/"
+const SPRITE_BASE_PATH := "res://assets/characters/hooshang/emotion_matrix/"
 
 @export var current_emotion: String = "neutral"
 @export var default_blink_rate: float = 0.25

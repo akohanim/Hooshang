@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Hooshang, thickened: the sprite pack warped into a heavier man.
 
-Source: assets/hooshang_sprites/animations/<Clip>/east/frame_*.png — the thin
+Source: assets/characters/hooshang/sprites/animations/<Clip>/east/frame_*.png — the thin
 pack, which is itself part generated (see gen_wall_slide.py).
-Output: assets/hooshang_sprites/chubby/<Clip>/east/frame_*.png, same names,
-same 88x88 canvas, same palette. assets/hooshang_frames.tres points at THESE.
+Output: assets/characters/hooshang/sprites/chubby/<Clip>/east/frame_*.png, same names,
+same 88x88 canvas, same palette. assets/characters/hooshang/hooshang_frames.tres points at THESE.
 
 Why a warp and not a redraw. There are 40 frames across eight clips in the
 .tres and every one of them is a pose of the same man; regenerating them would
@@ -67,11 +67,11 @@ import numpy as np
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SPRITES = os.path.join(ROOT, "assets", "hooshang_sprites")
+SPRITES = os.path.join(ROOT, "assets", "characters", "hooshang", "sprites")
 THIN = os.path.join(SPRITES, "animations")
 FAT = os.path.join(SPRITES, "chubby")
 
-## The clips assets/hooshang_frames.tres actually plays. Two more sit in the
+## The clips assets/characters/hooshang/hooshang_frames.tres actually plays. Two more sit in the
 ## thin pack (Dash, Two-Footed_Jump) and nothing references them: "dash" in the
 ## .tres is the Slide clip. They are warped anyway when --all-directions is
 ## passed, so the folder never half-matches.
@@ -83,7 +83,8 @@ FAT = os.path.join(SPRITES, "chubby")
 ## "east" anyway rather than a "north" folder of its own, so this scanner and
 ## the .tres path scheme need no special case for one clip out of nine.
 CLIPS = ["Breathing_Idle", "Falling", "Jumping", "Running", "Slide",
-         "Wall_Jump", "Wall_Land", "Wall_Slide", "Climb"]
+         "Wall_Jump", "Wall_Land", "Wall_Slide", "Climb", "Swim", "Exit_Water",
+         "Swim_Idle"]
 
 ## A pixel is "him" at or above this alpha. The pack is hard-cut already
 ## (gen_wall_slide.py's ALPHA_CUT), so this only has to ignore stray dust.

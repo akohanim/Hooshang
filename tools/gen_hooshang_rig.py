@@ -4,7 +4,7 @@ sheets by gen_hooshang_portraits.py) so it blinks and talks WITHOUT swapping
 in a different picture per frame — same idea as the original
 gen_portrait_frames.py, ported to this art's 256px canvas.
 
-  assets/portraits/hooshang_*.png  ->  assets/portraits/anim/hooshang_*_{mouth,eyes}.png
+  assets/characters/hooshang/portraits/hooshang_*.png  ->  assets/portraits/anim/hooshang_*_{mouth,eyes}.png
                                        assets/portraits/anim/manifest.json
 
 WHY THIS EXISTS INSTEAD OF THE LOOP SYSTEM THIS PROJECT ALSO HAS. The loop
@@ -79,6 +79,7 @@ from gen_hooshang_portraits import sheet_cell
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORTRAITS = os.path.join(ROOT, "assets", "portraits")
 OUT = os.path.join(PORTRAITS, "anim")
+HOOSHANG_PORTRAITS = os.path.join(ROOT, "assets", "characters", "hooshang", "portraits")
 
 SIZE = 256
 
@@ -93,7 +94,7 @@ MOUTH_DROPS = [0, 6, 11, 16]
 ## resolution-independent and kept identical to the original.
 BLINK_STEPS = [0.0, 0.55, 1.0]
 
-## Measured off assets/portraits/hooshang_hesitant.png and shared by all six
+## Measured off assets/characters/hooshang/portraits/hooshang_hesitant.png and shared by all six
 ## states (see the module docstring for why one set is enough). `lip_y` is the
 ## closed-mouth seam BELOW the moustache, not the moustache itself — the first
 ## measurement here used the moustache's own top edge (the obvious dark band)
@@ -295,7 +296,7 @@ def main():
     manifest = {}
     for state in STATES:
         name = "hooshang_%s" % state
-        src = os.path.join(PORTRAITS, name + ".png")
+        src = os.path.join(HOOSHANG_PORTRAITS, name + ".png")
         if not os.path.exists(src):
             print("  skip %s (no portrait)" % name)
             continue

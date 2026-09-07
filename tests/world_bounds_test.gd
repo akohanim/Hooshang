@@ -41,7 +41,7 @@ const CELL := 8.0
 ## Half his 8x12 hitbox, for reading his feet off his origin.
 const HALF_HEIGHT := 6.0
 ## What of him is actually drawn OVER the ledge, measured off
-## assets/hooshang_sprites/chubby/Breathing_Idle/east/frame_000.png at the boot
+## assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_000.png at the boot
 ## row and scaled by Hooshang.tscn's 0.39. His boots, not his belly: the weight
 ## went on above the knee (tools/gen_chubby_hooshang.py) and standing is done
 ## with the feet. Reported only — the check itself is on his CENTRE.

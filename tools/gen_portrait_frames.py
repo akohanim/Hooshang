@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rig the painted dialogue portraits so they blink and talk, Celeste-style.
 
-  assets/portraits/hooshang_*.png  ->  assets/portraits/anim/hooshang_*_{mouth,eyes}.png
+  assets/characters/hooshang/portraits/hooshang_*.png  ->  assets/portraits/anim/hooshang_*_{mouth,eyes}.png
                                        assets/portraits/anim/manifest.json
 
 Celeste's talking heads are not a drawn animation per line: they are a face with

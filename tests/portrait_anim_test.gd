@@ -37,11 +37,11 @@ extends Node
 ## A face with a loop. Every one of Hooshang's six has one now — including the
 ## waking shot, which used to be deliberately unrigged because it was a 3/4 view
 ## the old warps could not follow, and is front-facing art today.
-const LOOPED := preload("res://assets/portraits/hooshang_skeptical.png")
-const WAKING := preload("res://assets/portraits/hooshang_dazed.png")
+const LOOPED := preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png")
+const WAKING := preload("res://assets/characters/hooshang/portraits/hooshang_dazed.png")
 ## Rumi's, whose sheets are built a different way — only the mouth and the eyes
 ## are composited onto the still, so his frames differ from it nowhere else.
-const RUMI := preload("res://assets/portraits/rumi_serene.png")
+const RUMI := preload("res://assets/characters/rumi/portraits/rumi_serene.png")
 
 var failures: Array[String] = []
 

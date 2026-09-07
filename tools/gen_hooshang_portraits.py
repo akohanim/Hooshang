@@ -2,8 +2,8 @@
 """Hooshang's dialogue portraits, second pass: cut from PixelLab CONTACT SHEETS
 instead of one raw generation per state.
 
-Reads   assets/portraits/hooshang/raw/<sheet>.jpg   an 11-pose reference grid
-Writes  assets/portraits/hooshang_<state>.png        what the game uses
+Reads   assets/characters/hooshang/portraits/raw/<sheet>.jpg   an 11-pose reference grid
+Writes  assets/characters/hooshang/portraits/hooshang_<state>.png        what the game uses
 
 WHY A CONTACT SHEET AND NOT A RAW GENERATION. Rumi's raw/ holds one pose per
 file because gen_rumi_loops.py builds every talking FRAME itself, by patching
@@ -55,8 +55,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_rumi_portraits import flood_background, TOLERANCE
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW = os.path.join(ROOT, "assets/portraits/hooshang/raw")
-OUT = os.path.join(ROOT, "assets/portraits")
+RAW = os.path.join(ROOT, "assets/characters/hooshang/portraits/raw")
+OUT = os.path.join(ROOT, "assets/characters/hooshang/portraits")
 
 SIZE = (256, 256)
 ## A few pixels shaved off each cropped cell before the flood fill, so the

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Rumi's talking-portrait loops: one seven-frame sheet per expression.
 
-Reads   assets/portraits/rumi/raw/<state>.png          the still
-        assets/portraits/rumi/frames/<state>_anim/*    a talking pass
-        assets/portraits/rumi/frames/<state>_blink.png eyes shut
+Reads   assets/characters/rumi/portraits/raw/<state>.png          the still
+        assets/characters/rumi/portraits/frames/<state>_anim/*    a talking pass
+        assets/characters/rumi/portraits/frames/<state>_blink.png eyes shut
 Writes  assets/portraits/loops/rumi_<state>_sheet.png  7 frames of 256
         assets/portraits/loops/manifest.json           this face's entry
 
@@ -50,8 +50,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_rumi_portraits import STATES, flood_background, TOLERANCE
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW = os.path.join(ROOT, "assets/portraits/rumi/raw")
-FRAMES = os.path.join(ROOT, "assets/portraits/rumi/frames")
+RAW = os.path.join(ROOT, "assets/characters/rumi/portraits/raw")
+FRAMES = os.path.join(ROOT, "assets/characters/rumi/portraits/frames")
 LOOPS = os.path.join(ROOT, "assets/portraits/loops")
 
 SIZE = 256

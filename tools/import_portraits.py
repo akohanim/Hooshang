@@ -2,8 +2,8 @@
 """Bring hand-drawn dialogue portraits into the game at the size and framing it
 needs.
 
-  <source folder>/hooshang_*.png  ->  assets/portraits/hooshang_*.png
-  <source folder>/rumi_*.png      ->  assets/portraits/rumi_*.png
+  <source folder>/hooshang_*.png  ->  assets/characters/hooshang/portraits/hooshang_*.png
+  <source folder>/rumi_*.png      ->  assets/characters/rumi/portraits/rumi_*.png
 
 The delivered art is a 7-15 MB painted illustration. Three things have to happen
 to it before it is a dialogue portrait, and all three are easy to get wrong by

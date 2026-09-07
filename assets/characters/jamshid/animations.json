@@ -1,0 +1,26 @@
+{
+  "idle": {
+    "frames": 4,
+    "fps": 5,
+    "loop": true,
+    "standing_source_height": 740
+  },
+  "walk": {
+    "frames": 8,
+    "fps": 10,
+    "loop": true,
+    "standing_source_height": 500
+  },
+  "sit": {
+    "frames": 4,
+    "fps": 4,
+    "loop": true,
+    "standing_source_height": 800
+  },
+  "jump": {
+    "frames": 8,
+    "fps": 10,
+    "loop": false,
+    "standing_source_height": 429
+  }
+}

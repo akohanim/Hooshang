@@ -11,7 +11,7 @@ so the two agree now. The tiles are still placeholder art.
 
 ## Running things
 
-- Godot binary (this machine): `/Users/ari/Downloads/Godot.app/Contents/MacOS/Godot`
+- Godot binary (this machine): `/Applications/Godot.app/Contents/MacOS/Godot`
 - Main scene: `scenes/ui/MainMenu.tscn` (the title screen — NOT the debug
   picker any more, and not a level; it hands worlds to `Screen.load_scene`)
 - Movement test gym: `scenes/levels/TestLevel.tscn` (8 labeled sections, one per mechanic)
@@ -240,6 +240,94 @@ so the two agree now. The tiles are still placeholder art.
     on the same `reset_all` sweep), and the paintable `ThoughtHazards` tiles
     stop killing too. A death cuts the power immediately, same as the lemon
     glow.
+  - `Godot --headless --path . res://tests/pond_test.tscn` — Act 2's
+    swimmable pond: falling in (no input needed, same overlap-polling as
+    SlideZone/Ladder) switches him to SWIM; buoyancy alone settles velocity
+    near `-swim_buoyancy`, not zero and not runaway, because it is folded
+    into `_state_swim`'s vertical TARGET rather than added to velocity after
+    `move_toward` has already erased it (see `swim_buoyancy`'s own doc for
+    the broken version this replaced); holding up/down steers past or
+    against that drift, capped at `swim_max_sink_speed` going down; jump
+    underwater pops him toward the surface WITHOUT leaving SWIM for a real
+    JUMP; dash does nothing in the water; and control returns fully on
+    stepping clear of the box or on dying inside it — including a checkpoint
+    UNDER the surface, which needs `respawn()` to actually clear `swim_zone`
+    or he comes back stuck in FALL forever (player.gd's own note on this).
+    **Also covers a fast entry** (jumping in from height doesn't carry his
+    fall speed straight through — `enter_swim()` caps it to
+    `swim_max_sink_speed` on the spot, see that function's own note), **the
+    swim/swim_idle animation split** (neutral input plays the idle float,
+    holding a direction switches to the active stroke — checked against
+    `player.visual.animation`, not just `state_name()`), **the swim
+    ORIENTATION** (swimming right rotates the visual to exactly PI/2 —
+    horizontal, head leading — straight up stays at the clip's own
+    unrotated 0, and a diagonal lands exactly halfway between; letting go
+    eases the tilt back to level — regression-guarding the "rotated the
+    wrong axis" bug the Layout section's own note on this describes), **and
+    the EXIT_WATER climb-out clip** — reaching solid ground (Pond's own OUT
+    floor, in this test) actually plays it, and it lets go of its own accord
+    once `exit_water_anim_time` elapses, both of which regression-guard the
+    exit-swim-grace-window fix documented in the Layout section below.
+    **And the BANK MANTLE**, against a bank built to the shape Act 2's real
+    water actually has (full depth, top flush with the waterline, nothing
+    submerged to land on): swimming into it commits EXIT_WATER and actually
+    deposits him standing on top above the waterline, while the same press
+    from DEPTH is refused rather than hauling him up the wall like a ladder.
+    **Plus the surface float itself** — an idle float settles exactly
+    `swim_float_depth` below the surface, and holds it with ZERO state
+    changes over 120 frames, which is the direct regression guard on the
+    SWIM/FALL flicker (one defect that presented as three separate play
+    reports — see the Layout section).
+    Also covers the LDtk side (`FishCount` is a Float field, read and
+    rounded — never an Int, see `tools/ldtk_add_pond.py`'s note on why) and
+    that the water tiles the whole box and `fish_count` real `Fish` are
+    actually spawned.
+  - `Godot --headless --path . res://tests/water_tile_test.tscn` — the
+    PAINTABLE `Water` IntGrid layer (`scripts/ldtk_water_layer.gd`), kept
+    side by side with `Pond` rather than replacing it — one for a simple
+    dragged-and-resized rectangle, this one for an irregular shape painted
+    cell by cell with a real edge where it meets a bank. World-integration
+    half (same split `thought_tiles_test.gd` uses for ThoughtHazards):
+    the layer imports pass-through (`collision_enabled` off), `LdtkWorld`
+    caches it and calls the SAME `Player.enter_swim()/exit_swim()` Pond
+    calls (passing itself as the "zone" token, since a painted shape has no
+    single node to overlap) — painting a cell in memory starts a swim,
+    erasing it ends one, and TELEPORTING straight onto a still-painted cell
+    (no boundary ever crossed) starts one too, which is the exact bug
+    `respawn()` not clearing `swim_zone` would reproduce. Layer half, built
+    on a bare `TileMapLayer` with a `TileSet` constructed in code from the
+    real sheet (no LDtk round trip needed for either half): a cell one row
+    under an opening stays the shallow `fill` tile, a cell two rows under
+    gets RETARGETED to `fill_deep` — the depth gradient Pond's own box got
+    for free just by knowing "row 0 is the surface", which an LDtk auto-rule
+    cannot express on its own (it only ever sees immediate neighbours, never
+    "how far down am I") — a surface cell's shimmer frame actually advances
+    while a plain fill/left cell is left alone, and — unlike `Pond` — no fish
+    are ever spawned here (see `WaterLayer`'s own class doc for why).
+  - `Godot --headless --path . res://tests/jamshid_npc_test.tscn` — Act 2's
+    cousin, standing in a room with something to say (`JamshidNpc`): the reach
+    is a DISTANCE and is checked one pixel either side of it (51px silent, 40px
+    greets), he greets once per world load and not again on the way back, the
+    beat takes Hooshang's controls and hands them back, the ground probe stands
+    him on the floor below where he was placed (his origin is his FEET, unlike
+    Rumi's padded sprite), his face lands on the side he is actually standing
+    on, and the SCRIPT READING strips `(excited)` rather than printing it —
+    with the `excited` alias resolving to the joyful painting while still
+    NAMING that face, which is what lets `DialogueBox` find its rig. Where he
+    stands in `Act_2_Level_0` is not pinned here: `tools/ldtk_add_jamshid.py`
+    measures the bank off that room's own Water/Collisions layers and asserts
+    it at placement time, so a hardcoded pixel can never point at open air
+  - `Godot --headless --path . res://tests/jamshid_npc_test.tscn` covers the
+    greeting; `Godot --headless --path . res://tests/act2_jamshid_encounter_test.tscn`
+    covers the full CUTSCENE in `Act_2_Level_1` (see `Act2Beats` below):
+    swimming up to Jamshid stages the whole encounter
+    (meeting, sunset, campfire, the night-long dream retelling, dawn, and his
+    spring+carpet exit). It loads a real `Act2World` in Level_1, walks the player
+    to Jamshid, drives every beat with `Engine.time_scale` raised so the tweened
+    day/night collapses to seconds, and asserts the milestones: the greeting is
+    deferred to the cutscene, reaching him LOCKS the player, both speak, the sky
+    reaches full NIGHT with the stars out, it ends at DAWN with the stars gone,
+    Jamshid leaves and control returns
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -296,6 +384,19 @@ so the two agree now. The tiles are still placeholder art.
   anything in a `.import` OR in a post-import hook, and rebuild:
   `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
   `--import`.
+  **The same staleness bites CONTENT edits too, not just script/import-flag
+  ones** — placing an entity or painting tiles in LDtk while the Godot editor
+  is ALSO open does not make it appear. Measured directly: the `.ldtk` file on
+  disk had the new data (checked by reading it straight as JSON), but with the
+  editor still running, TWO successive headless `--import` runs both silently
+  no-op'd — no LDTK-plugin log block at all, `ldtk/levels/*.scn` untouched,
+  timestamps unchanged — while the editor held the project. Only after fully
+  quitting the editor did a headless `--import` run produce the real
+  `Entity Post-Import`/`Level Post-Import`/`Finished Import` log block and a
+  freshly-written `.scn`. So: closing the editor is not just for a script
+  change, it is required before ANY re-import (headless or otherwise) can see
+  new LDtk content at all — reopening the editor afterward, or pressing Play
+  from a fresh launch, is what actually shows it.
 - **An LDtk ENUM field arrives QUALIFIED.** `field-util.gd`'s `__parse_enum`
   returns `"ThoughtMotion.Circle"`, never `"Circle"` — the regex there pulls the
   enum's NAME out of the type string, it does not strip it off the value. Match
@@ -403,14 +504,340 @@ find things (`lights`, `player`, `checkpoint`, `hazard`), signals + methods over
 reaching across the tree, autoloads (`systems/`) for cross-level services, and
 `.tres` in `resources/` for data that repeats.
 
+**Character IMAGE assets live under `assets/characters/<name>/`** — sprites,
+portraits and source art for one character together in one folder
+(`assets/characters/hooshang/{sprites,portraits,emotion_matrix}`,
+`assets/characters/rumi/{samurai_pack,portraits}`, `assets/characters/jamshid/`
+(idle/walk/sit/jump/source/portraits — its whole original layout, just moved),
+`assets/characters/hooshang_child/`, `assets/characters/darkshang/`) rather
+than scattered across `assets/hooshang_sprites/`, `assets/jamshid/`,
+`assets/portraits/<name>/`, a bare `assets/FREE_Samurai .../` pack folder, etc.
+**`assets/portraits/loops/` and `assets/portraits/anim/` are the one
+exception, left where they are** — they are a shared, cross-character
+indexed rig system (`gen_portrait_loops.py`, `dialogue_box.gd`'s
+`LOOP_DIR`/`ANIM_DIR`) whose `manifest.json` mixes Hooshang's, Rumi's and (via
+a `../../characters/jamshid/source/...` relative path) Jamshid's entries in
+one file — not one character's art, so it does not fit under any single
+character's folder. Voice audio (`assets/voice/<name>/`) was already
+organized per-character before this pass and needed no change.
+
 ## Layout
 
 - `scenes/characters/hooshang/` — `Hooshang.tscn` + `player.gd`: the whole
-  controller, a state machine (IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, DEAD),
-  all physics as exported/grouped/commented vars. Abilities gate on flags
-  (`has_dash`); cutscenes use `input_locked`; all visuals go through
+  controller, a state machine (IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB,
+  SWIM, EXIT_WATER, DEAD), all physics as exported/grouped/commented vars. Abilities gate
+  on flags (`has_dash`); cutscenes use `input_locked`; all visuals go through
   `_update_visual()`. Cosmetic asks come in via methods (`flash()`,
   `set_camera_limits()`), not reach-ins.
+  **SWIM is Act 2's pond crossing** (`scenes/props/zones/Pond.tscn` /
+  `pond.gd`) — the same "zone hands over, player.gd does the moving" split
+  every other zone in this file uses (SlideZone, Ladder). A Pond grabs him on
+  overlap alone, no input needed, the same polling SlideZone/Ladder use and
+  for the same four reasons (a checkpoint under the surface, a room loading
+  with him already in the water, the debug picker, the frame after a
+  teleport). Every tunable lives on Player under its own `@export_group
+  ("Swim")` — `swim_speed`/`swim_accel` (free movement in every direction,
+  turned toward the target rather than snapped, the same shape `_apply_run`
+  uses for the ground), `swim_buoyancy` (a steady rise speed once submerged
+  doing nothing — **folded into `_state_swim`'s vertical TARGET, not added to
+  velocity afterwards**: added after, the same frame's `move_toward` call
+  toward the input-only target erases it again before it can ever be felt,
+  since it closes a few px/s of gap far faster than a few px/s of buoyancy
+  could ever open one — folding it into the target instead gives velocity an
+  actual resting value to settle at), `swim_max_sink_speed` (buoyancy's own
+  cap on how fast holding down can take him), and `swim_surface_pop_speed` /
+  `swim_jump_enabled` (jump underwater is a ONE-SHOT kick, staying in SWIM —
+  not a real JUMP with its own hold/coyote/buffer rules, which is what lets
+  mashing the button at the bottom of a deep pond never be mistaken for
+  actually jumping). Dash is refused the same way it is in a slide or a
+  climb. See `tests/pond_test.tscn`.
+  **The pond's own art is deliberately not a solid rectangle.** `pond.gd`
+  lays out `assets/props/pond/pond_water.png` (`tools/gen_pond_water.py`) a
+  cell at a time — an animated (per-column, hashed-phase) shimmer along the
+  top, a two-tone contact line (a dark line at the boundary, a bright one
+  just inside it — real liquid pressed against glass) down the LEFT/RIGHT
+  walls and along the BOTTOM floor, the four corners combining whichever
+  pair meets there, and a shallow/deep fill everywhere else — every tile
+  well under full alpha, so whatever the room painted under the water keeps
+  reading through it. **The fill itself is soft horizontal caustic banding,
+  not dapple dots** — a screenshot of the dapple version next to real brick
+  read as a tinted window over the room's own parallax stripes rather than
+  water, because isolated highlight dots read as flecks IN FRONT of the
+  backdrop while banding reads as the liquid's OWN structure regardless of
+  what's behind it. Both passes are documented together in
+  `gen_pond_water.py`'s own "liquid-in-a-container" revision note, including
+  why the contact line's dark tone (`_SHADOW`) is `_DEEP` scaled down rather
+  than a ramp colour — this source has nothing dark enough in it for one. A
+  few `scenes/props/Fish.tscn` (`fish.gd`) drift inside
+  on a deterministic, hashed-from-position patrol (`assets/props/pond_fish/
+  fish.png`, `tools/gen_pond_fish.py`) — purely decorative, no collision, not
+  a hazard, spawned by `Pond.fish_count` (an LDtk `FishCount` FLOAT field,
+  never Int — see `tools/ldtk_add_pond.py`'s own note on why this project has
+  only ever written String/Float fields to an LDtk project from a script).
+  **A second, PAINTABLE way to place water exists side by side with `Pond`,
+  not instead of it: the `Water` IntGrid layer** (`tools/ldtk_add_act2_water_
+  tiles.py`, `tools/gen_act2_water_tiles.py`, `scripts/ldtk_water_layer.gd`).
+  `Pond` is a dragged-and-resized rectangle; `Water` is painted cell by cell
+  for an irregular shape, with a real EDGE where the water meets a bank
+  instead of a flat cut — the same fill/top/left/corner auto-rule shape
+  ThoughtHazards already proves imports correctly in this exact project (its
+  rule JSON is copied from Act 2's own live ThoughtHazards layer, not
+  re-derived), plus a fifth, RULE-LESS `fill_deep` column: an LDtk auto-rule
+  can only ever see its immediate neighbours' IntGrid values, never "how far
+  down am I", so the depth gradient `Pond`'s box got for free by construction
+  has to be measured here instead — `ldtk_water_layer.gd` walks upward from
+  every plain "fill" cell at room-entry time and retargets it once it is far
+  enough below the nearest opening. It drives the surface tiles' shimmer the
+  same per-cell-hashed-clock way `ThoughtHazardLayer` drives its own
+  animation (see that script's header for why this cannot be Godot's built-in
+  tile animation).
+  **Every rewrite it makes must hand the auto-rule's own flipX/flipY BACK.**
+  `set_cell()`'s fourth argument, `alternative_tile`, defaults to 0 — the
+  untransformed tile — so re-drawing a cell without passing
+  `get_cell_alternative_tile()` back silently reverts it to the unmirrored
+  drawing, with no error anywhere. That matters here more than almost
+  anywhere else in the project, because only FOUR tiles are ever drawn and
+  the auto-rules build every other edge and corner by MIRRORING them: the
+  right bank is `left` flipped X, the floor is `top` flipped Y. BOTH of this
+  script's rewrite routes dropped it — the depth pass in `_ready()` for the
+  static columns, the shimmer in `_process()` for the animated ones — and it
+  SHIPPED, reported from play as "horizontal and vertical lines that
+  shouldn't be there". The tiles still drew their contact line and their
+  shimmer perfectly; they drew them on the edge they were DRAWN for rather
+  than the edge they were PLACED against, so the right bank's line landed a
+  full cell inside the water and the floor's a full cell above it, both
+  hanging in open water with nothing to be the contact line OF. Diagnosed by
+  dumping the live room's actual per-cell atlas coords and alternative flags,
+  not by reading the art — the sheet was correct throughout, which is what
+  makes this class of bug invisible to an art pass. `water_tile_test` now
+  pins both routes, plus that an unflipped cell is never GIVEN a transform it
+  never had. **No fish here, deliberately** — unlike `Pond`, which
+  scatters a few; painted water is for irregular, often small or branching
+  shapes where a per-region fish scatter reads as cluttered rather than
+  alive. Both paths end up calling the exact same
+  `Player.enter_swim()`/`exit_swim()` — `scripts/ldtk_world.gd` polls the
+  layer for the tile path (`_in_water_tile()`, cached per room like
+  `_thought_layer`) the same "asked fresh every frame" way a `Pond` or
+  `SlideZone` polls its own overlap, passing itself as the "zone" token since
+  a painted shape has no single node to overlap. See `tests/water_tile_test.
+  tscn` and `tests/water_tile_shot.tscn`.
+  **The swim clip went through the full character-art pipeline, not a
+  physics state playing his idle pose.** Raw frames came from the SAME
+  PixelLab character the rest of the pack already comes from — the one
+  `gen_chubby_hooshang.py`'s own `Climb` note names as generated via
+  `animate_character` — landed in the THIN source pack at
+  `assets/characters/hooshang/sprites/animations/Swim/east/`, added to that script's
+  `CLIPS` list so the weighting pass picks it up like every other clip, and
+  wired into `hooshang_frames.tres` as `"swim"`. Skipping any of that would
+  put a visibly thinner, differently-drawn Hooshang on screen the instant he
+  starts swimming.
+  **"swim" plays only while actually steering; a calmer "swim_idle" plays the
+  instant input lets go**, `Player._update_visual()`'s `State.SWIM` case
+  picking between them off `_swim_paddling` (set every tick in `_state_swim`
+  from whether either move axis is nonzero) — the same "one physics state,
+  the visual branches on a live condition" shape CLIMB's `speed_scale` sign
+  already uses, rather than splitting SWIM into two states that would move
+  identically. Both clips are 6 PixelLab-generated frames PLAYED AS A
+  PING-PONG (0,1,2,3,4,5,4,3,2,1 — 10 entries in `hooshang_frames.tres`
+  reusing the same 6 `ExtResource`s, no extra image files) rather than a
+  plain 6-frame loop: a generated arc that swings from one held pose to
+  another does not end where it started, so looping it straight would pop
+  visibly on every cycle; playing it forward then backward turns any such
+  arc into a clean loop for free. **Getting a true full-circle stroke
+  out of PixelLab for "swim" took three attempts** — the first two
+  described the stroke as a continuous circular motion and both came back as
+  a one-way lunge into a flat horizontal dive pose instead (the model's
+  strong prior for "swimming" action descriptions, it turns out); explicitly
+  saying the torso stays upright throughout and never tips into a dive
+  finally kept him vertical, at the cost of the arm only sweeping a partial
+  arc rather than the full rotation asked for — accepted as "close enough,
+  ping-ponged" rather than spending a fourth long round in an already
+  congested queue chasing an exact match. `"swim_idle"` took two attempts
+  for the OPPOSITE reason: the first, worded with words like "gentle bob"
+  and "drifting," came back as a plain WALK cycle (legs striding, one foot
+  off the ground) — a floating-in-place idle needed to explicitly rule out
+  "no walking or stepping motion of any kind, feet never touch the ground"
+  before it held still.
+  **The active stroke ROTATES to face whichever way he is actually
+  paddling** — level (lying flat, face down) for straight left or right,
+  tilted to match for up/down/diagonal, exactly like a real freestyle stroke
+  — rather than always drawing the clip's own upright "drifting right" pose
+  regardless of where he is headed. `_tick_swim_orientation()` (called from
+  `_state_swim`) computes this from INPUT, not velocity — velocity lags via
+  `swim_accel` and carries `swim_buoyancy`'s constant upward bias even while
+  holding straight sideways, both of which would tilt the sprite when level
+  travel was asked for — and eases toward it at `swim_turn_speed` rad/s
+  (`lerp_angle`, so it always turns the short way around).
+  **The FIRST attempt at this rotated the wrong axis.** It rotated the
+  clip's own sideways stroke-reach axis to face the input direction while
+  leaving his spine fixed — the same "rotate a limited arc, mirror past it"
+  shape `EXIT_WATER`-adjacent sideways-facing rotations use elsewhere in
+  this file — which measured out as internally consistent (every case
+  matched its own formula exactly) but FAILS the plain case the whole
+  feature was asked for: swimming right came out upright, not horizontal,
+  because the axis being aligned to the travel direction was never the axis
+  that reads as "his body" to a viewer. The fix aligns his actual head-to-
+  feet axis to the travel direction instead
+  (`target_angle = dir.angle() + PI/2` — Godot's rotation adds directly onto
+  a vector's own angle, and local "up" sits exactly 90 degrees behind local
+  "right", the clip's own un-rotated reference pose, on the circle), and
+  needs no mirroring at all: a pure rotation preserves the stroke's own
+  internal geometry, so an arm that pulls backward-relative-to-travel when
+  facing right keeps doing exactly that whichever way the whole rigid figure
+  is then rotated to face, for the full 360 degrees — confirmed by sampling
+  the rendered pixels directly (the hair-grey head cluster measures out on
+  the LEADING side of the direction of travel, the dark-boot feet cluster on
+  the trailing side, for every direction checked) rather than trusting the
+  angle numbers alone. See `tests/pond_test.tscn`'s own orientation checks.
+  **Both water systems are REFRACTED** (`assets/shaders/water_distortion.
+  gdshader`, this project's first shader) — real water bends light, which
+  plain alpha blending structurally cannot do, so whatever shows through the
+  surface visibly wobbles instead of sitting still under a fixed tint. It
+  samples `hint_screen_texture` at an offset built from two sines at
+  different axes/speeds (so it reads as turbulence, not one wave scrolling in
+  a direction) and — critically — the screen sampler is `filter_nearest`, so
+  a fractional offset SNAPS to a whole screen pixel instead of blurring one:
+  that is what keeps it reading as pixel art rather than a smeared heat-haze.
+  `Pond` builds one `ShaderMaterial` and shares it across every tile sprite
+  via `use_parent_material` (cheaper than one per 8px tile, and keeps every
+  tile's ripple in phase); `WaterLayer` assigns the same shader directly as
+  its own `material` since a `TileMapLayer` is already one `CanvasItem`.
+  **Reaching a bank plays a dedicated climb-out clip, EXIT_WATER, instead of
+  popping straight into RUN/IDLE.** `_clear_swim()` (called whenever a swim
+  ends, from either water system) arms `_exit_swim_grace_timer` to
+  `exit_water_grace_time` (0.2s); whichever `_post_move()` call FIRST finds
+  him on solid floor while that timer is still positive turns into
+  EXIT_WATER, zeroing the timer on the way — otherwise it just counts down
+  and expires, and he falls into FALL like normal (he genuinely surfaced
+  into open air, no bank nearby). **This used to be a plain one-shot flag,
+  checked only on the SINGLE `_post_move()` right after the swim ended, and
+  that was the wrong shape**: it required `is_on_floor()` to already read
+  true on that exact frame, which buoyancy makes unreliable even standing
+  right at a shallow bank (it is unconditionally upward with no resting
+  depth — see `swim_buoyancy`'s own doc — so a body resting on a submerged
+  shelf drifts back off it within a frame or two on its own), and it made
+  the painted `Water` layer's tile-exact, no-lag exit check
+  (`ldtk_world.gd`'s `_in_water_tile()`) MORE likely to miss the window than
+  `Pond`'s laggier Area2D overlap, not less. Reported from play as the
+  climb-out clip simply "not working" in Act 2's painted water, despite
+  `pond_test.gd`'s own hand-scripted, exact-single-frame version of the
+  transition passing clean — the bug was in how narrow the window was, not
+  in the transition logic itself. A short WINDOW instead of a single frame
+  fixes it while staying safe: landing on an unrelated platform well after
+  genuinely surfacing in open water still reads as an ordinary fall, never a
+  climb-out, because the window is far shorter than that would take.
+  `EXIT_WATER` reads no input and owns velocity directly, the same
+  "committed, uninterruptible beat" shape `_state_dash` uses, and was added
+  everywhere a ground state already gets special treatment: the no-gravity
+  ground-state invariant in `_post_move`, `_try_dash`'s guard, and
+  `respawn()` (which now explicitly zeroes the timer after its own
+  `_clear_swim()` call — dying mid-swim arms it, and a respawn onto ordinary
+  ground must not inherit that arm). The clip itself went through the same
+  PixelLab pipeline as every other clip (`assets/characters/hooshang/sprites/animations/
+  Exit_Water/east/` → `gen_chubby_hooshang.py`'s `CLIPS` → `hooshang_frames.
+  tres`'s `"exit_water"`, one-shot) — the FIRST generation attempt came back
+  with a hallucinated grey ledge baked into the sprite itself (real alpha,
+  not a background) because its prompt described the scene ("climbing onto a
+  ledge") rather than the pose; regenerated with a pose-only description
+  ("pulling the body up and forward, one arm reaching up and out..."), which
+  is the same "custom action description focuses on the movement only" rule
+  PixelLab's own tool guidance already states.
+  **THE GRACE WINDOW ALONE CANNOT GET HIM OUT, and a second climb-out —
+  the MANTLE — is what actually does.** The window only dresses up a landing
+  physics was already going to make; it cannot create one. Measured off
+  `Act_2_Level_0`'s own tilemap rather than assumed: Act 2's water sits in a
+  brick pit whose walls run the FULL depth and whose tops are FLUSH WITH THE
+  WATERLINE. There is no submerged shelf anywhere to land on, and the
+  resting float (`swim_float_depth`) deliberately holds him too low to drift
+  over the lip on his own — so the only exit left was the jump kick, whose
+  ballistic arc outlasts the 0.2s window several times over. That is why the
+  clip was reported "still not working" a SECOND time after the window fix:
+  the window was never the whole mechanism. `Player._try_bank_mantle()`
+  (called from `_state_swim`) is: treading water at the surface and pushing
+  INTO brick he could stand on top of commits the climb from inside the
+  swim. Four conditions, each measured against the world — he is steering
+  into it (a drift is not a climb), he is at the SURFACE (`swim_float_depth
+  + HALF_HEIGHT`, or the same press would haul him up a submerged wall from
+  the pond floor like a ladder), something solid is within
+  `exit_water_reach`, and `_can_stand_at()` finds a spot on top that is both
+  clear of brick and has ground under it. **The landing is derived from the
+  BANK'S FACE, not from where he happens to be floating** (`test_move`'s own
+  `KinematicCollision2D.get_travel()`): he may commit anywhere within
+  `exit_water_reach` of the brick, so measuring from his own x moves the
+  target by that whole reach depending on how fast he swam in — which is
+  exactly the difference between clearing a narrow bank and being refused by
+  the brick stacked one cell behind it, from one approach to the next. Two
+  landing candidates are tried, fully onto the bank and then just over its
+  lip at `footing_width`, because the commonest shape in the room is a bank
+  one or two cells wide with more brick above it a cell further in;
+  insisting on a body's width of clear standing room would refuse the climb
+  outright there. The move itself is an L-SHAPED path — up the face until
+  his feet clear the top, THEN forward — driven through velocity so brick in
+  the way still stops him honestly; a straight diagonal runs through the
+  bank's own top corner and `move_and_slide` stops him dead against it
+  halfway up. Its three legs are tracked in an explicit `MantlePhase`
+  (RISE/FORWARD/SETTLE) rather than derived from position, because they are
+  NOT monotonic: SETTLE moves back down past the height RISE was waiting
+  for, so a position test loops him on the lip forever. SETTLE exists so the
+  beat ends STANDING — end it hanging that 1px of clearance high instead and
+  the ground-state invariant drops him into FALL for the few frames it takes
+  to cover 1px from rest, which reads on screen as the climb-out clip being
+  interrupted by a flash of the falling pose. A running mantle is exempt
+  from that invariant outright (`_mantle_dir != 0`), wall or no wall: its
+  forward leg deliberately travels over the bank's top with nothing under
+  him yet, so the wall test alone would drop him one step short of the
+  ledge. `_post_move`'s grace branch is guarded with `state != EXIT_WATER`
+  for the same reason — a mantle arms that same window on its way out of the
+  water and would otherwise refresh its own timer every frame it spent
+  touching the bank it is climbing, and the beat would never end. And the
+  swim TILT unwinds across the clip instead of snapping: a climb-out is
+  entered by swimming into the bank, so `_swim_visual_angle` is at its most
+  extreme (a full 90 degrees, lying flat) on exactly the frame EXIT_WATER
+  starts. See `pond_test.gd`'s bank checks, which build a bank of that same
+  measured shape — full depth, top flush with the waterline — rather than a
+  shelf that would let the older path pass on its own.
+  **A SWIM/FALL FLICKER AT THE SURFACE was one defect presenting as three
+  separate play reports**, and is worth keeping straight because each
+  symptom looked like it belonged to a different system. `swim_buoyancy`
+  used to be unconditionally upward with nothing to settle against, and
+  `ldtk_world.gd`'s `_in_water_tile()` tested a SINGLE point at his hitbox
+  centre — so he rose until that centre cleared the top water row, dropped
+  out of SWIM, fell back in, and repeated. Measured in the real room: 15
+  state changes in 150 frames of doing nothing, about three a second. That
+  one oscillation explains all three reports — "he slides down the wall like
+  there's no water there" (WALL_SLIDE is only reachable from FALL, so the
+  FALL half of each cycle kept feeding it), "he sinks and stands on the
+  ground" (every FALL frame applies real gravity), and "the animations are
+  not smooth at all" (the sprite snapped between the `fall` and `swim_idle`
+  clips several times a second). Four changes close it, and the same
+  measurement now reads 1 state change per probe: an EQUILIBRIUM float
+  (`swim_float_depth` / `swim_float_spring` — lift below the resting line,
+  push back DOWN above it, instead of unconditional rise), HYSTERESIS on the
+  water test (enter on the centre point, STAY while the body still overlaps
+  — `_water_overlaps_body()`), a headroom cap on VELOCITY rather than on the
+  target (momentum coasts straight past a capped target; the cap shrinks to
+  nothing as he arrives, so he eases into the waterline and holds), and a
+  `SWIM` early-return in `_post_move` so the water owns him outright while
+  he is in it — no landing beat, no ledge slip, no wall slide. That last one
+  stays even with the flicker gone: a swimmer pressed against a wall is
+  swimming, not sliding down it. The headroom cap would also have swallowed
+  the jump kick, so `_swim_breach_timer` (`swim_breach_time`) exempts it for
+  a window. Both zone kinds answer `surface_y_at(world_pos)` for this —
+  duck-typed, so `Player` can ask whichever zone holds him without knowing
+  which kind it is: `Pond` returns its own top edge (it is always a box),
+  `WaterLayer` WALKS upward cell by cell, because an irregular painted shape
+  has a different surface height over every column and a cave pocket roofed
+  by brick has one that is not the region's own top row at all.
+  **A fast entry is capped the instant he hits the water, not eased in over
+  time.** `enter_swim()` used to leave `velocity.y` completely untouched, so
+  an existing big fall speed (jumping into the pond from height) carried
+  straight through and only bled off gradually via `swim_accel`'s own
+  `move_toward` toward the buoyant target — against a large incoming
+  velocity that took the better part of a second, which played as sinking
+  far too fast right after the splash. `enter_swim()` now clamps
+  `velocity.y` to `swim_max_sink_speed` immediately on entry — the same
+  ceiling holding "down" already caps him at, not a harsher separate number.
+  See `tests/pond_test.tscn`'s own "a fast entry is capped" check.
   **Jump is 'c' only now** — 'z' used to be a second jump key (and the key the
   dialogue box/pause menu/main menu all read as "confirm", since they check the
   `jump` action rather than a raw keycode) but is now its own `glow` action: the
@@ -514,6 +941,59 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   outright, because `SaveGame` persists them as part of a save's schema (see
   below) — advance()/set_current() are otherwise dead code with nothing left
   to call them.
+- `scenes/characters/jamshid/` — `Jamshid.tscn`/`jamshid.gd` is the VISUAL
+  ACTOR only (four poses, five dialogue faces, origin at his FEET, movement and
+  story timing owned by whoever directs him — see `assets/characters/jamshid/README.md`).
+  `JamshidNpc.tscn`/`jamshid_npc.gd` is what gives him a PLACE and a line:
+  dropped into a room as an LDtk `Jamshid` entity (`tools/ldtk_add_jamshid.py`,
+  built by `_build_jamshid_npc`), it stands him on the floor below where he was
+  placed and plays his `DialogueLine` once, the first time Hooshang comes within
+  `TriggerRadius`. **Proximity, not an Area2D**: "within 50px" is a distance, so
+  it is polled every physics frame — the same "asked fresh every frame" shape
+  `Key`'s `deliver_radius` and `SlideZone`/`Ladder`/`Pond`'s overlaps use, and
+  for the same reason (a respawn, a room loading with him already standing
+  there, and the frame after a teleport all have to work with no boundary ever
+  crossed). A `CircleShape2D` would also have measured to the edge of his
+  HITBOX rather than to him, which is a different number than the one written
+  down. First placement: `Act_2_Level_0`, on the bank three cells right of the
+  water — measured off that room's own `Water`/`Collisions` layers by the tool
+  and asserted before anything is written, never a typed-in pixel. Nothing to
+  do with `JamshidCage` (Act_2_Level_2's locked barrier, which still has no
+  character in it).
+- `scripts/act2_beats.gd` (`Act2Beats`) — Act 2's scripted cutscenes, the Act 2
+  twin of `Act1Beats` and wired into `ldtk/Act2World.tscn` the same way. It waits
+  for `LdtkWorld` to build its rooms, finds `Act_2_Level_1`'s `JamshidNpc`, sets
+  its `defer_to_cutscene` and connects `triggered` — so swimming up to Jamshid
+  stages the pond ENCOUNTER (the dream retelling that frames Act 1) instead of
+  his one-line greeting. **Time of day is the world's own `CanvasModulate`,
+  tweened** day -> sunset -> night -> dawn, plus a `StarField` fading in for the
+  night; the single hard CUT (fade to black) covers the fish going from the line
+  to the fire. Jamshid is a VISUAL actor (`Jamshid.tscn`), so his exit — run,
+  spring, land on a carpet, ride off — is scripted TWEENS over real prop art
+  (`SpringPlatform.bounce_visual()` fires the coil with no launch; the carpet is
+  a plain `ride.png` `Sprite2D`, not the physics `MagicCarpet`, so nothing fights
+  the scripted flight). Environment nodes (the fade layer, the star `CanvasLayer`)
+  are added to the BEATS node, not the world — `_ready` runs while the world is
+  still setting up its own children, and `add_child` on a mid-setup parent fails
+  ("busy setting up children"), the same reason `Act1Beats._build_fade` adds to
+  self. See `tests/act2_jamshid_encounter_test.tscn`.
+- `scenes/props/Campfire.tscn` / `campfire.gd` — the fire Jamshid sets: an
+  animated flame over two logs (`tools/gen_campfire.py`, procedural PIL — a
+  ~16px reduced set-piece the art rules keep crisp, not a Pixellab bleed) plus a
+  warm flickering `PointLight2D`. Starts UNLIT; `light()` fades it up. Flame and
+  light are UNSHADED/ADDITIVE so Act 2's dark night `CanvasModulate` cannot crush
+  them (the `DarkThought`-halo/lemon-glow rule).
+- `scenes/props/backdrop/StarField.tscn` / `star_field.gd` — twinkling night
+  stars, `_draw`n across the 320x180 screen with an `amount` (0..1) the beat
+  tweens up at night and down at dawn. **Must go on its own `CanvasLayer`**, not
+  in the world: it draws in a fixed SCREEN box, so in world space it lands at the
+  world origin (off-camera), and a separate `CanvasLayer` is also immune to the
+  night `CanvasModulate` for free. Fills only the upper sky band, above the
+  characters, so nothing draws over a face.
+  His `(excited)` state is an ALIAS onto the joyful painting, listed in
+  `Jamshid.FACES` in its own right for the reason `Act1Beats.FACES`'s four
+  aliases are: the beat is where the acting is described, so when the sheet
+  grows an excited face it gets its own art and not one line of dialogue moves.
 - `scenes/ui/` — `DialogueBox.tscn` (Celeste-style banner + portrait; registered
   as the `Dialogue` autoload — call `Dialogue.say(speaker, text, tint, face,
   side)`), `EmoteBubble.tscn` (world-space reaction bubble) and
@@ -715,13 +1195,13 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the
   numbers and player.gd does all the moving, so nothing else writes velocity.
   Place it in LDtk as a `SlideZone` and set the three fields per instance.
-- `assets/hooshang_frames.tres` = the player's SpriteFrames: 40 east-facing 88px
-  frames across eight clips, played at 0.39 scale. It points at
-  `assets/hooshang_sprites/chubby/`, NOT at `.../animations/` — the thin pack in
+- `assets/characters/hooshang/hooshang_frames.tres` = the player's SpriteFrames: 56 east-facing 88px
+  frames across ten clips, played at 0.39 scale. It points at
+  `assets/characters/hooshang/sprites/chubby/`, NOT at `.../animations/` — the thin pack in
   `animations/` is the source and `tools/gen_chubby_hooshang.py` is the pass that
   puts the weight on. `dash` is the Slide clip; west is `flip_h`, not art.
   (Rumi still reuses the samurai pack, `assets/FREE_Samurai .../Sprites`, tinted
-  gold — `assets/rumi_frames.tres`.)
+  gold — `assets/characters/rumi/rumi_frames.tres`.)
 - `tests/room_shot.tscn` — dev capture harness, not a pass/fail test. Stands the
   player in a named room, photographs the 320x180 game surface and prints the
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
@@ -733,6 +1213,21 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   mouth and the one it calls `blink` really is shut eyes. Windowed, like
   `room_shot`. Shots go to `user://portrait_shots` unless a directory is given:
   `Godot --path . res://tests/portrait_shot.tscn -- hooshang_annoyed /tmp/shots`
+- `tests/pond_shot.tscn` — dev capture harness for a Pond, not pass/fail. No
+  LdtkWorld needed — builds its own SubViewport (a bare one never actually
+  renders; it needs the SubViewportContainer pairing `systems/screen.gd`
+  itself uses) over a checkerboard backdrop, so the shot can PROVE the water
+  is transparent rather than a flat tint, drops Hooshang in mid-pond to swim,
+  and lets a few Fish patrol into frame. Windowed, like `room_shot`. Shot
+  lands in `user://shots/pond.png`: `Godot --path . res://tests/pond_shot.tscn`
+- `tests/water_tile_shot.tscn` — the same idea for the PAINTABLE `Water`
+  layer, not pass/fail. Builds a `TileMapLayer` + `TileSet` in code (no LDtk
+  round trip) and paints an L-shaped notch out of a rectangle rather than a
+  plain box, so the edge/corner auto-tiles actually get exercised instead of
+  settling for one flat rectangle's worth of top/fill. `freeze()`s Hooshang
+  in place — there is no LdtkWorld here to drive `_in_water_tile()`, so
+  nothing would otherwise stop him falling straight through the shot.
+  Windowed, like `pond_shot`: `Godot --path . res://tests/water_tile_shot.tscn`
 - `tests/feel_measure.tscn` — the same idea for MOVEMENT, and also not pass/fail.
   Prints the jump apex, the airtime, the horizontal reach of a running jump and
   a 20-timing sweep of the jump+up-dash. Run it before and after touching
@@ -861,7 +1356,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   The indexer then finds Rumi's blink at frame 6 on its own, which is where this
   tool put it — a check rather than a copy.
 - `tools/gen_rumi_portraits.py` — Rumi's five dialogue faces, normalised out of
-  the raw Pixellab generations in `assets/portraits/rumi/raw/` (the reference
+  the raw Pixellab generations in `assets/characters/rumi/portraits/raw/` (the reference
   the likeness came from is kept beside them in `rumi/source/`). The states are
   the file names and the file names are the contract: `Act1Beats.RUMI_FACES`
   preloads `rumi_<state>.png`, so re-cutting a face never touches a beat. What
@@ -887,7 +1382,7 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   own clock without the two fighting over a frame.
 - `tools/gen_hooshang_portraits.py` — Hooshang's SECOND portrait pass, replacing
   the painted set above wholesale. Source art arrived differently from Rumi's:
-  six JPEGs in `assets/portraits/hooshang/raw/`, each an 11-pose PixelLab
+  six JPEGs in `assets/characters/hooshang/portraits/raw/`, each an 11-pose PixelLab
   contact sheet (4x3 grid + a text-label cell) for one state, rather than one
   raw generation per pose — so this script PICKS cells instead of patching
   frames, with the picks recorded in `POSES` (state -> source sheet, rest cell,
@@ -958,8 +1453,8 @@ reaching across the tree, autoloads (`systems/`) for cross-level services, and
   `tools/ldtk_add_platforms.py` adds the two LDtk entities (LDtk must be
   CLOSED; it refuses to run otherwise).
 - `tools/gen_chubby_hooshang.py` — Hooshang with the weight on: the thin sprite
-  pack (`assets/hooshang_sprites/animations/`) warped into
-  `assets/hooshang_sprites/chubby/`, which is what `hooshang_frames.tres` plays.
+  pack (`assets/characters/hooshang/sprites/animations/`) warped into
+  `assets/characters/hooshang/sprites/chubby/`, which is what `hooshang_frames.tres` plays.
   A warp rather than 40 fresh generations, because 40 independent generations
   would have to agree with each other about how fat he is frame to frame and a
   deterministic warp cannot disagree with itself. Run it AFTER `gen_wall_slide.py`,
@@ -1043,6 +1538,16 @@ test rather than being noticed months later in play.
   player, so he is the other side.
 - **One portrait state per line.** Beats name a state (`"annoyed"`), not a file,
   so re-cutting the portrait sheet never touches the dialogue.
+- **A trigger's written SCRIPT is read by one parser, `scripts/dialogue_script.gd`
+  (`DialogueScript`).** One spoken line per line of text; a leading `(state)`
+  and an uppercase speaker heading (`RUMI — `, `JAMSHID — `) are read and
+  STRIPPED, never printed; the state is sticky until another names one. Both
+  `LdtkRumiTrigger` and `JamshidNpc` call it and neither keeps a copy — this
+  used to live on the Rumi trigger alone, and the failure a second copy makes
+  is the one this whole section exists to prevent: a stage direction printed on
+  screen as though somebody said it. Pinned by `tests/rumi_script_test.tscn`
+  (which still drives it through Rumi's own `script_beats()`) and
+  `tests/jamshid_npc_test.tscn`.
 - **Long lines are fine, and they PAGE.** The banner grows to fit up to
   `max_lines` (3) and no further; past that the line is broken into pages at
   SENTENCE boundaries and shown a press at a time (`_paginate`). An ellipsis is
