@@ -1,0 +1,106 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  Level_0 — jump+dash stays under the ceiling  [head 184.4, ceiling 160, 60px of reach]
+  PASS  Level_1 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 52px of reach]
+  PASS  Level_2 — jump+dash stays under the ceiling  [head 176.4, ceiling 160, 60px of reach]
+  PASS  Level_3 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 44px of reach]
+  PASS  Level_4 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 4px of reach]
+  PASS  Level_5 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 20px of reach]
+  PASS  Level_6 — jump+dash stays under the ceiling  [head 256.0, ceiling 240, 20px of reach]
+  PASS  Level_V1 — jump+dash stays under the ceiling  [head 480.0, ceiling 456, 28px of reach]
+  PASS  Level_V2 — jump+dash stays under the ceiling  [head 512.0, ceiling 488, 4px of reach]
+  PASS  Level_V3 — jump+dash stays under the ceiling  [head 512.0, ceiling 488, 44px of reach]
+  PASS  Level_V4 — jump+dash stays under the ceiling  [head 592.4, ceiling 488, 60px of reach]
+  PASS  Level_v5 — jump+dash stays under the ceiling  [head 952.0, ceiling 936, 20px of reach]
+  PASS  Level_v6 — jump+dash stays under the ceiling  [head 624.0, ceiling 608, 20px of reach]
+  PASS  Level_7 — jump+dash stays under the ceiling  [head -160.0, ceiling -176, 36px of reach]
+  PASS  Level_8 — jump+dash stays under the ceiling  [head -144.0, ceiling -176, 36px of reach]
+  PASS  Level_9 — jump+dash stays under the ceiling  [head 168.4, ceiling 160, 60px of reach]
+  PASS  Level_10 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 52px of reach]
+  PASS  Level_11 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 36px of reach]
+  PASS  Level_12 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 20px of reach]
+  PASS  Level_13 — jump+dash stays under the ceiling  [head 168.0, ceiling 152, 36px of reach]
+  PASS  Level_14 — jump+dash stays under the ceiling  [head 208.4, ceiling 160, 60px of reach]
+  PASS  Level_15 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 52px of reach]
+  PASS  Level_16 — jump+dash stays under the ceiling  [head 1280.0, ceiling 1184, 52px of reach]
+  PASS  Level_17 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 36px of reach]
+  PASS  Level_18 — jump+dash stays under the ceiling  [head 1300.0, ceiling 1184, -0px of reach]
+  PASS  Level_19 — jump+dash stays under the ceiling  [head 1192.4, ceiling 1184, 60px of reach]
+  PASS  Level_20 — jump+dash stays under the ceiling  [head 1216.0, ceiling 1184, 36px of reach]
+  PASS  Level_21 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 36px of reach]
+  PASS  Level_22 — jump+dash stays under the ceiling  [head 1184.0, ceiling 1184, 20px of reach]
+  PASS  Level_23 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 4px of reach]
+  PASS  Level_24 — jump+dash stays under the ceiling  [head 1208.0, ceiling 1184, 12px of reach]
+  PASS  Level_25 — jump+dash stays under the ceiling  [head 1208.4, ceiling 1184, 60px of reach]
+  PASS  Level_V_test — jump+dash stays under the ceiling  [head 224.4, ceiling 120, 60px of reach]
+  PASS  TEST — jump+dash stays under the ceiling  [head 1864.4, ceiling 1840, 60px of reach]
+  PASS  found a standable launch point in 34 of 34 rooms
+  PASS  the launches actually left the ground  [best reach 60px]
+  PASS  he cannot stand out over the drop  [rests at most -4.57px past the edge, boots -5.74..-2.62]
+WORLD BOUNDS TEST: ALL PASS
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:3 - ext_resource, invalid UID: uid://bf1agx8m7wbfc - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:4 - ext_resource, invalid UID: uid://iu5e6fw6fkrn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:5 - ext_resource, invalid UID: uid://jyk4r6vjiq34 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:6 - ext_resource, invalid UID: uid://du4es86x5bhny - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:11 - ext_resource, invalid UID: uid://sh003xxr3l2v - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:12 - ext_resource, invalid UID: uid://cmtn6t2qohh62 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:13 - ext_resource, invalid UID: uid://8u5ikhbkb4dh - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:14 - ext_resource, invalid UID: uid://6icmc3qcjldn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:15 - ext_resource, invalid UID: uid://duq6app32kcth - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_004.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:16 - ext_resource, invalid UID: uid://wasjch0medo - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_005.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:19 - ext_resource, invalid UID: uid://d386c2nowiw7y - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:20 - ext_resource, invalid UID: uid://e47eslghc823 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:21 - ext_resource, invalid UID: uid://bvgxb5fex1yju - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:22 - ext_resource, invalid UID: uid://dnn6w3kdgikpn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:23 - ext_resource, invalid UID: uid://cc1phbitach3m - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:24 - ext_resource, invalid UID: uid://hmpiugj8cgul - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:25 - ext_resource, invalid UID: uid://dlwfh815qaktq - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:26 - ext_resource, invalid UID: uid://b0gvpj75c3uxc - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:35 - ext_resource, invalid UID: uid://cd67l7x5qiv0c - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:36 - ext_resource, invalid UID: uid://lh0x0uiikqbf - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:37 - ext_resource, invalid UID: uid://c2fcdky03s5e0 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:38 - ext_resource, invalid UID: uid://dqu7p1xtunijn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:39 - ext_resource, invalid UID: uid://dhijuopfbkq1i - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_004.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:43 - ext_resource, invalid UID: uid://cxn3w5v4vckgg - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:44 - ext_resource, invalid UID: uid://q68k7lcyof6m - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:45 - ext_resource, invalid UID: uid://c72qsyvg6nepe - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:51 - ext_resource, invalid UID: uid://cnlnafmil8xqq - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

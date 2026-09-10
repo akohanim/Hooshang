@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the box is solid  [layer 1]
+  PASS  ...and findable for the reset sweep
+  PASS  drifting up into the underside slowly does not bump it
+  PASS  jumping into the underside bumps the block
+  PASS  ...and a mushroom is spawned in the room
+  PASS  ...and a second hit while spent gives up nothing more  [1 -> 1]
+  PASS  reset_all un-spends the block
+  PASS  emerging: it rises  [92.7 -> 92.0]
+  PASS  ...and finishes emerging within a second
+  PASS  ...starting off to the RIGHT
+  PASS  ...standing on top of the block once it clears it
+  PASS  ...and is actually walking that way  [100.5 -> 130.5]
+  PASS  ...then walks off the block's own edge and gravity takes it  [85.9 -> 185.5]
+  PASS  it lands on the floor before reaching the wall
+  PASS  ...and reverses direction on hitting the wall  [was 1]
+  PASS  the ledge runner also lands and walks first
+  PASS  ...then walks off the ledge and falls rather than turning back  [189.9 -> 359.2]
+  PASS  a dark thought's halo is on before the power runs
+  PASS  before touching it, no immunity yet
+  PASS  touching it consumes the mushroom
+  PASS  ...and grants thought immunity
+  PASS  ...of the type it was carrying
+  PASS  immune: touching a dark thought does not kill him
+  PASS  ...and the power turns its warning glow off world-wide
+  PASS  immune: touching a grey thought does not kill him either
+  PASS  ...and the grey thought dissolves instead  [monitoring off]
+  PASS  reset_all restores the dissolved grey thought
+  PASS  the power runs out
+  PASS  ...and the suppressed glow comes back
+  PASS  granted again, to prove death cuts it
+  PASS  ...and a death ends it instantly
+  PASS  ...restoring the glow the same as letting it run out
+  PASS  import: MushroomType.BlackWhite reaches the prop
+  PASS  ...and an unset field falls back to the default rather than nothing
+MYSTERY BOX TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

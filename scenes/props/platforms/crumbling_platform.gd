@@ -1,29 +1,9 @@
 @tool
 class_name CrumblingPlatform
 extends Platform
-## A ceiling panel that has already given up: stand on it and it goes.
-##
-## It arms the instant he is on top of it, not when he next touches its edge —
-## see `_try_arm`.
-##
-## Timeline, once he first stands on it — `crumble_time` total, under a second by
-## design, so it is a thing you cross rather than a thing you wait on:
-##
-##   0                 crumble_time        + fall_time
-##   |-- frames 0,1,2 --|-- collision off --|-- gone
-##      cracking, shaking      it drops and fades
-##
-## It comes BACK. Every one of these resets when the player respawns and when a
-## room is entered (LdtkWorld calls reset_all), so a room is always the room you
-## first walked into — dying to a gap you made unusable on your last attempt is
-## the kind of thing that turns a retry loop into a restart loop. Resetting the
-## LEVEL from the menu reloads the world outright, so that path needs nothing.
-##
-## WHY THERE IS A SKIN. A StaticBody2D emits no contact signals, so it cannot
-## know he is on it; the Area2D standing proud of the box is how NoteTile solves
-## the same problem, for the same reason. It answers "is he against me", and
-## `_standing_on` narrows that to "is he on top of me" — a platform that crumbles
-## when you brush its underside is a bug you only find in a shaft.
+## Beveled 8px crumble stones. A footfall starts individual block jitter,
+## then collision drops and pieces fall independently. A dashed outline stays
+## until player respawn or level reset. Room changes preserve collapsed state.
 
 ## How far the detection skin stands proud of the solid box.
 const SKIN := 2.0
@@ -35,13 +15,13 @@ const FRAMES := [
 
 ## How long from first footfall to the floor going away. Under a second, and the
 ## three damage frames are spread across it.
-@export var crumble_time := 0.75
+@export var crumble_time := 0.6
 ## How long the wreckage takes to fall out of sight afterwards.
-@export var fall_time := 0.5
+@export var fall_time := 0.35
 ## How far it drops while falling.
 @export var fall_distance := 40.0
-## How hard it shakes while it is going, in px.
-@export var shudder := 0.6
+## Brief one-pixel slips stay visible at native scale; pauses keep them subtle.
+@export var shudder := 1.0
 
 var _skin: Area2D
 var _skin_shape: CollisionShape2D
@@ -80,6 +60,18 @@ func _after_rebuild() -> void:
 	(_skin_shape.shape as RectangleShape2D).size = size + Vector2(SKIN, SKIN) * 2.0
 	# Centred, like the solid box it wraps — see platform.gd._rebuild.
 	_skin_shape.position = Vector2.ZERO
+	# Individual 8px blocks allow staggered motion at every authored width.
+	for child in _visual.get_children():
+		_visual.remove_child(child)
+		child.queue_free()
+	for i in int(size.x / 8):
+		var block := Sprite2D.new()
+		block.texture = FRAMES[0]
+		block.region_enabled = true
+		block.region_rect = Rect2((i % 3) * 8, 0, 8, 8)
+		block.position = Vector2(i * 8 + 4, 4) - size * 0.5
+		block.set_meta("rest", block.position)
+		_visual.add_child(block)
 	_apply_frame(0)
 
 
@@ -115,6 +107,7 @@ func _try_arm(body: Node2D) -> void:
 		return
 	_spent = true
 	_timer = 0.0
+	_apply_warning(0.0)
 
 
 ## Every player currently inside the detection skin — usually none or one.
@@ -152,14 +145,41 @@ func _process(delta: float) -> void:
 			return
 	_timer += delta
 	var t := clampf(_timer / maxf(crumble_time, 0.01), 0.0, 1.0)
-	_apply_frame(int(t * FRAMES.size()))
-	if _visual != null:
-		# Shakes harder the closer it is to going, so the warning is legible
-		# without a sound cue.
-		var k := shudder * t
-		_visual.position = Vector2(randf_range(-k, k), randf_range(-k, k))
+	_apply_warning(t)
 	if t >= 1.0:
 		_drop()
+
+
+## Apply synchronously on contact, without waiting for the next idle frame.
+func _apply_warning(t: float) -> void:
+	_apply_frame(int(t * FRAMES.size()))
+	if _visual != null:
+		for i in _visual.get_child_count():
+			var block := _visual.get_child(i) as Sprite2D
+			var offset := _warning_offset(i, t)
+			block.position = block.get_meta("rest") + offset
+			# A small loss of face light reads as a loose stone turning inward.
+			# Never flash white or fade the solid platform during its warning.
+			var shade := 0.97 - 0.04 * t - (0.05 if offset != Vector2.ZERO else 0.0)
+			block.modulate = Color(shade, shade, shade, 1.0)
+
+
+## Escalation comes from frequency and time spent displaced, not larger motion.
+## Keep the landing response synchronous, then shorten the quiet gaps as the
+## seams loosen. The final uneven downward slip leads into the falling pieces.
+func _warning_offset(index: int, progress: float) -> Vector2:
+	var t := clampf(progress, 0.0, 1.0)
+	var direction := 1.0 if index % 2 == 0 else -1.0
+	if t < 0.045:
+		return Vector2(direction * shudder, 0)
+	if t >= 0.92 and index % 3 == 1:
+		return Vector2(0, shudder)
+	var cycle := 2.0 * t + 5.0 * t * t + float((index * 7) % 5) * 0.2
+	var duty := 0.04 + 0.60 * t
+	if fposmod(cycle, 1.0) < duty:
+		var sign_flip := 1.0 if int(cycle) % 2 == 0 else -1.0
+		return Vector2(direction * sign_flip * shudder, 0)
+	return Vector2.ZERO
 
 
 ## The floor goes away, and the wreckage falls after it. Collision first, so
@@ -171,10 +191,22 @@ func _drop() -> void:
 		return
 	_visual.position = Vector2.ZERO
 	_fall_tween = create_tween().set_parallel()
-	_fall_tween.tween_property(_visual, "position:y", fall_distance, fall_time) \
-		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	_fall_tween.tween_property(_visual, "modulate:a", 0.0, fall_time) \
-		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	for i in _visual.get_child_count():
+		var block := _visual.get_child(i) as Sprite2D
+		var delay := float((i * 7) % 5) * 0.025
+		_fall_tween.tween_property(block, "position:y", block.position.y + fall_distance, fall_time).set_delay(delay).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		_fall_tween.tween_property(block, "modulate:a", 0.0, fall_time).set_delay(delay)
+	queue_redraw()
+
+func _draw() -> void:
+	if not _falling: return
+	var corner := -size * 0.5
+	var color := Color(0.65,0.76,0.82,0.65)
+	for x in range(0,int(size.x),4):
+		draw_rect(Rect2(corner + Vector2(x,0),Vector2(2,1)),color)
+		draw_rect(Rect2(corner + Vector2(x,7),Vector2(2,1)),color)
+	draw_rect(Rect2(corner,Vector2(1,2)),color)
+	draw_rect(Rect2(corner+Vector2(size.x-1,5),Vector2(1,2)),color)
 
 
 ## Take this panel away on purpose, `after` seconds from now.
@@ -201,6 +233,7 @@ func reset() -> void:
 		_fall_tween.kill()
 	_spent = false
 	_falling = false
+	queue_redraw()
 	_timer = 0.0
 	# If he is inside the skin right now — he just fell through this panel, or a
 	# respawn put him on it — make him leave before it can arm again.
@@ -209,6 +242,10 @@ func reset() -> void:
 	if _visual != null:
 		_visual.position = Vector2.ZERO
 		_visual.modulate.a = 1.0
+		for block in _visual.get_children():
+			block.position = block.get_meta("rest")
+			block.modulate = Color.WHITE
+			block.scale = Vector2.ONE
 	_apply_frame(0)
 
 

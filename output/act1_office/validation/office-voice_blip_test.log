@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the voice manifest loads off res://  [22 keys]
+  PASS  ...and holds a Hooshang state
+  PASS  ...and a Rumi state
+  PASS  ...with all three tiers populated  [{ "emphasized": 4.0, "ending": 3.0, "passing": 8.0 }]
+  PASS  revealing a line with a portrait fires voice blips  [31]
+  PASS  ...every blip comes from the speaking state's own pool  [["hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed", "hooshang_annoyed"]]
+  PASS  ...and the page finishing plays one ENDING-tier blip last  [ending]
+  PASS  system text with no portrait fires no voice blips at all  [0]
+  PASS  a different portrait state uses a different voice pool  [["hooshang_annoyed"] then ["hooshang_vulnerable"]]
+  PASS  no voice blips fire while the reveal is paused mid-line  [0]
+  PASS  sanity: the page actually finished revealing
+  PASS  no voice blips fire while a finished page waits on a press  [0]
+  PASS  sanity: the long line actually rolled some emphasized picks
+  PASS  ...and never two emphasized blips in a row  [9 emphasized of 77]
+  PASS  a 2-clip pool never plays the same clip twice in a row  [40 plays, repeat=false]
+VOICE BLIP TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

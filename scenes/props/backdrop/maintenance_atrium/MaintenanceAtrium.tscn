@@ -1,0 +1,73 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/backdrop/maintenance_atrium/maintenance_atrium.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/props/lighting/LampFixture.tscn" id="2"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/office_moon/OfficeMoon.tscn" id="3"]
+
+[sub_resource type="CanvasItemMaterial" id="WallPaint"]
+light_mode = 1
+
+[node name="MaintenanceAtrium" type="Node2D"]
+z_index = -1
+material = SubResource("WallPaint")
+script = ExtResource("1")
+
+[node name="EntryLight" parent="." instance=ExtResource("2")]
+position = Vector2(64, 276)
+light_color = Color(0.9, 0.73, 0.5, 1)
+light_energy = 1.25
+light_scale = 1.65
+cable_length = 12.0
+flickers = false
+
+[node name="LowerWindowLight" parent="." instance=ExtResource("2")]
+position = Vector2(186, 254)
+light_color = Color(0.58, 0.8, 0.92, 1)
+light_energy = 1.35
+light_scale = 1.7
+show_body = false
+flickers = false
+
+[node name="LandingLight" parent="." instance=ExtResource("2")]
+position = Vector2(272, 204)
+light_color = Color(0.95, 0.75, 0.48, 1)
+light_energy = 1.35
+light_scale = 1.5
+cable_length = 16.0
+flickers = false
+
+[node name="BridgeLight" parent="." instance=ExtResource("2")]
+position = Vector2(366, 214)
+light_color = Color(0.54, 0.78, 0.88, 1)
+light_energy = 1.15
+light_scale = 1.45
+show_body = false
+flickers = false
+
+[node name="TurnLight" parent="." instance=ExtResource("2")]
+position = Vector2(472, 136)
+light_color = Color(0.95, 0.75, 0.48, 1)
+light_energy = 1.4
+light_scale = 1.65
+cable_length = 16.0
+flickers = false
+
+[node name="HighWindowLight" parent="." instance=ExtResource("2")]
+position = Vector2(316, 76)
+light_color = Color(0.56, 0.78, 0.92, 1)
+light_energy = 1.35
+light_scale = 1.85
+show_body = false
+flickers = false
+
+[node name="ExitLight" parent="." instance=ExtResource("2")]
+position = Vector2(560, 46)
+light_color = Color(0.59, 0.79, 0.88, 1)
+light_energy = 1.3
+light_scale = 1.85
+show_body = false
+flickers = false
+
+[node name="Moon" parent="." instance=ExtResource("3")]
+position = Vector2(76, 54)

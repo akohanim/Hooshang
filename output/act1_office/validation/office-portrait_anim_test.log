@@ -1,0 +1,35 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the loop manifest loads off res:// at all  [20 loops]
+  PASS  ...and holds the face this test drives
+  PASS  ...and the waking shot, which has a loop now that it faces front
+  PASS  a looped face arms its loop
+  PASS  ...by drawing a window onto the sheet over the face
+  PASS  ...while the still underneath still NAMES the face  [res://assets/characters/hooshang/portraits/hooshang_skeptical.png]
+  PASS  ...and leaves the older overlays off, so nothing is drawn over it
+  PASS  the window lies inside the sheet  [[P: (0.0, 0.0), S: (256.0, 256.0)] in 1024 wide]
+  PASS  the rest frame is not a speech frame  [rest 0, talk [1, 2]]
+  PASS  and neither is the blink  [blink 3, talk [1, 2]]
+  PASS  a face with no portrait at all animates nothing and simply holds still
+  PASS  Rumi's face arms a loop of its own
+  PASS  ...and the still underneath still names him  [res://assets/characters/rumi/portraits/rumi_serene.png]
+  PASS  ...and his blink was FOUND, in the band his eyes are actually in
+  PASS  ...and kept out of the speech cycle  [blink 3, talk [1, 2]]
+  PASS  ...and a speech frame really differs from the rest frame  [841 px]
+  PASS  Side.RIGHT put the portrait on the right  [1152.0]
+  PASS  ...and the loop frame came with it, still over the face
+  PASS  while revealing, the face never rests on the silent frame  [saw [1, 2]]
+  PASS  ...and it actually moves between positions  [saw [1, 2]]
+  PASS  ...and only ever shows speech frames  [strays [], talk [1, 2]]
+  PASS  a breath returns the face to rest  [frame 0, rest 0]
+  PASS  and it rests the instant the line finishes  [frame 0, rest 0]
+  PASS  the eyes blink shut on their own, with no typing going on
+  PASS  ...and open again afterwards, rather than staying shut
+PORTRAIT ANIM TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,103 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  starts empty
+  PASS  sits on layer 4 'triggers' and masks the player only (8/2)
+  PASS  bounces through all 8 painted frames  [8]
+  PASS  the prop's own bob is off, since the frames carry it  [0.0]
+  PASS  every frame square, the same size, and collectible-sized  [(10.0, 10.0)]
+  PASS  Screen has a token surface
+  PASS  the fruit put its picture on it  [14, was 13]
+  PASS  and took the world copy down, so there is only one fruit on screen
+  PASS  at density x the texels  [(20.0, 20.0) vs (10.0, 10.0)]
+  PASS  and the same world footprint, not a bigger fruit  [scale 0.50]
+  PASS  standing where the real one is, within a pixel  [0.000px]
+  PASS  picking one up banks it (total=1)
+  PASS  the fruit is remembered as taken
+  PASS  a +1000 pops off the fruit
+  PASS  and the lemon paid into the score  [1000]
+  PASS  ...which the counter is still running up to  [showing 998 of 1000]
+  PASS  the tag is built per digit, so it can say any number  [9 children]
+  PASS  ...over the fruit rather than at the origin  [(288.0, 326.2496)]
+  PASS  ...drawn with square pixels, not smoothed
+  PASS  the counter hasn't ticked yet — the fruit is still in the air (shown=0)
+  PASS  it ticks over when the fruit lands (shown=1)
+  PASS  the node goes away after the pop
+  PASS  and the token went with it  [13, baseline 13]
+  PASS  the total survives loading another level (total=1)
+  PASS  dying does not cost you fruit (total=1)
+  PASS  collecting the same fruit twice counts once (total=2)
+  PASS  the counter has caught up by then  [3000]
+  PASS  the +1000 is up for about a second  [1.00s]
+  PASS  STRAWBERRY: touching mid-air arms the lemon
+  PASS  STRAWBERRY: the total stays at 0 while pending  [0]
+  PASS  STRAWBERRY: the fruit is NOT in the taken set while pending
+  PASS  STRAWBERRY: the player has landed  [y=250.0]
+  PASS  STRAWBERRY: landing banks the fruit exactly once  [1]
+  PASS  STRAWBERRY: the fruit IS in the taken set after banking
+  PASS  STRAWBERRY: no longer pending after banking
+  PASS  DEATH-RESTORE: armed before dying
+  PASS  DEATH-RESTORE: death un-arms the fruit
+  PASS  DEATH-RESTORE: death did not bank the fruit  [0]
+  PASS  DEATH-RESTORE: the fruit is NOT in the taken set after death
+  PASS  DEATH-RESTORE: the lemon node survives the death
+  PASS  DEATH-RESTORE: the trigger is re-armed after death
+  PASS  DEATH-RESTORE: the lemon can be re-collected  [1]
+  PASS  SAVE: armed for save test
+  PASS  SAVE: a pending lemon is absent from Collectibles.save_state()
+  PASS  SAVE: total in save is 0 while the lemon is still pending  [0]
+  PASS  CRUMBLING GROUND: armed mid-air, above the platform
+  PASS  CRUMBLING GROUND: falls and lands on the platform
+  PASS  CRUMBLING GROUND: the platform itself does not read as solid ground
+  PASS  CRUMBLING GROUND: still pending while resting on the crumbling platform
+  PASS  CRUMBLING GROUND: not banked while standing on a platform about to give way  [0]
+  PASS  CRUMBLING GROUND: banks once he reaches real ground below
+  PASS  CRUMBLING GROUND: ...and that ground reads as solid  [on_floor=true]
+  PASS  SEAM: armed mid-air, above the first platform
+  PASS  SEAM: falls and settles on the first platform
+  PASS  SEAM: not banked on landing  [0]
+  PASS  SEAM: crossing onto the second platform never banks it early
+  PASS  SEAM: still pending after the crossing
+  PASS  SEAM: ...and he actually made the crossing  [x -824.0 -> -791.5]
+LEMON TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/zones/pond.gd" id="1_pond"]
+
+[node name="Pond" type="Area2D" groups=["pond"]]
+script = ExtResource("1_pond")
+size = Vector2(64, 24)

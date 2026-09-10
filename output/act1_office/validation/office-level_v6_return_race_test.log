@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the world has Level_v5 and Level_v6
+  PASS  walked from Level_v5 into Level_v6
+  PASS  walking clear of the entrance arms the return door
+  FAIL  dying past the entrance does not bounce him back to Level_v5  [now in Level_v5]
+LEVEL_V6 RETURN RACE TEST: 1 FAILURE(S)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

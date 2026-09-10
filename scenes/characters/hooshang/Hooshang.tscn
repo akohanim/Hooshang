@@ -32,6 +32,13 @@ energy = 0.0
 texture = ExtResource("4_light")
 texture_scale = 0.75
 
+[node name="PresenceLight" type="PointLight2D" parent="."]
+enabled = true
+color = Color(1, 0.96, 0.88, 1)
+energy = 0.35
+texture = ExtResource("4_light")
+texture_scale = 0.55
+
 [node name="LemonGlowLight" type="Sprite2D" parent="."]
 visible = false
 z_index = -1

@@ -1,0 +1,37 @@
+[remap]
+
+importer="ldtk.import"
+type="PackedScene"
+uid="uid://cttenuvvo1bta"
+path="res://.godot/imported/hooshang_act1.ldtk-48f98b81adb5dcd1cf4550a31fdcda84.scn"
+
+[deps]
+
+files=["res://output/level_v9/before/levels/Level_0.scn", "res://output/level_v9/before/levels/Level_25.scn", "res://output/level_v9/before/levels/Level_3.scn", "res://output/level_v9/before/levels/Level_1.scn", "res://output/level_v9/before/levels/Level_2.scn", "res://output/level_v9/before/levels/Level_24.scn", "res://output/level_v9/before/levels/Level_4.scn", "res://output/level_v9/before/levels/Level_23.scn", "res://output/level_v9/before/levels/Level_5.scn", "res://output/level_v9/before/levels/Level_22.scn", "res://output/level_v9/before/levels/Level_7.scn", "res://output/level_v9/before/levels/Level_6.scn", "res://output/level_v9/before/levels/Level_V6.scn", "res://output/level_v9/before/levels/Level_V7.scn", "res://output/level_v9/before/levels/Level_V8.scn", "res://output/level_v9/before/levels/Level_21.scn", "res://output/level_v9/before/levels/Level_8.scn", "res://output/level_v9/before/levels/Level_20.scn", "res://output/level_v9/before/levels/Level_9.scn", "res://output/level_v9/before/levels/Level_19.scn", "res://output/level_v9/before/levels/Level_10.scn", "res://output/level_v9/before/levels/Level_18.scn", "res://output/level_v9/before/levels/Level_11.scn", "res://output/level_v9/before/levels/Level_17.scn", "res://output/level_v9/before/levels/Level_12.scn", "res://output/level_v9/before/levels/Level_16.scn", "res://output/level_v9/before/levels/Level_13.scn", "res://output/level_v9/before/levels/Level_15.scn", "res://output/level_v9/before/levels/Level_14.scn", "res://output/level_v9/before/levels/Level_V1.scn", "res://output/level_v9/before/levels/Level_V2.scn", "res://output/level_v9/before/levels/Level_V3.scn", "res://output/level_v9/before/levels/Level_V4.scn", "res://output/level_v9/before/levels/Level_V5.scn", "res://output/level_v9/before/levels/Level_V_test.scn", "res://output/level_v9/before/levels/TEST.scn", "res://output/level_v9/before/levels/Level_V9.scn", "res://.godot/imported/hooshang_act1.ldtk-48f98b81adb5dcd1cf4550a31fdcda84.scn"]
+
+source_file="res://output/level_v9/before/hooshang_act1.ldtk"
+dest_files=["res://.godot/imported/hooshang_act1.ldtk-48f98b81adb5dcd1cf4550a31fdcda84.scn", "res://output/level_v9/before/levels/Level_0.scn", "res://output/level_v9/before/levels/Level_25.scn", "res://output/level_v9/before/levels/Level_3.scn", "res://output/level_v9/before/levels/Level_1.scn", "res://output/level_v9/before/levels/Level_2.scn", "res://output/level_v9/before/levels/Level_24.scn", "res://output/level_v9/before/levels/Level_4.scn", "res://output/level_v9/before/levels/Level_23.scn", "res://output/level_v9/before/levels/Level_5.scn", "res://output/level_v9/before/levels/Level_22.scn", "res://output/level_v9/before/levels/Level_7.scn", "res://output/level_v9/before/levels/Level_6.scn", "res://output/level_v9/before/levels/Level_V6.scn", "res://output/level_v9/before/levels/Level_V7.scn", "res://output/level_v9/before/levels/Level_V8.scn", "res://output/level_v9/before/levels/Level_21.scn", "res://output/level_v9/before/levels/Level_8.scn", "res://output/level_v9/before/levels/Level_20.scn", "res://output/level_v9/before/levels/Level_9.scn", "res://output/level_v9/before/levels/Level_19.scn", "res://output/level_v9/before/levels/Level_10.scn", "res://output/level_v9/before/levels/Level_18.scn", "res://output/level_v9/before/levels/Level_11.scn", "res://output/level_v9/before/levels/Level_17.scn", "res://output/level_v9/before/levels/Level_12.scn", "res://output/level_v9/before/levels/Level_16.scn", "res://output/level_v9/before/levels/Level_13.scn", "res://output/level_v9/before/levels/Level_15.scn", "res://output/level_v9/before/levels/Level_14.scn", "res://output/level_v9/before/levels/Level_V1.scn", "res://output/level_v9/before/levels/Level_V2.scn", "res://output/level_v9/before/levels/Level_V3.scn", "res://output/level_v9/before/levels/Level_V4.scn", "res://output/level_v9/before/levels/Level_V5.scn", "res://output/level_v9/before/levels/Level_V_test.scn", "res://output/level_v9/before/levels/TEST.scn", "res://output/level_v9/before/levels/Level_V9.scn", "res://.godot/imported/hooshang_act1.ldtk-48f98b81adb5dcd1cf4550a31fdcda84.scn"]
+
+[params]
+
+World=""
+group_world_layers=false
+Level=""
+pack_levels=true
+Layer=""
+layers_always_visible=false
+Tileset=""
+tileset_custom_data=false
+integer_grid_tilesets=false
+atlas_texture_type=0
+Entity=""
+resolve_entityrefs=true
+use_entity_placeholders=false
+Post Import=""
+tileset_post_import=""
+entities_post_import=""
+level_post_import=""
+world_post_import=""
+Debug=""
+force_tileset_reimport=false
+verbose_output=false

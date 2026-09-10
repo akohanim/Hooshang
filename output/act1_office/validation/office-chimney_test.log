@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  chimney: Level_1 column 34, rows 10..17  (mouth at world -284,240)
+  PASS  the shaft is exactly one cell wide  [1 cells]
+  PASS  the shaft is at least 4 cells deep  [8]
+  PASS  standing over the mouth takes him in  [9 of 9 offsets]
+  PASS  ...and down to the bottom of it  [y 330, shaft floor 336]
+  PASS  and running over it drops him in rather than across  [fell 32px]
+  PASS  he is squeezed while in the shaft
+  PASS  and slides down it with nothing held  [41 frames]
+  PASS  that slide is speed-capped  [peak vy 60.0, cap 60]
+  PASS  ...and he was actually moving  [peak vy 60.0]
+  PASS  he can wall-jump back out of the shaft  [climbed 101px of 43, to y 182]
+  PASS  ...and he is back to full width once he is out
+  PASS  found one-cell gaps between props  [2]
+  PASS  he drops through every prop gap from anywhere across it  [worst 5 of 5 at Level_2 x124]
+CHIMNEY TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

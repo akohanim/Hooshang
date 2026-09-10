@@ -1,0 +1,28 @@
+[gd_scene load_steps=8 format=3]
+[ext_resource type="Script" path="res://scenes/props/backdrop/office_moon/office_moon.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/light_radial.png" id="2"]
+[ext_resource type="Shader" path="res://scenes/props/backdrop/office_moon/disc.gdshader" id="3"]
+[ext_resource type="Shader" path="res://scenes/props/backdrop/office_moon/masked_halo.gdshader" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/WindowStars.tscn" id="StarsScene"]
+
+[sub_resource type="ShaderMaterial" id="HaloMaterial"]
+shader = ExtResource("4")
+[sub_resource type="ShaderMaterial" id="CoreMaterial"]
+shader = ExtResource("3")
+[node name="OfficeMoon" type="Node2D"]
+script = ExtResource("1")
+texture_filter = 1
+[node name="Stars" parent="." instance=ExtResource("StarsScene")]
+
+[node name="Halo" type="Sprite2D" parent="."]
+material = SubResource("HaloMaterial")
+texture = ExtResource("2")
+scale = Vector2(0.32, 0.32)
+self_modulate = Color(0.38, 0.65, 1, 0.32)
+[node name="Core" type="Sprite2D" parent="."]
+material = SubResource("CoreMaterial")
+[node name="Pool" type="PointLight2D" parent="."]
+texture = ExtResource("2")
+texture_scale = 0.65
+color = Color(0.48, 0.7, 1, 1)
+energy = 0.9

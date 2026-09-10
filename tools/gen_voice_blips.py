@@ -103,6 +103,43 @@ VOICES = {
     "rumi":     dict(base_freq=82.0, jitter_semitones=0.8,
                       vibrato_depth=0.009, vibrato_rate=2.2, shimmer=True,
                       sub=0.32, formant_bw=100.0, formant_gain=1.6, noise_amt=0.0),
+    # JAMSHID is the CHILD voice — Hooshang's cousin in Act 2, pitched and
+    # coloured like a boy of about twelve. He is built as Hooshang's own plain
+    # synthesis moved UP rather than sculpted with formant tricks (the note
+    # above on why those backfired on Hooshang applies just as much to a
+    # brighter voice): base_freq well above Hooshang's — checked against a
+    # child's ~210-230Hz speaking fundamental, the mirror of Rumi's
+    # deliberately-low register — and the "young" colour carried by his STATES'
+    # higher brightness (a shorter vocal tract reads as higher formants, which
+    # `brightness` already raises cleanly) rather than a narrow/hot formant
+    # override. Livelier vibrato and a wider default pitch jitter than Hooshang
+    # give the wobbly, unsettled quality a kid's voice has without words. No
+    # sub-octave layer (that is Rumi's chest weight, the opposite of a boy) and
+    # no shimmer.
+    "jamshid":  dict(base_freq=215.0, jitter_semitones=1.5,
+                      vibrato_depth=0.016, vibrato_rate=5.8, shimmer=False,
+                      sub=0.0, noise_amt=0.0),
+    # CHILD HOOSHANG is Act 2's flashback protagonist — Hooshang as a boy, the
+    # voice asked to sit "high, close to Madeline from Celeste." Built the same
+    # way Jamshid is (Hooshang's plain synthesis moved UP, no narrow/hot formant
+    # override — the docstring's CASTING note on why those backfire holds for a
+    # bright voice too), but pitched HIGHER and LIGHTER than the boy cousin so
+    # the two children never blur together: base_freq above Jamshid's 215, his
+    # STATES skewed brighter (a shorter tract + more forward placement is the
+    # Madeline read, carried by `brightness`, which lifts the formants cleanly),
+    # and a livelier vibrato + wider jitter than either adult for the quick,
+    # unsettled lightness a kid's voice has. No sub-octave (chest weight is the
+    # opposite of this) and no shimmer.
+    #
+    # The speaker key is "childhooshang", ONE run-on word with no underscore, on
+    # purpose: VoiceBlips splits a "<speaker>_<state>" key on its FIRST
+    # underscore so a state name can carry one ("warm_open") — a speaker name
+    # with an underscore ("child_hooshang") would split into the wrong path and
+    # every clip would silently 404. The face files are named to match
+    # (childhooshang_<state>.png; see act2_beats.gd's CHILD_FACES).
+    "childhooshang": dict(base_freq=245.0, jitter_semitones=1.6,
+                      vibrato_depth=0.018, vibrato_rate=6.2, shimmer=False,
+                      sub=0.0, noise_amt=0.0),
 }
 
 # How far apart two harmonics' starting phases can randomly land, radians.
@@ -150,7 +187,37 @@ RUMI_STATES = {
     "warm_open":  dict(brightness=0.32, decay=4.5, attack=0.015, pitch_mult=1.05, jitter=1.3),
     "wistful":    dict(brightness=0.16, decay=3.8, attack=0.020, pitch_mult=0.96, jitter=1.2),
 }
-STATES = {"hooshang": HOOSHANG_STATES, "rumi": RUMI_STATES}
+# Jamshid's five painted dialogue faces (scenes/characters/jamshid/jamshid.gd's
+# FACES, minus the "excited" alias that points at the joyful painting — the same
+# "aliases don't get their own voice" rule Hooshang/Rumi follow). Skewed BRIGHT
+# and snappy across the board next to Hooshang's moderate table: a boy's voice
+# sits higher and more forward, and his pitch rides above Hooshang's in every
+# state (lowest here, "sad" at 0.94 * 215 = 202Hz, still lands well above
+# Hooshang's highest, "shocked" at 1.20 * 125 = 150Hz), the mirror of the
+# Rumi-below-Hooshang guarantee.
+JAMSHID_STATES = {
+    "friendly":   dict(brightness=0.42, decay=11.0, attack=0.008, pitch_mult=1.00, jitter=1.3),
+    "joyful":     dict(brightness=0.68, decay=15.0, attack=0.003, pitch_mult=1.10, jitter=2.4),
+    "worried":    dict(brightness=0.30, decay=10.0, attack=0.010, pitch_mult=1.02, jitter=2.2),
+    "sad":        dict(brightness=0.18, decay=8.0,  attack=0.014, pitch_mult=0.94, jitter=1.0),
+    "determined": dict(brightness=0.52, decay=13.0, attack=0.004, pitch_mult=1.05, jitter=1.4),
+}
+# Child Hooshang's six painted dialogue faces (act2_beats.gd's CHILD_FACES).
+# Skewed BRIGHT and snappy like Jamshid's table, but a notch brighter and
+# higher on top of the higher base_freq above, so he reads as the lighter, more
+# forward "Madeline" voice next to the warmer boy cousin — lowest here,
+# "vulnerable" at 0.90 * 245 = 220Hz, and highest, "surprised" at 1.18 * 245 =
+# 289Hz, both riding clear of adult Hooshang's whole range.
+CHILD_HOOSHANG_STATES = {
+    "neutral":    dict(brightness=0.48, decay=11.0, attack=0.008, pitch_mult=1.00, jitter=1.4),
+    "happy":      dict(brightness=0.72, decay=15.0, attack=0.003, pitch_mult=1.10, jitter=2.3),
+    "sad":        dict(brightness=0.20, decay=8.0,  attack=0.014, pitch_mult=0.92, jitter=1.0),
+    "surprised":  dict(brightness=0.80, decay=16.0, attack=0.002, pitch_mult=1.18, jitter=2.8),
+    "annoyed":    dict(brightness=0.58, decay=14.0, attack=0.004, pitch_mult=1.06, jitter=2.4),
+    "vulnerable": dict(brightness=0.14, decay=7.0,  attack=0.014, pitch_mult=0.90, jitter=1.1),
+}
+STATES = {"hooshang": HOOSHANG_STATES, "rumi": RUMI_STATES, "jamshid": JAMSHID_STATES,
+          "childhooshang": CHILD_HOOSHANG_STATES}
 
 # --- tiers: Celeste's "quick passing / emphasized / sentence-ending" -------
 # Scaled down from Celeste's 20/10/10 syllable banks to a scope that fits a

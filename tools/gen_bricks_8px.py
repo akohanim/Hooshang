@@ -13,6 +13,32 @@ Order on the sheet IS the tile id the rules use, so do not reorder:
     0  fill        2  left edge       4  ceiling floor    6  ceiling overhead
     1  top edge    3  top-left corner  5  ...+ panel       7  ...+ panel
 
+Scaffolding (14-17) and Concrete (18-21) follow the moss variants (8-13),
+same fill/top/left/corner order as brick, wired to IntGrid value 5/6 by
+tools/ldtk_add_act1_materials.py. Their art is NOT hand-drawn here -- it calls
+straight into tools/build_material_lab.py's tile_art(material, mask, variant),
+the same procedural generator (and PALETTES) that already produced
+ldtk/material_lab/art/{scaffolding,concrete}.png, so this sheet carries the
+identical pixel art rather than a second, differently-styled masonry pass.
+mask 255 (fully surrounded) is tile_art's flat-interior case for every
+material -- see that function's own header -- which is why "fill" here reads
+as a plain dark swatch rather than a textured brick-style fill; masks 14/7/6
+are the top/left/corner topologies (verified against build_material_lab's own
+MASKS set before this was written). Their generic ragged-edge look is fine
+for these two -- there is no existing "what scaffolding really looks like"
+reference in this project to fall short of.
+
+brick_new (22-25, IntGrid value 7) is DIFFERENT ON PURPOSE: it is a material
+literally called "brick", so tile_art()'s generic look reading as "not
+bricks" (reported directly from play) is a real defect, not a style choice.
+It reuses THIS FILE'S OWN masonry algorithm -- draw()/brick_px(), the same
+running-bond coursing, mortar joints, mineral grain and stone lip that make
+tiles 0-3 read as actual brick -- via a second BrickPalette (BRICK_NEW_PALETTE)
+recoloured from build_material_lab.py's `Brick` ramp, so it is still visibly
+"the one Codex generated" rather than a copy of the original brick's colours.
+The original `brick` (0-3) and its moss variants (8-13) are untouched --
+DEFAULT_PALETTE reproduces their exact prior output byte-for-byte.
+
 The ceiling comes in two orientations because they are two different objects:
 4/5 are a SURFACE, seen edge on with a lip to stand on, and 6/7 are the ceiling
 seen from BELOW, which is what the room above his head is made of.
@@ -27,20 +53,41 @@ so a run of suspended ceiling is brushed in like a wall and is solid for the sam
 reason every other tile here is (scripts/ldtk_tileset_post_import.gd gives every
 tile in the sheet a full square).
 
-Colours are sampled from the 16px art this replaces (Brick_and_Stone.png tiles
-10/13/33/83), so the wall reads as the same wall at a finer grain rather than as
-a different building. The trim keeps its three-band structure -- highlight, body,
-shadow line -- because that is what makes it read as a stone lip over brick
-instead of a grey border; it is just 3px deep now instead of 5.
+The colour palette is sampled from `art/source/act1_office_brick_wall.png`, a
+generated Act I material swatch with worn oxblood masonry and cool charcoal
+concrete. Its geometry is never cropped or reduced into this sheet: the compact
+8px version is drawn below so its seams, one-pixel details, and tile IDs stay
+reliable. The trim keeps its three-band structure -- highlight, body, shadow
+line -- because that is what makes it read as a concrete lip over brick instead
+of a grey border; it is just 3px deep now instead of 5.
 
 The fill is a running bond with a half-brick offset per course, which tiles
 seamlessly in both axes: courses are 4px, bricks are 8px, so an 8px tile holds
 exactly two courses and the offset returns to 0 every second tile.
 
+DETAIL AND GREENERY. The base brick carries weathering (deterministic per-pixel
+mineral noise, a grimier lower course) and is otherwise CLEAN. Moss is not drawn
+into the base fill at all -- two earlier attempts did (first on the stone lip,
+which read as a green dotted border; then in the mortar of the single fill tile,
+which repeated identically every 8px and read as a mechanical pattern). A single
+tile CANNOT look random, because the whole world's brick is that one tile.
+
+So the moss is a set of separate VARIANT tiles (moss_variant, appended after the
+eight base tiles) -- each one clean brick with a distinct clump -- and
+scripts/ldtk_world.gd scatters them across the wall keyed off ABSOLUTE cell
+position, clustered into patches by value noise and favouring exposed tops. That
+is what makes which bricks are mossy, and how heavily, vary irregularly over the
+whole wall the way real growth does, rather than repeating. Adding variants means
+the Bricks8px tileset def in the .ldtk grew from 8 to 8+len(VARIANTS) columns
+(pxWid / __cWid) so the importer creates the extra tiles; every tile gets its
+full-square collision from scripts/ldtk_tileset_post_import.gd as usual, so a
+mossed brick is exactly as solid as a clean one.
+
 Re-run after editing: python3 tools/gen_bricks_8px.py
 """
 import os
 import sys
+from collections import Counter, namedtuple
 
 from PIL import Image
 
@@ -48,78 +95,283 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gen_ceiling_panel import (FIELD_HI, FIELD_LO, FRAME, LIP_HI, LIP_LO,
                                RAIL_HI, TILE_EDGE, TILE_HI, TILE_LO,
                                mix, shade, speckle)
+# Scaffolding/Concrete reuse the material lab's own procedural tile art
+# (tools/build_material_lab.py's tile_art()) rather than a second hand-drawn
+# masonry style -- these are the same generated swatches already reviewed and
+# screenshotted under ldtk/material_lab, just appended onto this sheet so the
+# Collisions layer's existing brick-style auto-rules (fill/top/left/corner,
+# see tools/ldtk_add_act1_materials.py) can address them by tile id.
+import build_material_lab as material_lab
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "ldtk", "art")
+SOURCE = os.path.join(OUT, "source", "act1_office_brick_wall.png")
 CELL = 8
 
-# Sampled straight off the 16px sheet.
-STONE_HI = (0x79, 0x79, 0x79, 255)
-STONE = (0x59, 0x59, 0x59, 255)
-STONE_DARK = (0x2E, 0x2E, 0x2E, 255)
-MORTAR = (0x40, 0x11, 0x0C, 255)
-# Brick faces, lit top to bottom. Two tones per course so a 4px brick still has
-# a lip on it -- flat 4px bricks read as stripes.
-FACE_HI = (0x84, 0x23, 0x18, 255)
-FACE = (0x69, 0x1C, 0x13, 255)
-FACE_LO = (0x55, 0x17, 0x10, 255)
-# Every second brick along a course is a shade off, so a long wall does not
-# stripe. Keyed off the brick's x index, not random: a re-run has to give the
-# same sheet or the whole world's walls shuffle.
-FACE_ALT = (0x5F, 0x19, 0x11, 255)
+def _luminance(c):
+    return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+
+def _source_colour(colours, predicate, target):
+    """Pick the closest useful quantized source colour to `target` luminance.
+
+    This is deliberately palette-only: the swatch informs the material's
+    oxblood/charcoal palette, while the precise 8px masonry geometry below is
+    still hand-authored and seamless.
+    """
+    choices = [c for c in colours if predicate(c)]
+    if not choices:
+        raise RuntimeError("Act 1 brick source did not contain its expected palette")
+    # Keep this RGB: `shade()` below returns the same arity and brick_px()
+    # appends the one opaque alpha channel.  Returning RGBA here would make
+    # shade's tiny mineral jitter dim the alpha channel too.
+    return min(choices, key=lambda c: abs(_luminance(c) - target))
+
+
+def _palette_from_source():
+    """Read a compact, stable material palette from the generated source swatch."""
+    source = Image.open(SOURCE).convert("RGB")
+    # Quantizing first prevents a single anti-aliased or compression shade from
+    # becoming a design decision.  The source is a concept swatch, not geometry.
+    quantized = source.quantize(colors=128, method=Image.Quantize.MEDIANCUT)
+    colours = list(Counter(quantized.convert("RGB").getdata()))
+    red = lambda c: c[0] > c[1] * 1.30 and c[0] > c[2] * 1.15
+    cool_grey = lambda c: max(c) - min(c) < 24 and c[2] >= c[0] - 4
+    dark = lambda c: _luminance(c) < 22 and c[2] >= c[1] - 3
+    return {
+        "stone_hi": _source_colour(colours, cool_grey, 82),
+        "stone": _source_colour(colours, cool_grey, 61),
+        "stone_dark": _source_colour(colours, cool_grey, 36),
+        "mortar": _source_colour(colours, dark, 15),
+        "face_hi": _source_colour(colours, red, 65),
+        "face": _source_colour(colours, red, 48),
+        "face_lo": _source_colour(colours, red, 35),
+        "face_alt": _source_colour(colours, red, 42),
+    }
+
+
+# A concept swatch generated for this exact replacement lives under art/source.
+# Only these colour stops come from it; tile topology below remains procedural so
+# the 8px game asset is crisp, seam-safe, and compatible with existing LDtk IDs.
+_PALETTE = _palette_from_source()
+STONE_HI = _PALETTE["stone_hi"]
+STONE = _PALETTE["stone"]
+STONE_DARK = _PALETTE["stone_dark"]
+MORTAR = _PALETTE["mortar"]
+FACE_HI = _PALETTE["face_hi"]
+FACE = _PALETTE["face"]
+FACE_LO = _PALETTE["face_lo"]
+FACE_ALT = _PALETTE["face_alt"]
+
+# The masonry algorithm below (running-bond coursing, mortar joints, mineral
+# grain, a stone lip) is what makes THIS sheet's brick actually read as brick
+# rather than a flat tinted swatch -- so `brick_new` (tools/ldtk_add_act1_
+# materials.py's value 7) reuses it wholesale instead of the generic
+# ragged-edge look tools/build_material_lab.py's tile_art() gives every other
+# material lab material. Only the COLOURS differ, pulled from that material's
+# own generated `Brick` ramp so it still reads as "the one Codex generated"
+# rather than a copy of the original brick.
+BrickPalette = namedtuple(
+    "BrickPalette",
+    "face_hi face face_lo face_alt mortar stone_hi stone stone_dark")
+DEFAULT_PALETTE = BrickPalette(FACE_HI, FACE, FACE_LO, FACE_ALT, MORTAR,
+                               STONE_HI, STONE, STONE_DARK)
+
+
+def _hex_rgb(h):
+    h = h.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def _luma_grey(rgb):
+    """A neutral grey at the same perceived lightness as `rgb` -- used for
+    brick_new's stone lip, so the cap over each course reads as a genuinely
+    different (unpainted concrete) material rather than a lighter tint of the
+    same brick, the same warm-face/cool-stone contrast the original brick
+    uses, just derived from Brick's own ramp instead of a second hand-picked
+    palette."""
+    l = int(round(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]))
+    return (l, l, l)
+
+
+_LAB_BRICK = material_lab.PALETTES["Brick"]  # [fill, dark, mid, warm, light]
+_BN_FACE_HI = _hex_rgb(_LAB_BRICK[3])
+_BN_FACE = _hex_rgb(_LAB_BRICK[2])
+_BN_FACE_LO = _hex_rgb(_LAB_BRICK[1])
+BRICK_NEW_PALETTE = BrickPalette(
+    face_hi=_BN_FACE_HI, face=_BN_FACE, face_lo=_BN_FACE_LO,
+    face_alt=mix(_BN_FACE, _BN_FACE_HI, 0.5),
+    mortar=_hex_rgb(_LAB_BRICK[0]),
+    stone_hi=_luma_grey(_BN_FACE_HI), stone=_luma_grey(_BN_FACE),
+    stone_dark=_luma_grey(_BN_FACE_LO),
+)
+
+# Moss / greenery, three tones. It grows IN THE MORTAR CRACKS between the red
+# bricks -- not on the grey stone lip, which reads as a decorative border and
+# was the first attempt's mistake. Muted to sit inside Act I's dim office rather
+# than a jungle green, but clearly alive against the near-black mortar.
+MOSS_LO = (0x2C, 0x3A, 0x20, 255)   # deep shadow moss, at the bottom of a crack
+MOSS = (0x46, 0x5A, 0x30, 255)      # body
+MOSS_HI = (0x64, 0x7C, 0x42, 255)   # the lit face of a clump
+# The whole wall's mortar is shifted a touch toward this -- a flat tint that
+# ages the field with nothing to grid.
+MILDEW = (0x30, 0x28, 0x1C, 255)
 
 TRIM = 3          # highlight + body + shadow line
 BRICK_W = 8
 COURSE_H = 4
 
+# Six moss VARIANT tiles are appended after the eight base tiles. The base fill
+# is left clean; ldtk_world.gd scatters these variants over the wall by absolute
+# cell position, so WHICH bricks are mossed (and how heavily) varies across the
+# whole wall instead of every 8px cell being identical. Each variant is one
+# clean brick with a distinct moss clump, so a scattered patch is not uniform.
+# Densities run light->heavy; the runtime picks heavier ones for the centres of
+# a moss patch and lighter ones at its edges.
+VARIANTS = [
+    (1, 0.30), (2, 0.42), (3, 0.42), (4, 0.60), (5, 0.62), (6, 0.85),
+]
 
-def brick_px(x, y):
-    """One pixel of the running-bond fill, in TILE coordinates."""
+
+def _hash(x, y, salt):
+    """0..255, deterministic. A hash and not `random`, so a re-run rebuilds the
+    identical sheet -- the whole world's brick is this one 8px tile."""
+    h = (x * 2246822519 + y * 3266489917 + salt * 668265263) & 0xFFFFFFFF
+    h = (h ^ (h >> 15)) * 2654435761 & 0xFFFFFFFF
+    h ^= h >> 13
+    return h & 0xFF
+
+
+def bnoise(x, y):
+    """+/-1.5 per-pixel wobble on the brick faces -- mineral grain, so a flat
+    brick tone does not read as plastic."""
+    return (_hash(x, y, 0) & 3) - 1.5
+
+
+def _is_h_joint(y):
+    return y % COURSE_H == COURSE_H - 1
+
+
+def _is_v_joint(x, y):
+    course = y // COURSE_H
+    offset = 0 if course % 2 == 0 else BRICK_W // 2
+    return (x - offset) % BRICK_W == 0
+
+
+def _is_mortar(x, y):
+    """True where this tile pixel is a joint rather than a brick face. Periodic
+    in both axes with the 8px cell, so it lines up across tiles into the wall's
+    continuous mortar grid."""
+    return _is_h_joint(y) or _is_v_joint(x, y)
+
+
+def brick_px(x, y, pal=DEFAULT_PALETTE):
+    """One pixel of the CLEAN running-bond fill, in TILE coordinates. No moss
+    here -- the base fill is bare brick, and moss arrives only through the
+    scattered variant tiles, so open wall stays free of any 8px repeat."""
+    if _is_mortar(x, y):
+        return mix(pal.mortar, MILDEW, 0.35) + (255,)   # mildewed joint
+
     course = y // COURSE_H
     row_in = y % COURSE_H
-    if row_in == COURSE_H - 1:
-        return MORTAR                      # horizontal joint
     offset = 0 if course % 2 == 0 else BRICK_W // 2
-    if (x - offset) % BRICK_W == 0:
-        return MORTAR                      # vertical joint
     index = (x - offset) // BRICK_W
-    base = FACE if index % 2 == 0 else FACE_ALT
+    base = pal.face if index % 2 == 0 else pal.face_alt
     if row_in == 0:
-        return FACE_HI                     # top lip catches the light
-    if row_in == COURSE_H - 2:
-        return FACE_LO
-    return base
+        base = pal.face_hi                 # top lip catches the light
+    elif row_in == COURSE_H - 2:
+        base = pal.face_lo
+    grime = -6 if course % 2 == 1 else 0   # damp settles on the lower course
+    return shade(base, bnoise(x, y) + grime)
 
 
-def draw(top, left):
-    """One tile: brick fill, with a stone lip on the requested sides."""
+def _snap_to_crack(x, y):
+    """Nudge a blob seed onto the nearest joint, so a clump roots in a gap
+    between bricks (where moss starts) rather than floating on a brick face."""
+    best = (x, y)
+    best_d = 99
+    for yy in range(CELL):
+        for xx in range(CELL):
+            if not _is_mortar(xx, yy):
+                continue
+            d = abs(xx - x) + abs(yy - y)
+            if d < best_d:
+                best_d, best = d, (xx, yy)
+    return best
+
+
+def _blob(px, cx, cy, salt, reach):
+    """Grow one irregular moss clump around (cx, cy). Nearer pixels are likelier
+    than far ones and the centre is lit, so it reads as a rounded tuft with a
+    soft edge rather than a square. Wraps with the 8px cell so a clump at a tile
+    edge continues into the neighbour when two mossy tiles land side by side."""
+    for dy in range(-reach, reach + 1):
+        for dx in range(-reach, reach + 1):
+            dist = abs(dx) + abs(dy)
+            if dist > reach + 1:
+                continue
+            x = (cx + dx) % CELL
+            y = (cy + dy) % CELL
+            # Closer + on a crack = far likelier. Brick faces can catch a little.
+            prob = 235 - dist * 62
+            if _is_mortar(x, y):
+                prob += 45
+            if _hash(x, y, salt) >= prob:
+                continue
+            if dist == 0:
+                px[x, y] = MOSS_HI
+            elif dist == 1:
+                px[x, y] = MOSS_HI if _hash(x, y, salt + 9) < 90 else MOSS
+            else:
+                px[x, y] = MOSS if _hash(x, y, salt + 9) < 70 else MOSS_LO
+
+
+def moss_variant(seed, density):
+    """A clean brick with a scattered moss clump on it -- one of several distinct
+    stamps the runtime spreads across the wall. `density` sets how many blobs and
+    how far they reach; `seed` decorrelates one variant from another so a patch
+    made of several variants is not a repeat of one stamp."""
+    img = draw(False, False)
+    px = img.load()
+    blobs = 1 + int(round(density * 3))          # 1 (light) .. 4 (heavy)
+    reach = 1 + int(round(density * 1.5))         # 1 .. 2 px spread
+    for b in range(blobs):
+        sx = _hash(b * 3 + 1, seed, 51) % CELL
+        sy = _hash(b * 3 + 2, seed, 52) % CELL
+        sx, sy = _snap_to_crack(sx, sy)
+        _blob(px, sx, sy, seed * 97 + b * 13, reach)
+    return img
+
+
+def draw(top, left, pal=DEFAULT_PALETTE):
+    """One tile: CLEAN brick fill, with a stone lip on the requested sides."""
     img = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
     px = img.load()
     for y in range(CELL):
         for x in range(CELL):
-            px[x, y] = brick_px(x, y)
+            px[x, y] = brick_px(x, y, pal)
     if top:
         for x in range(CELL):
-            px[x, 0] = STONE_HI
-            px[x, 1] = STONE
-            px[x, 2] = STONE_DARK
+            px[x, 0] = pal.stone_hi
+            px[x, 1] = pal.stone
+            px[x, 2] = pal.stone_dark
     if left:
         for y in range(CELL):
-            px[0, y] = STONE_HI
-            px[1, y] = STONE
-            px[2, y] = STONE_DARK
+            px[0, y] = pal.stone_hi
+            px[1, y] = pal.stone
+            px[2, y] = pal.stone_dark
     if top and left:
         # The corner belongs to the top run, so the lip reads as one piece
         # turning rather than as two strips meeting in a seam.
-        px[0, 0] = STONE_HI
-        px[1, 0] = STONE_HI
-        px[2, 0] = STONE_HI
-        px[0, 1] = STONE_HI
-        px[1, 1] = STONE
-        px[2, 1] = STONE
-        px[0, 2] = STONE_HI
-        px[1, 2] = STONE
-        px[2, 2] = STONE_DARK
+        px[0, 0] = pal.stone_hi
+        px[1, 0] = pal.stone_hi
+        px[2, 0] = pal.stone_hi
+        px[0, 1] = pal.stone_hi
+        px[1, 1] = pal.stone
+        px[2, 1] = pal.stone
+        px[0, 2] = pal.stone_hi
+        px[1, 2] = pal.stone
+        px[2, 2] = pal.stone_dark
     return img
 
 
@@ -194,20 +446,57 @@ TILES = [
 CEILING = [("ceiling", False), ("ceiling panel", True)]
 OVERHEAD = [("overhead", False), ("overhead panel", True)]
 
-count = len(TILES) + len(CEILING) + len(OVERHEAD)
+# The moss variants come LAST of the original eight, so tile ids 0..7 the
+# auto-rules and the ceiling rules reference never move. Their ids are
+# 8..8+len(VARIANTS)-1, which scripts/ldtk_world.gd's scatter references as
+# atlas coords (8,0)..(N,0). Scaffolding/Concrete are appended after THAT, for
+# the same reason -- see this file's module doc.
+# Scaffolding/Concrete use material_lab's generic ragged-edge tile_art() --
+# there is no existing "what scaffolding/concrete really look like" reference
+# in this project the way there is for brick, so its one-size-fits-all
+# material look is the right default. `brick_new` (below, not in this list)
+# gets the real masonry treatment instead: see BRICK_NEW_PALETTE's own
+# comment for why a material actually called "brick" needs to look like one.
+MATERIAL_TILES = [
+    ("Scaffolding", [("fill", 255), ("top", 14), ("left", 7), ("corner", 6)]),
+    ("Concrete", [("fill", 255), ("top", 14), ("left", 7), ("corner", 6)]),
+]
+
+count = (len(TILES) + len(CEILING) + len(OVERHEAD) + len(VARIANTS)
+         + sum(len(tiles) for _material, tiles in MATERIAL_TILES)
+         + len(TILES))  # brick_new: same fill/top/left/corner shape as brick
 sheet = Image.new("RGBA", (CELL * count, CELL), (0, 0, 0, 0))
-for i, (_name, top, left) in enumerate(TILES):
-    sheet.paste(draw(top, left), (i * CELL, 0))
-for i, (_name, panel) in enumerate(CEILING):
-    sheet.paste(ceiling(panel), ((len(TILES) + i) * CELL, 0))
-for i, (_name, panel) in enumerate(OVERHEAD):
-    sheet.paste(ceiling_overhead(panel),
-                ((len(TILES) + len(CEILING) + i) * CELL, 0))
+col = 0
+for _name, top, left in TILES:
+    sheet.paste(draw(top, left), (col * CELL, 0)); col += 1
+for _name, panel in CEILING:
+    sheet.paste(ceiling(panel), (col * CELL, 0)); col += 1
+for _name, panel in OVERHEAD:
+    sheet.paste(ceiling_overhead(panel), (col * CELL, 0)); col += 1
+moss_first_col = col
+for seed, density in VARIANTS:
+    sheet.paste(moss_variant(seed, density), (col * CELL, 0)); col += 1
+material_first_col = col
+for material, tiles in MATERIAL_TILES:
+    for _name, mask in tiles:
+        from gen_scaffolding import tile as scaffold_tile
+        art = scaffold_tile(mask) if material == "Scaffolding" else material_lab.tile_art(material, mask, 0)
+        sheet.paste(art, (col * CELL, 0))
+        col += 1
+brick_new_first_col = col
+for _name, top, left in TILES:
+    sheet.paste(draw(top, left, BRICK_NEW_PALETTE), (col * CELL, 0)); col += 1
 
 os.makedirs(OUT, exist_ok=True)
 path = os.path.join(OUT, "bricks_8px.png")
 sheet.save(path)
-print("wrote %s  %dx%d  (%s)"
-      % (path, sheet.width, sheet.height,
-         ", ".join([t[0] for t in TILES] + [c[0] for c in CEILING]
-                   + [o[0] for o in OVERHEAD])))
+print("wrote %s  %dx%d  (%d tiles; moss variants at %d..%d; "
+      "scaffolding/concrete at %d..%d; brick_new masonry at %d..%d)"
+      % (path, sheet.width, sheet.height, count,
+         moss_first_col, material_first_col - 1,
+         material_first_col, brick_new_first_col - 1,
+         brick_new_first_col, col - 1))
+
+# Keep the appended randomized masonry library when rebuilding legacy tiles.
+from gen_celeste_masonry import run as rebuild_celeste_masonry
+rebuild_celeste_masonry(False)

@@ -23,6 +23,13 @@ extends Node2D
 ## that ordering has to be exactly right rather than just close.
 
 signal room_changed(room: Node2D)
+## Fired the instant a room slide BEGINS, carrying the room being entered — so
+## anything gated on "which room is live" (the moon and its floor pool, see
+## MoonVisibility) can wake the destination up as it scrolls IN rather than a
+## beat after the slide lands. room_changed still fires at the slide's END, once
+## the player has fully arrived; nothing that resets a room's state (hazards,
+## doors, checkpoint) may move to this earlier edge.
+signal transition_started(target: Node2D)
 
 ## The imported .ldtk world (its children are the rooms).
 @export var world_scene: PackedScene
@@ -62,6 +69,15 @@ signal room_changed(room: Node2D)
 ## means, and Act II's CanvasModulate (a different mood entirely) is
 ## untouched by this file simply because Act II has no note tiles to match.
 @export var music_room_color := Color.BLACK
+## Room-specific pixel art, keyed by exact LDtk identifier.
+@export var room_backdrop_overrides: Dictionary[String, Texture2D] = {}
+## Per-wall reflectance, without retuning fixtures or tinting child windows.
+@export var room_backdrop_tints: Dictionary[String, Color] = {}
+## Background art brightness; lower values separate the player from scenery.
+@export_range(0.0, 1.0, 0.05) var background_brightness := 1.0
+## Pixel rectangles around every painted moon in a room-specific texture.
+@export var room_moon_regions: Dictionary[String, Array] = {}
+const OFFICE_MOON := preload("res://scenes/props/backdrop/office_moon/OfficeMoon.tscn")
 @onready var _canvas_modulate: CanvasModulate = $CanvasModulate
 var _ambient_color := Color.BLACK
 
@@ -136,6 +152,12 @@ static var debug_start_room := ""
 
 var player: Player
 var current_room: Node2D
+## The room a slide is currently travelling INTO, or null when not sliding.
+## current_room only advances at the slide's END (a death mid-slide must respawn
+## in the room you left), but the destination is already on screen and already
+## holds the player the whole way across — so "which room is visually live" is
+## current_room OR this. See is_room_active() and MoonVisibility.
+var transition_target: Node2D
 var rooms: Array[Node2D] = []
 
 var _world: Node2D
@@ -156,6 +178,14 @@ var _return_armed := false
 # none painted). Cached on room entry so the per-frame overlap check is cheap.
 var _thought_layer: TileMapLayer
 
+# The current room's paintable Water TileMapLayer (null if the room has none
+# painted) — same caching reason as _thought_layer above. This is the
+# tile-painted counterpart to a placed Pond entity; both end up calling the
+# same Player.enter_swim()/exit_swim(), this world node standing in as the
+# "zone" token for the tile-based path since there is no per-instance node to
+# use instead (see _in_water_tile()).
+var _water_layer: TileMapLayer
+
 # Rooms whose way back the story has re-pointed: room name -> the room walking
 # back out of it actually leads to. See set_way_back().
 var _way_back := {}
@@ -171,10 +201,16 @@ func _ready() -> void:
 	add_child(_world)
 
 	rooms = rooms_in(_world)
+	_scatter_moss()
 
 	if draw_room_backdrops:
 		for room in rooms:
 			_add_backdrop(room)
+	for room in rooms:
+		for background_name in ["RoomBackdrop", "BG Image", "Background"]:
+			var background := room.get_node_or_null(background_name) as CanvasItem
+			if background != null:
+				background.modulate *= Color(background_brightness, background_brightness, background_brightness, 1.0)
 	if seal_room_ceilings:
 		for room in rooms:
 			_add_ceiling(room)
@@ -216,6 +252,125 @@ func _ready() -> void:
 	# no bug in the re-route itself would ever be reachable to test.
 	if _way_back.has(_start_room().name):
 		_arm_return(_room_before(_start_room()))
+
+
+# --- Moss scatter -------------------------------------------------------------
+# Act 1's brick is one shared 8px tile, so a single tile can never look random:
+# every wall cell is byte-identical. tools/gen_bricks_8px.py instead appends a
+# set of MOSS VARIANT tiles (clean brick + a distinct clump each) after the eight
+# base tiles, and this pass sprinkles them over the plain-fill cells keyed off
+# ABSOLUTE cell position -- clustered into patches by value noise, heavier where a
+# brick sits against the wall's exposed top or face -- so WHICH bricks are mossy,
+# and how much, varies irregularly across the whole wall the way real growth does.
+# It only rewrites a cell's atlas coordinates, so collision (and every test that
+# reads which cells are filled) is untouched: a mossed brick is the same solid
+# brick. Gated on the source actually having the variant tiles, which only Act 1's
+# widened Bricks8px does -- Act 2/3 share the PNG but keep the 8-tile def, so they
+# are skipped automatically.
+const _MOSS_FILL_ATLAS := Vector2i(0, 0)
+# Atlas X of the moss variants on the sheet, light -> heavy. Must match the order
+# gen_bricks_8px.py appends them (columns 8..13).
+const _MOSS_VARIANT_COLS: Array[int] = [8, 9, 10, 11, 12, 13]
+const _MOSS_THRESHOLD := 0.60      # below this a cell stays clean brick
+const _MOSS_PATCH_CELLS := 3.5     # value-noise wavelength -- rough patch size
+
+func _scatter_moss() -> void:
+	for room in rooms:
+		var layer := room.get_node_or_null("Collisions") as TileMapLayer
+		if layer != null and layer.tile_set != null:
+			_scatter_moss_layer(layer)
+			preload("res://scripts/scaffolding_variation.gd").apply(layer)
+
+
+func _scatter_moss_layer(layer: TileMapLayer) -> void:
+	# Snapshot the ORIGINAL tiles first, so every decision reads the wall as
+	# imported rather than one we have already half-mossed this pass.
+	var cells := layer.get_used_cells()
+	var atlas := {}
+	var srcs := {}
+	for c in cells:
+		atlas[c] = layer.get_cell_atlas_coords(c)
+		srcs[c] = layer.get_cell_source_id(c)
+	for c in cells:
+		var a: Vector2i = atlas[c]
+		if a != _MOSS_FILL_ATLAS:
+			continue
+		var sid: int = srcs[c]
+		var source := layer.tile_set.get_source(sid) as TileSetAtlasSource
+		if source == null or not source.has_tile(Vector2i(_MOSS_VARIANT_COLS[0], 0)):
+			continue                       # not Act 1's variant-bearing bricks
+		var col := _moss_pick(c, atlas)
+		if col >= 0:
+			layer.set_cell(c, sid, Vector2i(col, 0))
+
+
+## Clean (-1) or a moss variant's atlas X for a fill cell. Clustered growth,
+## thicker against exposed tops and faces, with the exact variant jittered so a
+## patch is a mix of stamps rather than one repeated.
+func _moss_pick(cell: Vector2i, atlas: Dictionary) -> int:
+	var region := _vnoise(cell.x, cell.y, _MOSS_PATCH_CELLS, 11)
+	var fine := _hash01(cell.x, cell.y, 7)
+	var amount := region * 0.85 + fine * 0.15
+	if _surface_adjacent(cell, atlas):
+		amount += 0.18                     # first course under a lip / against a face
+	if amount < _MOSS_THRESHOLD:
+		return -1
+	var span := _MOSS_VARIANT_COLS.size()
+	var idx := int((amount - _MOSS_THRESHOLD) / (1.30 - _MOSS_THRESHOLD) * span)
+	idx = clampi(idx, 0, span - 1)
+	idx = clampi(idx + (int(_hash(cell.x, cell.y, 3) % 3) - 1), 0, span - 1)
+	return _MOSS_VARIANT_COLS[idx]
+
+
+## True where a fill brick touches the wall's surface on top or a side -- an
+## empty neighbour, or a lip/edge tile (anything that is not another plain fill).
+## Moss creeps in from those, so they carry more of it.
+func _surface_adjacent(cell: Vector2i, atlas: Dictionary) -> bool:
+	var neighbours: Array[Vector2i] = [Vector2i(cell.x, cell.y - 1),
+		Vector2i(cell.x - 1, cell.y), Vector2i(cell.x + 1, cell.y)]
+	for n in neighbours:
+		if not atlas.has(n):
+			return true
+		var a: Vector2i = atlas[n]
+		if a != _MOSS_FILL_ATLAS:
+			return true
+	return false
+
+
+## 0 .. 0x7FFFFFFF integer hash of a cell coordinate. Multipliers and masks keep
+## every product inside 63 bits, so it is exact (no reliance on int overflow) and
+## deterministic -- the same wall mosses identically every load.
+func _hash(x: int, y: int, salt: int) -> int:
+	var h := (x & 0xFFFF) * 73856093
+	h ^= (y & 0xFFFF) * 19349663
+	h ^= (salt & 0xFFFF) * 83492791
+	h &= 0x7FFFFFFF
+	h = ((h ^ (h >> 13)) * 1274126177) & 0x7FFFFFFF
+	return h ^ (h >> 16)
+
+
+func _hash01(x: int, y: int, salt: int) -> float:
+	return _hash(x, y, salt) / float(0x7FFFFFFF)
+
+
+## Smooth value noise: a hashed value per coarse lattice point, bilinearly and
+## smoothstep-interpolated, so moss forms soft blobs a few cells across instead
+## of salt-and-pepper speckle.
+func _vnoise(cx: int, cy: int, scale: float, salt: int) -> float:
+	var fx := cx / scale
+	var fy := cy / scale
+	var x0 := floori(fx)
+	var y0 := floori(fy)
+	var tx := _smoothstep01(fx - float(x0))
+	var ty := _smoothstep01(fy - float(y0))
+	var top: float = lerp(_hash01(x0, y0, salt), _hash01(x0 + 1, y0, salt), tx)
+	var bot: float = lerp(_hash01(x0, y0 + 1, salt), _hash01(x0 + 1, y0 + 1, salt), tx)
+	var out: float = lerp(top, bot, ty)
+	return out
+
+
+func _smoothstep01(t: float) -> float:
+	return t * t * (3.0 - 2.0 * t)
 
 
 ## What this world contributes to a save slot (see systems/save_game.gd).
@@ -288,6 +443,8 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 	var found: Array[Node2D] = []
 	for child in world.get_children():
 		if child is Node2D and child.has_node("Entities"):
+			if str(child.name) in SHELVED_ROOMS:
+				continue  # on hold — out of the play route (see SHELVED_ROOMS)
 			found.append(child)
 	found.sort_custom(func(a: Node2D, b: Node2D) -> bool:
 		var na := play_index(a)
@@ -305,23 +462,41 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 ## derivable from their name. Keyed by identifier; value is [the numbered room
 ## they follow, their order among any others inserted at the same point].
 ##
-## `Level_V1`..`Level_V4` are `tools/renumber_levels_v2.py`'s block, meant to
-## land between Level_6 and Level_7. `Level_v5`/`Level_v6` follow them, same
-## spot. THIS TABLE IS THE ONLY PLACE THAT SAYS SO — the .ldtk's own Exit
-## entities carry no NextRoom override for any of this (checked: every one is
-## empty), so index_in_name() below is not just how the debug picker numbers
-## things, it is the ONLY thing routing actual play through here. Get it wrong
-## and the game does not misnumber a menu, it walks into a dead end: that is
-## what an empty NextRoom chain plus the OLD digit-matching rule did — `V1`..
-## `V4` share their trailing digit with `Level_1`..`Level_4`, so the old sort
-## interleaved them one per numbered room instead of as a block, and `v5`/`v6`
-## (no recorded place at all under that rule) landed wherever their trailing
-## digit happened to collide too. Walking the result from Level_0 dead-ends at
-## Level_v6; Level_7 onward was unreachable by ordinary play.
+## `Level_V1`..`Level_V7` all land between Level_6 and the escape row as one
+## block — the current spine of the game is `Level_0`..`Level_6` then this V
+## block then `Level_14`..`Level_25`, with `Level_7`..`Level_13` on hold (see
+## SHELVED_ROOMS below). THIS TABLE IS THE ONLY PLACE THAT SAYS SO — the .ldtk's
+## own Exit entities carry no NextRoom override for any of this (checked: every
+## one is empty), so index_in_name() below is not just how the debug picker
+## numbers things, it is the ONLY thing routing actual play through here. Get it
+## wrong and the game does not misnumber a menu, it walks into a dead end: that
+## is what an empty NextRoom chain plus the OLD digit-matching rule did — `V1`..
+## `V7` all carry a non-digit after `Level_` and fall to index_in_name()'s
+## sort-last bucket unless they are pinned here (which is exactly the state a
+## rename to `Level_V6`/`Level_V7` left them in before this table was updated:
+## routed 6->V1->V2->V3->V4, then a dead end, with V5/V6/V7 orphaned at the very
+## end of the array). Add to this block rather than trusting a V-room's digits.
 const INSERTED_ROOMS := {
 	"Level_V1": [6, 0], "Level_V2": [6, 1], "Level_V3": [6, 2], "Level_V4": [6, 3],
-	"Level_v5": [6, 4], "Level_v6": [6, 5],
+	"Level_V5": [6, 4], "Level_V6": [6, 5], "Level_V7": [6, 6],
+	"Level_V8": [6, 7], "Level_V9": [6, 8],
+	"Level_V10": [6, 9], "Level_V11": [6, 10], "Level_V12": [6, 11],
+	"Level_V13": [6, 12], "Level_V14": [6, 13],
 }
+
+## Rooms taken OUT of the play route for now (a level-design pass shelved
+## `Level_7`..`Level_13`; they were also moved well clear in the .ldtk). rooms_in
+## skips them: no Exit ever slides into one, the debug picker does not list them,
+## and the escape row (`Level_14`..) follows the V block directly. Their NODES
+## still exist in the loaded world, so a name lookup that used to find one
+## (act1_beats' `music_room_name` = "Level_7", say) now resolves to null and its
+## caller no-ops gracefully rather than crashing. Empty this array to bring them
+## back. NOTE: several tests still target these rooms (music/intro/chase_route/
+## save) and will fail until retargeted — shelving is a routing change, not a
+## deletion, so that is expected and left for a follow-up.
+const SHELVED_ROOMS: Array[String] = [
+	"Level_7", "Level_8", "Level_9", "Level_10", "Level_11", "Level_12", "Level_13",
+]
 
 ## The number in a room's identifier — the 16 in `Level_16` — or an
 ## INSERTED_ROOMS entry's position just past the room it follows. Rooms
@@ -341,17 +516,32 @@ static func play_index(room: Node) -> int:
 ## and the next: Level_6 is 600, an insertion after it is 610-619, Level_7 is
 ## 700 — comfortable room for a INSERTED_ROOMS entry to grow past ten without
 ## a collision.
+##
+## Matches the trailing "Level_<digits>" REGARDLESS of what comes before it —
+## not just names that BEGIN with "Level_". Act 1's rooms are bare (`Level_16`),
+## but Act 2's and Act 3's are prefixed to stay unique across the importer's one
+## shared `ldtk/levels/` folder (`Act_2_Level_3`, `Act3_Level_0` — see
+## CLAUDE.md's "prefixed uniquely" rule), and a plain `begins_with("Level_")`
+## check silently failed every one of those: they fell into the "sort last"
+## bucket and the whole room lost identifier ordering to a worldY/worldX
+## position tiebreak instead — the exact bug this function exists to prevent
+## for Act 1's escape row, just triggered by an Act-prefixed name rather than a
+## right-to-left grid.
 static func index_in_name(name: String) -> int:
 	if INSERTED_ROOMS.has(name):
 		var after: Array = INSERTED_ROOMS[name]
 		return int(after[0]) * 100 + 10 + int(after[1])
-	if not name.begins_with("Level_"):
+	const MARKER := "Level_"
+	var pos := name.rfind(MARKER)
+	if pos == -1:
 		return 1 << 30
-	var suffix := name.substr(6)
+	var suffix := name.substr(pos + MARKER.length())
+	if suffix == "":
+		return 1 << 30
 	for c in suffix:
 		if c < "0" or c > "9":
 			return 1 << 30
-	return int(suffix) * 100 if suffix != "" else 1 << 30
+	return int(suffix) * 100
 
 
 ## Room to open in: the first, unless the debug picker asked for another one.
@@ -396,11 +586,16 @@ func _clamp_exit_signs() -> void:
 ## it is lit by Light2D and dimmed by CanvasModulate, which is the whole point
 ## — see draw_room_backdrops above.
 func _add_backdrop(room: Node2D) -> void:
+	if room_backdrop_overrides.has(str(room.name)):
+		var old_image := room.get_node_or_null("BG Image") as CanvasItem
+		if old_image != null:
+			old_image.hide()
 	var r := room_rect(room)
-	var panel: Control = _backdrop_panel()
+	var panel: Control = _backdrop_panel(str(room.name))
 	panel.name = "RoomBackdrop"
 	panel.position = r.position - room.position  # room-local
 	panel.size = r.size
+	panel.self_modulate = room_backdrop_tints.get(str(room.name), Color.WHITE)
 	# Background band. Sibling order (move_child below) is what keeps it behind
 	# the room's own Background tile layer, which shares this z-index.
 	panel.z_index = -1
@@ -412,6 +607,37 @@ func _add_backdrop(room: Node2D) -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	room.add_child(panel)
 	room.move_child(panel, 0)
+	if panel is TextureRect and room_moon_regions.has(str(room.name)):
+		panel.clip_contents = true
+		var wall_material := ShaderMaterial.new()
+		wall_material.shader = preload("res://scenes/props/backdrop/office_moon/moonless_wall.gdshader")
+		var regions := PackedVector4Array()
+		for region: Rect2 in room_moon_regions[str(room.name)]:
+			regions.append(Vector4(region.position.x, region.position.y, region.size.x, region.size.y))
+		assert(regions.size() <= 64, "A moon backdrop supports at most 64 authored regions")
+		wall_material.set_shader_parameter("moon_count", regions.size())
+		regions.resize(64)
+		wall_material.set_shader_parameter("moon_regions", regions)
+		panel.material = wall_material
+		for region in [room_moon_regions[str(room.name)][0]]:
+			var moon := OFFICE_MOON.instantiate()
+			panel.add_child(moon)
+			moon.configure(panel.texture, region)
+			var left_positions := {"Level_0": 184.0, "Level_25": 184.0, "Level_1": 91.0, "Level_2": 64.0, "Level_3": 250.0, "Level_4": 190.0, "Level_5": 244.0, "Level_6": 85.0}
+			moon.position.x = left_positions.get(str(room.name), moon.position.x - 8.0) - 4.0 * float(rooms.find(room)) / maxf(rooms.size() - 1, 1)
+			moon.set_window_openings(OfficeWindowPanes.for_room(str(room.name)))
+			moon.set_pool_enabled(false)
+			# The floor pool follows the same "is this room live" rule as the moon
+			# disc, re-evaluated on BOTH edges: transition_started (the slide
+			# begins — this room may be the destination scrolling in) and
+			# room_changed (the slide lands). Reading is_room_active() rather than
+			# comparing to the emitted room is deliberate — mid-slide BOTH the
+			# room being left and the one being entered are live, so a single
+			# "winner" broadcast would switch the departing pool off too early.
+			var follow_pool := func(_room: Node2D) -> void:
+				moon.set_pool_enabled(is_room_active(room))
+			room_changed.connect(follow_pool)
+			transition_started.connect(follow_pool)
 
 
 ## The unsized, unpositioned backdrop node itself — a TextureRect painted with
@@ -428,16 +654,18 @@ func _add_backdrop(room: Node2D) -> void:
 ## art already carries Act I's dim, desaturated mood, and multiplying
 ## room_backdrop_color over it would only mud a gradient that was mixed for
 ## exactly this shot in the first place.
-func _backdrop_panel() -> Control:
-	if room_backdrop_texture == null:
+func _backdrop_panel(room_name: String = "") -> Control:
+	var chosen: Texture2D = room_backdrop_overrides.get(room_name, room_backdrop_texture)
+	if chosen == null:
 		var flat := ColorRect.new()
 		flat.color = room_backdrop_color
 		return flat
 	var tex := TextureRect.new()
-	tex.texture = room_backdrop_texture
+	tex.texture = chosen
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex.stretch_mode = TextureRect.STRETCH_SCALE
-	tex.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	tex.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST if room_backdrop_overrides.has(room_name) \
+		else CanvasItem.TEXTURE_FILTER_LINEAR
 	return tex
 
 
@@ -541,6 +769,16 @@ func _room_has_music_puzzle(room: Node2D) -> bool:
 	return false
 
 
+## Whether a room is the one the player is actually in RIGHT NOW, for anything
+## that must be lit/awake the moment the room is on screen rather than the moment
+## the camera finishes arriving. True for current_room, and — mid-slide — also
+## for the room being entered (the player is teleported into it when the slide
+## starts, so it is live for the whole crossing). This is what keeps the moon
+## from popping in a beat after entry.
+func is_room_active(room: Node2D) -> bool:
+	return room != null and (room == current_room or room == transition_target)
+
+
 func _enter_room(room: Node2D, snap: bool) -> void:
 	current_room = room
 	_canvas_modulate.color = \
@@ -563,11 +801,12 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	# hazards at the start of their cycle, so a room presents the same pattern
 	# every time you walk into it and not whichever phase the clock happens to
 	# be at.
-	CrumblingPlatform.reset_all(get_tree())
+	# Crumbling platforms persist across visits; only respawn/reset restores them.
 	DarkThought.reset_all(get_tree())
 	MysteryBox.reset_all(get_tree())
 	MagicCarpet.reset_all(get_tree())
 	_thought_layer = room.get_node_or_null("ThoughtHazards") as TileMapLayer
+	_water_layer = room.get_node_or_null("Water") as TileMapLayer
 	room_changed.emit(room)
 
 
@@ -583,6 +822,17 @@ func _physics_process(_delta: float) -> void:
 	if _in_thought_tile() and not player.has_thought_immunity():
 		player.die()
 		return
+	# Painted water works the same way a Pond entity does — grabbed on
+	# overlap alone, asked fresh every frame (a checkpoint under the surface,
+	# a room load with him already in it, and a teleport all have to work
+	# with no boundary ever crossed; see slide_zone.gd's own note on this
+	# family of bug) — just checked against the tile grid instead of an
+	# Area2D, since a painted shape has no single box to overlap.
+	if _in_water_tile():
+		if not player.swimming():
+			player.enter_swim(self)
+	else:
+		player.exit_swim(self)
 
 
 func _in_thought_tile() -> bool:
@@ -590,6 +840,56 @@ func _in_thought_tile() -> bool:
 		return false
 	var cell := _thought_layer.local_to_map(_thought_layer.to_local(player.global_position))
 	return _thought_layer.get_cell_source_id(cell) != -1
+
+
+## Is he in painted water? Asked with HYSTERESIS, deliberately: getting IN
+## needs his centre under the surface, staying in only needs his body still
+## touching it.
+##
+## A single point for both is what this used to be, and at the surface it
+## flickered — measured in Act_2_Level_0, fifteen SWIM/FALL changes in 150
+## frames, several a second, because buoyancy lifts him until his centre
+## clears the top row and gravity drops him straight back in. That flicker is
+## what made him wall-slide down the side of a full pool (WALL_SLIDE can only
+## be entered from FALL, and half those frames were FALL), sink and stand on
+## the bottom (real gravity applies during the FALL half), and snap between
+## the swim and fall clips several times a second. The float now settles
+## against a real surface (Player's swim_float_depth) so it never reaches the
+## top row on its own, and this margin means even a deliberate breach has to
+## clear his whole body before the swim ends.
+func _in_water_tile() -> bool:
+	if _water_layer == null:
+		return false
+	if player.swimming():
+		return _water_overlaps_body()
+	return _water_layer.has_water_at(player.global_position)
+
+
+## Does any painted cell overlap his hitbox? Inset a pixel a side so merely
+## grazing the surface — standing on a bank whose floor is flush with it, say
+## — is not "still swimming".
+func _water_overlaps_body() -> bool:
+	var box := player.hitbox_rect().grow(-1.0)
+	if box.size.x <= 0.0 or box.size.y <= 0.0:
+		return _water_layer.has_water_at(player.global_position)
+	for corner in [box.position, Vector2(box.end.x, box.position.y),
+			Vector2(box.position.x, box.end.y), box.end,
+			Vector2(box.get_center().x, box.position.y),
+			Vector2(box.get_center().x, box.end.y)]:
+		if _water_layer.has_water_at(corner):
+			return true
+	return _water_layer.has_water_at(box.get_center())
+
+
+## World Y of the water surface above `world_pos`, for Player's own buoyancy.
+## This world node stands in as the "zone" token for painted water (see
+## _physics_process), so it answers this under the SAME name a Pond does —
+## Player asks whichever zone is holding him without knowing which kind it is.
+## INF when that point is not in water.
+func surface_y_at(world_pos: Vector2) -> float:
+	if _water_layer == null:
+		return INF
+	return _water_layer.surface_y_at(world_pos)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -786,8 +1086,27 @@ func _resolve_return_arming() -> void:
 	_return_armed = false
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	if _return_room != null and not _return_zone.overlaps_body(player):
+	if _return_room != null and not _return_strip_rect().intersects(player.hitbox_rect()):
 		_return_armed = true
+
+
+## The return door's strip, as a plain Rect2 in world space — read straight off
+## the shape/position that were just assigned in _arm_return, not asked of the
+## Area2D. `Area2D.overlaps_body()` reflects the physics server's own
+## MONITORING CACHE, which lags a teleport (a plain `global_position`
+## assignment, not `move_and_slide`) by an extra physics step — measured,
+## `body_entered` for a respawn landing back inside an already-armed strip
+## fired on the THIRD physics frame after the teleport, one frame later than
+## the two-frame wait above used to check it with. That let a stale "clear"
+## reading arm the door right before the real, late signal walked straight
+## back into it — see tests/level_v6_return_race_test.tscn, which is built
+## around exactly that respawn. A Rect2 built from the shape's own size and
+## the zone's current global_position has nothing to catch up on: it reads
+## whatever is true on the frame it is called, teleport or not.
+func _return_strip_rect() -> Rect2:
+	var shape: CollisionShape2D = _return_zone.get_child(0)
+	var size: Vector2 = (shape.shape as RectangleShape2D).size
+	return Rect2(_return_zone.global_position - size * 0.5, size)
 
 
 ## Where to stand a player who has just walked BACK into `room`:
@@ -964,6 +1283,11 @@ func _view_centre_for(rect: Rect2, focus: Vector2) -> Vector2:
 ## Going backwards passes an explicit point beside the previous room's Exit.
 func _slide_to_room(target: Node2D, arrive_at := Vector2.INF) -> void:
 	_transitioning = true
+	# The destination is live from here on — the player is placed in it below and
+	# the camera only travels to catch up. Announcing it now (not at slide end)
+	# is what lets its moon and pool scroll IN already lit instead of popping in.
+	transition_target = target
+	transition_started.emit(target)
 	player.input_locked = true
 
 	var cam := player.camera
@@ -996,6 +1320,7 @@ func _slide_to_room(target: Node2D, arrive_at := Vector2.INF) -> void:
 	cam.set_as_top_level(false)
 	cam.position = Vector2.ZERO
 	cam.position_smoothing_enabled = true
+	transition_target = null
 	_enter_room(target, false)
 	# Respawn where you actually came IN, not at the room's PlayerStart — enter
 	# a room from its right (walking backwards) and dying should not spit you

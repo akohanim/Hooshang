@@ -29,6 +29,7 @@ func _ready() -> void:
 	await _check_stops_the_world()
 	await _check_hitstop()
 	await _check_refused_mid_cutscene()
+	await _check_music_toggle()
 	await _check_retry()
 	await _check_leaves_playerless_scenes_alone()
 
@@ -176,6 +177,52 @@ func _check_refused_mid_cutscene() -> void:
 	_check(Pause.can_pause(), "and is allowed again the moment the beat ends")
 
 
+## The MUSIC row: it flips Settings.music_enabled, mutes the bus that carries
+## the world's own Music node (never Master, so a hazard's sound or a
+## dialogue voice blip is unaffected), and — unlike every other row — does
+## not close the menu.
+func _check_music_toggle() -> void:
+	# A throwaway file, not user://settings.json — a suite run must never be
+	# able to flip a real player's preference.
+	Settings.path = "user://test_settings.json"
+	var bus := AudioServer.get_bus_index("Music")
+	_check(bus >= 0, "the world's Music node has its own audio bus")
+	Settings.set_music_enabled(true)
+
+	_press(KEY_ESCAPE)
+	await _frames(5)
+	_check(Pause.open, "the menu opens for the music check")
+	_check(Pause.selected == PauseMenu.Item.RESUME, "starting on Resume")
+
+	await _step_down()
+	_check(Pause.selected == PauseMenu.Item.MUSIC,
+		"one press down lands on Music (%d)" % Pause.selected)
+
+	_press(KEY_C)  # jump = confirm, same key the dialogue box advances on
+	await _frames(3)
+	_check(Pause.open, "choosing Music does NOT close the menu, unlike every other row")
+	_check(not Settings.music_enabled, "it turned music off")
+	if bus >= 0:
+		_check(AudioServer.is_bus_mute(bus), "and actually muted the Music bus")
+	_check(_music_row_text() == "MUSIC: OFF",
+		"and the row's own label says so (%s)" % _music_row_text())
+
+	_press(KEY_C)
+	await _frames(3)
+	_check(Settings.music_enabled, "pressing it again turns music back on")
+	if bus >= 0:
+		_check(not AudioServer.is_bus_mute(bus), "and unmutes the bus")
+	_check(_music_row_text() == "MUSIC: ON",
+		"with the label back to ON (%s)" % _music_row_text())
+
+	Pause.resume_game()
+	await _frames(5)
+
+
+func _music_row_text() -> String:
+	return (Pause.rows.get_node("Music") as Label).text
+
+
 ## Retry is the menu's half of R: it hands the game back first, then kills him,
 ## because the respawn hold is a timer on the level and a paused level never
 ## finishes counting one.
@@ -185,15 +232,9 @@ func _check_retry() -> void:
 	await _frames(5)
 	_check(Pause.open, "the menu opens for the retry check")
 
-	# HELD across a frame, not tapped. The menu polls the movement actions now
-	# rather than reacting to their events (PauseMenu._process — an analog stick
-	# fires a stream of motion events and the old way moved the cursor once per
-	# event). A press-and-release inside one frame is invisible to polling, which
-	# is exactly what _press does.
-	Input.action_press("move_down")
-	await _frames(3)
-	Input.action_release("move_down")
-	await _frames(1)
+	# Two steps now that Music sits between Resume and Retry.
+	await _step_down()
+	await _step_down()
 	_check(Pause.selected == PauseMenu.Item.RETRY,
 		"holding down moves the cursor to Retry (%d)" % Pause.selected)
 
@@ -226,6 +267,18 @@ func _check_leaves_playerless_scenes_alone() -> void:
 	await _frames(5)
 	_check(not get_tree().paused and not Pause.open,
 		"so Escape stays the prototype's, not the pause menu's")
+
+
+## One row's worth of cursor movement, held across a frame rather than tapped:
+## the menu polls the movement actions now rather than reacting to their
+## events (PauseMenu._process — an analog stick fires a stream of motion
+## events and the old way moved the cursor once per event), and a
+## press-and-release inside one frame is invisible to polling.
+func _step_down() -> void:
+	Input.action_press("move_down")
+	await _frames(3)
+	Input.action_release("move_down")
+	await _frames(1)
 
 
 ## One press and release of a physical key, straight into the input system.

@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/props/backdrop/office_wing/office_wing.gd" id="1"]
+[sub_resource type="CanvasItemMaterial" id="Dressing"]
+light_mode = 1
+[node name="OfficeWing" type="Node2D"]
+z_index = -1
+self_modulate = Color(0.67, 0.67, 0.67, 1)
+material = SubResource("Dressing")
+script = ExtResource("1")

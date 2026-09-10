@@ -79,7 +79,7 @@ func _check_empty_to_start() -> void:
 ## Save the whole of a run, throw every piece of it away in memory, load it back,
 ## and check each piece against the owner that actually holds it.
 func _check_round_trip() -> void:
-	await _open("Level_10", 0)
+	await _open("Level_5", 0)
 
 	Collectibles.collect("fruit:a")
 	Collectibles.collect("fruit:b")
@@ -99,21 +99,21 @@ func _check_round_trip() -> void:
 	_check(SaveGame.has_save(0), "and the slot now holds something")
 
 	var card := SaveGame.summary(0)
-	_check(card.get("room", "") == "Level_10",
+	_check(card.get("room", "") == "Level_5",
 		"the card names the room he was in  [%s]" % card.get("room", ""))
-	# 11, not 10: room_number is the index PLUS ONE (Level_0 is room 1), and this
-	# room became Level_10 in the renumber. A bare 10 is a room named by NUMBER, so
-	# the Level_N rewrite could not see it — this assertion is what caught the
-	# renumber's numeric list being one entry short.
-	_check(int(card.get("room_number", 0)) == 11,
+	# room_number round-trips the saved room through the SAME name->number rule
+	# the pickers use (index_in_name + 1), rather than a hardcoded constant — so
+	# it stays correct across renumbers and the index_in_name scaling. (Level_10
+	# was the original target here; it is on hold now, see LdtkWorld.SHELVED_ROOMS.)
+	_check(int(card.get("room_number", 0)) == LdtkWorld.index_in_name("Level_5") + 1,
 		"numbered the way the pickers number it  [%s]" % card.get("room_number", 0))
 	_check(int(card.get("points", -1)) == 2 * Points.LEMON,
 		"and the score it had earned  [%s]" % card.get("points", -1))
 	_check(int(card.get("lemons", -1)) == 2 and int(card.get("deaths", -1)) == 3,
 		"with the two counters on it  [%s / %s]"
 			% [card.get("lemons"), card.get("deaths")])
-	_check(SaveGame.unlocked_rooms(0).has("Level_10"),
-		"and Level_10 is unlocked for the level select  %s" % str(SaveGame.unlocked_rooms(0)))
+	_check(SaveGame.unlocked_rooms(0).has("Level_5"),
+		"and Level_5 is unlocked for the level select  %s" % str(SaveGame.unlocked_rooms(0)))
 
 	# Wipe everything the run knew, in memory. Anything that survives this is
 	# something the load did not have to do, which is the point of doing it.
@@ -141,7 +141,7 @@ func _check_round_trip() -> void:
 	# opened, and a score running up from zero is a lie about what just happened.
 	_check(Points.shown() == Points.total,
 		"...and shown outright rather than rolled  [%d]" % Points.shown())
-	_check(world.current_room != null and world.current_room.name == "Level_10",
+	_check(world.current_room != null and world.current_room.name == "Level_5",
 		"opened in the room it was saved in  [%s]"
 			% (world.current_room.name if world.current_room else "<none>"))
 	_check(world.player.has_dash, "and he still has the dash he was given")
@@ -159,7 +159,7 @@ func _check_slots_are_independent() -> void:
 	Deaths.record()
 	SaveGame.save_now()
 
-	await _open("Level_8", 2)
+	await _open("Level_6", 2)
 	Deaths.record()
 	Deaths.record()
 	Deaths.record()
@@ -170,11 +170,11 @@ func _check_slots_are_independent() -> void:
 	var one := SaveGame.summary(0)
 	var two := SaveGame.summary(1)
 	var three := SaveGame.summary(2)
-	_check(one.get("room") == "Level_10" and int(one.get("deaths")) == 3,
+	_check(one.get("room") == "Level_5" and int(one.get("deaths")) == 3,
 		"slot 1 is untouched  [%s / %s]" % [one.get("room"), one.get("deaths")])
 	_check(two.get("room") == "Level_4" and int(two.get("deaths")) == 1,
 		"slot 2 holds its own run  [%s / %s]" % [two.get("room"), two.get("deaths")])
-	_check(three.get("room") == "Level_8" and int(three.get("deaths")) == 5,
+	_check(three.get("room") == "Level_6" and int(three.get("deaths")) == 5,
 		"slot 3 holds a third  [%s / %s]" % [three.get("room"), three.get("deaths")])
 	_check(SaveGame.latest_slot() == 2,
 		"and CONTINUE picks the one saved most recently  [slot %d]"
@@ -254,10 +254,11 @@ func _check_way_back_survives() -> void:
 
 	# Walk it. The dictionary being right and the door being wrong is exactly the
 	# bug this whole field exists to prevent, so the assertion is the doorway.
-	# Walked in through Level_13's Exit rather than dropped into Level_14,
+	# Walked in through the room BEFORE the boss (Level_V14 now — Level_13 is on
+	# hold, see LdtkWorld.SHELVED_ROOMS) rather than dropped into Level_14,
 	# because arriving is what hangs the return door — a room you were simply
 	# placed in has no doorway behind you to try.
-	await _open_room("Level_13")
+	await _open_room("Level_V14")
 	await _walk_forward()
 	_check(world.current_room != null and world.current_room.name == "Level_14",
 		"walked into Level_14  [%s]"
@@ -349,7 +350,7 @@ func _check_menu_offers() -> void:
 ## screen must not itself be pausable, which is the same `Screen.current` gate
 ## that already refuses a pause with no world.
 func _check_quit_to_title() -> void:
-	await _open("Level_12", 0)
+	await _open("Level_V2", 0)
 	Deaths.record()
 	await _frames(5)
 	_check(Pause.pause_game(), "the run pauses")
@@ -367,7 +368,7 @@ func _check_quit_to_title() -> void:
 	_check(SaveGame.slot == -1, "the run is unbound")
 
 	var card := SaveGame.summary(0)
-	_check(card.get("room") == "Level_12" and int(card.get("deaths")) >= 1,
+	_check(card.get("room") == "Level_V2" and int(card.get("deaths")) >= 1,
 		"and it was written down on the way out  [%s / %s]"
 			% [card.get("room"), card.get("deaths")])
 

@@ -1,0 +1,54 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  Level_0 — jump+dash stays under the ceiling  [head 184.4, ceiling 160, 60px of reach]
+  PASS  Level_1 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 52px of reach]
+  PASS  Level_2 — jump+dash stays under the ceiling  [head 176.4, ceiling 160, 60px of reach]
+  PASS  Level_3 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 44px of reach]
+  PASS  Level_4 — jump+dash stays under the ceiling  [head 176.0, ceiling 160, 12px of reach]
+  PASS  Level_5 — jump+dash stays under the ceiling  [head 204.0, ceiling 160, -8px of reach]
+  PASS  Level_6 — jump+dash stays under the ceiling  [head 184.0, ceiling 168, 20px of reach]
+  PASS  Level_V1 — jump+dash stays under the ceiling  [head 652.0, ceiling 456, -144px of reach]
+  PASS  Level_V2 — jump+dash stays under the ceiling  [head 496.0, ceiling 456, 36px of reach]
+  PASS  Level_V3 — jump+dash stays under the ceiling  [head 504.0, ceiling 456, 52px of reach]
+  PASS  Level_V4 — jump+dash stays under the ceiling  [head 592.5, ceiling 456, 59px of reach]
+  PASS  Level_V5 — jump+dash stays under the ceiling  [head 552.4, ceiling 456, 60px of reach]
+  PASS  Level_V6 — jump+dash stays under the ceiling  [head 272.0, ceiling 272, 36px of reach]
+  PASS  Level_V7 — jump+dash stays under the ceiling  [head -135.6, ceiling -136, 60px of reach]
+  PASS  Level_V8 — jump+dash stays under the ceiling  [head -487.6, ceiling -544, 60px of reach]
+  PASS  Level_V9 — jump+dash stays under the ceiling  [head 180.0, ceiling -488, -616px of reach]
+  PASS  Level_14 — jump+dash stays under the ceiling  [head 64.4, ceiling 16, 60px of reach]
+  PASS  Level_15 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 52px of reach]
+  PASS  Level_16 — jump+dash stays under the ceiling  [head 1272.4, ceiling 1184, 60px of reach]
+  PASS  Level_17 — jump+dash stays under the ceiling  [head 1192.0, ceiling 1184, 44px of reach]
+  PASS  Level_18 — jump+dash stays under the ceiling  [head 1300.0, ceiling 1184, -0px of reach]
+  PASS  Level_19 — jump+dash stays under the ceiling  [head 1192.4, ceiling 1184, 60px of reach]
+  PASS  Level_20 — jump+dash stays under the ceiling  [head 1216.0, ceiling 1184, 36px of reach]
+  PASS  Level_21 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 36px of reach]
+  PASS  Level_22 — jump+dash stays under the ceiling  [head 1184.0, ceiling 1184, 20px of reach]
+  PASS  Level_23 — jump+dash stays under the ceiling  [head 1184.0, ceiling 1184, 20px of reach]
+  PASS  Level_24 — jump+dash stays under the ceiling  [head 1200.0, ceiling 1184, 20px of reach]
+  PASS  Level_25 — jump+dash stays under the ceiling  [head 1208.4, ceiling 1184, 60px of reach]
+  PASS  Level_V_test — jump+dash stays under the ceiling  [head 224.4, ceiling 120, 60px of reach]
+  PASS  TEST — jump+dash stays under the ceiling  [head 1864.4, ceiling 1840, 60px of reach]
+  PASS  found a standable launch point in 30 of 30 rooms
+  PASS  the launches actually left the ground  [best reach 60px]
+  PASS  he cannot stand out over the drop  [rests at most -99.00px past the edge, boots -100.17..-97.05]
+WORLD BOUNDS TEST: ALL PASS
+WARNING: 56 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 14 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 2 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

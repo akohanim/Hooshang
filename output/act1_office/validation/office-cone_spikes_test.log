@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  floor: a five-cell strip lays five tiles  [5]
+  PASS  floor: ...all from that facing's sheet  [0 stray]
+  PASS  floor: the kill box sits towards the points  [offset -1.0]
+  PASS  ceiling: a five-cell strip lays five tiles  [5]
+  PASS  ceiling: ...all from that facing's sheet  [0 stray]
+  PASS  ceiling: the kill box sits towards the points  [offset 1.0]
+  PASS  left wall: a five-cell strip lays five tiles  [5]
+  PASS  left wall: ...all from that facing's sheet  [0 stray]
+  PASS  left wall: the kill box sits towards the points  [offset 1.0]
+  PASS  right wall: a five-cell strip lays five tiles  [5]
+  PASS  right wall: ...all from that facing's sheet  [0 stray]
+  PASS  right wall: the kill box sits towards the points  [offset -1.0]
+  PASS  the kill box stops exactly where the cones do  [1.0, cones end 1.0]
+  PASS  ...and starts below the very tip  [-3.0, cell top -4.0]
+  PASS  ...and is still thick enough to be a hazard  [4.0px]
+  PASS  the base is a band worth missing  [3.0px of the cell]
+  PASS  a body among the cones is detected
+  PASS  a body standing in the base is NOT  [that is what makes the base safe]
+  PASS  a five-cell strip is no deeper than a one-cell one  [4.0 vs 4.0]
+  PASS  ...it got longer instead  [36.0 vs 4.0]
+CONE SPIKES TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

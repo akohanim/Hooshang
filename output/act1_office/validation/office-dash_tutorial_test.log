@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the world carries the tutorial node
+  PASS  opens in Level_2  [Level_2]
+  PASS  this room's panels are relaxed to 2.4s  [24 of them]
+  PASS  and no panel outside it was touched  [0 were]
+  PASS  he is caught below the ledge he has to reach  [hang 268, ledge 248, panels 248]
+  PASS  and the fall to it is a fall  [26px below the run]
+  PASS  Rumi has something to say  [1 lines]
+  PASS  ...and the hand-over is wordless  [0 lines]
+  PASS  he is caught mid-fall and the prompt arrives
+  PASS  and Rumi has handed him the dash he is about to need
+  PASS  his controls are gone for the fall
+  PASS  there is a beat between the catch and the prompt  [168 frames]
+  PASS  and his controls stay gone for all of it  [loose on 0 of 168 frames]
+  PASS  and come back with the prompt, to answer it with
+  PASS  reaching the point pulls the floor
+  PASS  and every panel in the room is gone  [0 still solid]
+  PASS  ...held at the hang point  [(472.0, 268.1615) vs (472.0, 268.0)]
+  PASS  and he is still there a second later  [(472.0, 268.1615)]
+  PASS  and gravity never builds on him  [(0.0, 9.69)]
+  PASS  a flat dash does not count as having learned it
+  PASS  and he is put back where he was  [(472.0, 268.1615)]
+  PASS  the diagonal dash clears the prompt
+  PASS  and lets go of him
+  PASS  so he actually leaves the spot  [(499.0435, 241.9945)]
+  PASS  and the dash puts him on the ledge  [(499.0435, 241.9945), ledge top 248 x 496]
+DASH TUTORIAL TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

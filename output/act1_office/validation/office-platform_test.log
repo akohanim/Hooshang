@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  a solid platform keeps the width it was given  [(72.0, 8.0)]
+  PASS  ...snapped to whole cells, and always one cell tall  [(72.0, 8.0)]
+  PASS  he lands on the solid platform
+  PASS  ...on its top surface  [feet 96.0, surface 96.0]
+  PASS  and it is still there two seconds later
+  PASS  it goes in under a second  [0.75s]
+  PASS  and it is findable for the reset sweep
+  PASS  he lands on the crumbling platform
+  PASS  it holds for the first few frames
+  PASS  then it gives way and drops him
+  PASS  its collision is off once it has gone
+  PASS  reset_all puts its collision back
+  PASS  ...and the wreckage back where it started
+  PASS  he can stand on it again after a reset
+  PASS  and it holds again, rather than being spent
+  PASS  the run's collider is as wide as the run  [(120.0, 8.0), 5 cells of 24]
+  PASS  ...and follows it through the rounding to an odd count  [5 cells, 120px]
+  PASS  he lands on top of the ceiling run
+  PASS  ...on its top surface  [feet 96.0, surface 96.0]
+  PASS  he cannot punch up through it from below  [head 104.0, underside 104.0]
+  PASS  a bare CeilingLight has no collider working
+  PASS  ...and he falls straight through where it is
+  PASS  a sensored fixture is dark with nobody near it  [0.00 of 1.40]
+  PASS  ...and comes up when he walks under it  [1.40 of 1.40]
+  PASS  ...with the panel's own face lit too, not just the pool  [1.60 of 1.60]
+  PASS  ...and goes back out when he leaves  [0.00 of 1.40]
+  PASS  the fade takes time rather than snapping  [0.15 of 1.40 after ~0.1s]
+  PASS  ...and gets all the way there  [1.40 of 1.40]
+  PASS  an unsensored fixture just stays on  [1.40 of 1.40]
+PLATFORM TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

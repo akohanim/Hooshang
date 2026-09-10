@@ -1,3 +1,7 @@
+> **Full Act I office art:** all 34 rooms now have native-resolution back walls. Existing eclipse and dawn fixtures are unchanged. New V-room windows remain cold; added windows in 22–23 continue the warm pre-dawn ramp. `room_backdrop_tints` adjusts only wall reflectance in the brightest office rooms, preserving the light settings. See `assets/background/act1_office/README.md`.
+
+> **Office background update:** Level_0–Level_9 now use unique shaded pixel-art backgrounds. Their old MoonWindow/MoonGlow/WallPattern placements are removed; moon views in rooms 0–6 now carry OfficeMoon emission (unshaded core/halo plus a small PointLight2D), and music rooms 7–9 remain windowless with black CanvasModulate. Later rooms retain the lighting recipes below. See `assets/background/act1_office/README.md`.
+
 # Lighting — a working guide
 
 How to light rooms in this project by hand, and the handful of rules that stop
@@ -838,3 +842,31 @@ the far end and the sun in the window, not the average.
 - **Lights don't move with rooms.** If this keeps costing you time, the fix is to
   make `Lamp` an LDtk entity so lights are placed *in* the room and travel with
   it — a small addition to `tools/ldtk_entities.py` and the entities import hook.
+
+### Fixed room moons (September 2026)
+
+Act I uses the same 16px unshaded cratered disc in both baked-background
+windows and MoonWindow props. `MoonVisibility` elects one source by stable
+scene order per room; camera position is deliberately irrelevant. Only the
+active room's source is enabled, including during camera transitions. Additional
+windows remain moonless. The first seven backgrounds erase every baked disc
+but instantiate only one replacement. Place that replacement inside the left
+pane. `MoonWindow.night_progress` shifts the later moon from x=-7 to x=-11
+through the route. The boss's primary window is centered in its room; the
+legacy secondary eclipse target is hidden, retained for story compatibility.
+CanvasModulate, musical darkness, eclipse timing, and the return dawn are unchanged.
+
+### Window occlusion
+
+The lunar disc, halo and eclipse shadow share `WindowAperture` glass masks.
+Only transparent panes reveal these layers; opaque wall, sash and divider
+pixels never receive lunar artwork. Point-light illumination remains separate.
+Baked office backgrounds declare native-pixel glass rectangles in
+`office_window_panes.gd`; missing geometry defaults to opaque. The reusable
+MoonWindow clips all three layers inside its steel sash. Each sprite owns
+its material so one room cannot change another room's mask.
+
+Run `tests/moon_occlusion_test.tscn` with the graphical renderer to check
+actual pixels through glass, behind a mullion and outside the window, for
+both normal and blood moons. The headless camera sweep remains
+`tests/single_moon_test.tscn`.

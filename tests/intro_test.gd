@@ -314,7 +314,11 @@ func _ready() -> void:
 	_arrival_msec = 0
 	_arrival_gap = -1.0
 	var tile_room := _room_named("Level_7")
-	_check(tile_room != null, "the world has room 5 (Level_7)")
+	# The sounding-tiles room is on hold (LdtkWorld.SHELVED_ROOMS) as part of a
+	# level-design pass, so it is off the routed world; skip this beat rather than
+	# fail on its absence. Springs back if Level_7 is un-shelved.
+	if not LdtkWorld.SHELVED_ROOMS.has("Level_7"):
+		_check(tile_room != null, "the world has room 5 (Level_7)")
 	if tile_room != null:
 		world._enter_room(tile_room, true)
 		await _frames(10)

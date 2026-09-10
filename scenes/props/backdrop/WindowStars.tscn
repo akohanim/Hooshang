@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/backdrop/window_stars.gd" id="1"]
+[sub_resource type="CanvasItemMaterial" id="SkyLight"]
+light_mode = 1
+
+[node name="Stars" type="Node2D"]
+material = SubResource("SkyLight")
+script = ExtResource("1")
+texture_filter = 1

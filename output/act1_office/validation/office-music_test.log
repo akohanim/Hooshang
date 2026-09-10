@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the world has room 6 (Level_8)
+  PASS  the world has a NoteSequence
+  PASS  room 6 has five pads  [got 5]
+  PASS  straddling the 2|3 seam sounds ONE pad, not two  [got [3]]
+  PASS  and it cannot advance the run twice  [progress 0]
+  PASS  same at the 4|5 seam  [got [4]]
+  PASS  three landings cannot buy five notes  [progress 0]
+  PASS  stepping a pad twice breaks the run  [progress 0]
+  PASS  and so does the wrong pad  [progress 0]
+  PASS  all five sound, in order, one each  [got [1, 2, 3, 4, 5]]
+  FAIL  the run completes  [progress 0]
+  FAIL  and the glow is granted
+MUSIC TEST: 2 FAILURE(S)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

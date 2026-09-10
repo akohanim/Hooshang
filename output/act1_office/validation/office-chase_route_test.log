@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the three rooms of the chase all exist
+  PASS  opened in Level_13  [Level_13]
+  PASS  Level_14 has a DarkshangTrigger
+  PASS  and something claimed its `triggered` beat  [1 listener(s)]
+  PASS  walked into Level_14  [Level_14]
+  PASS  untriggered, backing out of Level_14 still leads to Level_13  [Level_13]
+  PASS  back in Level_14 for the encounter
+  PASS  Act1Beats drives BOTH of the boss room's moon windows  [2]
+  PASS  and each of them has its light paired with it  [2]
+  PASS  they start on the same moon  [MoonWindowRoom14=0.000, MoonWindowRoom14B=0.000]
+  PASS  the return door stays on the wall he came in through, not the far one  [4822, left=4822 right=5474]
+  PASS  crossing the line does NOT start the moon — the dialogue would hide it  [0.000]
+  PASS  and it starts none of the others either  [MoonWindowRoom14=0.000, MoonWindowRoom14B=0.000]
+  PASS  ...and finishing the reveal starts it  [0.000 -> 0.358]
+  PASS  ...every window in the room turns  [MoonWindowRoom14 = 0.358]
+  PASS  ...every window in the room turns  [MoonWindowRoom14B = 0.358]
+  PASS  ...and they turn together, in step  [MoonWindowRoom14=0.358, MoonWindowRoom14B=0.358]
+  PASS  ...and each paired light drains with it  [MoonGlowRoom14 = 0.879]
+  PASS  ...and each paired light drains with it  [MoonGlowRoom14B = 0.879]
+  PASS  ...in step as well  [0.879 vs 0.879]
+  PASS  the world has an Act1Beats to resume through
+  PASS  a resumed save snaps it, and snaps all of it  [MoonWindowRoom14 = 0.850]
+  PASS  a resumed save snaps it, and snaps all of it  [MoonWindowRoom14B = 0.850]
+  PASS  after meeting him it leads to Level_15 instead  [Level_15]
+  PASS  landing at Level_15's PlayerStart  [(4316.0, 1348.0) vs (4316.0, 1348.0)]
+  PASS  Level_15 still backs out into Level_14  [Level_14]
+  PASS  and leaving Level_14 a second time still goes to Level_15  [Level_15]
+  PASS  the boss room's doorway no longer points at Level_13  [Level_15]
+  PASS  and the re-route is the two halves of one door  [{ &"Level_14": "Level_15", "Level_15": &"Level_14" }]
+  PASS  Level_16 exists
+  PASS  back in Level_15
+  PASS  Level_15's Exit reaches Level_16  [Level_16]
+  PASS  and Level_16 backs out into Level_15  [Level_15]
+CHASE ROUTE TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

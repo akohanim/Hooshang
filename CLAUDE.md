@@ -112,6 +112,23 @@ so the two agree now. The tiles are still placeholder art.
     dialogue box's TOP/BOTTOM placement: flush against whichever screen edge is
     asked for, grows AWAY from that edge as the line gets longer, and switching
     edges between lines leaves nothing behind from the one before
+  - `Godot --headless --path . res://tests/dialogue_skip_test.tscn` — hold
+    `skip_dialogue` (X) for `skip_hold_time` seconds to end a WHOLE
+    conversation, not fast-forward through it page by page: a short hold
+    does nothing (and does not carry over once released, even split across
+    two holds that would add up to one long one if it did), crossing the
+    threshold finishes the current page's reveal instantly and the line
+    then closes ITSELF the same tick with no further press needed, and —
+    the actual point of the feature — a second line in the same
+    conversation never activates and the box's own visibility never so much
+    as flickers while the hold is still armed (it truly never opens, rather
+    than opening and getting skipped). A hold started BEFORE any line was on
+    screen survives the ordinary close+reopen gap between two lines of the
+    SAME conversation but is dropped once it sits idle past
+    `SKIP_HOLD_GAP` — the case that matters MORE here than it would for a
+    page-skip: a stale hold from before a conversation ever started (a
+    finger resting on X, which is also `dash`'s key) must never suppress a
+    whole conversation the player never even saw open
   - `Godot --headless --path . res://tests/intro_video_test.tscn` — the opening
     film: the stream is Ogg Theora (the ONLY container Godot plays — an MP4
     loads as a silent null), it plays on a NEW run, and CONTINUE skips it
@@ -177,7 +194,12 @@ so the two agree now. The tiles are still placeholder art.
   - `Godot --headless --path . res://tests/pause_test.tscn` — the pause screen:
     the world stops and comes back in exactly the state it stopped in,
     `Engine.time_scale` survives a pause taken mid-hitstop, and pause is refused
-    while `input_locked` or when the loaded scene has no player
+    while `input_locked` or when the loaded scene has no player. **Also covers
+    the MUSIC row**: it flips `Settings.music_enabled`, actually mutes the
+    `Music` bus (not Master — a hazard's kill sound or a dialogue voice blip
+    must keep playing with music off), updates its own label between
+    "MUSIC: ON"/"MUSIC: OFF", and — the one row that isn't a way to leave the
+    menu — leaves the pause up rather than closing it
   - `Godot --headless --path . res://tests/thought_tiles_test.tscn` — paintable
     thought-hazard tiles: the ThoughtHazards IntGrid layer imports as a
     pass-through TileMapLayer (collision disabled), the world caches it on room
@@ -336,26 +358,30 @@ so the two agree now. The tiles are still placeholder art.
   entity stays raw data in `ldtk/levels/*.scn` and simply never appears, with
   no error anywhere. `touch ldtk/hooshang_act1.ldtk` then `--import`.
 - **Level identifiers ARE the play order**, and `LdtkWorld.rooms` is sorted by
-  them. `Level_0` is the opening room. The world is no longer one left-to-right
-  row: rooms 14-23 are the escape and run RIGHT to left along the bottom of the
-  grid, retracing rooms 11-3 (room N pairs with room 26-N). Sorting by world
-  position — which this used to do — reads that row backwards, and every "next
-  room" fallback then hands you the room you just left. Renumber when you insert
-  a room, and re-letter that room's lights with it (`LIGHTING.md`).
+  them. `Level_0` is the opening room. **The current spine is `Level_0`..`Level_6`
+  -> `Level_V1`..`Level_V7` -> `Level_14`..`Level_25`.** `Level_7`..`Level_13` are
+  ON HOLD (`LdtkWorld.SHELVED_ROOMS`, a 2026 level-design pass): moved ~1000px
+  clear in the `.ldtk` and skipped by `rooms_in`, so no Exit slides into one and
+  the debug picker does not list them — their nodes still exist, so a name lookup
+  (act1_beats' `music_room_name` = "Level_7") resolves to null gracefully rather
+  than crashing. The escape row `Level_14`..`Level_23` runs RIGHT to left along
+  the bottom of the grid (it used to retrace rooms 11-3; with 7-13 shelved that
+  pairing is dormant). Sorting by world position — which this used to do — reads
+  that row backwards, and every "next room" fallback then hands you the room you
+  just left. Renumber when you insert a room, and re-letter its lights
+  (`LIGHTING.md`).
   **This is not cosmetic.** No Exit in the `.ldtk` carries a NextRoom
   override — checked directly, every one is empty — so `LdtkWorld.rooms`'s
   array order is not just how the debug picker numbers things, it is the ONLY
-  thing that routes actual play from one room to the next. A handful of rooms
-  (`Level_V1`..`Level_V4`, `Level_v5`, `Level_v6`) carry no number of their own
-  but do have a real place in the sequence, between `Level_6` and `Level_7` —
-  `tools/renumber_levels_v2.py`'s block, extended since. Trailing-digit sorting
-  cannot place those on its own (`Level_V1` shares its digit with `Level_1`,
-  which is exactly the bug this note used to be about: they interleaved one per
-  numbered room instead of landing together, and the walk from `Level_0` dead-
-  ended at `Level_v6` with rooms 7-25 unreachable). They are pinned by hand in
-  `LdtkWorld.INSERTED_ROOMS` instead — read that table's own comment, and add to
-  it rather than trusting a new room's digits, before assuming a fifth one will
-  sort itself into place.
+  thing that routes actual play from one room to the next. `Level_V1`..`Level_V7`
+  carry no number of their own but have a real place between `Level_6` and the
+  escape row. Trailing-digit sorting cannot place them (everything after
+  `Level_` is a non-digit, so they fall to `index_in_name`'s sort-last bucket —
+  exactly the dead end a `Level_v5`/`v6` -> `Level_V6`/`V7` rename left before
+  the table was updated: routed `6->V1..V4` then nowhere). They are pinned by
+  hand in `LdtkWorld.INSERTED_ROOMS` instead — read that table's own comment, and
+  add to it rather than trusting a new room's digits. To shelve/un-shelve a room,
+  edit `SHELVED_ROOMS` beside it.
 - **A renamed level needs the import CACHE cleared, not just a re-import.**
   Deleting `ldtk/levels/*.scn` is not enough — the world scene itself is cached
   in `.godot/imported/hooshang_act1.ldtk-*`, and a stale one loaded two rooms
@@ -933,6 +959,19 @@ organized per-character before this pass and needed no change.
   when you quit to the title. `SaveGame.slot == -1` means "write nothing" — the
   debug picker, level-select practice runs and every test run unbound, so
   nothing they do can touch a player's save.
+- `systems/settings.gd` — `Settings` autoload: player PREFERENCES, as opposed
+  to run progress — currently just `music_enabled`, toggled from the pause
+  menu's MUSIC row. Deliberately its own tiny `user://settings.json` rather
+  than a field on a `SaveGame` slot: turning music off has to stick on the
+  title screen and in a brand new game, neither of which has a slot bound yet.
+  Applies itself once at `_ready()`, before any world's Music node has had a
+  chance to autoplay. **Mutes a BUS, not `AudioServer` wholesale** —
+  `default_bus_layout.tres` gives the project a second bus, `Music`, that
+  every world's own `Music` node is routed onto (`bus = &"Music"` on the
+  node, `ldtk/Act1World.tscn` so far); voice blips, SFX and hazard sounds all
+  stay on `Master` and keep playing with music off. `path` is a plain var, not
+  a const, so a test can point it at a throwaway file the same way
+  `SaveGame.dir` does — see `pause_test.gd`'s music check.
 - `systems/game.gd` — `Game` autoload: level progression + Celeste-style fade
   transitions, for `LevelBase`-derived scenes. `Game.LEVELS` is the ordered
   scene list — currently EMPTY, since the two scenes it ever chained
@@ -1020,7 +1059,14 @@ organized per-character before this pass and needed no change.
   never resume in slow motion. A respawn hold is therefore a PAUSABLE
   `SceneTreeTimer` (`create_timer(t, false)`) in both `level_base.gd` and
   `ldtk_world.gd` — the default keeps counting through a pause and would respawn
-  him behind the menu.
+  him behind the menu. **Its rows are RESUME / MUSIC / RETRY / QUIT TO
+  TITLE** — `PauseMenu.Item`'s order has to match `Rows`' children in the
+  scene, the same rule the enum's own doc comment states. MUSIC is the one
+  row that isn't a way to leave the menu: choosing it calls
+  `Settings.set_music_enabled()` and refreshes its own label in place
+  ("MUSIC: ON"/"MUSIC: OFF") rather than closing the pause, which is also why
+  `_choose()` calls `_refresh()` directly for it instead of going through
+  whatever the other rows do on their way out.
 - `systems/voice_blips.gd` — the `VoiceBlips` autoload: Celeste-style dialogue
   VOICE. Not recorded speech — short syllables synthesized by
   `tools/gen_voice_blips.py` (pure stdlib formant synthesis, deterministic,
@@ -1195,11 +1241,70 @@ organized per-character before this pass and needed no change.
   are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the
   numbers and player.gd does all the moving, so nothing else writes velocity.
   Place it in LDtk as a `SlideZone` and set the three fields per instance.
-- `assets/characters/hooshang/hooshang_frames.tres` = the player's SpriteFrames: 56 east-facing 88px
-  frames across ten clips, played at 0.39 scale. It points at
+- `assets/characters/hooshang/hooshang_frames.tres` = the player's SpriteFrames: 82 east-facing 88px
+  frames across twelve clips, played at 0.39 scale. It points at
   `assets/characters/hooshang/sprites/chubby/`, NOT at `.../animations/` — the thin pack in
   `animations/` is the source and `tools/gen_chubby_hooshang.py` is the pass that
-  puts the weight on. `dash` is the Slide clip; west is `flip_h`, not art.
+  puts the weight on (for the clips that still go through it — see below). West
+  is `flip_h`, not art.
+  **`idle`, `run`, `jump`, `fall`, `dash`, `wall_jump`, `wall_land` and `wall_slide` are a
+  SECOND generation, from Codex's built-in image_gen rather than PixelLab/the
+  chubby-warp pipeline** (source sheets + prompts:
+  `assets/characters/hooshang/sprites/source/gpt_v1/`, processed by
+  `tools/import_hooshang_gpt_v1.py`). Those sheets came back as eight poses each,
+  4 cols x 2 rows, 1774x887 with a baked-in checkerboard "background" (real
+  alpha was requested and not honored) that had to be flood-filled from the
+  sheet border into transparency, then color-decontaminated (nearest-opaque-
+  neighbor fill) before a LANCZOS downscale — feeding the checker gray straight
+  into a resize halos every edge in light gray. Frames were placed by the
+  sheet's OWN authored contract (512px cell scaled by the sheet's actual/
+  requested size ratio, 390px standing height, 450px baseline, horizontally
+  centered) rather than each frame's own bounding box, so a run cycle's stride
+  doesn't get independently re-centered frame to frame. `dash` FINALLY got its
+  own art (`chubby/Dash/`) instead of reusing `Slide`'s frames — `Slide`'s PNGs
+  are still on disk, just unreferenced now. **`jump` and `fall` are trimmed to
+  4 of the 8 generated frames each** — the other 4 drift in scale (jump) or
+  rotate into an unrelated dive pose (fall) rather than holding a loopable
+  cycle, which is fine for a one-shot but breaks a `loop: true` clip's wrap.
+  `fall`'s remaining 4 are ping-ponged (0,1,2,3,2,1) rather than played
+  straight, for the same reason `swim`/`swim_idle` are. **`climb` skipped this
+  batch entirely and got a THIRD generation instead, straight from PixelLab**
+  — this batch's own sheet was one static hang pose repeated (the arms never
+  alternate), a downgrade from the cycle it would have replaced. See
+  `assets/characters/hooshang/sprites/source/pixellab_v2/climb/README.md` for
+  the full story, including the PixelLab character itself needing an update
+  first — it had drifted out of date (gray hair, no cardigan pattern, thinner
+  build) from everything else this rig now looks like. **The result STILL
+  isn't a true alternating stride** (arm and knee just keep rising across all
+  8 frames rather than repeating a cycle — the same shape of defect as this
+  batch's own climb sheet, different cause), so it's played as the same
+  ping-pong trick: `0,1,2,3,4,5,6,7,6,5,4,3,2,1`, speed 14 for the same ~1s
+  cycle the old 8-frame straight loop had at speed 8.
+  **`085ab187-f08d-43ff-929e-fdaa97e37475` (PixelLab character_id, state
+  "Chubby (current)") is the one to animate from for any FUTURE clip that
+  wants genuine native-resolution pixel art** — not the older
+  `f925bceb-1d54-4691-a381-54c9c729a97e` this whole rig originally came from
+  (still on file, now a stale sibling state in the same group), and not
+  another GPT/Codex sheet needing the whole dechecker/rescale rescue pipeline
+  `import_hooshang_gpt_v1.py` exists for. It already renders at this rig's
+  exact 88x88 canvas with a matching baseline, so a good generation drops
+  straight into `chubby/<Clip>/east/` with no processing at all.
+  **`idle` is a separate sheet (`source/gpt_v1/idle.png`,
+  `tools/import_hooshang_idle_gpt.py`) and a different shape of problem from
+  the other seven** — this one is `prompts.json`'s own reference image 2, the
+  art the other sheets were told to match, not one of the eight generated
+  from it. It already carried real alpha (no checkerboard to key out), one
+  row of 8 equal columns instead of a 4x2 grid, and a caption
+  ("IDLE BREATHING ANIMATION (8 FRAMES)" plus a "1".."8" under each frame)
+  baked in below the character row that has to be cropped away before
+  slicing (`CAPTION_TOP` in that script). It is also drawn far more
+  consistently than the action sheets — every frame's silhouette bbox landed
+  within 2px of the same height and baseline, measured directly rather than
+  assumed — so frames are placed by each frame's OWN bbox (fixed baseline, a
+  single sheet-wide scale from the median bbox height so per-frame noise
+  can't pulse his size, per-frame horizontal center since a breathing sway
+  has nothing to stay pinned to) rather than the cell contract the noisier
+  action sheets need.
   (Rumi still reuses the samurai pack, `assets/FREE_Samurai .../Sprites`, tinted
   gold — `assets/characters/rumi/rumi_frames.tres`.)
 - `tests/room_shot.tscn` — dev capture harness, not a pass/fail test. Stands the
@@ -1555,6 +1660,46 @@ test rather than being noticed months later in play.
   Do not shrink the font to fit more in — the type size is the thing that makes
   this read like Celeste, and a six-row banner covers the room the scene is set
   in, which is what the cap exists to stop.
+- **Holding `skip_dialogue` (X) for `skip_hold_time` (1s) ends the WHOLE
+  conversation — not a page-by-page fast-forward through it.** The line on
+  screen when the hold crosses the threshold closes itself out with its own
+  ordinary close animation (a smooth transition, never a hard cut — see
+  say()'s `break` right after `await line_finished`), and every line AFTER
+  it in the same conversation never opens at all: `say()` checks
+  `_skip_armed()` as its very FIRST line and returns before touching a
+  single node. This is implemented ENTIRELY inside `DialogueBox`, not in any
+  of its callers: every multi-line conversation (`act1_beats.gd`,
+  `act2_beats.gd`, `ldtk_rumi_trigger.gd`, `jamshid_npc.gd`,
+  `darkshang_trigger.gd`, `dash_tutorial.gd`) is just that CALLER's own `for
+  beat in beats: await Dialogue.say(...)` loop — DialogueBox only ever has
+  one line open at a time and has no idea a "conversation" exists. This
+  still ends the whole thing anyway because `_skip_held_time` survives the
+  gap between one line's close and the next line's entrance (up to
+  `SKIP_HOLD_GAP`), so by the time the NEXT `say()` call in the loop runs,
+  `_skip_armed()` is already true and it returns immediately — the caller's
+  `for` loop just runs to completion in the same frame, with nothing ever
+  drawn, and whatever it does after the loop (almost always
+  `player.input_locked = false`) hands control back. It does NOT survive
+  sitting idle longer than `SKIP_HOLD_GAP`, on purpose — MORE important now
+  than it would be for a page-skip: X is also `dash`'s key (harmless during
+  dialogue since `input_locked` is always true by then, but not before one
+  opens), so a stale hold from before any line was ever on screen would
+  otherwise suppress a WHOLE conversation the player never even saw start,
+  not just fast-forward one page of it. See `tests/dialogue_skip_test.tscn`
+  and `_tick_skip_hold`/`_skip_armed`'s own docs in
+  `scenes/ui/dialogue_box.gd`.
+  **A "Hold X to skip" reminder (the `SkipHint` label) fades in after
+  `hint_delay` (2s) a LINE has been up** — independent of the hold timer
+  above (nothing suppresses it once someone is already holding X; this
+  stays simple on purpose) and reset per LINE rather than surviving the gap
+  between lines, unlike `_skip_held_time` — a line that opens and closes
+  quickly never needed the reminder, and one that runs long enough will
+  cross `hint_delay` again on its own. It shares the Arrow's own strip at
+  the bottom of the banner, at the OPPOSITE end (both are in `_mirrored()`
+  and `_place_vside()`'s node lists, and positioned in `_fit_banner()`
+  alongside Arrow rather than restored from `_authored_v`, same reasoning as
+  Arrow's own exclusion from that list), so it always lands in the free
+  corner rather than competing with the "press to continue" cue for space.
 - **The banner is closed top and bottom by a Persian khatam border**
   (`tools/gen_persian_trim.py`). It is TILED, so it does not care how wide the
   banner is — but it does care how tall: the bands hang off the banner's own two

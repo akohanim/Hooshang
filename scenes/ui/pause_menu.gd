@@ -40,7 +40,7 @@ signal closed
 
 ## The rows, top to bottom. Must match the order of Rows' children in
 ## PauseMenu.tscn — the enum names them, the scene draws them.
-enum Item { RESUME, RETRY, QUIT }
+enum Item { RESUME, MUSIC, RETRY, QUIT }
 
 ## How much of the room still shows through behind the menu. Darker reads as a
 ## harder stop; lighter keeps the level present behind the words.
@@ -262,10 +262,20 @@ func _choose() -> void:
 	match selected:
 		Item.RESUME:
 			resume_game()
+		Item.MUSIC:
+			_toggle_music()
 		Item.RETRY:
 			_retry()
 		Item.QUIT:
 			_quit_to_title()
+
+
+## Flips the setting and stays open — unlike every other row, this one is not
+## a way to leave the menu, so `_refresh()` is called directly rather than by
+## routing through `_move()`.
+func _toggle_music() -> void:
+	Settings.set_music_enabled(not Settings.music_enabled)
+	_refresh()
 
 
 ## Leave the run for the title screen.
@@ -302,6 +312,7 @@ func _refresh() -> void:
 	for i in list.size():
 		list[i].add_theme_color_override("font_color",
 			selected_color if i == selected else dimmed_color)
+	list[Item.MUSIC].text = "MUSIC: ON" if Settings.music_enabled else "MUSIC: OFF"
 	_place_caret()
 
 

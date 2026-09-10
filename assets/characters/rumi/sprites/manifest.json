@@ -1,0 +1,25 @@
+{
+  "frame_size": [
+    96,
+    96
+  ],
+  "render_scale": 0.5,
+  "occupied_height_world_px": 18,
+  "animations": {
+    "idle": {
+      "frames": 4,
+      "fps": 4,
+      "loop": true
+    },
+    "walk": {
+      "frames": 8,
+      "fps": 8,
+      "loop": true
+    },
+    "give_glow": {
+      "frames": 6,
+      "fps": 6,
+      "loop": false
+    }
+  }
+}

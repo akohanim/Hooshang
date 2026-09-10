@@ -1,0 +1,13 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the menu has enough rows to navigate  [3]
+  PASS  a stick resting at 0.30 does not move the cursor at all  [row 0 after 1.2s]
+  PASS  one push moves exactly one row  [row 1]
+  PASS  one move only, until the repeat delay is up  [1 moves in the first 0.34s]
+  PASS  and it repeats once held past it  [5 moves]
+  PASS  at a readable rate, not a blur  [5 moves]
+  PASS  releasing stops the cursor dead  [row 2, was 2]
+  PASS  up moves one row too  [row 1]
+MENU NAV TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

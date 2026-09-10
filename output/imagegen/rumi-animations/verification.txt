@@ -1,0 +1,17 @@
+animation: RUMI ANIMATION TEST: ALL PASS
+rumi_script: RUMI SCRIPT TEST: ALL PASS
+screen: SCREEN TEST: ALL PASS
+portrait_anim: PORTRAIT ANIM TEST: ALL PASS
+dash_tutorial: DASH TUTORIAL TEST: ALL PASS
+Intro: 9 failures; exact messages match before-replacement baseline: True
+Baseline used an isolated copy of the current working project with only this replacement reversed; no user files were reverted.
+FAIL  meeting lines, in order  [got ["Hello??", "Who are you?  I\'ve worked in this office fifteen years. I\'ve never seen you once.", "Are you going to say something, or just stand there glowing at me...", "... I think I hit my head harder than I thought.", "You stand at the beginning of your most important journey, Hooshang jaan.", "A journey? I just wanted to make it to my car.", "You will not reach the parking lot from here.", "This is not that building. It is the one you carry inside you.", "...Inside me?", "Your mind has built its own rooms, and you must go down through every one.", "The office that swallowed your years. Your childhood. And beneath them the places and", "things you have never let go of.", "And I\'m supposed to just walk through my own head.", "Not walk through. You have done that your whole life.", "To pass, you must meet what waits in each room.", "They are not memories, jaan.", "They are still alive. And they will not let you by until you face them.", "Look this really isn\'t a good time. I just lost my job. I\'ll get to all that ...Later.", "...Later. Yes, it\'s always later isn\'t it.", "You have knocked on this door your whole life, from the inside. Now it opens."]]
+FAIL  Rumi stays silent until Hooshang has run out of things to say  [got ["Hooshang", "Hooshang", "Hooshang", "Hooshang", "Rumi", "Hooshang", "Rumi", "Rumi", "Hooshang", "Rumi", "Rumi", "Rumi", "Hooshang", "Rumi", "Rumi", "Rumi", "Rumi", "Hooshang", "Rumi", "Rumi"]]
+FAIL  meeting portraits, one state per line  [got ["hesitant", "skeptical", "annoyed", "vulnerable", "", "skeptical", "", "", "skeptical", "", "", "", "skeptical", "", "", "", "", "hesitant", "", ""]]
+FAIL  the wordless beats play as bubbles, in order  [got ["!"]]
+FAIL  each face sits on the side that speaker is standing on  [Rumi right, got ["left", "left", "left", "left", "right", "left", "right", "right", "left", "right", "right", "right", "left", "right", "right", "right", "right", "left", "right", "right"]]
+FAIL  the tile lines, in order  [got ["I can\'t see a thing.", "You show up right before the parts I\'m going to hate, don\'t you?", "The dark awaits you, you think you\'ve lost your rhythm. You haven\'t.", "It\'s only sleeping, here, in these tiles.", "Wake the notes in their order, one after the next, until they join into a melody. Complete", "it, and its light will gather on you, enough to carry you through the dark ahead.", "So I play the tune, I get a light. ...Fine."]]
+FAIL  he complains into the dark before Rumi answers  [got ["Hooshang", "Hooshang", "Rumi", "Rumi", "Rumi", "Rumi", "Hooshang"]]
+FAIL  tile portraits, one state per line  [got ["hesitant", "annoyed", "", "", "", "", "skeptical"]]
+FAIL  each face sits on the side that speaker is standing on  [Rumi right, got ["left", "left", "right", "right", "right", "right", "left"]]
+Windowed Godot render capture: idle, walk, give_glow captured at 320x180; final palette correction visually checked.

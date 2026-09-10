@@ -1,0 +1,47 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the intro has a stream at all
+  PASS  and it is Ogg Theora, the one container Godot plays  [VideoStreamTheora]
+  PASS  it draws over the main menu  [layer 130]
+  PASS  starting a new run plays the film
+  PASS  mashing enter/space/escape/shift/pad does NOT skip the film
+  PASS  and it is still playing, not merely still on screen
+  PASS  no engine-drawn prompt over the film — its last frame carries that
+  PASS  and nothing behind it acted on the presses  [<null>]
+  PASS  when it ends it holds on the title card instead of starting the run
+  PASS  and the world is still not loaded  [<null>]
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  a press dismisses the title card
+  PASS  and the run starts  [Act1World:<Node2D#176395651155>]
+  PASS  a written slot offers CONTINUE  [["CONTINUE", "NEW GAME", "LOAD GAME", "LEVEL SELECT", "DEBUG PICKER", "QUIT"]]
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  continuing a run does NOT play the film
+  PASS  and it loads the world  [Act1World:<Node2D#510430028866>]
+INTRO VIDEO TEST: ALL PASS
+WARNING: 132 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 32 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

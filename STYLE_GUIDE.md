@@ -362,3 +362,13 @@ Run the headless tests (exit 0 = pass) and confirm a clean boot:
 Godot --headless --path . res://tests/smoke_test.tscn      # movement physics
 Godot --headless --path . res://tests/world_bounds_test.tscn  # LDtk rooms sealed
 ```
+
+### One moon per camera
+
+Use `OfficeMoon` or `MoonWindow` for every moon. Both automatically join the
+`MoonVisibility` autoload's per-viewport selection, including future rooms.
+Do not bake unregistered moons into repeated backgrounds. Existing painted
+moons must have native-pixel rectangles in `LdtkWorld.room_moon_regions` and
+an associated backdrop override so the shaded wall renderer removes the
+painted copies. Windows stay visible; only one lunar disc and halo may draw
+per viewport. Keep music-puzzle rooms moonless.

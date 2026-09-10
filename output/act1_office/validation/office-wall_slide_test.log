@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  wall-slides against a wall on the right  [side=1]
+  PASS  ...always with wall_dir on that same side  [1]
+  PASS  ...and always genuinely touching it (is_on_wall)
+  PASS  wall-slides against a wall on the left  [side=-1]
+  PASS  ...always with wall_dir on that same side  [-1]
+  PASS  ...and always genuinely touching it (is_on_wall)
+  PASS  holding away from the only wall never triggers a wall-slide
+  PASS  falls all the way through without getting stuck
+  PASS  never drifts toward the side that stopped being a wall  [0.00px]
+WALL SLIDE TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

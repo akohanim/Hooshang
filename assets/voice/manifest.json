@@ -1,4 +1,34 @@
 {
+  "childhooshang_annoyed": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "childhooshang_happy": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "childhooshang_neutral": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "childhooshang_sad": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "childhooshang_surprised": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "childhooshang_vulnerable": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
   "hooshang_annoyed": {
     "emphasized": 4,
     "ending": 3,
@@ -25,6 +55,31 @@
     "passing": 8
   },
   "hooshang_vulnerable": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "jamshid_determined": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "jamshid_friendly": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "jamshid_joyful": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "jamshid_sad": {
+    "emphasized": 4,
+    "ending": 3,
+    "passing": 8
+  },
+  "jamshid_worried": {
     "emphasized": 4,
     "ending": 3,
     "passing": 8

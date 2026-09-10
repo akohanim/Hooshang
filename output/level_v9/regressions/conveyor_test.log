@@ -1,0 +1,59 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  the world's own ConveyorBelt entities imported  [58]
+  PASS  and each entity built the belt it names  [made 34 right / 24 left, placed 34 / 24]
+  PASS  a fresh belt runs Right
+  PASS  at 60 px/s  [60]
+  PASS  drift is +speed  [60]
+  PASS  and -speed running Left  [-60]
+  PASS  standing on the belt he is inside it
+  PASS  and it is carrying him
+  PASS  a Right belt carries him right at its speed  [+30.0px, want +30.0]
+  PASS  and never writes his velocity to do it  [0.0 px/s]
+  PASS  a Left belt carries him left  [-30.0px, want -30.0]
+  PASS  twice the speed carries him twice as far  [+60.0px, want +60.0]
+  PASS  walking against the belt he still makes ground  [-2.5px]
+  PASS  because his own run is untouched by it  [-72 of -72 px/s]
+  PASS  and going with it he is faster than going against it  [+50.5 vs -2.5]
+  PASS  jumping, he is airborne and still inside the belt
+  PASS  so the belt is not carrying him
+  PASS  he carries the belt's speed on, and the belt adds no more  [+6.9px, +55 -> +30 px/s]
+  PASS  a dead player is not carried, even standing on it
+  PASS  the belt's speed is handed over on takeoff  [+60 vs +0 px/s]
+  PASS  and a standing jump off a running belt carries further  [+26.5px vs -880.0px]
+  PASS  and running off one, further again  [+67.7px vs +36.0px]
+  PASS  jumping WITH the belt pays 20% over its speed  [+72, want +72 px/s]
+  PASS  dashing along a belt covers a normal dash  [39.0px vs 39.0px]
+  PASS  and dashing INTO one covers exactly the same  [39.0px vs 39.0px]
+  FAIL  a Left belt throws him the other way  [-26.5px vs -880.0px]
+  FAIL  passing over one without landing collects nothing  [+57.5 -> +42.5]
+  PASS  nothing holds him at the test spot to begin with  [34px]
+  PASS  he lands ON a belt strung across a gap  [14px above it, on_floor true]
+  PASS  and drops through one told it is not floor  [34px]
+  PASS  the importer places and sizes it from LDtk  [(8.0, 4.0) (64.0, 16.0)]
+  PASS  a ConveyorBelt_Left runs left  [drift -90]
+  PASS  and a ConveyorBelt_Right runs right  [drift +45]
+  PASS  an unset speed falls back to the prefab, not to zero  [RIGHT, 60]
+  PASS  a belt placed under the old name still runs right
+  PASS  a negative speed is a magnitude, not a stop  [80, drift -80]
+CONVEYOR TEST: 2 FAILURE(S)
+WARNING: 66 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 16 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 2 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

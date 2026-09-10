@@ -14,7 +14,7 @@ extends CharacterBody2D
 
 signal died
 
-enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB, DEAD }
+enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB, SWIM, EXIT_WATER, DEAD }
 
 ## Half of the 9x12 hitbox in Hooshang.tscn — his NORMAL width. Kept here because
 ## the footing check has to probe at the box's own edges; if the shape is ever
@@ -148,7 +148,16 @@ const HALF_HEIGHT := 6.0
 ## coming over it. Celeste runs ONE gravity with a half-strength band at the apex
 ## and saves the fast fall for when you hold down; narrowing this to 1.2 and
 ## letting the apex band below do the work is the same idea.
-@export var fall_gravity := 1900.0
+##
+## WEAKENED 15% (2026-09, 1900 -> 1615, AT THE USER'S EXPLICIT DIRECTION after
+## being warned it is GLOBAL): every descent in the game is now 15% floatier —
+## the way DOWN only, since the rise is rise_gravity's job and jump apex HEIGHT
+## is set on the way up, so normal jumps reach the same height but hang longer
+## before landing. That longer hang is more horizontal reach (airtime x
+## max_run_speed), which player.gd's apex_gravity_mult note flags as tied to
+## level geometry — re-check tests/feel_measure and world_bounds after any
+## further change here.
+@export var fall_gravity := 1615.0
 ## Terminal velocity. Caps fall speed so drops stay readable and survivable.
 @export var max_fall_speed := 220.0
 ## When |vertical speed| is under this, we're "at the apex" of a jump...
@@ -272,6 +281,90 @@ const HALF_HEIGHT := 6.0
 ## since nothing here asks for climbing up and down at different rates.
 @export var climb_speed := 60.0
 
+@export_group("Swim")
+## Top speed while submerged, any direction, px/s. Well below max_run_speed —
+## water is meant to feel slower and heavier than the office floor. (45 =
+## the original 50 minus 10%, tuned down once more for feel.)
+@export var swim_speed := 45.0
+## How fast velocity turns toward the stroke target, px/s^2 — water's own
+## resistance to a sudden change of direction. Lower than ground_accel/decel
+## on purpose, so steering in the pond reads as swimming through something
+## rather than running with gravity turned off.
+@export var swim_accel := 260.0
+## How fast the swim VISUAL's tilt turns to face the current stroke
+## direction, radians/s — see _state_swim's own note on why this is a turn
+## rate and not an instant snap, and why the snap still happens anyway the
+## instant he changes which way he is facing.
+@export var swim_turn_speed := 14.0
+## TOP upward drift, px/s, while submerged and doing nothing — how fast
+## letting go carries him toward the surface once he is well under it.
+## Folded directly into the vertical TARGET (see _state_swim) rather than
+## added to velocity after the fact: added after, swim_accel's own
+## move_toward call erases it again the very next frame (it approaches 0 far
+## faster than a few px/s^2 could ever push velocity away from it), so
+## buoyancy would exist in the code and do nothing you could feel. Folded
+## into the target, it is a value velocity actually settles at and holds —
+## the "the pond does something even if you do nothing" contract
+## DarkThought's motion fields document for a hazard.
+@export var swim_buoyancy := 24.0
+## How far below the surface his CENTRE floats at rest, px. His hitbox is
+## HALF_HEIGHT*2 tall and the sprite's head clears its top, so a few px here
+## is the difference between bobbing with only his head out — what floating
+## actually looks like — and standing on the water like it were a floor.
+@export var swim_float_depth := 7.0
+## Lift per px of depth below that resting line, 1/s. This is the whole
+## reason buoyancy SETTLES instead of climbing forever: below the line it
+## pushes up (saturating at swim_buoyancy), above it pushes back down, so
+## there is a height he actually comes to rest at.
+##
+## Unconditional lift is what this replaced, and it was the root of a whole
+## family of reported bugs rather than just a cosmetic one — with nothing to
+## settle against he rose until his own centre left the top water cell,
+## dropped out of SWIM, fell back in, and flickered SWIM/FALL several times a
+## second (measured: 15 changes in 150 frames in Act_2_Level_0). Every frame
+## in that flicker spent in FALL was a frame of real gravity, of the swim
+## clip snapping back to the fall clip, and of WALL_SLIDE being reachable —
+## which is how a full pool could slide him down its own wall and stand him
+## on its floor.
+@export var swim_float_spring := 4.0
+## How long a jump kick keeps its exemption from the waterline cap — long
+## enough at swim_surface_pop_speed to clear his whole body out of the
+## water, so a breach that was asked for actually lands.
+@export var swim_breach_time := 0.35
+## Hard cap on the DOWNWARD target even holding straight down — buoyancy
+## fighting the descent, not a top speed he is free to choose past it.
+@export var swim_max_sink_speed := 30.0
+## Jump underwater kicks him toward the surface at this speed once, the same
+## shot every press gives rather than a hold — see swim_jump_enabled.
+@export var swim_surface_pop_speed := 100.0
+## Whether jump does anything while submerged. On by default so a panicked
+## mash of the jump button is always a way up.
+@export var swim_jump_enabled := true
+## How long the climb-out-of-water clip holds control for once a swim ends
+## with him already standing on solid ground — reaching a bank rather than
+## surfacing into open air. Purely cosmetic: physics has already landed him
+## correctly by the time this starts (see _post_move's exit-swim-grace
+## check), so this only delays ordinary control long enough for the clip to
+## read as him pulling himself out rather than popping upright mid-stroke.
+@export var exit_water_anim_time := 0.5
+## How long after a swim ends a SUBSEQUENT landing still counts as reaching a
+## bank rather than an ordinary fall — see `_exit_swim_grace_timer`'s own doc
+## for why this needs to be a window and not a single frame. Short enough
+## that landing somewhere unrelated well after genuinely surfacing in open
+## water is never mistaken for a climb-out.
+@export var exit_water_grace_time := 0.2
+## How far in front of him a swim looks for a bank to CLIMB, in px, and how
+## far past that bank's edge the mantle sets him down. See _try_bank_mantle
+## for the whole check; this is the one number that decides both "is there
+## brick right there" and "where does standing on it put me".
+@export var exit_water_reach := 6.0
+## How fast the mantle itself carries him, px/s, up the bank's face and then
+## forward onto its top. Not a physics speed — EXIT_WATER owns velocity
+## outright (see _state_exit_water) — so this is purely how long the climb
+## reads as taking, and it has to cover reach + his own height inside
+## exit_water_anim_time or the beat ends before he is up.
+@export var exit_water_climb_speed := 80.0
+
 @export_group("Footing")
 ## How much solid ground he needs under his MIDDLE to keep standing, in px
 ## either side of his centre. 0 disables the check.
@@ -366,6 +459,11 @@ var facing := 1                 # 1 = right, -1 = left; used for neutral dashes
 ## input reads as neutral. Dialogue/cinematics set this, not pause.
 var input_locked := false
 var dash_available := true      # one dash per airtime, refilled on landing
+## Gravity multiplier for the current spring-launched arc; 1.0 = ordinary
+## gravity. Set by bounce(), read by _apply_gravity, restored to 1.0 the moment
+## he lands (see _post_move) and on respawn — so it can never leak into an
+## ordinary jump or fall that follows.
+var _bounce_gravity_scale := 1.0
 var wall_dir := 0               # which side the wall is on while wall sliding
 ## True while his box is narrowed to fit a one-cell slot. Public because the
 ## visual could want to know one day; nothing reads it yet.
@@ -419,6 +517,89 @@ var slide_speed := 0.0          # px/s it has built to so far
 # while he climbs lives here, in one frame order.
 var ladder_zone: Node = null    # which ladder, so a second one leaving can't clear it
 var ladder_x := 0.0             # the rail's x his box is held to while climbing
+
+# Ponds. Same split again: a Pond grabs him on overlap (see pond.gd, the same
+# "asked fresh every frame" polling SlideZone documents — falling into one, a
+# checkpoint under the surface and the debug picker all have to work with no
+# boundary ever crossed) and hands over via enter_swim()/exit_swim(); all the
+# actual paddling lives here, in _state_swim().
+var swim_zone: Node = null      # which pond, so a second one leaving can't clear it
+## Armed to exit_water_grace_time the instant a swim ends (_clear_swim),
+## ticked down every physics frame in _tick_timers, and consumed (zeroed) by
+## whichever _post_move() call FIRST finds him on solid floor while it is
+## still positive — see that check for why a countdown rather than a
+## one-shot flag. A plain one-shot (checked only on the very next
+## _post_move()) is what this used to be, and it required is_on_floor() to
+## already read true on that exact single frame — which buoyancy makes
+## unreliable even standing right at a shallow bank (it is unconditionally
+## upward with no resting depth, see swim_buoyancy's own doc, so a body
+## resting on a submerged shelf drifts back off it within a frame or two of
+## its own accord) and made painted Water's own tile-exact, no-lag exit
+## check (ldtk_world.gd's _in_water_tile) MORE likely to miss the window
+## than Pond's laggier Area2D overlap, not less — reported from play as the
+## climb-out clip "not working" in Act 2's painted water despite pond_test's
+## own hand-scripted, exact-frame version of the same transition passing.
+## The window is short enough that landing on an unrelated platform several
+## seconds after genuinely surfacing in open water still reads as an
+## ordinary fall, never a bank climb-out.
+var _exit_swim_grace_timer := 0.0
+var exit_water_timer := 0.0     # counts down while State.EXIT_WATER holds control
+## -1/0/+1: which way an EXIT_WATER currently running is MANTLING, 0 when it
+## is the plain "he already landed on a bank, just play the clip" kind. The
+## two kinds share one state deliberately — they are the same beat and the
+## same animation, differing only in whether physics had already put him
+## where he is going. See _try_bank_mantle() and _state_exit_water().
+var _mantle_dir := 0
+## Which leg of the climb is running. Tracked EXPLICITLY rather than derived
+## from where he is, because the legs are not monotonic in position: SETTLE
+## moves back DOWN past the height RISE was waiting for, so a position test
+## would send him straight back to RISE and loop him on the lip forever.
+enum MantlePhase { RISE, FORWARD, SETTLE }
+var _mantle_phase := MantlePhase.RISE
+## Where a mantle is taking him: standing on the bank, feet at the waterline.
+## Computed ONCE when the climb commits, so the whole beat aims at a fixed
+## point rather than re-deriving a moving target every frame.
+var _mantle_to := Vector2.ZERO
+## True while actively steering in the water this frame (any move key held),
+## set by _state_swim and read by _update_visual to pick "swim" (the active
+## stroke) over "swim_idle" (floating, treading water) — the same "one state,
+## the visual branches on a live condition" shape CLIMB's speed_scale already
+## uses, rather than splitting SWIM into two physics states that would behave
+## identically.
+var _swim_paddling := false
+## Counts down while a jump kick is allowed through the waterline cap — see
+## where it is armed in _state_swim, and swim_breach_time's own doc.
+var _swim_breach_timer := 0.0
+## Set by _state_swim, read by _update_visual's SWIM case: rotates the
+## sprite so his own head-to-feet axis points along the stroke direction —
+## level (lying flat) swimming straight left or right, tilted for
+## up/down/diagonal, matching real freestyle rather than staying upright and
+## just leaning — see _tick_swim_orientation's own doc for why the OTHER
+## natural reading (rotate his sideways stroke-reach axis instead, keeping
+## his spine vertical) is wrong: it fails the plainest case there is,
+## "swimming right", which comes out upright rather than level.
+##
+## A FULL circle for THIS axis specifically — unlike a sprite's SIDEWAYS
+## axis elsewhere in this file, which must stay within (-PI/2, PI/2] or it
+## reads as upside down, every angle here is an intentional pose (swimming
+## straight down IS supposed to look head-first-down), because the axis
+## being aligned is the one already pointing head-to-feet.
+var _swim_visual_angle := 0.0
+## Mirrors the art for any leftward-travelling stroke — see
+## _tick_swim_orientation's own doc for why this axis choice, unlike the
+## sideways-axis one it replaced, genuinely needs a flip rather than being
+## fine with a bare rotation: aligning the head-to-feet axis alone leaves
+## the FACE direction unconstrained, and a plain rotation (checked, then
+## corrected from actual play) sends it out of the water on every
+## leftward angle instead of down into it — the "swimming left looks
+## inverted" bug. Mirroring for dir.x < 0 fixes that for free rather than
+## needing a second rotation formula: the head-to-feet axis is flip-
+## invariant (it has zero local x-component), so the exact same rotation
+## angle still lands it correctly regardless of flip, while the face
+## direction — which does have a local x-component — flips right along
+## with everything else and ends up facing down for every direction,
+## left included.
+var _swim_visual_flip := false
 
 # The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
 # with its feet offset-pinned to the bottom of the 9x12 hitbox. It lives
@@ -492,6 +673,10 @@ func _physics_process(delta: float) -> void:
 			_state_wall_slide(delta)
 		State.CLIMB:
 			_state_climb(delta, input_x)
+		State.SWIM:
+			_state_swim(delta, input_x)
+		State.EXIT_WATER:
+			_state_exit_water(delta)
 
 	if sliding():
 		_apply_slide(delta)
@@ -504,6 +689,8 @@ func _physics_process(delta: float) -> void:
 
 func _tick_timers(delta: float) -> void:
 	coyote_timer = maxf(coyote_timer - delta, 0.0)
+	_exit_swim_grace_timer = maxf(_exit_swim_grace_timer - delta, 0.0)
+	_swim_breach_timer = maxf(_swim_breach_timer - delta, 0.0)
 	boost_timer = maxf(boost_timer - delta, 0.0)
 	jump_buffer_timer = maxf(jump_buffer_timer - delta, 0.0)
 	wall_coyote_timer = maxf(wall_coyote_timer - delta, 0.0)
@@ -596,6 +783,10 @@ func _state_climb(delta: float, input_x: float) -> void:
 		jump_buffer_timer = 0.0
 		velocity = Vector2(facing * max_run_speed * 0.6, -jump_speed * 0.6)
 		jump_hold_timer = 0.0
+		# Refill the dash as he leaves the rail — gripping a ladder is a reset
+		# point like landing, so a jump off it always has a dash even when he
+		# grabbed the ladder mid-air with the dash already spent.
+		dash_available = true
 		_clear_ladder()
 		state = State.JUMP
 		juice.on_jump()
@@ -613,6 +804,271 @@ func _state_climb(delta: float, input_x: float) -> void:
 	const CLIMB_SNAP_SPEED := 400.0
 	velocity.x = clampf((ladder_x - global_position.x) / delta, -CLIMB_SNAP_SPEED, CLIMB_SNAP_SPEED) \
 		if delta > 0.0 else 0.0
+
+
+## Submerged in a Pond: free movement in every direction, throttled to
+## swim_speed and turned toward its target at swim_accel rather than snapping
+## — the same "approach, don't teleport" shape _apply_run uses for the
+## ground, just with no floor to push against and no gravity at all.
+##
+## Buoyancy is folded straight into the vertical TARGET rather than added to
+## velocity afterwards — see swim_buoyancy's own doc for why the other order
+## makes it invisible. Neutral input settles at -swim_buoyancy (a steady
+## rise); holding up adds his own stroke on top of that; holding down fights
+## it, capped at swim_max_sink_speed rather than a free descent.
+##
+## Getting IN and OUT is entirely the zone's job (pond.gd polls overlap the
+## same way SlideZone/Ladder do) — this function never checks whether he
+## should still be swimming, only how he moves while he is.
+func _state_swim(delta: float, input_x: float) -> void:
+	var input_y := 0.0 if input_locked else Input.get_axis("move_up", "move_down")
+	_swim_paddling = input_x != 0.0 or input_y != 0.0
+	_tick_swim_orientation(delta, input_x, input_y)
+	velocity.x = move_toward(velocity.x, input_x * swim_speed, swim_accel * delta)
+	var surface := _swim_surface_y()
+	var target_y := clampf(input_y * swim_speed - _buoyant_rise(surface),
+		-(swim_speed + swim_buoyancy), swim_max_sink_speed)
+	velocity.y = move_toward(velocity.y, target_y, swim_accel * delta)
+	# A STROKE cannot carry him out of the water — only the jump kick below
+	# can. Capped on VELOCITY rather than on the target above, because the
+	# target is only where velocity is HEADED: capping it still let a rise
+	# already up to speed coast several px clear of the surface (measured,
+	# 7 SWIM/FALL changes in 150 frames of just holding up — the last of the
+	# flicker the resting float had otherwise fixed). Capping the velocity by
+	# exactly the headroom left closes that: the limit shrinks to nothing as
+	# he arrives, so he eases into the waterline and holds there instead of
+	# breaching and being pulled straight back in.
+	if _swim_breach_timer <= 0.0 and is_finite(surface) and delta > 0.0:
+		velocity.y = maxf(velocity.y, -maxf(global_position.y - surface, 0.0) / delta)
+	# A kick toward the surface, not a jump: he stays in SWIM (the pond still
+	# owns him) rather than launching into JUMP, so mashing the button at the
+	# bottom of a deep pond cannot be mistaken for a real jump with its own
+	# hold/coyote/buffer rules.
+	if swim_jump_enabled and jump_buffer_timer > 0.0:
+		jump_buffer_timer = 0.0
+		velocity.y = -swim_surface_pop_speed
+		# The kick is the ONE thing allowed through the waterline cap above —
+		# without this window it would be swallowed within a few frames of
+		# leaving the resting float, and "a panicked mash of the jump button
+		# is always a way up" (swim_jump_enabled's own promise) would only
+		# ever be true from the bottom of a deep pond.
+		_swim_breach_timer = swim_breach_time
+	# Treading water at the edge and pushing INTO the bank is the climb-out:
+	# it commits here, from inside the swim, rather than waiting for physics
+	# to deposit him on solid ground first. See _try_bank_mantle's own doc
+	# for why that wait could never work in a real pool.
+	_try_bank_mantle(input_x, surface)
+
+
+## Start a climb-out if he is treading water at a bank and pushing into it.
+## True once the climb has committed (state is EXIT_WATER on the way out).
+##
+## THE CLIMB-OUT CANNOT WAIT FOR A LANDING, which is what the grace window
+## (see _exit_swim_grace_timer) assumed and why it was reported broken twice.
+## That window only turns a landing he was already going to make into the
+## climb-out beat; it cannot create one. In a real pool there is no landing
+## to catch: Act 2's own water sits in a brick pit whose walls run the full
+## depth and whose TOPS ARE FLUSH WITH THE WATERLINE -- measured off
+## Act_2_Level_0's own tilemap, not assumed. Swimming into that wall presses
+## him against a face with no ledge below the surface to stand on, and the
+## resting float (swim_float_depth) deliberately holds him too low to ever
+## rise over it on his own. The only exit left was the jump kick, whose arc
+## outlasts the grace window several times over, so the beat never fired and
+## getting out of the water played as flailing at a wall.
+##
+## So the climb is its own move, entered from the water: at the surface,
+## pressing into brick he could stand on top of. Every condition is measured
+## against the world rather than assumed:
+##
+##  1. He is STEERING into it -- drifting into a wall is not a climb.
+##  2. He is AT THE SURFACE. Without this the same press would haul him up a
+##     submerged wall from the pond floor like a ladder.
+##  3. There is genuinely something solid within exit_water_reach ahead.
+##  4. There is somewhere on top of it he could actually stand.
+func _try_bank_mantle(input_x: float, surface: float) -> bool:
+	if input_x == 0.0 or not is_finite(surface):
+		return false
+	# Near the surface only: his own resting depth plus his height, so
+	# treading water at the edge qualifies and swimming along the bottom of
+	# the same pool never does.
+	if global_position.y - surface > swim_float_depth + HALF_HEIGHT:
+		return false
+	var dir := signi(int(signf(input_x)))
+	var hit := KinematicCollision2D.new()
+	if not test_move(global_transform, Vector2(dir * exit_water_reach, 0.0), hit):
+		return false
+	# WHERE THE BANK'S FACE IS, not where he happens to be floating when the
+	# probe first reaches it. He can commit anywhere within exit_water_reach
+	# of the brick, so deriving the landing from his own x instead moves the
+	# target by up to that whole reach depending on how fast he swam in --
+	# which is the difference between clearing a narrow bank and being
+	# refused by the brick stacked one cell behind it, from one approach to
+	# the next. Measured off the collision itself, it is the same spot every
+	# time.
+	var face := global_position.x + dir * (hit.get_travel().length() + _box_width * 0.5)
+	# 1px of clearance over the waterline, not zero: Godot resolves two
+	# exactly-abutting AABBs as a collision (the fact tests/chimney_test.tscn
+	# is built around), so feet dead level with the bank's top would make the
+	# test below read the bank he is climbing ONTO as brick in the way, and
+	# would block the forward leg of the climb against it as well.
+	var top := surface - HALF_HEIGHT - 1.0
+	# Fully onto the bank if it is wide enough to hold him, otherwise just
+	# over its lip. Two candidates rather than one, because real banks here
+	# are a cell or two of brick with MORE brick stacked above them a cell
+	# further in (again, measured -- Act_2_Level_0's right-hand bank is
+	# exactly that), and insisting on a body's width of clear standing room
+	# would refuse the climb outright on the commonest shape in the room.
+	# The lip fallback is footing_width past the face on purpose: that is the
+	# very check _keep_footing() will apply to him the moment he lands, so a
+	# spot that passes here cannot be one he is immediately slipped off.
+	for over in [_box_width * 0.5, footing_width + 0.5]:
+		var landing := Vector2(face + dir * over, top)
+		if _can_stand_at(landing):
+			_mantle_dir = dir
+			_mantle_phase = MantlePhase.RISE
+			_mantle_to = landing
+			_swim_breach_timer = 0.0
+			velocity = Vector2.ZERO
+			facing = dir
+			state = State.EXIT_WATER
+			exit_water_timer = exit_water_anim_time
+			return true
+	return false
+
+
+## Could he stand at `at` -- clear of brick, with ground under his feet?
+## The whole "is that actually a bank" question: a submerged wall that keeps
+## going up past the surface fails the first half, and an overhang or a gap
+## in the bank fails the second.
+func _can_stand_at(at: Vector2) -> bool:
+	var xf := Transform2D(0.0, at)
+	# recovery_as_collision, exactly as _tick_squeeze's own stand-up test
+	# needs it and for the same reason: without it Godot depenetrates first
+	# and reports only what is LEFT, so a body buried in the brick comes back
+	# "clear" -- and he would climb straight into a wall.
+	if test_move(xf, Vector2.ZERO, null, 0.08, true):
+		return false
+	return test_move(xf, Vector2(0.0, exit_water_reach + 1.0))
+
+
+## How hard buoyancy is lifting him right now, px/s (positive = up). Full
+## swim_buoyancy while he is well under, easing to nothing as he reaches the
+## resting line swim_float_depth below the surface, and PUSHING BACK DOWN
+## above it — which is what makes a deliberate breach fall back and settle
+## rather than carrying him clean out of the water, and what stops the
+## SWIM/FALL flicker at its source (see swim_float_spring's own doc).
+##
+## Falls back to the old constant lift when the surface is unknown (INF) —
+## see _swim_surface_y for which zones can answer and which cannot.
+func _buoyant_rise(surface: float) -> float:
+	if not is_finite(surface):
+		return swim_buoyancy
+	var below := global_position.y - (surface + swim_float_depth)
+	return clampf(below * swim_float_spring, -swim_max_sink_speed, swim_buoyancy)
+
+
+## World Y of the waterline above him, or INF if whichever zone is holding him
+## cannot say. swim_zone is a plain Node by design (a Pond, or ldtk_world.gd
+## standing in for painted water, which has no single node to overlap), so
+## this ASKS rather than assumes — and a future third kind of water that never
+## implements it still floats exactly the way everything did before.
+func _swim_surface_y() -> float:
+	if swim_zone != null and swim_zone.has_method("surface_y_at"):
+		return swim_zone.surface_y_at(global_position)
+	return INF
+
+
+## Points the swim visual's own head-to-feet axis along the direction he is
+## actually paddling — level, lying flat and face-down, for straight
+## left/right, tilted to match for up/down/diagonal, exactly like a real
+## freestyle stroke — rather than always drawing the clip's own upright
+## "drifting right" pose no matter which way he actually heads. Driven by
+## INPUT, not velocity: velocity lags behind via swim_accel and carries
+## buoyancy's constant upward bias even while holding straight sideways,
+## either of which would tilt the sprite when level travel was asked for.
+##
+## A FULL circle for the rotation itself — see _swim_visual_angle's own doc
+## for why this particular axis never needs the "stop at 90 degrees, mirror
+## past it" rule this project uses when rotating a sprite's SIDEWAYS axis
+## elsewhere — so lerp_angle alone is enough for the angle; it already takes
+## the short way around a full circle.
+##
+## The MIRROR is a separate, simpler question answered by dir.x alone (see
+## _swim_visual_flip's own doc for why one is needed at all here, when the
+## angle's own axis is flip-invariant): a plain rotation keeps the face
+## pointing down for rightward travel but sends it out of the water for
+## leftward travel, so leftward mirrors. That split lines up with the
+## rotation's own zero-crossings — straight up and straight down are the
+## boundary, both already dir.x == 0 — so toggling it there, the same
+## un-eased instant snap ordinary ground flip_h already uses, changes
+## nothing about which way the character is already very nearly facing at
+## that exact moment.
+func _tick_swim_orientation(delta: float, input_x: float, input_y: float) -> void:
+	var target_angle := 0.0  # idle float: level
+	if _swim_paddling:
+		var dir := Vector2(input_x, input_y).normalized()
+		_swim_visual_flip = dir.x < 0.0
+		# The clip's own local "up" (head-ward) axis is what should end up
+		# pointing along dir. A Node2D rotation adds directly onto a
+		# vector's own angle, and local-up sits exactly 90 degrees behind
+		# local-right (the clip's un-rotated "drifting right" reference
+		# pose) on the circle — so the rotation that carries local-up onto
+		# dir is dir's own angle plus that same 90 degrees. This holds
+		# regardless of the mirror above: local-up has zero local
+		# x-component, so flipping (which negates local x) leaves it
+		# completely unaffected.
+		target_angle = dir.angle() + PI / 2.0
+	else:
+		_swim_visual_flip = facing < 0.0
+	_swim_visual_angle = lerp_angle(_swim_visual_angle, target_angle, minf(1.0, swim_turn_speed * delta))
+
+
+## A brief, uninterruptible beat playing the climb-out-of-water clip — not a
+## ground state itself, so it needs no gravity (he already landed correctly
+## by the time this started, see _post_move's exit-swim-grace check), and
+## it deliberately never reads input, the same way _state_dash owns motion
+## regardless of what the stick is doing: he committed to climbing out, and
+## should not be able to instantly run or jump away mid-animation.
+func _state_exit_water(delta: float) -> void:
+	# Unwind whatever tilt the stroke he arrived on left behind — see the
+	# EXIT_WATER case in _update_visual for why this cannot just be zeroed.
+	_swim_visual_angle = lerp_angle(_swim_visual_angle, 0.0, minf(1.0, swim_turn_speed * delta))
+	if _mantle_dir != 0:
+		# An L-SHAPED path, deliberately not a straight diagonal to the
+		# target: a diagonal runs through the bank's own top corner, and
+		# move_and_slide would simply stop him dead against it halfway up.
+		# Up the face until his feet clear the top, then forward onto it —
+		# still driven through velocity, so brick that turns out to be in the
+		# way (a low ceiling over the bank) stops him honestly instead of
+		# teleporting him into it.
+		if _mantle_phase == MantlePhase.RISE:
+			velocity = Vector2(0.0, -exit_water_climb_speed)
+			if global_position.y <= _mantle_to.y:
+				_mantle_phase = MantlePhase.FORWARD
+		elif _mantle_phase == MantlePhase.FORWARD:
+			velocity = Vector2(_mantle_dir * exit_water_climb_speed, 0.0)
+			if absf(global_position.x - _mantle_to.x) <= 1.0:
+				_mantle_phase = MantlePhase.SETTLE
+		elif not is_on_floor():
+			# The climb deliberately clears the lip by a pixel (see
+			# _try_bank_mantle), so the last thing it does is put that pixel
+			# back. Settling INSIDE the beat is what keeps the clip running
+			# straight into idle/run: end it hanging that pixel high instead
+			# and the ground-state invariant below drops him into FALL for
+			# the few frames it takes to cover 1px from a standstill, which
+			# reads on screen as the climb-out clip being interrupted by a
+			# flash of the falling pose.
+			velocity = Vector2(0.0, exit_water_climb_speed)
+		else:
+			_mantle_dir = 0  # down and standing; hold still for the rest of the clip
+			velocity = Vector2.ZERO
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, ground_decel * delta)
+	exit_water_timer -= delta
+	if exit_water_timer <= 0.0:
+		_mantle_dir = 0
+		var input_x := 0.0 if input_locked else Input.get_axis("move_left", "move_right")
+		state = State.RUN if input_x != 0.0 else State.IDLE
 
 
 # ------------------------------------------------------------- helpers ----
@@ -673,6 +1129,10 @@ func _apply_gravity(delta: float) -> void:
 	# Anti-gravity apex: floatier right at the top of the jump for control.
 	if absf(velocity.y) < apex_threshold:
 		g *= apex_gravity_mult
+	# A spring bounce stretches its whole arc under reduced gravity — see
+	# bounce() and SpringPlatform.bounce_gravity_scale. 1.0 (the default,
+	# restored on every landing) leaves an ordinary jump or fall untouched.
+	g *= _bounce_gravity_scale
 	velocity.y = minf(velocity.y + g * delta, max_fall_speed)
 
 
@@ -771,8 +1231,10 @@ func _try_dash() -> bool:
 		return false  # the slide owns him until he is out of it
 	if climbing():
 		return false  # the ladder owns him until he lets go (jump)
-	if state == State.DASH or state == State.DEAD:
-		return false
+	if swimming():
+		return false  # the pond owns him until he surfaces or reaches the bank
+	if state == State.DASH or state == State.DEAD or state == State.EXIT_WATER:
+		return false  # committed to climbing out; see _state_exit_water's own doc
 	if not dash_available or dash_cooldown_timer > 0.0:
 		return false
 	# 8-directional: snap analog input to -1/0/1 per axis; neutral = forward.
@@ -803,6 +1265,12 @@ func _try_dash() -> bool:
 
 ## Transitions that depend on what move_and_slide() just discovered.
 func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> void:
+	# Still within the window a swim's end counts as "reaching a bank" — see
+	# _exit_swim_grace_timer's own doc. NOT cleared here: only the branch
+	# below that actually acts on it zeroes it, so it survives however many
+	# airborne _post_move() calls happen while he is still falling the last
+	# few px onto the bank.
+	var exiting_water := _exit_swim_grace_timer > 0.0
 	# Hitting a ceiling ends the jump's thrust. Without this the hold keeps
 	# re-asserting -jump_speed against a collision that keeps zeroing it, and he
 	# sticks to the underside of the platform for the rest of jump_hold_time.
@@ -810,8 +1278,39 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		jump_hold_timer = 0.0
 	if state == State.DASH or state == State.DEAD:
 		return
+	# The water owns him outright while he is in it: no landing beat, no
+	# ledge slip, and — the one that was actually reported from play — no
+	# WALL_SLIDE. Wall slide can only be entered from FALL (see the branch at
+	# the bottom of this function), so before the float settled against a
+	# real surface the SWIM/FALL flicker was handing it FALL frames several
+	# times a second, and he slid down the side of a full pool as though the
+	# water were not there. Even with the flicker gone this stays: a swimmer
+	# pressed against a wall is swimming, not sliding down it.
+	if state == State.SWIM:
+		return
+	# A bank is not always a FLOOR he lands on — swimming straight into a
+	# wall of brick at the water's own edge (no ledge, just a vertical face
+	# level with the surface) is just as much "reaching a bank" and used to
+	# never trigger EXIT_WATER at all, since only is_on_floor() was checked.
+	# is_on_wall() catches that case too; _state_exit_water() still reads no
+	# input and owns velocity regardless of which one fired it, the same
+	# "committed beat" a ledge-mantle would be in any platformer.
+	# `state != EXIT_WATER` because a MANTLE (see _try_bank_mantle) is already
+	# a climb-out and arms this same grace window on its way out of the water
+	# — without the guard it would refresh its own timer every frame it spent
+	# touching the bank it is climbing, and the beat would never end.
+	if exiting_water and state != State.EXIT_WATER and (is_on_floor() or is_on_wall()):
+		_exit_swim_grace_timer = 0.0  # consumed — see its own doc
+		_mantle_dir = 0  # the landing kind: physics already put him there
+		state = State.EXIT_WATER
+		exit_water_timer = exit_water_anim_time
+		if is_on_floor():
+			dash_available = true  # dash refreshes on landing
+			_keep_footing()
+		return
 	if is_on_floor():
 		dash_available = true  # dash refreshes on landing
+		_bounce_gravity_scale = 1.0  # a spring arc ends where he touches down
 		if state == State.FALL or state == State.JUMP or state == State.WALL_SLIDE:
 			juice.on_land(incoming_vel_y)
 			state = State.RUN if input_x != 0.0 else State.IDLE
@@ -839,7 +1338,27 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 	# upward component happens to end on the frame the player is still touching
 	# the floor). Fixing the invariant rather than that one caller keeps the
 	# whole class of bug closed.
-	if state == State.IDLE or state == State.RUN:
+	#
+	# EXIT_WATER counts as a ground state for exactly this check — it starts
+	# already touching solid support (floor OR wall, see the bank check
+	# above) and applies no gravity of its own either (see
+	# _state_exit_water), so that support giving way mid-climb-out (a
+	# CrumblingPlatform, say) would strand him the same way IDLE/RUN can.
+	# WALL support alone is enough to let it keep running here, unlike
+	# IDLE/RUN which this check always ends — a wall-triggered climb-out
+	# is a brief, deliberate mantle off that wall (the same "suspended for a
+	# beat" shape a ledge-grab uses in any platformer), not a state that is
+	# ever meant to persist indefinitely without support the way standing
+	# still is, and exit_water_timer already bounds it to
+	# exit_water_anim_time regardless of what it is still touching.
+	# A MANTLE in progress is exempt outright, wall or no wall: its forward
+	# half deliberately travels over the bank's top with nothing under him
+	# yet (see _state_exit_water's L-path), so the wall test alone would drop
+	# him back into FALL one step short of the ledge — which is the climb
+	# failing at the last pixel. It owns velocity and exit_water_timer bounds
+	# it, so it cannot strand him the way a gravity-less IDLE would.
+	if (state == State.IDLE or state == State.RUN
+			or (state == State.EXIT_WATER and _mantle_dir == 0 and not is_on_wall())):
 		state = State.FALL
 
 	if state == State.WALL_SLIDE:
@@ -954,6 +1473,17 @@ func _try_stand_up() -> void:
 func _set_box_width(w: float) -> void:
 	if _box != null:
 		_box.size.x = w
+
+
+## His hitbox in world space — the CURRENT one, so a squeeze is reflected
+## rather than assumed away (see _tick_squeeze). Handed out so callers asking
+## "is he in this" can ask about his body instead of the single point his
+## origin happens to be: ldtk_world.gd's water check needs exactly that, since
+## a point at his centre flickers in and out at a water's surface while his
+## body plainly stays in it.
+func hitbox_rect() -> Rect2:
+	var half := Vector2(_box_width * 0.5, HALF_HEIGHT)
+	return Rect2(global_position - half, half * 2.0)
 
 
 ## The centre of the one-cell hole he is standing over, as an offset from his
@@ -1078,6 +1608,13 @@ func is_on_solid_ground() -> bool:
 ## The ONE place player visuals are decided (future palette/power-mode hook).
 func _update_visual() -> void:
 	visual.flip_h = facing < 0
+	# Every OTHER state keeps the sprite level — only SWIM's own case below
+	# overrides this, so leaving a swim tilt behind him on land or mid-climb
+	# is impossible by construction rather than by remembering to reset it.
+	# How DEEP he floats is not a visual offset at all any more, it is where
+	# his body actually is (see swim_float_depth) — so the sprite and the
+	# hitbox cannot disagree about where the waterline crosses him.
+	visual.rotation = 0.0
 	match state:
 		State.IDLE:
 			visual.play("idle")
@@ -1115,6 +1652,26 @@ func _update_visual() -> void:
 			visual.speed_scale = 1.0 if velocity.y < 0.0 else -1.0
 			if is_zero_approx(velocity.y):
 				visual.pause()
+		State.SWIM:
+			# Active stroke while steering, a calmer float the instant input
+			# lets go — see _swim_paddling's own doc.
+			visual.play("swim" if _swim_paddling else "swim_idle")
+			# Overrides the plain ground-facing flip_h set above — swimming
+			# needs its OWN flip (mirror leftward travel so the face still
+			# reads as pointing down, not the last horizontal key pressed on
+			# land) — see _swim_visual_flip's own doc.
+			visual.flip_h = _swim_visual_flip
+			# Child clip itself unfolds from horizontal swimming to standing.
+			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
+		State.EXIT_WATER:
+			visual.play("exit_water")  # climbing onto the bank, one-shot
+			# He arrives here mid-stroke, lying flat against the bank — a
+			# climb-out is entered by swimming INTO it, so the swim tilt is
+			# at its most extreme (a full 90 degrees) on exactly the frame
+			# this state starts. Snapping that to level in one frame is a
+			# visible pop, so the tilt UNWINDS across the clip instead (the
+			# decay itself lives in _state_exit_water, which has the delta).
+			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
 	# Dash availability tint (our stand-in for Celeste's hair color):
 	# normal colors = dash ready, cool blue tint = dash spent.
 	if state != State.DASH:
@@ -1188,6 +1745,19 @@ func respawn(at: Vector2) -> void:
 	# same zone would not, and he would come back sliding with no zone to blame.
 	# Cheaper to start every life with full control and let the zone re-take it.
 	_clear_slide()
+	# Same reasoning for a pond: a checkpoint sitting in or near the water is a
+	# very ordinary thing to place, and without this a respawn there comes back
+	# stuck in FALL forever — swim_zone still points at the pond, so its own
+	# polling in _physics_process reads swimming() as already true and never
+	# calls enter_swim() again to put the state back.
+	_clear_swim()
+	# _clear_swim() arms _exit_swim_grace_timer when he died mid-swim — cleared
+	# here too, or the very next landing (his own checkpoint, almost always
+	# solid ground) would misread as him climbing out of water rather than
+	# an ordinary respawn.
+	_exit_swim_grace_timer = 0.0
+	_mantle_dir = 0  # dying mid-climb must not carry the climb into the next life
+	_bounce_gravity_scale = 1.0  # dying mid-spring-arc must not float the next life
 	visible = true
 	state = State.FALL
 	camera.reset_smoothing()  # snap the camera so retries feel instant
@@ -1242,10 +1812,17 @@ func add_momentum(dx: float) -> void:
 ## what keeps it reading as the platform launching him rather than an ordinary
 ## jump that happened to start high. Buffer/coyote timers are cleared so a jump
 ## queued just before landing can't fight the launch on the very next frame.
-func bounce(vy: float) -> void:
+## Launch straight up, spring-style. `gravity_scale` stretches the whole
+## launched arc under reduced gravity (1.0 = ordinary gravity), so a spring can
+## be slowed and floated without changing the gravity every other jump feels —
+## SpringPlatform pairs a halved launch_speed with a low scale to keep its
+## reach while doubling the airtime (see that prop's own notes). The scale
+## rides until the next landing, where _post_move restores it to 1.0.
+func bounce(vy: float, gravity_scale := 1.0) -> void:
 	if state == State.DEAD:
 		return
 	velocity.y = -absf(vy)
+	_bounce_gravity_scale = maxf(gravity_scale, 0.01)
 	jump_hold_timer = 0.0
 	jump_buffer_timer = 0.0
 	coyote_timer = 0.0
@@ -1311,6 +1888,59 @@ func _clear_ladder() -> void:
 	ladder_zone = null
 	if state == State.CLIMB:
 		state = State.FALL
+
+
+# ----------------------------------------------------------------- ponds ----
+# The API a Pond drives him through (scenes/props/zones/pond.gd). The pond
+# decides who is swimming and when (grabbed on overlap, no input needed — he
+# can simply fall in); this node is the only thing that moves him while he
+# swims.
+
+func swimming() -> bool:
+	return swim_zone != null
+
+
+## Go under: gravity off, free movement at swim_speed/swim_accel/swim_buoyancy
+## (see _state_swim). The pond calls this the moment he overlaps it; this node
+## only does the moving.
+func enter_swim(zone: Node) -> void:
+	if state == State.DEAD or swimming():
+		return
+	# A slide carrying him straight into the water should not keep running
+	# once he is in it — the same reason enter_ladder arrives from states that
+	# already can't coexist with CLIMB.
+	if sliding():
+		_clear_slide()
+	swim_zone = zone
+	jump_hold_timer = 0.0
+	# The water catches him immediately rather than letting an existing fall
+	# carry straight through — without this, jumping in from height kept him
+	# plunging at near free-fall speed for the better part of a second before
+	# swim_accel's own move_toward could bleed it down to the buoyant target
+	# (a big incoming velocity.y against a target near -swim_buoyancy is a
+	# gap swim_accel closes slowly, on purpose, for steering — see its own
+	# doc — which reads right for turning around mid-stroke and wrong for a
+	# splashdown). Capped to the same ceiling holding "down" already caps him
+	# at, not a separate number, so entering the water is never a harder cap
+	# than swimming down through it on purpose would be.
+	velocity.y = minf(velocity.y, swim_max_sink_speed)
+	state = State.SWIM
+
+
+## Let go, if `zone` is the one holding him — mirrors exit_slide/exit_ladder.
+func exit_swim(zone: Node) -> void:
+	if swim_zone == zone:
+		_clear_swim()
+
+
+func _clear_swim() -> void:
+	swim_zone = null
+	if state == State.SWIM:
+		state = State.FALL
+		# Arms the grace window a landing within has to fall inside to read as
+		# a bank climb-out rather than an ordinary fall — see the timer's own
+		# doc for why this is a window and not a single frame.
+		_exit_swim_grace_timer = exit_water_grace_time
 
 
 # ------------------------------------------------------------- cosmetics ----
@@ -1551,3 +2181,17 @@ func set_camera_limits(bounds: Rect2i) -> void:
 	camera.limit_top = bounds.position.y
 	camera.limit_right = bounds.end.x
 	camera.limit_bottom = bounds.end.y
+
+
+## Held campfire pose, using the settled landing crouch from the existing pack.
+## Only the cutscene calls this while physics is frozen; normal play restores
+## the animation on the first tick after unfreeze().
+func cutscene_rest(seated: bool, direction: int) -> void:
+	look(direction)
+	visual.rotation = 0.0
+	visual.flip_h = direction < 0
+	var child_sit: bool = seated and visual.sprite_frames.get_meta("child_hooshang", false)
+	visual.play("sit" if child_sit else ("wall_land" if seated else "idle"))
+	if seated and not child_sit:
+		visual.set_frame_and_progress(0, 0.0)
+		visual.pause()

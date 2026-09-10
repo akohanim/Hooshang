@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  FAIL  the world has Level_v5 and Level_v6
+SCRIPT ERROR: Cannot call method 'is_ancestor_of' on a null value.
+          at: LdtkWorld._room_has_music_puzzle (res://scripts/ldtk_world.gd:765)
+          GDScript backtrace (most recent call first):
+              [0] _room_has_music_puzzle (res://scripts/ldtk_world.gd:765)
+              [1] _enter_room (res://scripts/ldtk_world.gd:782)
+              [2] _ready (res://tests/level_v6_return_race_test.gd:47)
+SCRIPT ERROR: Cannot call method 'get_node_or_null' on a null value.
+          at: LdtkWorld.spawn_point_for (res://scripts/ldtk_world.gd:753)
+          GDScript backtrace (most recent call first):
+              [0] spawn_point_for (res://scripts/ldtk_world.gd:753)
+              [1] _enter_room (res://scripts/ldtk_world.gd:784)
+              [2] _ready (res://tests/level_v6_return_race_test.gd:47)
+SCRIPT ERROR: Cannot call method 'get_children' on a null value.
+          at: LdtkWorld.room_rect (res://scripts/ldtk_world.gd:731)
+          GDScript backtrace (most recent call first):
+              [0] room_rect (res://scripts/ldtk_world.gd:731)
+              [1] _enter_room (res://scripts/ldtk_world.gd:785)
+              [2] _ready (res://tests/level_v6_return_race_test.gd:47)
+SCRIPT ERROR: Cannot call method 'is_ancestor_of' on a null value.
+          at: LdtkWorld._door_in (res://scripts/ldtk_world.gd:954)
+          GDScript backtrace (most recent call first):
+              [0] _door_in (res://scripts/ldtk_world.gd:954)
+              [1] _enter_room (res://scripts/ldtk_world.gd:794)
+              [2] _ready (res://tests/level_v6_return_race_test.gd:47)
+SCRIPT ERROR: Cannot call method 'get_node_or_null' on a null value.
+          at: LdtkWorld._enter_room (res://scripts/ldtk_world.gd:806)
+          GDScript backtrace (most recent call first):
+              [0] _enter_room (res://scripts/ldtk_world.gd:806)
+              [1] _ready (res://tests/level_v6_return_race_test.gd:47)
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+SCRIPT ERROR: Cannot call method 'is_ancestor_of' on a null value.
+          at: LdtkWorld._exit_in (res://scripts/ldtk_world.gd:1243)
+          GDScript backtrace (most recent call first):
+              [0] _exit_in (res://scripts/ldtk_world.gd:1243)
+              [1] _ready (res://tests/level_v6_return_race_test.gd:51)
+              [2] _frames (res://tests/level_v6_return_race_test.gd:99)
+SCRIPT ERROR: Cannot call method 'get_children' on a null value.
+          at: LdtkWorld.room_rect (res://scripts/ldtk_world.gd:731)
+          GDScript backtrace (most recent call first):
+              [0] room_rect (res://scripts/ldtk_world.gd:731)
+              [1] _ready (res://tests/level_v6_return_race_test.gd:52)
+              [2] _frames (res://tests/level_v6_return_race_test.gd:99)
+SCRIPT ERROR: Invalid access to property or key 'global_position' on a base object of type 'Nil'.
+          at: _ready (res://tests/level_v6_return_race_test.gd:53)
+          GDScript backtrace (most recent call first):
+              [0] _ready (res://tests/level_v6_return_race_test.gd:53)
+              [1] _frames (res://tests/level_v6_return_race_test.gd:99)

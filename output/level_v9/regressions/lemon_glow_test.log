@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  GLOW: LemonGlowLight is a Sprite2D, not a Light2D  [Sprite2D]
+  PASS  GLOW: ...drawn unshaded and additive, so it cannot be crushed by CanvasModulate or starved by the light budget
+  PASS  starts with no lemons
+  PASS  GLOW: pressing z with no lemons does nothing
+  PASS  GLOW: ...and nothing is spent
+  PASS  GLOW: pressing z with a lemon spends it
+  PASS  GLOW: ...and lights him up  [visible=true modulate=(0.3719, 0.4375, 0.1313, 1.0)]
+  PASS  GLOW: ...for close to the full duration  [29.98s of 30.0s]
+  PASS  GLOW: pressing again while already lit spends nothing  [5]
+  PASS  GLOW: steady while more than the flicker window remains
+  PASS  GLOW: flickers on and off in the warning window  [on=true off=true]
+  PASS  GLOW: turns off once the timer reaches zero
+  PASS  DEATH: lit before dying
+  PASS  DEATH: dying cuts the glow immediately  [visible=false, 0.0s left]
+  PASS  DEATH: ...and the spent lemon is not refunded  [0]
+LEMON GLOW TEST: ALL PASS

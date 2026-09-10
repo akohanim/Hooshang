@@ -56,26 +56,52 @@ extends Platform
 ##    the request rather than one that is wrong on screen.
 const FIXED_SIZE := Vector2(16.0, 8.0)
 
-## How hard it launches him, px/s upward. MUCH more than a full jump —
-## reference is classic Mario's spring (a bounce that reaches a platform
-## clearly out of a normal jump's range, not an assisted hop): a full held
-## jump apexes at 34px (Player.jump_speed docs), and this is tuned to roughly
-## double that, ~68px — measured directly (spawn, bounce(), track peak height),
-## not derived, same as every other feel number in this project. Comfortably
-## under the game's existing max vertical reach (jump+dash, ~85px — see
-## Player.jump_speed's own doc and tests/world_bounds_test), so a spring can
-## never punch through a ceiling that reach was built against.
-@export var launch_speed := 480.0
+## How hard it launches him, px/s upward. Reaches clearly higher than a full
+## jump — reference is classic Mario's spring (a bounce that reaches a platform
+## out of a normal jump's range, not an assisted hop): a full held jump apexes
+## at 34px (Player.jump_speed docs), and this reaches ~68px — measured directly
+## (spawn, bounce(), track peak height), not derived. Comfortably under the
+## game's max vertical reach (jump+dash, ~85px — see Player.jump_speed's own doc
+## and tests/world_bounds_test), so a spring can never punch through a ceiling
+## that reach was built against.
+##
+## SLOWED ~20% (2026-09) as the "slow the whole bounce down" pass, HEIGHT KEPT.
+## A 50% pass was tried first (240 launch + 0.28 gravity, ~2.15x airtime) and
+## read as WAY too floaty, so it was dialled back to ~20%: 480 -> 415 launch,
+## paired with bounce_gravity_scale below (0.77). Cutting launch alone would
+## drop the arc (reach goes as speed squared), so the reduced gravity lifts it
+## back to the original height while stretching the airtime ~1.2x. Same height,
+## ~20% slower — measured: ORIGINAL 68.5px/0.72s, NOW 68.0px/0.85s. The two
+## knobs are tuned together against tests/spring_platform_test's apex check;
+## move one and the other has to move with it.
+@export var launch_speed := 415.0
+## Gravity the player feels for the WHOLE spring-launched arc, as a fraction of
+## his ordinary gravity — handed to Player.bounce() and restored to 1.0 the
+## moment he lands, so it floats the bounce without changing how any other jump
+## or fall in the game feels. 0.77 is what keeps ~68px of reach out of the
+## reduced launch_speed above while ~1.2x-ing the airtime: same height, ~20%
+## slower (measured). See launch_speed's own note for the paired tuning.
+@export var bounce_gravity_scale := 0.77
 ## How long the compressed frame shows before it starts releasing — the
 ## "under his weight" beat in the reference, held long enough to actually read
 ## as a landing rather than a flicker.
-@export var compress_time := 0.09
+##
+## These three timings were SLOWED 20% TWICE (2026-09, AT THE USER'S
+## DIRECTION: the spring "operated too fast", but the launch HEIGHT was fine —
+## so only the visual mechanic slowed, not launch_speed). Each "20% slower" is
+## speed x0.8, i.e. duration /0.8 = x1.25, so two passes compound to x1.5625
+## off the originals (0.09/0.12/0.16): 0.09 -> 0.1125 -> 0.140625,
+## 0.12 -> 0.15 -> 0.1875, 0.16 -> 0.20 -> 0.25. They are purely cosmetic — the
+## launch fires instantly on contact regardless of these (see _try_launch), so
+## lengthening them cannot change how high or how fast he is thrown, only how
+## long the coil is seen compressing and springing back.
+@export var compress_time := 0.140625
 ## How long the EXPANDED frame holds before easing back to IDLE — the "just
 ## let go" beat, the coil visibly taller than its own resting height.
-@export var expand_time := 0.12
+@export var expand_time := 0.1875
 ## How long the settle-back-to-rest bounce takes once EXPANDED hands back to
 ## IDLE.
-@export var stretch_settle_time := 0.16
+@export var stretch_settle_time := 0.25
 
 ## IDLE/COMPRESSED share the compact 16x8 canvas; EXPANDED is its own taller
 ## 16x16 canvas — a REAL third frame now, not a scale trick played on IDLE.
@@ -203,7 +229,7 @@ func _try_launch(body: Node2D) -> void:
 	var who := body as Player
 	if not _touching(who):
 		return
-	who.bounce(launch_speed)
+	who.bounce(launch_speed, bounce_gravity_scale)
 	_play_bounce()
 
 
@@ -226,6 +252,14 @@ func _players_on_skin() -> Array[Player]:
 func _process(_delta: float) -> void:
 	for who in _players_on_skin():
 		_try_launch(who)
+
+
+## Play the coil's compress/expand/settle animation on demand, with no launch —
+## for a scripted cutscene (Act2Beats' Jamshid exit) where a visual actor, not
+## the player, is bouncing off it. The real bounce path (_try_launch) calls
+## _play_bounce directly; this is just a public door onto the same beat.
+func bounce_visual() -> void:
+	_play_bounce()
 
 
 ## Compress, expand, settle — the visual half of the bounce, played once per

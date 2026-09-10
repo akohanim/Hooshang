@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the intro has a stream at all
+  PASS  and it is Ogg Theora, the one container Godot plays  [VideoStreamTheora]
+  PASS  it draws over the main menu  [layer 130]
+  PASS  starting a new run plays the film
+  PASS  mashing enter/space/escape/shift/pad does NOT skip the film
+  PASS  and it is still playing, not merely still on screen
+  PASS  no engine-drawn prompt over the film — its last frame carries that
+  PASS  and nothing behind it acted on the presses  [<null>]
+  PASS  when it ends it holds on the title card instead of starting the run
+  PASS  and the world is still not loaded  [<null>]
+  PASS  a press dismisses the title card
+  PASS  and the run starts  [Act1World:<Node2D#145190029333>]
+  FAIL  a written slot offers CONTINUE  [["NEW GAME", "DEBUG PICKER", "QUIT"]]
+  FAIL  menu has a row called 'CONTINUE'  [["NEW GAME", "DEBUG PICKER", "QUIT"]]
+  PASS  continuing a run does NOT play the film
+  FAIL  and it loads the world  [<null>]
+INTRO VIDEO TEST: 3 FAILURE(S)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+SCRIPT ERROR: Cannot call method 'store_string' on a null value.
+          at: _write_slot (res://tests/intro_video_test.gd:163)
+          GDScript backtrace (most recent call first):
+              [0] _write_slot (res://tests/intro_video_test.gd:163)
+              [1] _ready (res://tests/intro_video_test.gd:108)
+              [2] _hold (res://tests/intro_video_test.gd:186)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

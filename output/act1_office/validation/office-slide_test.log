@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the default angle is 60 degrees, down and to the right  [(0.5, 0.866025)]
+  PASS  clear of the zone he is not sliding
+  FAIL  and can jump  [rose 2px]
+  PASS  standing in the zone puts him in a slide
+  PASS  his steering drops to control_strength  [0.35]
+  PASS  the drag builds along the angle  [48 -> 92 px/s]
+  PASS  never past the player's own ceiling  [92 of 260]
+  PASS  and it carries him downhill with no input  [57px, 219 px/s]
+  PASS  jump does nothing in the zone  [rose 0px]
+  PASS  and neither does dash  [state RUN]
+  PASS  in the zone again
+  PASS  stepping out ends the slide
+  PASS  steering and drag are both cleared  [control 1.00, drag 0]
+  FAIL  and he can jump again  [rose -59px]
+  PASS  sliding once more, to die in it
+  PASS  respawning clear of it gives control back  [sliding false, control 1.00, at (180.0, 249.615)]
+  FAIL  respawning INSIDE it starts sliding again  [state FALL]
+  PASS  the importer places and sizes it from LDtk  [(8.0, 4.0) (64.0, 32.0)]
+  PASS  and reads all three fields  [30, 0.50, 90]
+  PASS  an unset field falls back to the default, not to zero  [60, 0.35]
+  PASS  nothing holds him at the test spot to begin with  [34px]
+  PASS  a 6-cell slide draws 6 cells of slick floor  [got 6]
+  PASS  he lands ON a slide strung across a gap  [14px above it, on_floor true]
+  PASS  turned off, it draws nothing  [got 0]
+  PASS  and he drops through it  [35px]
+SLIDE TEST: 3 FAILURE(S)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+ERROR: 2 RID allocations of type 'P11GodotArea2D' were leaked at exit.
+WARNING: 2 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

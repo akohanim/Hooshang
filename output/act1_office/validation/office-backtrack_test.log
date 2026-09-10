@@ -1,0 +1,86 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the world has enough rooms to test backtracking
+  PASS  forward: Level_0 -> Level_1
+  PASS  respawning at Level_1's own spawn point doesn't bounce him to the room behind  [now in Level_1]
+  PASS  forward: Level_1 -> Level_2
+  PASS  respawning at Level_2's own spawn point doesn't bounce him to the room behind  [now in Level_2]
+  PASS  forward: Level_2 -> Level_3
+  PASS  respawning at Level_3's own spawn point doesn't bounce him to the room behind  [now in Level_3]
+  PASS  forward: Level_3 -> Level_4
+  PASS  respawning at Level_4's own spawn point doesn't bounce him to the room behind  [now in Level_4]
+  PASS  forward: Level_4 -> Level_5
+  PASS  respawning at Level_5's own spawn point doesn't bounce him to the room behind  [now in Level_5]
+  PASS  forward: Level_5 -> Level_6
+  PASS  respawning at Level_6's own spawn point doesn't bounce him to the room behind  [now in Level_6]
+  PASS  forward: Level_6 -> Level_V1
+  PASS  respawning at Level_V1's own spawn point doesn't bounce him to the room behind  [now in Level_V1]
+  PASS  forward: Level_V1 -> Level_V2
+  PASS  respawning at Level_V2's own spawn point doesn't bounce him to the room behind  [now in Level_V2]
+  PASS  forward: Level_V2 -> Level_V3
+  PASS  respawning at Level_V3's own spawn point doesn't bounce him to the room behind  [now in Level_V3]
+  PASS  forward: Level_V3 -> Level_V4
+  PASS  respawning at Level_V4's own spawn point doesn't bounce him to the room behind  [now in Level_V4]
+  PASS  forward: Level_V4 -> Level_v5
+  PASS  respawning at Level_v5's own spawn point doesn't bounce him to the room behind  [now in Level_v5]
+  PASS  forward: Level_v5 -> Level_v6
+  PASS  respawning at Level_v6's own spawn point doesn't bounce him to the room behind  [now in Level_v6]
+  PASS  forward: Level_v6 -> Level_7
+  PASS  respawning at Level_7's own spawn point doesn't bounce him to the room behind  [now in Level_7]
+  PASS  forward: Level_7 -> Level_8
+  PASS  respawning at Level_8's own spawn point doesn't bounce him to the room behind  [now in Level_8]
+  PASS  forward: Level_8 -> Level_9
+  PASS  respawning at Level_9's own spawn point doesn't bounce him to the room behind  [now in Level_9]
+  PASS  forward: Level_9 -> Level_10
+  PASS  respawning at Level_10's own spawn point doesn't bounce him to the room behind  [now in Level_10]
+  PASS  forward: Level_10 -> Level_11
+  PASS  respawning at Level_11's own spawn point doesn't bounce him to the room behind  [now in Level_11]
+  PASS  forward: Level_11 -> Level_12
+  PASS  respawning at Level_12's own spawn point doesn't bounce him to the room behind  [now in Level_12]
+  PASS  forward: Level_12 -> Level_13
+  PASS  respawning at Level_13's own spawn point doesn't bounce him to the room behind  [now in Level_13]
+  PASS  forward: Level_13 -> Level_14
+  PASS  respawning at Level_14's own spawn point doesn't bounce him to the room behind  [now in Level_14]
+  PASS  walked forward through the Act  [21 rooms]
+  PASS  triggered Darkshang encounter in Level_14
+  PASS  escape: Level_14 -> Level_15
+  PASS  escape: Level_15 -> Level_16
+  PASS  escape: Level_16 -> Level_17
+  PASS  escape: Level_17 -> Level_18
+  PASS  escape: Level_18 -> Level_19
+  PASS  escape: Level_19 -> Level_20
+  PASS  escape: Level_20 -> Level_21
+  PASS  escape: Level_21 -> Level_22
+  PASS  escape: Level_22 -> Level_23
+  PASS  escape: Level_23 -> Level_24
+  PASS  escape: Level_24 -> Level_25
+  PASS  walked the escape route  [12 rooms]
+  PASS  every room re-enters INSIDE itself  []
+  PASS  and clear of its own Exit, not on top of it  []
+  route out : Level_0 -> Level_1 -> Level_2 -> Level_3 -> Level_4 -> Level_5 -> Level_6 -> Level_V1 -> Level_V2 -> Level_V3 -> Level_V4 -> Level_v5 -> Level_v6 -> Level_7 -> Level_8 -> Level_9 -> Level_10 -> Level_11 -> Level_12 -> Level_13 -> Level_14
+  route back: Level_14 -> Level_15 -> Level_16 -> Level_17 -> Level_18 -> Level_19 -> Level_20 -> Level_21 -> Level_22 -> Level_23 -> Level_24 -> Level_25
+BACKTRACK TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+SCRIPT ERROR: Invalid call. Nonexistent function 'swell' in base 'Nil'.
+          at: DashTutorial._give_the_dash (res://scripts/dash_tutorial.gd:325)
+          GDScript backtrace (most recent call first):
+              [0] _give_the_dash (res://scripts/dash_tutorial.gd:325)
+              [1] step_to (res://scripts/ldtk_rumi_trigger.gd:439)
+SCRIPT ERROR: Invalid call. Nonexistent function 'portrait_side' in base 'Nil'.
+          at: DashTutorial._say (res://scripts/dash_tutorial.gd:334)
+          GDScript backtrace (most recent call first):
+              [0] _say (res://scripts/dash_tutorial.gd:334)
+              [1] _call_rumi (res://scripts/dash_tutorial.gd:314)
+              [2] _give_the_dash (res://scripts/dash_tutorial.gd:325)
+              [3] step_to (res://scripts/ldtk_rumi_trigger.gd:439)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

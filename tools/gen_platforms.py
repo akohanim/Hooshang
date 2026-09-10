@@ -188,3 +188,7 @@ edge(cut(solid, plain_x, ICON, ICON // 2)).resize((ICON, ICON), Image.NEAREST) \
 Image.open(os.path.join(OUT, "crumble_1.png")).resize((ICON, ICON), Image.NEAREST) \
     .save(os.path.join(LDTK_ART, "platform_crumbling.png"))
 print("wrote %s and the two LDtk icons" % os.path.relpath(OUT, ROOT))
+
+# Crumble stones use their own geometry; keep the LDtk icon synchronized.
+from gen_crumble_blocks import run as rebuild_crumble_stones
+rebuild_crumble_stones()

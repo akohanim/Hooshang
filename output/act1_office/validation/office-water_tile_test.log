@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  started in Act_2_Level_0
+  PASS  Water layer exists in the room
+  PASS  collision disabled (pass-through)
+  PASS  ldtk_world cached the water layer
+  PASS  empty cell is not water
+  PASS  clear of any painted cell, he is not swimming
+  PASS  _in_water_tile() detects the painted cell
+  PASS  standing on it starts a swim  [state SWIM]
+  PASS  stepping off the painted cell ends the swim
+  PASS  teleporting straight onto a painted cell also starts a swim
+  PASS  1 row under the surface stays shallow (fill)  [got 0]
+  PASS  2 rows under the surface is retargeted to fill_deep  [got 4]
+  PASS  the surface tile itself is untouched (still top)  [got 1]
+  PASS  the surface shimmer actually advances a frame  [0 -> 1]
+  PASS  a plain fill/left cell is never touched by the animation pass
+  PASS  a flipped LEFT (the right bank) keeps its mirroring through the depth pass  [alt 4096]
+  PASS  a flipped TOP (the floor) keeps its mirroring through the shimmer  [alt 8192]
+  PASS  ...and an UNflipped cell is not given a transform it never had  [alt 0]
+  PASS  painted water spawns no fish
+WATER TILE TEST: 19 pass, 0 fail
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

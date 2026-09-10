@@ -1,0 +1,140 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  the world has enough rooms to test backtracking
+  PASS  forward: Level_0 -> Level_1
+  PASS  respawning at Level_1's own spawn point doesn't bounce him to the room behind  [now in Level_1]
+  PASS  forward: Level_1 -> Level_2
+  PASS  respawning at Level_2's own spawn point doesn't bounce him to the room behind  [now in Level_2]
+  PASS  forward: Level_2 -> Level_3
+  PASS  respawning at Level_3's own spawn point doesn't bounce him to the room behind  [now in Level_3]
+  PASS  forward: Level_3 -> Level_4
+  PASS  respawning at Level_4's own spawn point doesn't bounce him to the room behind  [now in Level_4]
+  PASS  forward: Level_4 -> Level_5
+  PASS  respawning at Level_5's own spawn point doesn't bounce him to the room behind  [now in Level_5]
+  PASS  forward: Level_5 -> Level_6
+  PASS  respawning at Level_6's own spawn point doesn't bounce him to the room behind  [now in Level_6]
+  PASS  forward: Level_6 -> Level_V1
+  PASS  respawning at Level_V1's own spawn point doesn't bounce him to the room behind  [now in Level_V1]
+  PASS  forward: Level_V1 -> Level_V2
+  PASS  respawning at Level_V2's own spawn point doesn't bounce him to the room behind  [now in Level_V2]
+  PASS  forward: Level_V2 -> Level_V3
+  PASS  respawning at Level_V3's own spawn point doesn't bounce him to the room behind  [now in Level_V3]
+  PASS  forward: Level_V3 -> Level_V4
+  PASS  respawning at Level_V4's own spawn point doesn't bounce him to the room behind  [now in Level_V4]
+  PASS  forward: Level_V4 -> Level_v5
+  PASS  respawning at Level_v5's own spawn point doesn't bounce him to the room behind  [now in Level_v5]
+  PASS  forward: Level_v5 -> Level_v6
+  PASS  respawning at Level_v6's own spawn point doesn't bounce him to the room behind  [now in Level_v6]
+  PASS  forward: Level_v6 -> Level_7
+  PASS  respawning at Level_7's own spawn point doesn't bounce him to the room behind  [now in Level_7]
+  PASS  forward: Level_7 -> Level_8
+  PASS  respawning at Level_8's own spawn point doesn't bounce him to the room behind  [now in Level_8]
+  PASS  forward: Level_8 -> Level_9
+  PASS  respawning at Level_9's own spawn point doesn't bounce him to the room behind  [now in Level_9]
+  PASS  forward: Level_9 -> Level_10
+  PASS  respawning at Level_10's own spawn point doesn't bounce him to the room behind  [now in Level_10]
+  PASS  forward: Level_10 -> Level_11
+  PASS  respawning at Level_11's own spawn point doesn't bounce him to the room behind  [now in Level_11]
+  PASS  forward: Level_11 -> Level_12
+  PASS  respawning at Level_12's own spawn point doesn't bounce him to the room behind  [now in Level_12]
+  PASS  forward: Level_12 -> Level_13
+  PASS  respawning at Level_13's own spawn point doesn't bounce him to the room behind  [now in Level_13]
+  PASS  forward: Level_13 -> Level_14
+  PASS  respawning at Level_14's own spawn point doesn't bounce him to the room behind  [now in Level_14]
+  PASS  walked forward through the Act  [21 rooms]
+  PASS  triggered Darkshang encounter in Level_14
+  PASS  escape: Level_14 -> Level_15
+  PASS  escape: Level_15 -> Level_16
+  PASS  escape: Level_16 -> Level_17
+  PASS  escape: Level_17 -> Level_18
+  PASS  escape: Level_18 -> Level_19
+  PASS  escape: Level_19 -> Level_20
+  PASS  escape: Level_20 -> Level_21
+  PASS  escape: Level_21 -> Level_22
+  PASS  escape: Level_22 -> Level_23
+  PASS  escape: Level_23 -> Level_24
+  PASS  escape: Level_24 -> Level_25
+  PASS  walked the escape route  [12 rooms]
+  PASS  every room re-enters INSIDE itself  []
+  PASS  and clear of its own Exit, not on top of it  []
+  route out : Level_0 -> Level_1 -> Level_2 -> Level_3 -> Level_4 -> Level_5 -> Level_6 -> Level_V1 -> Level_V2 -> Level_V3 -> Level_V4 -> Level_v5 -> Level_v6 -> Level_7 -> Level_8 -> Level_9 -> Level_10 -> Level_11 -> Level_12 -> Level_13 -> Level_14
+  route back: Level_14 -> Level_15 -> Level_16 -> Level_17 -> Level_18 -> Level_19 -> Level_20 -> Level_21 -> Level_22 -> Level_23 -> Level_24 -> Level_25
+BACKTRACK TEST: ALL PASS
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:3 - ext_resource, invalid UID: uid://bf1agx8m7wbfc - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:4 - ext_resource, invalid UID: uid://iu5e6fw6fkrn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:5 - ext_resource, invalid UID: uid://jyk4r6vjiq34 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:6 - ext_resource, invalid UID: uid://du4es86x5bhny - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:11 - ext_resource, invalid UID: uid://sh003xxr3l2v - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:12 - ext_resource, invalid UID: uid://cmtn6t2qohh62 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:13 - ext_resource, invalid UID: uid://8u5ikhbkb4dh - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:14 - ext_resource, invalid UID: uid://6icmc3qcjldn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:15 - ext_resource, invalid UID: uid://duq6app32kcth - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_004.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:16 - ext_resource, invalid UID: uid://wasjch0medo - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_005.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:19 - ext_resource, invalid UID: uid://d386c2nowiw7y - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:20 - ext_resource, invalid UID: uid://e47eslghc823 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:21 - ext_resource, invalid UID: uid://bvgxb5fex1yju - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:22 - ext_resource, invalid UID: uid://dnn6w3kdgikpn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:23 - ext_resource, invalid UID: uid://cc1phbitach3m - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:24 - ext_resource, invalid UID: uid://hmpiugj8cgul - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:25 - ext_resource, invalid UID: uid://dlwfh815qaktq - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:26 - ext_resource, invalid UID: uid://b0gvpj75c3uxc - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:35 - ext_resource, invalid UID: uid://cd67l7x5qiv0c - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:36 - ext_resource, invalid UID: uid://lh0x0uiikqbf - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:37 - ext_resource, invalid UID: uid://c2fcdky03s5e0 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:38 - ext_resource, invalid UID: uid://dqu7p1xtunijn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:39 - ext_resource, invalid UID: uid://dhijuopfbkq1i - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_004.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:43 - ext_resource, invalid UID: uid://cxn3w5v4vckgg - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:44 - ext_resource, invalid UID: uid://q68k7lcyof6m - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:45 - ext_resource, invalid UID: uid://c72qsyvg6nepe - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:51 - ext_resource, invalid UID: uid://cnlnafmil8xqq - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+SCRIPT ERROR: Invalid call. Nonexistent function 'swell' in base 'Nil'.
+          at: DashTutorial._give_the_dash (res://scripts/dash_tutorial.gd:325)
+          GDScript backtrace (most recent call first):
+              [0] _give_the_dash (res://scripts/dash_tutorial.gd:325)
+              [1] step_to (res://scripts/ldtk_rumi_trigger.gd:439)
+SCRIPT ERROR: Invalid call. Nonexistent function 'portrait_side' in base 'Nil'.
+          at: DashTutorial._say (res://scripts/dash_tutorial.gd:334)
+          GDScript backtrace (most recent call first):
+              [0] _say (res://scripts/dash_tutorial.gd:334)
+              [1] _call_rumi (res://scripts/dash_tutorial.gd:314)
+              [2] _give_the_dash (res://scripts/dash_tutorial.gd:325)
+              [3] step_to (res://scripts/ldtk_rumi_trigger.gd:439)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

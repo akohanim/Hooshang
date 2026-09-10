@@ -84,6 +84,10 @@ def main():
     man = json.load(open(man_path))
     for key in sorted(man):
         entry = man[key]
+        # Atlas-backed sheets have deliberately authored rest/talk/blink roles.
+        # They are Godot resources, not bitmaps for Pillow's eye-band detector.
+        if entry.get("authored_roles", False):
+            continue
         path = os.path.join(LOOPS, entry["sheet"])
         blink, talk, energy = roles(path, int(entry["frames"]),
                                     entry.get("eye", EYE))

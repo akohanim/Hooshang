@@ -3,33 +3,11 @@ class_name MoonWindow
 extends Node2D
 ## The office window, and whatever the moon is doing tonight.
 ##
-## Art only — it emits no light. Pair it with a cold `LampFixture`
-## (`show_body = false`) placed at the same spot; the window IS the visible
-## source and the fixture is the light coming through it. See LIGHTING.md.
-##
-## ONE SCENE, TINTED PER INSTANCE. The escape row (rooms 12-21) runs a total
-## eclipse that recovers as Hooshang gets closer to the way out: room 12 is a
-## blood moon with the umbra still across most of it, and by room 21 it is a
-## clear warm disc the colour of the sunrise waiting in room 22. That is a
-## ten-room ramp, and the alternative — ten drawn moons — puts a slow visual
-## progression in the art pipeline where nobody can compare two steps of it
-## without opening two files. Here the whole ramp is a column of numbers in
-## ldtk/Act1World.tscn.
-##
-## The two overlays are white masks carrying their shape in alpha only
-## (tools/gen_eclipse_moon.py), so their colour is entirely these exports.
-##
-## DEFAULTS ARE THE PLAIN FULL MOON the outbound rooms have always had: no
-## umbra, no halo, no tint. Adding the eclipse could not be allowed to change
-## rooms 1-11, which are still the same night from the other direction.
+## Shared 16px emissive disc and steel sash. The paired LampFixture lights
+## the office while CanvasModulate continues to determine its ambient mood.
+## MoonVisibility assigns one fixed source to each room, never to camera pans.
+## Eclipse exports retain the authored totality, blood moon, and dawn ramp.
 
-## Tint on the moon's own disc. Multiplies the art, so it can only darken —
-## which is right, because the disc is then brightened again by the light
-## fixture sitting on it.
-##
-## Keep GREEN well below RED at the warm end. moon.png's craters are blue, so a
-## yellow tint (high green, low blue) turns them olive and the moon comes out
-## looking mouldy rather than warm.
 @export var moon_color := Color(1, 1, 1):
 	set(v): moon_color = v; _apply()
 ## The patch of sky behind it.
@@ -87,10 +65,25 @@ extends Node2D
 @export_range(0.1, 0.8) var crossing_share := 0.5
 @export_range(0.0, 0.4) var totality_share := 0.12
 
+@export_range(0.0, 1.0) var night_progress := 0.0:
+	set(v): night_progress = v; _apply()
+
 var _turn: Tween
+var _moon_selected := true
+
+func moon_local_rect() -> Rect2:
+	return $Moon.transform * $Moon.get_rect()
+
+func set_moon_selected(selected: bool) -> void:
+	_moon_selected = selected
+	_apply()
 
 
 func _ready() -> void:
+	if not Engine.is_editor_hint():
+		add_to_group("moon_candidates")
+		_moon_selected = false
+	$Stars.configure([Rect2(-19, -26, 38, 52)], str(get_path()))
 	_apply()
 
 
@@ -186,6 +179,7 @@ func _snap_to_blood(glow: LampFixture) -> void:
 func _apply() -> void:
 	if not is_inside_tree():
 		return
+	$Stars.visible = not _moon_selected
 	var sky := get_node_or_null("SkyPatch") as ColorRect
 	var moon := get_node_or_null("Moon") as Sprite2D
 	var shadow := get_node_or_null("Shadow") as Sprite2D
@@ -193,10 +187,23 @@ func _apply() -> void:
 	if sky != null:
 		sky.color = sky_color
 	if moon != null:
+		moon.position = Vector2(roundf(lerpf(-7.0, -11.0, night_progress)), -7)
+		moon.scale = Vector2(16, 16) / moon.texture.get_size()
 		moon.modulate = moon_color
+		moon.visible = _moon_selected
 	if shadow != null:
+		shadow.position = moon.position
+		shadow.scale = moon.scale
 		shadow.modulate = Color(shadow_color, shadow_amount)
-		shadow.visible = shadow_amount > 0.0
+		shadow.visible = _moon_selected and shadow_amount > 0.0
 	if halo != null:
-		halo.modulate = Color(halo_color, halo_amount)
-		halo.visible = halo_amount > 0.0
+		halo.position = moon.position
+		halo.scale = moon.scale
+		halo.modulate = Color(halo_color if halo_amount > 0 else Color(0.48, 0.7, 1), maxf(halo_amount, 0.22))
+		halo.visible = _moon_selected
+
+	# The sky opening is behind the sash. Neither atmosphere nor eclipse can
+	# cover the wall even if a future moon is moved beyond the glass bounds.
+	for layer in [moon, shadow, halo]:
+		if layer != null:
+			WindowAperture.apply(layer, [Rect2(-19, -26, 38, 52)])

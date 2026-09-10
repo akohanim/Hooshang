@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  clear of the pond he is not swimming
+  PASS  and can jump  [rose 16px]
+  PASS  falling into it starts a swim  [state SWIM]
+  PASS  a fast entry is capped the instant he hits the water, not eased in over time  [30.0 px/s]
+  PASS  neutral input rises on buoyancy alone  [-24.0 px/s]
+  PASS  ...settling near swim_buoyancy, not runaway or zero  [-24.0 vs -24.0]
+  PASS  ...and plays the idle float, not the active stroke  [got 'swim_idle']
+  PASS  holding a direction switches to the active stroke  [got 'swim']
+  PASS  holding right builds rightward speed  [45.0 px/s]
+  PASS  holding up rises faster than buoyancy alone  [-69.0 vs -24.0]
+  PASS  holding down is capped at swim_max_sink_speed  [21.0 of 30.0]
+  PASS  swimming right lays him horizontal, head leading  [90.0 deg]
+  PASS  swimming straight up keeps the clip's own upright pose  [0.0 deg]
+  PASS  a diagonal stroke tilts exactly halfway between  [45.0 deg]
+  PASS  letting go levels the idle float back out  [0.0 deg]
+  PASS  jump underwater stays in SWIM, not JUMP  [state SWIM]
+  PASS  ...and gives him a real kick toward the surface  [-100.0 px/s]
+  PASS  dash does nothing in the water  [state SWIM]
+  PASS  stepping clear of the pond ends the swim
+  PASS  ...and reaching solid ground plays the climb-out clip  [state EXIT_WATER]
+  PASS  ...which lets go on its own
+  PASS  and he can jump again once it finishes  [rose 16px]
+  PASS  treading water beside a bank, he is swimming
+  PASS  swimming INTO a bank commits the climb-out  [state EXIT_WATER]
+  PASS  ...and it actually gets him out of the water
+  PASS  ...standing on top of the bank, above the waterline  [y 362.0, surface 368.0]
+  PASS  pushing into that same bank from DEPTH does not climb it  [state SWIM]
+  PASS  an idle float settles at swim_float_depth below the surface  [7.0px, want 7.0]
+  PASS  ...and holds it without flickering out of SWIM  [0 state changes in 120 frames]
+  PASS  swimming once more, to die in it
+  PASS  respawning clear of it gives control back  [at (400.0, 599.7241)]
+  PASS  respawning INSIDE it starts swimming again  [state SWIM]
+  PASS  the importer places and sizes it from LDtk  [(8.0, 4.0) (64.0, 32.0)]
+  PASS  ...and reads FishCount, rounded from the float field  [5]
+  PASS  an unset FishCount falls back to the prefab default, not zero  [3]
+  PASS  the water sheet tiles the whole box  [96 cells, expected 96]
+  PASS  fish_count fish are actually spawned  [3]
+  PASS  ...and each one is a real Fish  [Fish:<Node2D#98901690542>]
+  PASS  ...and each one is a real Fish  [@Node2D@117:<Node2D#98985576627>]
+  PASS  ...and each one is a real Fish  [@Node2D@118:<Node2D#99069462712>]
+POND TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

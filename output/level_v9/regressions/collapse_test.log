@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  a room with things hanging in it has a collapse to play  [0.91s]
+  PASS  all three airborne props are picked up — belt, spikes and fruit alike
+  PASS  a prop already on the floor is left out of it
+  PASS  three things fall  [3]
+  PASS  and a marker is not one of them
+  PASS  the belt came to rest ON the floor  [(40.0, 192.0)]
+  PASS  the spikes did too  [(90.0, 198.0)]
+  PASS  and the fruit  [(140.0, 200.0)]
+  PASS  the prop that was already down did not budge  [192.0, was 192.0]
+  PASS  nor did the marker  [60.0, was 60.0]
+  PASS  the landing squash sprang back  [(1.0, 1.0)]
+  PASS  they are staggered left to right, so the room comes apart as a ripple
+  PASS  an empty room asks for no hold at all  [0.00]
+COLLAPSE TEST: ALL PASS

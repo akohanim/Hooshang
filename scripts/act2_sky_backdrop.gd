@@ -89,16 +89,45 @@ func _wait_for_world() -> void:
 	if world == null or world.current_room == null:
 		return  # a test/editor context with no real room — nothing to draw
 	_world = world
+	# room_changed (slide END) settles the backdrop on the room just entered.
+	# transition_started (slide BEGINS) frames it for the destination up front,
+	# so it is already correct on arrival rather than snapping in a beat after
+	# the player lands — the pop-in the moon had. Unlike the parallax, this
+	# backdrop tiles a FINITE run of sprites to exactly cover a rect, so framing
+	# the destination alone mid-slide would leave the room being left uncovered:
+	# _on_transition_started spans the tiles across BOTH rooms while keeping the
+	# sun (CENTER) centred on the destination, and the slide-end _rebuild then
+	# sheds the now-offscreen half without moving the sun.
 	_world.room_changed.connect(_rebuild)
+	if _world.has_signal("transition_started"):
+		_world.transition_started.connect(_on_transition_started)
 	_rebuild(_world.current_room)
 
 
-func _rebuild(room: Node2D) -> void:
+## Slide start: cover the whole span the camera is about to travel (the room
+## being left through the room being entered) so nothing goes bare mid-slide,
+## but centre the sun on the DESTINATION — where the camera lands and rests —
+## so it does not have to jump there on arrival.
+func _on_transition_started(target: Node2D) -> void:
+	if target == null or _world == null or _world.current_room == null:
+		return
+	var span := _world.room_rect(_world.current_room).merge(_world.room_rect(target))
+	_rebuild(target, span)
+
+
+## `span_override` (Vector2.INF area sentinel: an empty Rect2) widens the tiled
+## coverage beyond `room` without moving the sun — used mid-slide. Empty means
+## "just this room", the ordinary at-rest case.
+func _rebuild(room: Node2D, span_override := Rect2()) -> void:
 	for child in get_children():
 		child.queue_free()
 	if room == null:
 		return
 	var rect: Rect2 = _world.room_rect(room).grow_individual(margin, 0.0, margin, 0.0)
+	# Horizontal tiling spans this instead when a slide is in progress; the sun
+	# and ground line below stay derived from `rect` (the destination room).
+	var span: Rect2 = rect if span_override.size == Vector2.ZERO \
+		else span_override.grow_individual(margin, 0.0, margin, 0.0)
 
 	# top_level = true makes `position` a WORLD position regardless of where
 	# this node sits in the scene tree — so the tiles below are laid out
@@ -124,14 +153,14 @@ func _rebuild(room: Node2D) -> void:
 	var left_edge := center_x - center_w * 0.5
 	var right_edge := center_x + center_w * 0.5
 	var mirror := false
-	while left_edge > rect.position.x:
+	while left_edge > span.position.x:
 		left_edge -= extend_w
 		var left_tile := _sprite(EXTEND, mirror)
 		left_tile.position = Vector2(left_edge, top_y)
 		add_child(left_tile)
 		mirror = not mirror
 	mirror = false
-	while right_edge < rect.end.x:
+	while right_edge < span.end.x:
 		var right_tile := _sprite(EXTEND, mirror)
 		right_tile.position = Vector2(right_edge, top_y)
 		right_edge += extend_w

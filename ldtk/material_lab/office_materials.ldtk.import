@@ -1,0 +1,37 @@
+[remap]
+
+importer="ldtk.import"
+type="PackedScene"
+uid="uid://tsthrhwa80fn"
+path="res://.godot/imported/office_materials.ldtk-c8597b06065ad4d19bcb325f36cb5234.scn"
+
+[deps]
+
+files=["res://ldtk/material_lab/tilesets/tileset_8px_office_materials.res", "res://ldtk/material_lab/levels/OfficeMaterialLab.scn", "res://.godot/imported/office_materials.ldtk-c8597b06065ad4d19bcb325f36cb5234.scn"]
+
+source_file="res://ldtk/material_lab/office_materials.ldtk"
+dest_files=["res://.godot/imported/office_materials.ldtk-c8597b06065ad4d19bcb325f36cb5234.scn", "res://ldtk/material_lab/tilesets/tileset_8px_office_materials.res", "res://ldtk/material_lab/levels/OfficeMaterialLab.scn", "res://.godot/imported/office_materials.ldtk-c8597b06065ad4d19bcb325f36cb5234.scn"]
+
+[params]
+
+World=""
+group_world_layers=false
+Level=""
+pack_levels=true
+Layer=""
+layers_always_visible=false
+Tileset=""
+tileset_custom_data=false
+integer_grid_tilesets=true
+atlas_texture_type=0
+Entity=""
+resolve_entityrefs=true
+use_entity_placeholders=false
+Post Import=""
+tileset_post_import="res://scripts/ldtk_tileset_post_import.gd"
+entities_post_import="res://scripts/material_lab_entities_import.gd"
+level_post_import="res://scripts/material_lab_level_import.gd"
+world_post_import=""
+Debug=""
+force_tileset_reimport=true
+verbose_output=false

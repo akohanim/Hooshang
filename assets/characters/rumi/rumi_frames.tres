@@ -1,58 +1,16 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://cktdl6l6c7a5v"]
 
-[ext_resource type="Texture2D" path="res://assets/characters/rumi/sprites/idle.png" id="idle"]
-
-[ext_resource type="Texture2D" path="res://assets/characters/rumi/sprites/walk.png" id="walk"]
-
-[ext_resource type="Texture2D" path="res://assets/characters/rumi/sprites/give_glow.png" id="give_glow"]
-
-[sub_resource type="AtlasTexture" id="idle_0"]
-atlas = ExtResource("idle")
-region = Rect2(0, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="idle_1"]
-atlas = ExtResource("idle")
-region = Rect2(96, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="idle_2"]
-atlas = ExtResource("idle")
-region = Rect2(192, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="idle_3"]
-atlas = ExtResource("idle")
-region = Rect2(288, 0, 96, 96)
+[ext_resource type="Texture2D" uid="uid://cb03x7k4qdlmc" path="res://assets/characters/rumi/sprites/give_glow.png" id="give_glow"]
+[ext_resource type="Texture2D" uid="uid://dxy8jdq0mjufn" path="res://assets/characters/rumi/sprites/idle.png" id="idle"]
+[ext_resource type="Texture2D" uid="uid://bu5sl4t8mbr8u" path="res://assets/characters/rumi/sprites/walk.png" id="walk"]
 
 [sub_resource type="AtlasTexture" id="walk_0"]
 atlas = ExtResource("walk")
 region = Rect2(0, 0, 96, 96)
 
-[sub_resource type="AtlasTexture" id="walk_1"]
-atlas = ExtResource("walk")
-region = Rect2(96, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="walk_2"]
-atlas = ExtResource("walk")
-region = Rect2(192, 0, 96, 96)
-
 [sub_resource type="AtlasTexture" id="walk_3"]
 atlas = ExtResource("walk")
 region = Rect2(288, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="walk_4"]
-atlas = ExtResource("walk")
-region = Rect2(384, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="walk_5"]
-atlas = ExtResource("walk")
-region = Rect2(480, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="walk_6"]
-atlas = ExtResource("walk")
-region = Rect2(576, 0, 96, 96)
-
-[sub_resource type="AtlasTexture" id="walk_7"]
-atlas = ExtResource("walk")
-region = Rect2(672, 0, 96, 96)
 
 [sub_resource type="AtlasTexture" id="give_glow_0"]
 atlas = ExtResource("give_glow")
@@ -78,12 +36,175 @@ region = Rect2(384, 0, 96, 96)
 atlas = ExtResource("give_glow")
 region = Rect2(480, 0, 96, 96)
 
+[sub_resource type="AtlasTexture" id="idle_0"]
+atlas = ExtResource("idle")
+region = Rect2(0, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="idle_1"]
+atlas = ExtResource("idle")
+region = Rect2(96, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="idle_2"]
+atlas = ExtResource("idle")
+region = Rect2(192, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="idle_3"]
+atlas = ExtResource("idle")
+region = Rect2(288, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="walk_2"]
+atlas = ExtResource("walk")
+region = Rect2(192, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="walk_1"]
+atlas = ExtResource("walk")
+region = Rect2(96, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="walk_4"]
+atlas = ExtResource("walk")
+region = Rect2(384, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="walk_5"]
+atlas = ExtResource("walk")
+region = Rect2(480, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="walk_6"]
+atlas = ExtResource("walk")
+region = Rect2(576, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="walk_7"]
+atlas = ExtResource("walk")
+region = Rect2(672, 0, 96, 96)
+
 [resource]
-animations = [{"frames": [{"duration": 1.0, "texture": SubResource("idle_0")}, {"duration": 1.0, "texture": SubResource("idle_1")}, {"duration": 1.0, "texture": SubResource("idle_2")}, {"duration": 1.0, "texture": SubResource("idle_3")}], "loop": true, "name": &"idle", "speed": 4.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("walk_0")}, {"duration": 1.0, "texture": SubResource("walk_1")}, {"duration": 1.0, "texture": SubResource("walk_2")}, {"duration": 1.0, "texture": SubResource("walk_3")}, {"duration": 1.0, "texture": SubResource("walk_4")}, {"duration": 1.0, "texture": SubResource("walk_5")}, {"duration": 1.0, "texture": SubResource("walk_6")}, {"duration": 1.0, "texture": SubResource("walk_7")}], "loop": true, "name": &"walk", "speed": 8.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("give_glow_0")}, {"duration": 1.0, "texture": SubResource("give_glow_1")}, {"duration": 1.0, "texture": SubResource("give_glow_2")}, {"duration": 1.0, "texture": SubResource("give_glow_3")}, {"duration": 1.0, "texture": SubResource("give_glow_4")}, {"duration": 1.0, "texture": SubResource("give_glow_5")}], "loop": false, "name": &"give_glow", "speed": 6.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("walk_0")}, {"duration": 1.0, "texture": SubResource("walk_1")}, {"duration": 1.0, "texture": SubResource("walk_2")}, {"duration": 1.0, "texture": SubResource("walk_3")}, {"duration": 1.0, "texture": SubResource("walk_4")}, {"duration": 1.0, "texture": SubResource("walk_5")}, {"duration": 1.0, "texture": SubResource("walk_6")}, {"duration": 1.0, "texture": SubResource("walk_7")}], "loop": true, "name": &"run", "speed": 8.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("walk_2")}], "loop": true, "name": &"jump", "speed": 8.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("walk_3")}], "loop": true, "name": &"fall", "speed": 8.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("walk_0")}], "loop": true, "name": &"dash", "speed": 8.0},
-{"frames": [{"duration": 1.0, "texture": SubResource("idle_0")}], "loop": true, "name": &"wall_slide", "speed": 4.0}]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("walk_0")
+}],
+"loop": true,
+"name": &"dash",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("walk_3")
+}],
+"loop": true,
+"name": &"fall",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("give_glow_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("give_glow_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("give_glow_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("give_glow_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("give_glow_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("give_glow_5")
+}],
+"loop": false,
+"name": &"give_glow",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("idle_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("idle_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("idle_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("idle_3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("walk_2")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("walk_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_7")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("walk_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_6")
+}, {
+"duration": 1.0,
+"texture": SubResource("walk_7")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("idle_0")
+}],
+"loop": true,
+"name": &"wall_slide",
+"speed": 4.0
+}]

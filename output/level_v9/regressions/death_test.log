@@ -1,0 +1,388 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  the world has hazards to test (84)
+ERROR: Attempted to use 'has' an object of type 'SubViewport' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewportContainer' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Node' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Window' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewport' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewportContainer' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Node' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Window' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewport' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewportContainer' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Node' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Window' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewport' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewportContainer' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Node' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Window' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewport' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewportContainer' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Node' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Window' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewport' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'SubViewportContainer' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Node' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Attempted to use 'has' an object of type 'Window' into a TypedArray, which does not inherit from 'Node2D'.
+   at: _internal_validate_object (core/variant/container_type_validate.h:114)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+ERROR: Condition "!_p->typed.validate(value, "use 'has'")" is true. Returning: false
+   at: has (core/variant/array.cpp:499)
+   GDScript backtrace (most recent call first):
+       [0] _room_holding (res://tests/death_test.gd:291)
+       [1] _ready (res://tests/death_test.gd:54)
+       [2] _wait_out_death (res://tests/death_test.gd:278)
+       [3] _frames (res://tests/death_test.gd:305)
+  FAIL  every hazard counts exactly one death  ["(3108.175, 596.0) in Level_V2 counted 0"]
+  PASS  floor glass is a hazard like any other
+  PASS  floor: a 4-cell strip draws 4 cells  [got 4]
+  PASS  floor: the kill box is on the shards, not the rubble  [reaches 6 of 8, backs off at -2 (bed starts -4)]
+  PASS  floor: walking into it counts one death (1)
+  PASS  ceiling glass is a hazard like any other
+  PASS  ceiling: a 4-cell strip draws 4 cells  [got 4]
+  PASS  ceiling: the kill box is on the shards, not the rubble  [reaches 6 of 8, backs off at -2 (bed starts -4)]
+  PASS  ceiling: walking into it counts one death (1)
+  PASS  left wall glass is a hazard like any other
+  PASS  left wall: a 4-cell strip draws 4 cells  [got 4]
+  PASS  left wall: the kill box is on the shards, not the rubble  [reaches 6 of 8, backs off at -2 (bed starts -4)]
+  PASS  left wall: walking into it counts one death (1)
+  PASS  right wall glass is a hazard like any other
+  PASS  right wall: a 4-cell strip draws 4 cells  [got 4]
+  PASS  right wall: the kill box is on the shards, not the rubble  [reaches 6 of 8, backs off at -2 (bed starts -4)]
+  PASS  right wall: walking into it counts one death (1)
+  PASS  the importer places it where LDtk put it
+  PASS  a floor strip keeps its width and is one cell tall  [(80.0, 16.0)]
+  PASS  a wall strip keeps its HEIGHT and is one cell wide  [(16.0, 80.0)]
+  PASS  and lays its 5 cells out down the wall  [5]
+  PASS  dying throws a burst of shards  [0 before, 12 after]
+  PASS  and they travel outward  [5.9px -> 23.6px]
+  PASS  and clean themselves up  [0 left]
+  PASS  he is either still dead or already back, never a hidden live player
+  PASS  falling out of the world counts one death (1)
+  PASS  a dead player does not move, so it cannot enter anything new
+  PASS  two separate deaths count two (2)
+DEATH TEST: 1 FAILURE(S)
+WARNING: 66 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 16 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 4 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

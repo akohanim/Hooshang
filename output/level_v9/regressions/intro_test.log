@@ -1,0 +1,60 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  opens on a black screen
+  PASS  fades up from black
+  PASS  control is returned after the waking scene
+  PASS  Hooshang starts DASHLESS — the gift has to mean something
+  PASS  waking lines, in order  [got ["Where am I?", "This doesn\'t feel like my cubicle..."]]
+  PASS  waking portraits: dazed then confused  [got ["dazed", "hesitant"]]
+  PASS  room 1's banner sits flush at the TOP of the screen  [got ["top", "top"]]
+  PASS  room 1 has a Rumi trigger
+  PASS  the trigger defers its beat to the cutscene (no stray one-liner)
+  FAIL  meeting lines, in order  [got ["Hello??", "Who are you?  I\'ve worked in this office fifteen years. I\'ve never seen you once.", "Are you going to say something, or just stand there glowing at me...", "... I think I hit my head harder than I thought.", "You stand at the beginning of your most important journey, Hooshang jaan.", "A journey? I just wanted to make it to my car.", "You will not reach the parking lot from here.", "This is not that building. It is the one you carry inside you.", "...Inside me?", "Your mind has built its own rooms, and you must go down through every one.", "The office that swallowed your years. Your childhood. And beneath them the places and", "things you have never let go of.", "And I\'m supposed to just walk through my own head.", "Not walk through. You have done that your whole life.", "To pass, you must meet what waits in each room.", "They are not memories, jaan.", "They are still alive. And they will not let you by until you face them.", "Look this really isn\'t a good time. I just lost my job. I\'ll get to all that ...Later.", "...Later. Yes, it\'s always later isn\'t it.", "You have knocked on this door your whole life, from the inside. Now it opens."]]
+  FAIL  Rumi stays silent until Hooshang has run out of things to say  [got ["Hooshang", "Hooshang", "Hooshang", "Hooshang", "Rumi", "Hooshang", "Rumi", "Rumi", "Hooshang", "Rumi", "Rumi", "Rumi", "Hooshang", "Rumi", "Rumi", "Rumi", "Rumi", "Hooshang", "Rumi", "Rumi"]]
+  FAIL  meeting portraits, one state per line  [got ["hesitant", "skeptical", "annoyed", "vulnerable", "", "skeptical", "", "", "skeptical", "", "", "", "skeptical", "", "", "", "", "hesitant", "", ""]]
+  FAIL  the wordless beats play as bubbles, in order  [got ["!"]]
+  PASS  every line types at the same speed  [saw [22.0]]
+  FAIL  each face sits on the side that speaker is standing on  [Rumi right, got ["left", "left", "left", "left", "right", "left", "right", "right", "left", "right", "right", "right", "left", "right", "right", "right", "right", "left", "right", "right"]]
+  PASS  room 1's banner stays at the TOP through the meeting too  [got ["top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top", "top"]]
+  PASS  room 1 grants NO dash — the first meeting is an introduction, not a gift
+  PASS  control is returned after the meeting
+  PASS  Rumi has faded out again
+  PASS  Rumi leaving arms the story door
+  PASS  Rumi arrives at a distance, not inside Hooshang  [24px]
+  PASS  the world has the dash room  [Level_2]
+  PASS  the dash room's beat belongs to the tutorial
+  PASS  he still has no dash walking into the room that grants it
+  PASS  Rumi comes down for it
+  PASS  the dash lines, in order  [got ["Hold the way you want to go: up and onward, and dash!"]]
+  PASS  all spoken by Rumi  [got ["Rumi"]]
+  PASS  the gift is wordless, so the one line that IS said comes after it  [got [true]]
+  PASS  his face is on his side of the screen here too  [Rumi left, got ["left"]]
+  PASS  the banner sits at the TOP — he is pinned low in the room  [got ["top"]]
+  PASS  the second encounter grants the dash
+  PASS  control is returned after the gift
+  PASS  and Rumi stays for the move he is teaching
+  PASS  the gift: the mote ends up closer to Hooshang than it started  [10px -> 3px]
+  PASS  the gift: it crosses a visible distance, not a flicker  [12px]
+  PASS  the gift: it leaves Rumi at body height, not above his head  [5px off]
+  PASS  every line fits its banner  
+INTRO TEST: 5 FAILURE(S)
+WARNING: 66 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 16 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

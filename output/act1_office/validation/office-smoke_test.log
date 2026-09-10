@@ -1,0 +1,31 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  player settles on floor
+  PASS  reaches top run speed (vx=72.0)
+  PASS  RUN state while running
+  PASS  decelerates to a stop
+  PASS  jump gains height
+  PASS  a ground jump uses the normal jump pose (got 'jump')
+  PASS  airborne state during jump
+  PASS  lands after jump
+  PASS  dash covers distance (dx=48.3)
+  PASS  dash refills on the ground
+  PASS  wall slide engages when falling into a wall
+  PASS  slide speed is capped (vy=60.0)
+  PASS  wall jump kicks away from the wall (vx=170.0)
+  PASS  wall jump plays its own kick clip (got 'wall_jump')
+  PASS  the kick clip hands back to the normal pose when it ends (got 'run')
+  PASS  wall jump works while rising, without a slide (vx=170.0)
+  PASS  float check: starts grounded
+  PASS  airborne ground state is corrected to FALL (got FALL)
+  PASS  gravity resumes and he comes back down (peak 9.8px up)
+  PASS  lands back at floor level (314.0 vs 314.0)
+  PASS  die() enters DEAD state
+  PASS  dying counts on the run's death counter (1)
+  PASS  one death counts once (1)
+  PASS  respawns automatically
+  PASS  respawns at the checkpoint
+  PASS  respawning doesn't add another (1)
+SMOKE TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

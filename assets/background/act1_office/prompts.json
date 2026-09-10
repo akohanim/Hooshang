@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Level_0",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_0. Canvas target 320x192 pixels; use that aspect ratio. Quiet employee cubicle office, tidy low filing cabinets, one empty desk at far left, generous clear paneled wall, broad window centered toward right with a small pale moon. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_0.png"
+  },
+  {
+    "name": "Level_1",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_1. Canvas target 320x192 pixels; use that aspect ratio. Clean stairwell office landing, tall narrow windows showing small pale moon, understated wall clock, ventilation grille, restrained blue grey wall panels. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_1.png"
+  },
+  {
+    "name": "Level_2",
+    "size": "880x192",
+    "prompt": "Generate one production game background asset for Level_2. Canvas target 880x192 pixels; use that aspect ratio. Very wide panoramic office corridor with three separated bays of tall windows, each bay shows the same small pale moon so it remains visible while scrolling. Sparse low filing cabinets, blank notice board, long clean wall panels. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_2.png"
+  },
+  {
+    "name": "Level_3",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_3. Canvas target 320x192 pixels; use that aspect ratio. Quiet records office, neatly aligned low filing drawers and binders at left, large window at right with small pale moon, large quiet wall areas. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_3.png"
+  },
+  {
+    "name": "Level_4",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_4. Canvas target 320x192 pixels; use that aspect ratio. Empty meeting room seen side-on, low conference desk silhouette near bottom, wide window centered in upper wall with a small pale moon, quiet blue grey acoustic wall panels. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_4.png"
+  },
+  {
+    "name": "Level_5",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_5. Canvas target 320x192 pixels; use that aspect ratio. Clean office printer alcove, small copier silhouette at lower left, broad window at upper right showing small pale moon, very sparse office shelving. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_5.png"
+  },
+  {
+    "name": "Level_6",
+    "size": "200x408",
+    "prompt": "Generate one production game background asset for Level_6. Canvas target 200x408 pixels; use that aspect ratio. Tall vertical corporate service stairwell back wall, three vertically separated window bays, small pale moon visible in each bay while camera scrolls, clean blue-grey concrete panels and narrow conduit, no stairs or platforms in art. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_6.png"
+  },
+  {
+    "name": "Level_7",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_7. Canvas target 320x192 pixels; use that aspect ratio. Windowless dark office music puzzle chamber, shuttered solid wall, subtle acoustic panels, orderly low cabinet. NO moon, NO window, NO light sources, NO luminous screens. Dark navy monochromatic wall. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_7.png"
+  },
+  {
+    "name": "Level_8",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_8. Canvas target 320x192 pixels; use that aspect ratio. Windowless dark office electrical records room, tidy recessed service cabinets, faint ventilation grille and acoustic panel pattern. NO moon, NO window, NO light sources, NO luminous screens. Dark navy monochromatic wall. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_8.png"
+  },
+  {
+    "name": "Level_9",
+    "size": "320x192",
+    "prompt": "Generate one production game background asset for Level_9. Canvas target 320x192 pixels; use that aspect ratio. Windowless dark office archive listening chamber, subtle closed storage drawers at bottom and large quiet wall panels. NO moon, NO window, NO light sources, NO luminous screens. Dark navy monochromatic wall. Style: clean detailed pixel art very similar to Celeste, modern 16-bit, soft shading built from crisp pixel clusters, restrained dithering, NOT 8-bit/NES, no antialiasing or blurry photographic texture. Flat straight-on orthographic side-scrolling elevation, no perspective floor, no isometric view. Low-contrast desaturated midnight indigo, slate blue and muted teal office walls, small pale ivory moon where requested. Background only: no characters, no gameplay platforms, no foreground terrain, no text, no logos, no borders, no dramatic light beams, no glow overlays. Keep furniture understated at bottom and ample negative space so foreground gameplay reads clearly. Entire canvas filled with office wall architecture. Save generated image for integration into Godot.",
+    "source": "source/level_9.png"
+  }
+]

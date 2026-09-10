@@ -1,0 +1,119 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  vertical: stays on one x  [0.000px of wander]
+  PASS  ...and swings the amplitude it was given  [64.0px of travel, want ~64]
+  PASS  ...reaching amplitude and no further  [32.00px from origin]
+  PASS  horizontal: stays on one y  [0.000px of wander]
+  PASS  ...and swings across  [48.0px of travel, want ~48]
+  PASS  linear 45: x and y travel equally  [56.6 x, 56.6 y]
+  PASS  ...and it actually swings  [56.6px across]
+  PASS  ...every point on the 45-degree line  [worst 0.000px off]
+  PASS  ...linear 90 traces the same path as VERTICAL  [0.0000px apart]
+  PASS  ...linear 0 traces the same path as HORIZONTAL  [0.0000px apart]
+  PASS  circle: every point is the radius from the origin  [worst 0.000px off]
+  PASS  ...and it moved on BOTH axes  [80.0 x, 80.0 y]
+  PASS  ...clockwise takes the quarter lap DOWN  [y 40.0]
+  PASS  ...anticlockwise takes it UP  [y -40.0]
+  PASS  phase: a quarter-cycle offset separates two identical thoughts  [45.3px]
+  PASS  ...and with the same phase they move as one  [0.000px apart]
+  PASS  reset: it had actually left the origin first  [12.5px out]
+  PASS  ...and reset_all puts it back on the point it was placed  [0.000px off]
+  PASS  ...with its cycle back at the start, not merely its position
+  PASS  ...found via the dark_thought group
+  PASS  reset (linear): it had left the origin first  [27.3px out]
+  PASS  ...and reset_all puts the linear thought back too  [0.000px off]
+  PASS  collapse: a thought is anchored  [it is floating, not resting]
+  PASS  ...so RoomCollapse does not pick it up  [1 props dropped]
+  PASS  ...while the plain hazard beside it is  [1 dropped]
+  PASS  ...and the thought never leaves its own path  [32.00px out of 32]
+  PASS  ...having watched the hazard beside it drop to the floor  [160.0 -> 289.0]
+  PASS  import: the addon parses an enum field to something ending in its value  [ThoughtMotion.Circle]
+  PASS  ...and ThoughtMotion.Vertical reaches the prop as VERTICAL  [got VERTICAL]
+  PASS  ...and ThoughtMotion.Horizontal reaches the prop as HORIZONTAL  [got HORIZONTAL]
+  PASS  ...and ThoughtMotion.Circle reaches the prop as CIRCLE  [got CIRCLE]
+  PASS  ...and ThoughtMotion.Linear reaches the prop as LINEAR  [got LINEAR]
+  PASS  ...while an unset field still falls back to VERTICAL  [VERTICAL]
+  PASS  ...and the Angle field reaches the prop  [motion LINEAR, angle 135.0]
+  PASS  ...while an unset Angle stays at the prop's default  [0.0]
+  PASS  tone: DarkThought imports as DARK  [DARK]
+  PASS  ...drawn from its own sheet  [dark_thought.png]
+  PASS  ...and is still in the dark_thought group, so reset_all covers it
+  PASS  tone: LightThought imports as LIGHT  [LIGHT]
+  PASS  ...drawn from its own sheet  [light_thought.png]
+  PASS  ...and is still in the dark_thought group, so reset_all covers it
+  PASS  tone: GreyThought imports as GREY  [GREY]
+  PASS  ...drawn from its own sheet  [grey_thought.png]
+  PASS  ...and is still in the dark_thought group, so reset_all covers it
+  PASS  ...DarkThought is drawn UNSHADED, so its sheet is what reaches the screen
+  PASS  ...LightThought is drawn UNSHADED, so its sheet is what reaches the screen
+  PASS  ...GreyThought is drawn UNSHADED, so its sheet is what reaches the screen
+  PASS  halo: DarkThought spends nothing from the room's light budget  [0 lights]
+  PASS  halo: LightThought spends nothing from the room's light budget  [0 lights]
+  PASS  halo: GreyThought spends nothing from the room's light budget  [0 lights]
+  PASS  ...it is unshaded and additive, which is what CanvasModulate 0.05 cannot eat
+  PASS  ...and sits behind the cloud, not over its rim  [z -1]
+  PASS  ...and is actually drawn  [modulate (0.4025, 0.0966, 0.0644, 1.0)]
+  PASS  Glow 1 imports as true
+  PASS  ...and the halo is drawn to match
+  PASS  Glow 0 imports as false
+  PASS  ...and the halo is gone to match
+  PASS  ...and a thought with no Glow field keeps its halo
+  PASS  ...and the two tones trace the SAME path  [worst 0.0000px apart]
+  PASS  ...having actually moved while being compared  [24.0px out]
+DARK THOUGHT TEST: ALL PASS
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:3 - ext_resource, invalid UID: uid://bf1agx8m7wbfc - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:4 - ext_resource, invalid UID: uid://iu5e6fw6fkrn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:5 - ext_resource, invalid UID: uid://jyk4r6vjiq34 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:6 - ext_resource, invalid UID: uid://du4es86x5bhny - using text path instead: res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:11 - ext_resource, invalid UID: uid://sh003xxr3l2v - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:12 - ext_resource, invalid UID: uid://cmtn6t2qohh62 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:13 - ext_resource, invalid UID: uid://8u5ikhbkb4dh - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:14 - ext_resource, invalid UID: uid://6icmc3qcjldn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:15 - ext_resource, invalid UID: uid://duq6app32kcth - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_004.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:16 - ext_resource, invalid UID: uid://wasjch0medo - using text path instead: res://assets/characters/hooshang/sprites/chubby/Running/east/frame_005.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:19 - ext_resource, invalid UID: uid://d386c2nowiw7y - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:20 - ext_resource, invalid UID: uid://e47eslghc823 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:21 - ext_resource, invalid UID: uid://bvgxb5fex1yju - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:22 - ext_resource, invalid UID: uid://dnn6w3kdgikpn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:23 - ext_resource, invalid UID: uid://cc1phbitach3m - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:24 - ext_resource, invalid UID: uid://hmpiugj8cgul - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:25 - ext_resource, invalid UID: uid://dlwfh815qaktq - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:26 - ext_resource, invalid UID: uid://b0gvpj75c3uxc - using text path instead: res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:35 - ext_resource, invalid UID: uid://cd67l7x5qiv0c - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:36 - ext_resource, invalid UID: uid://lh0x0uiikqbf - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:37 - ext_resource, invalid UID: uid://c2fcdky03s5e0 - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:38 - ext_resource, invalid UID: uid://dqu7p1xtunijn - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_003.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:39 - ext_resource, invalid UID: uid://dhijuopfbkq1i - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_004.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:43 - ext_resource, invalid UID: uid://cxn3w5v4vckgg - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:44 - ext_resource, invalid UID: uid://q68k7lcyof6m - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_001.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:45 - ext_resource, invalid UID: uid://c72qsyvg6nepe - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_002.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://assets/characters/hooshang/hooshang_frames.tres:51 - ext_resource, invalid UID: uid://cnlnafmil8xqq - using text path instead: res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_000.png
+     at: load (scene/resources/resource_format_text.cpp:500)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)

@@ -14,6 +14,11 @@ extends CanvasLayer
 ##     await Dialogue.say("", "Press X to dash.")                      # system, no portrait
 ## First confirm press (jump / ui_accept) completes the reveal instantly,
 ## second press closes the box. `say` returns when the box closes.
+## Hold `skip_dialogue` (X) for skip_hold_time seconds to skip the WHOLE
+## conversation: the line on screen closes itself out (its own ordinary
+## close animation, not a hard cut), and every line after it never opens at
+## all — not a page-by-page fast-forward through everything that follows.
+## See _tick_skip_hold and _skip_armed.
 ##
 ## VERTICAL PLACEMENT. The banner sits flush against whichever screen edge
 ## `vside` names (DialogueBox.VSide.TOP or .BOTTOM) — never floating with a gap,
@@ -127,6 +132,17 @@ const CANVAS_HEIGHT := 720.0
 ## than a breath. One mark per line.
 @export var pause_time := 0.5
 const PAUSE_MARK := "[p]"
+## Hold "skip_dialogue" (X) this long, in seconds, before it starts blazing
+## through dialogue — see _tick_skip_hold. Long enough that mashing dash
+## (the same physical key, inert during dialogue since input_locked is
+## always true by then) never trips it by accident.
+@export var skip_hold_time := 1.0
+## Seconds a LINE has to have been on screen before the "Hold X to skip"
+## reminder appears — see _tick_skip_hint. Independent of skip_hold_time
+## (they default to the same number, but nothing ties them together): this
+## one is about not cluttering a line the player is already mid-read on the
+## instant it opens, not about how long a hold has to be.
+@export var hint_delay := 2.0
 ## How long one character takes to fade from transparent to fully opaque as
 ## the typewriter reveals it. Expressed as a duration rather than a fixed
 ## character count so the fade always reads as "this many seconds", however
@@ -250,6 +266,27 @@ var _blink_t := -1.0
 var _active := false
 var _revealing := false
 var _reveal_accum := 0.0
+## Seconds "skip_dialogue" has been held CONTINUOUSLY — counted through the
+## gap between one line closing and the next opening (see SKIP_HOLD_GAP), so
+## a hold does not have to restart its climb once the next line's banner is
+## up. See _tick_skip_hold.
+var _skip_held_time := 0.0
+## Seconds dialogue has sat inactive while still holding "skip_dialogue".
+var _skip_inactive_time := 0.0
+## How long dialogue can sit inactive before a lingering hold stops counting
+## toward skip. Long enough to cover the close+reopen animation between two
+## lines of the SAME conversation (entrance_time + up to
+## portrait_entrance_time, worst case ~0.54s at the defaults) without
+## dropping the hold; short enough that a player who was simply resting a
+## finger on X (dash's own key, see skip_hold_time's doc) while walking
+## around — never having been in any dialogue at all — can never have that
+## stale hold instantly skip the very first line the moment it opens.
+const SKIP_HOLD_GAP := 1.0
+## Seconds the CURRENT line has been active (see _tick_skip_hint) — unlike
+## _skip_held_time this does NOT survive the gap between lines: it is reset
+## once per say() call, so the reminder judges "has this line been up a
+## while", not "has the whole conversation".
+var _hint_elapsed := 0.0
 ## Character index the reveal holds at, or -1 for none / already spent.
 var _pause_at := -1
 var _pause_left := 0.0
@@ -318,6 +355,11 @@ var _generation := 0
 @onready var name_label: Label = $NameLabel
 @onready var text_label: RichTextLabel = $TextLabel
 @onready var arrow: Label = $Arrow
+## The "Hold X to skip" reminder — see hint_delay and _tick_skip_hint. Shares
+## the arrow's own bottom-of-banner strip, at the OPPOSITE end (see
+## _mirrored's doc for why both live in that list), so it never competes with
+## the actual text for space.
+@onready var skip_hint: Label = $SkipHint
 @onready var portrait: TextureRect = $Portrait
 @onready var portrait_frame: ColorRect = $PortraitFrame
 @onready var portrait_back: ColorRect = $PortraitBack
@@ -366,9 +408,12 @@ func _ready() -> void:
 
 ## Everything whose horizontal position flips with the speaker's side. The
 ## arrow flips too: it belongs at the far end of the text block, and with the
-## portrait on the right that end is the left.
+## portrait on the right that end is the left. skip_hint flips right along
+## with it, authored at the OTHER end of the same strip — so the two always
+## land at opposite corners of the text block, on either side, rather than
+## skip_hint colliding with wherever the arrow's own flip just sent it.
 func _mirrored() -> Array[Control]:
-	return [portrait_frame, portrait_back, portrait, name_label, text_label, arrow]
+	return [portrait_frame, portrait_back, portrait, name_label, text_label, arrow, skip_hint]
 
 
 ## Lay the banner out for `side`, or hand the whole width to the text when there
@@ -423,7 +468,7 @@ func _place_vside(vside: int) -> void:
 		return
 	var shift := CANVAS_HEIGHT - banner.offset_bottom
 	for node in [banner, trim_top, trim_bottom, portrait_frame, portrait_back,
-			portrait, name_label, text_label, arrow]:
+			portrait, name_label, text_label, arrow, skip_hint]:
 		node.offset_top += shift
 		node.offset_bottom += shift
 
@@ -452,6 +497,15 @@ func _apply_font() -> void:
 func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		portrait_texture: Texture2D = null, side: int = Side.LEFT,
 		vside: int = VSide.TOP) -> void:
+	# Skip already armed from an earlier line in this SAME conversation (see
+	# _tick_skip_hold/_skip_armed) — never open this one at all. Nothing
+	# below has run yet (no generation bump, no banner touched), so this is
+	# a true no-op: the caller's own `for beat in beats: await
+	# Dialogue.say(...)` loop just falls straight through to its next
+	# iteration, and with every remaining call taking this same exit, the
+	# whole loop finishes in the same frame it started skipping in.
+	if _skip_armed():
+		return
 	# banner/trim/portrait/name/text are ONE set of nodes shared by every
 	# call to say(), not fresh per line — so a call that starts while the
 	# PREVIOUS line's close animation is still mid-flight used to leave that
@@ -554,11 +608,23 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	text_label.scale = Vector2.ONE
 
 	_active = true
+	# Fresh per LINE, not per page — see _tick_skip_hint's own doc for why
+	# resetting mid-conversation (rather than mid-line) is the right grain.
+	_hint_elapsed = 0.0
+	skip_hint.visible = false
 	for page in pages:
 		_begin_page(page)
 		await line_finished
 		if my_gen != _generation:
 			return  # superseded while waiting on this page; not ours to close
+		if _skip_armed():
+			# The hold crossed the threshold while THIS page was up —
+			# _tick_skip_hold already forced the emit above. Stop reading
+			# out the remaining pages of this line and fall straight to the
+			# close-out below, same as if this had been the last page —
+			# that is the "smooth transition" out, not one more page flashed
+			# on screen before it.
+			break
 
 	# CLOSE the same way it opened: collapsed shut toward the edge, not a
 	# hard cut to invisible. No overshoot on the way out — a bounce reads as
@@ -569,6 +635,7 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	# words hanging in the air after their banner has gone.
 	_active = false
 	arrow.visible = false
+	skip_hint.visible = false
 	# text_label never ran through _grow_in (nothing to shrink at entrance
 	# time), so its pivot was never pointed at the anchored edge the way
 	# every other node's was — set it here or it collapses toward its own
@@ -836,6 +903,11 @@ func _fit_banner(rows: int) -> void:
 	trim_bottom.offset_top = banner.offset_bottom - TRIM_HEIGHT
 	arrow.offset_bottom = trim_bottom.offset_top - 2.0
 	arrow.offset_top = arrow.offset_bottom - ARROW_HEIGHT
+	# Same strip as the arrow, same reason it is not in _authored_v either —
+	# both are recomputed fresh every line rather than restored from an
+	# authored baseline.
+	skip_hint.offset_top = arrow.offset_top
+	skip_hint.offset_bottom = arrow.offset_bottom
 
 
 ## Read the frame rigs the generator wrote.
@@ -1043,6 +1115,8 @@ func _process(delta: float) -> void:
 	# for a press.
 	_animate_portrait(delta)
 	_animate_loop(delta)
+	_tick_skip_hold(delta)
+	_tick_skip_hint(delta)
 	if not _revealing:
 		return
 	if _pause_left > 0.0:
@@ -1069,6 +1143,109 @@ func _process(delta: float) -> void:
 		return
 	_apply_page_text(shown, false)
 	_voice_new_chars(shown)
+
+
+## Advance the hold timer for "skip_dialogue" (X). Once _skip_armed() goes
+## true, the CURRENT line closes itself out (see the `break` in say()'s own
+## page loop) and every LATER say() call in the same conversation returns
+## immediately without ever opening a banner (see say()'s own early-return) —
+## a smooth transition on the line you were reading, then straight back to
+## the game, not a page-by-page fast-forward through everything after it.
+##
+## DialogueBox only ever has ONE line active at a time — a multi-line
+## conversation is entirely the CALLER's own `await Dialogue.say()` loop (see
+## the class doc's "FUTURE: multi-line conversations" note and every one of
+## its callers: act1_beats.gd, act2_beats.gd, ldtk_rumi_trigger.gd,
+## jamshid_npc.gd, darkshang_trigger.gd, dash_tutorial.gd). This still skips
+## a WHOLE conversation without any of those callers knowing skipping
+## happened, because _skip_held_time survives the gap between one line's
+## close and the next line's entrance (where `_active` is momentarily false)
+## up to SKIP_HOLD_GAP seconds — so the very first frame the NEXT line WOULD
+## have gone `_active`, say() finds skip already armed and never opens it at
+## all, and so on for as long as the player keeps holding: one continuous
+## press ends the whole conversation. It does NOT survive a longer idle
+## stretch — see SKIP_HOLD_GAP's own doc for why a hold has to actually
+## belong to a conversation already in progress, not just be lying around
+## from before one ever started — which matters MORE now than it did for a
+## page-by-page skip: a stale hold that slipped past this guard would not
+## just fast-forward a line, it would suppress a conversation the player
+## never saw open at all.
+func _tick_skip_hold(delta: float) -> void:
+	if not Input.is_action_pressed("skip_dialogue"):
+		_skip_held_time = 0.0
+		_skip_inactive_time = 0.0
+		return
+	if _active:
+		_skip_inactive_time = 0.0
+	else:
+		_skip_inactive_time += delta
+		if _skip_inactive_time > SKIP_HOLD_GAP:
+			# Been idle too long to still be "between lines of this
+			# conversation" — a fresh hold, not a continued one. Reset so a
+			# stale hold from before any dialogue was ever on screen cannot
+			# instantly skip a line the player has not even seen open yet.
+			_skip_held_time = 0.0
+	_skip_held_time += delta
+	if not _active or _skip_held_time < skip_hold_time:
+		return
+	# Once armed: finish revealing if still mid-page, then ALWAYS advance —
+	# this is what turns "waiting on a press" into "closing on its own" the
+	# very same tick armed, rather than needing one more frame to notice the
+	# reveal just finished.
+	if _revealing:
+		_finish_reveal_instantly()
+	line_finished.emit()
+
+
+## True once a hold has cleared skip_hold_time and is still being held RIGHT
+## NOW — say()'s own gate for "do not even open this line". Read, not just
+## _tick_skip_hold's problem, because the check has to happen again at the
+## top of every LATER say() call in the conversation, not only inside the
+## line that was actually open when the hold first crossed the threshold.
+func _skip_armed() -> bool:
+	return Input.is_action_pressed("skip_dialogue") and _skip_held_time >= skip_hold_time
+
+
+## Reveal the "Hold X to skip" reminder once a LINE has been up for
+## hint_delay seconds — not tied to _skip_held_time (holding the key does not
+## make the hint appear any sooner, and it is not needed once someone is
+## already holding it, but this stays simple rather than also suppressing it
+## for a player mid-hold) and not tied to _revealing either, since the hint
+## is just as useful sitting on a finished page waiting for a press as it is
+## mid-reveal.
+##
+## Resets once per LINE (say()'s own _hint_elapsed = 0.0, at the top of the
+## page loop), not once per conversation: unlike the hold timer, there is no
+## reason for this to survive the gap into the next line — a line that opens
+## and closes quickly, on its own, never needed the reminder in the first
+## place, and one that runs long enough to need it will cross hint_delay
+## again on its own.
+func _tick_skip_hint(delta: float) -> void:
+	if not _active or skip_hint.visible:
+		return
+	_hint_elapsed += delta
+	if _hint_elapsed >= hint_delay:
+		skip_hint.visible = true
+
+
+## Snap the current page to fully shown. Shared by the confirm button's own
+## first-press skip (_unhandled_input) and the hold-to-skip timer above, so
+## the two can never drift into skipping a page two different ways.
+func _finish_reveal_instantly() -> void:
+	# Drops the [fade] wrapper the same way a natural finish does —
+	# _apply_page_text's own doc explains why leaving it on would hide the
+	# tail of the line rather than merely skip its animation. Skipping ahead
+	# skips the breath too — holding a reader at a dramatic beat they have
+	# just asked to skip past is the wrong way round.
+	_apply_page_text(_parsed_len, true)
+	_revealing = false
+	_pause_at = -1
+	_pause_left = 0.0
+	arrow.visible = true
+	# One "ending" blip rather than racing a blip through every skipped
+	# character, which would sound like a chirp burst.
+	if _voice_key != "":
+		VoiceBlips.blip(_voice_key, "ending")
 
 
 ## Voice every newly revealed, non-whitespace character since the last call —
@@ -1103,21 +1280,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()
 		if _revealing:
-			# First press: finish the reveal instantly. Skipping ahead skips the
-			# breath too — holding a reader at a dramatic beat they have just
-			# asked to skip past is the wrong way round. Drops the [fade]
-			# wrapper the same way a natural finish does — _apply_page_text's
-			# own doc explains why leaving it on would hide the tail of the
-			# line rather than merely skip its animation.
-			_apply_page_text(_parsed_len, true)
-			_revealing = false
-			_pause_at = -1
-			_pause_left = 0.0
-			arrow.visible = true
-			# One "ending" blip rather than racing a blip through every
-			# skipped character, which would sound like a chirp burst.
-			if _voice_key != "":
-				VoiceBlips.blip(_voice_key, "ending")
+			_finish_reveal_instantly()  # first press: finish the reveal instantly
 		else:
 			# Second press: dismiss.
 			line_finished.emit()

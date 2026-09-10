@@ -1,0 +1,229 @@
+[
+  {
+    "test": "smoke_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "world_bounds_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "backtrack_test",
+    "exit": 1,
+    "failures": [
+      "SCRIPT ERROR: Invalid call. Nonexistent function 'swell' in base 'Nil'.",
+      "SCRIPT ERROR: Invalid call. Nonexistent function 'portrait_side' in base 'Nil'.",
+      "  FAIL  every room re-enters INSIDE itself  [Level_V6 at x=5612, room 5480-5736, Level_V7 at x=5612, room 5480-5736]",
+      "BACKTRACK TEST: 1 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "level_v6_return_race_test",
+    "exit": "TIMEOUT",
+    "failures": [
+      "  FAIL  the world has Level_v5 and Level_v6",
+      "SCRIPT ERROR: Cannot call method 'is_ancestor_of' on a null value.",
+      "SCRIPT ERROR: Cannot call method 'get_node_or_null' on a null value.",
+      "SCRIPT ERROR: Cannot call method 'get_children' on a null value.",
+      "SCRIPT ERROR: Cannot call method 'is_ancestor_of' on a null value.",
+      "SCRIPT ERROR: Cannot call method 'get_node_or_null' on a null value.",
+      "SCRIPT ERROR: Cannot call method 'is_ancestor_of' on a null value.",
+      "SCRIPT ERROR: Cannot call method 'get_children' on a null value.",
+      "SCRIPT ERROR: Invalid access to property or key 'global_position' on a base object of type 'Nil'."
+    ]
+  },
+  {
+    "test": "intro_test",
+    "exit": 1,
+    "failures": [
+      "  FAIL  meeting lines, in order  [got [\"Hello??\", \"Who are you?  I\\'ve worked in this office fifteen years. I\\'ve never seen you once.\", \"Are you going to say something, or just stand there glowing at me...\", \"... I think I hit my head harder than I thought.\", \"You stand at the beginning of your most important journey, Hooshang jaan.\", \"A journey? I just wanted to make it to my car.\", \"You will not reach the parking lot from here.\", \"This is not that building. It is the one you carry inside you.\", \"...Inside me?\", \"Your mind has built its own rooms, and you must go down through every one.\", \"The office that swallowed your years. Your childhood. And beneath them the places and\", \"things you have never let go of.\", \"And I\\'m supposed to just walk through my own head.\", \"Not walk through. You have done that your whole life.\", \"To pass, you must meet what waits in each room.\", \"They are not memories, jaan.\", \"They are still alive. And they will not let you by until you face them.\", \"Look this really isn\\'t a good time. I just lost my job. I\\'ll get to all that ...Later.\", \"...Later. Yes, it\\'s always later isn\\'t it.\", \"You have knocked on this door your whole life, from the inside. Now it opens.\"]]",
+      "  FAIL  Rumi stays silent until Hooshang has run out of things to say  [got [\"Hooshang\", \"Hooshang\", \"Hooshang\", \"Hooshang\", \"Rumi\", \"Hooshang\", \"Rumi\", \"Rumi\", \"Hooshang\", \"Rumi\", \"Rumi\", \"Rumi\", \"Hooshang\", \"Rumi\", \"Rumi\", \"Rumi\", \"Rumi\", \"Hooshang\", \"Rumi\", \"Rumi\"]]",
+      "  FAIL  meeting portraits, one state per line  [got [\"hesitant\", \"skeptical\", \"annoyed\", \"vulnerable\", \"\", \"skeptical\", \"\", \"\", \"skeptical\", \"\", \"\", \"\", \"skeptical\", \"\", \"\", \"\", \"\", \"hesitant\", \"\", \"\"]]",
+      "  FAIL  the wordless beats play as bubbles, in order  [got [\"!\"]]",
+      "  FAIL  each face sits on the side that speaker is standing on  [Rumi right, got [\"left\", \"left\", \"left\", \"left\", \"right\", \"left\", \"right\", \"right\", \"left\", \"right\", \"right\", \"right\", \"left\", \"right\", \"right\", \"right\", \"right\", \"left\", \"right\", \"right\"]]",
+      "INTRO TEST: 5 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "screen_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "lemon_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "lemon_glow_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "death_test",
+    "exit": 1,
+    "failures": [
+      "  FAIL  every hazard counts exactly one death  [\"(3108.175, 596.0) in Level_V2 counted 0\"]",
+      "DEATH TEST: 1 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "slide_test",
+    "exit": 1,
+    "failures": [
+      "  FAIL  and can jump  [rose 2px]",
+      "  FAIL  and he can jump again  [rose -59px]",
+      "SLIDE TEST: 2 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "music_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "conveyor_test",
+    "exit": 1,
+    "failures": [
+      "  FAIL  a Left belt throws him the other way  [-26.5px vs -880.0px]",
+      "  FAIL  passing over one without landing collects nothing  [+57.5 -> +42.5]",
+      "CONVEYOR TEST: 2 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "chase_route_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "chase_entry_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "route_order_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "collapse_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "save_test",
+    "exit": 1,
+    "failures": [
+      "  FAIL  walked into Level_14  [Level_V7]",
+      "  FAIL  level select offers the rooms that run stood in and no others  [\"ROOM 617\", \"ROOM 1401\", \"ROOM 1501\"]",
+      "SAVE TEST: 2 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "dialogue_placement_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "intro_video_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "menu_nav_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "dash_tutorial_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "jump_tutorial_test",
+    "exit": "TIMEOUT",
+    "failures": [
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_key_tap()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Value of type \"Key\" cannot be assigned to a variable of type \"Key\".",
+      "SCRIPT ERROR: Parse Error: Value of type \"Key\" cannot be assigned to a variable of type \"Key\"."
+    ]
+  },
+  {
+    "test": "cone_spikes_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "dark_thought_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "platform_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "portrait_anim_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "chimney_test",
+    "exit": 1,
+    "failures": [
+      "  FAIL  found one-cell gaps between props  [0]",
+      "CHIMNEY TEST: 1 FAILURE(S)"
+    ]
+  },
+  {
+    "test": "pause_test",
+    "exit": "TIMEOUT",
+    "failures": [
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Invalid argument for \"_press()\" function: argument 1 should be \"Key\" but is \"Key\".",
+      "SCRIPT ERROR: Parse Error: Value of type \"Key\" cannot be assigned to a variable of type \"Key\".",
+      "SCRIPT ERROR: Parse Error: Value of type \"Key\" cannot be assigned to a variable of type \"Key\"."
+    ]
+  },
+  {
+    "test": "thought_tiles_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "wall_slide_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "voice_blip_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "mystery_box_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "pond_test",
+    "exit": 0,
+    "failures": []
+  },
+  {
+    "test": "water_tile_test",
+    "exit": 0,
+    "failures": []
+  }
+]

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bikjmoihpplhx"]
+
+[ext_resource type="Script" uid="uid://6r58kvxx7ngm" path="res://scenes/levels/material_lab/launch_material_lab.gd" id="1"]
+
+[node name="LaunchMaterialLab" type="Node" unique_id=683316522]
+script = ExtResource("1")

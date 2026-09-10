@@ -64,11 +64,14 @@ static func build_tilesets(
 
 			# Include Source if size matches grid (or is an override found for this grid size)
 			if size == source_size or has_override:
+				# PATCHED (Hooshang): use the source built from THIS import.
+				# Reusing the saved source here discards newly added atlas tiles.
+				# The texture can grow to 416 tiles while the source still has 26;
+				# every level cell referring to a new tile then silently disappears.
 				if tileset.has_source(uid):
-					source = tileset.get_source(uid)
-				else:
-					source = source.duplicate()
-					tileset.add_source(source, uid)
+					tileset.remove_source(uid)
+				source = source.duplicate()
+				tileset.add_source(source, uid)
 
 				if (Util.options.tileset_custom_data):
 					if definitions.tilesets.has(uid):
@@ -149,14 +152,21 @@ static func create_new_tileset_source(definition: Dictionary, base_dir: String) 
 	else:
 		filepath = base_dir + definition.relPath
 
-	var texture := load(filepath)
+	var texture := ResourceLoader.load(filepath, "Texture2D", ResourceLoader.CACHE_MODE_REPLACE)
 
 	# Cannot load texture
 	if texture == null:
 		push_error("Cannot access source texture: %s. Please include this file in the Godot project." % [filepath])
 		return null
 
-	var image: Image = texture.get_image()
+	# Classify current source pixels, not a cached pre-expansion texture image.
+	var image: Image = Image.load_from_file(filepath)
+	if image == null or image.is_empty():
+		image = texture.get_image()
+	if texture.get_size() != Vector2(image.get_size()):
+		# A PNG and LDtk can be imported in the same filesystem scan. Embed the
+		# current pixels if the compressed texture hasn't caught up yet.
+		texture = ImageTexture.create_from_image(image)
 
 	# Convert texture from CompressedTexture2D to CanvasTexture
 	if (Util.options.atlas_texture_type == AtlasTextureType.CanvasTexture):

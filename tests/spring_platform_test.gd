@@ -89,25 +89,41 @@ func _run() -> void:
 	var apex := 0.0
 	var checked_expanded := false
 	var checked_idle_again := false
+	# The frame swaps are driven by tween callbacks, which process on IDLE
+	# frames while this loop samples PHYSICS frames — so a sample taken on the
+	# exact frame a swap is due can land just before the callback runs and read
+	# the OLD texture. (It shipped that way and passed only because the old
+	# 0.21s total happened to miss the boundary; the 20% slower 0.2625s landed
+	# right on it.) A few frames of grace after each transition time is enough
+	# for the callback to have fired — the frame either side of the swap holds
+	# the same pose for well longer than this, so nothing real is skipped.
+	const SWAP_GRACE := 3.0 / 60.0
 	for i in 90:
 		await _frames(1)
 		apex = maxf(apex, start_y - player.global_position.y)
 		var elapsed := (i + 1) / 60.0
-		if not checked_expanded and elapsed >= spring.compress_time:
+		if not checked_expanded and elapsed >= spring.compress_time + SWAP_GRACE:
 			checked_expanded = true
 			_check(tile.texture == spring.EXPANDED,
 				"compress_time after landing, the EXPANDED frame is showing")
 			_check(is_equal_approx(tile.position.y, expanded_top),
 				"...bottom-anchored so it extends further up, not repositioned some other way  [%.1f, want %.1f]"
 					% [tile.position.y, expanded_top])
-		elif not checked_idle_again and elapsed >= spring.compress_time + spring.expand_time:
+		elif not checked_idle_again and elapsed >= spring.compress_time + spring.expand_time + SWAP_GRACE:
 			checked_idle_again = true
 			_check(tile.texture == spring.IDLE,
 				"expand_time later, it has handed back to IDLE")
 			_check(is_equal_approx(tile.position.y, idle_top),
 				"...back at IDLE's own anchored position  [%.1f, want %.1f]" % [tile.position.y, idle_top])
-		if player.velocity.y >= 0.0 and i > 5:
-			break  # past the top of the arc
+		# Past the top of the arc AND both frame-swap beats seen. The two are
+		# no longer ordered the way they were: with the coil animation slowed
+		# (see spring_platform.gd's timing note), the EXPANDED -> IDLE handback
+		# now finishes AFTER the player has already passed apex — a spring whose
+		# coil is still springing back while he is airborne, which is exactly
+		# how a real one looks. `apex` is the running max, so it is already
+		# captured by the time this waits the extra few frames for that swap.
+		if player.velocity.y >= 0.0 and i > 5 and checked_expanded and checked_idle_again:
+			break
 	_check(checked_expanded and checked_idle_again,
 		"the frame-swap checks above actually ran inside the apex-measurement window")
 	_check(apex >= FULL_JUMP_APEX * 1.5,

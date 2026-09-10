@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  Level_14 has a Darkshang
+  PASS  the entry hold is armed  [16px]
+  PASS  and the chase is running
+  PASS  a respawn leaves him out of the room
+  PASS  ...and standing still keeps him out, for as long as you like
+  PASS  ...without creeping closer while he waits  [(4820.0, 185.9998) vs (4820.0, 185.9998)]
+  PASS  ...and cannot kill while he waits, even standing on him  [0 deaths]
+  PASS  backing up the route does not let him in, however far  [24px the wrong way]
+  PASS  moving 16px along the route lets him in
+  PASS  ...at the full gap behind where the player is by then  [108.0, want 108]
+CHASE ENTRY TEST: ALL PASS
+WARNING: 66 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 16 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

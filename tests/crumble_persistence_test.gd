@@ -1,0 +1,20 @@
+extends Node
+func _ready() -> void:
+	SaveGame.slot = -1
+	var world = load("res://ldtk/Act1World.tscn").instantiate()
+	var beats = world.get_node("Act1Beats")
+	world.remove_child(beats)
+	beats.free()
+	add_child(world)
+	var p = preload("res://scenes/props/platforms/CrumblingPlatform.tscn").instantiate()
+	p.position = Vector2(-10000,-10000)
+	world.add_child(p)
+	p.give_way(0)
+	p._process(0.01)
+	world._enter_room(world.rooms[1],true)
+	world._enter_room(world.rooms[0],true)
+	assert(p._falling and not p.get_collision_layer_value(1), "Room visits must not restore platforms")
+	await world._on_player_died()
+	assert(not p._falling and p.get_collision_layer_value(1), "Respawn must restore platforms")
+	print("PASS: room changes preserve collapse; world respawn restores it")
+	get_tree().quit()

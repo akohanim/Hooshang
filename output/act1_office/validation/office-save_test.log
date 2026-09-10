@@ -1,0 +1,175 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  slot 1 starts empty
+  PASS  slot 2 starts empty
+  PASS  slot 3 starts empty
+  PASS  and so `has_any` says there is nothing to continue
+  PASS  and there is no most-recent slot
+  PASS  an empty slot summarises as empty rather than as zeroes
+  PASS  and unlocks no rooms, so level select cannot skip the game
+  PASS  resuming an empty slot is refused
+  FAIL  the run writes to slot 1
+  FAIL  and the slot now holds something
+  FAIL  the card names the room he was in  []
+  FAIL  numbered the way the pickers number it  [0]
+  FAIL  and the score it had earned  [-1]
+  FAIL  with the two counters on it  [<null> / <null>]
+  FAIL  and Level_10 is unlocked for the level select  []
+  PASS  in-memory state wiped
+  FAIL  slot 1 loads
+  FAIL  lemon total restored  [0]
+  FAIL  and WHICH fruit were taken, so none of them come back
+  FAIL  the counter shows it outright rather than flying a fruit in  [0]
+  FAIL  death count restored  [0]
+  FAIL  score restored  [0]
+  PASS  ...and shown outright rather than rolled  [0]
+  PASS  opened in the room it was saved in  [Level_10]
+  PASS  and he still has the dash he was given
+  PASS  the waking scene is not queued up again
+  PASS  and Level_16 is remembered as already fallen  ["Level_16"]
+  FAIL  the run is bound to slot 1, so it keeps saving
+  FAIL  slot 1 is untouched  [<null> / <null>]
+  FAIL  slot 2 holds its own run  [<null> / <null>]
+  FAIL  slot 3 holds a third  [<null> / <null>]
+  FAIL  and CONTINUE picks the one saved most recently  [slot 0]
+  PASS  erasing slot 2 empties it
+  FAIL  and leaves 1 and 3 standing
+  FAIL  slot 1 is readable before this
+  PASS  Level_14 has its Darkshang trigger
+  PASS  meeting him re-points the doorway  { &"Level_14": "Level_15", "Level_15": &"Level_14" }
+  FAIL  the run saves with the encounter behind it
+  FAIL  and loads again
+  PASS  both halves of the re-routed door came back  { &"Level_14": "Level_15", "Level_15": &"Level_14" }
+  PASS  and the reveal does not play a second time
+  PASS  walked into Level_14  [Level_14]
+  PASS  backing out of Level_14 continues the escape  [Level_15]
+  FAIL  a practice run starts from slot 1
+  FAIL  in the room that was picked  [Level_15]
+  FAIL  with the abilities that run had earned, and no others  [dash true]
+  PASS  and no slot bound
+  PASS  so a save is refused outright
+  FAIL  with runs on disk the title screen offers them  ["NEW GAME", "DEBUG PICKER", "QUIT"]
+  FAIL  and CONTINUE is the row you land on  [NEW GAME]
+  FAIL  level select offers the rooms that run stood in and no others  ["— NOTHING REACHED YET —"]
+  PASS  overwriting an occupied slot starts on the harmless answer  [KEEP IT]
+  PASS  with nothing saved it offers only NEW GAME and QUIT  ["NEW GAME", "DEBUG PICKER", "QUIT"]
+  PASS  the run pauses
+  PASS  quitting to the title takes the world down
+  PASS  and lets go of the pause on the way out
+  PASS  so the title screen cannot have a pause menu put over it
+  PASS  the title screen is back and taking input again
+  PASS  the run is unbound
+  FAIL  and it was written down on the way out  [<null> / <null>]
+SAVE TEST: 29 FAILURE(S)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_0.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_0.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+         [2] _check_round_trip (res://tests/save_test.gd:98)
+         [3] _frames (res://tests/save_test.gd:474)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_1.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_1.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+         [2] _check_slots_are_independent (res://tests/save_test.gd:160)
+         [3] _open (res://tests/save_test.gd:389)
+         [4] _open_room (res://tests/save_test.gd:400)
+         [5] _frames (res://tests/save_test.gd:474)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_2.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_2.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+         [2] _check_slots_are_independent (res://tests/save_test.gd:168)
+         [3] _open (res://tests/save_test.gd:389)
+         [4] _open_room (res://tests/save_test.gd:400)
+         [5] _frames (res://tests/save_test.gd:474)
+SCRIPT ERROR: Cannot call method 'get_as_text' on a null value.
+          at: _check_corrupt_reads_as_empty (res://tests/save_test.gd:195)
+          GDScript backtrace (most recent call first):
+              [0] _check_corrupt_reads_as_empty (res://tests/save_test.gd:195)
+              [1] _ready (res://tests/save_test.gd:50)
+              [2] _check_slots_are_independent (res://tests/save_test.gd:186)
+              [3] _open (res://tests/save_test.gd:389)
+              [4] _open_room (res://tests/save_test.gd:400)
+              [5] _frames (res://tests/save_test.gd:474)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_0.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_0.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+         [2] _check_way_back_survives (res://tests/save_test.gd:241)
+         [3] _frames (res://tests/save_test.gd:474)
+SCRIPT ERROR: Invalid call. Nonexistent 'int' constructor.
+          at: _check_practice_writes_nothing (res://tests/save_test.gd:294)
+          GDScript backtrace (most recent call first):
+              [0] _check_practice_writes_nothing (res://tests/save_test.gd:294)
+              [1] _frames (res://tests/save_test.gd:474)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_0.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+WARNING: SaveGame: cannot write /Users/ari/Library/Application Support/Godot/app_userdata/Hooshang/test_saves/slot_0.json.tmp (error 12).
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _write (res://systems/save_game.gd:438)
+         [1] save_now (res://systems/save_game.gd:333)
+         [2] _quit_to_title (res://scenes/ui/pause_menu.gd:286)
+         [3] _choose (res://scenes/ui/pause_menu.gd:268)
+         [4] _check_quit_to_title (res://tests/save_test.gd:358)
+         [5] _frames (res://tests/save_test.gd:474)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: Act1Beats: no room named 'Level_7' — the tiles go unexplained.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _ready (res://scripts/act1_beats.gd:385)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+  PASS  the world renders into a (320, 180) viewport (got (320, 180))
+  PASS  the world viewport samples NEAREST, not the engine's Linear default  [0]
+  PASS  the loaded world is inside that viewport, not the window
+  PASS  Screen.current tracks the loaded world
+  PASS  the dialogue box is a CanvasLayer in FRONT of the world (layer 95)
+  PASS  the dialogue box is NOT inside the world's viewport
+  PASS  restyling the dialogue leaves the game viewport untouched ((320, 180))
+  PASS  restyling the dialogue leaves the player's sprite untouched
+  PASS  held input still drives the player (dx=33.7)
+  PASS  R-to-retry reaches the world through the viewport forwarding
+  PASS  positional audio has a listener in the world's viewport
+    [trail] dashed, walking tree
+  PASS  dashing spawns afterimages inside the world (74)
+  PASS  no afterimage escapes onto the UI surface (0)
+SCREEN TEST: ALL PASS
+WARNING: 66 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: 16 RIDs of type "CanvasLight" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 11 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

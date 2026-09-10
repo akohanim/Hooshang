@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  play order: Level_0 Level_1 Level_2 Level_3 Level_4 Level_5 Level_6 Level_V1 Level_V2 Level_V3 Level_V4 Level_v5 Level_v6 Level_7 Level_8 Level_9 Level_10 Level_11 Level_12 Level_13 Level_14 Level_15 Level_16 Level_17 Level_18 Level_19 Level_20 Level_21 Level_22 Level_23 Level_24 Level_25 Level_V_test TEST
+  PASS  rooms come out in identifier order  [[0, 100, 200, 300, 400, 500, 600, 610, 611, 612, 613, 614, 615, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500]]
+  PASS  Level_13 leads on to Level_14  [Level_14]
+  PASS  ...and Level_14 backs into Level_13  [Level_13]
+  PASS  Level_14 leads on to Level_15  [Level_15]
+  PASS  ...and Level_15 backs into Level_14  [Level_14]
+  PASS  Level_15 leads on to Level_16  [Level_16]
+  PASS  ...and Level_16 backs into Level_15  [Level_15]
+  PASS  Level_16 leads on to Level_17  [Level_17]
+  PASS  ...and Level_17 backs into Level_16  [Level_16]
+  PASS  Level_17 leads on to Level_18  [Level_18]
+  PASS  ...and Level_18 backs into Level_17  [Level_17]
+  PASS  Level_18 leads on to Level_19  [Level_19]
+  PASS  ...and Level_19 backs into Level_18  [Level_18]
+  PASS  Level_19 leads on to Level_20  [Level_20]
+  PASS  ...and Level_20 backs into Level_19  [Level_19]
+  PASS  Level_20 leads on to Level_21  [Level_21]
+  PASS  ...and Level_21 backs into Level_20  [Level_20]
+  PASS  Level_21 leads on to Level_22  [Level_22]
+  PASS  ...and Level_22 backs into Level_21  [Level_21]
+  PASS  the curated chain comes out in order  [Level_0 Level_1 Level_2 Level_3 Level_4 Level_5 Level_6 Level_V1 Level_V2 Level_V3 Level_V4 Level_v5 Level_v6 Level_7 Level_8 Level_9 Level_10 Level_11 Level_12 Level_13 Level_14 Level_15 Level_16 Level_17 Level_18 Level_19 Level_20 Level_21 Level_22 Level_23 Level_24 Level_25]
+  PASS  Level_V_test sorts after the curated chain, not into it  [position 32, chain ends at 31]
+  PASS  TEST sorts after the curated chain, not into it  [position 33, chain ends at 31]
+  PASS  the world still starts at Level_0  [Level_0]
+  PASS  Act_2_Level_3 orders the same as a bare Level_3 would  [300]
+  PASS  Act3_Level_0 orders the same as a bare Level_0 would  [0]
+  PASS  Act_2_Level_10 still sorts after Act_2_Level_2, not lexicographically before it  [1000 vs 200]
+ROUTE ORDER TEST: ALL PASS
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

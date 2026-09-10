@@ -40,6 +40,14 @@ const THOUGHT_LAYER := "ThoughtHazards"
 ## packed into the saved .scn, the way LdtkDoor and LdtkRumiTrigger are also
 ## swapped onto their nodes at import time.
 const THOUGHT_LAYER_SCRIPT := preload("res://scripts/ldtk_thought_hazard_layer.gd")
+## Paintable swimmable water — same pass-through/no-collision treatment as
+## ThoughtHazards above, and for the same reason (the tile is a trigger area,
+## not a wall). No unshaded material here, unlike ThoughtHazards: Act 2's
+## CanvasModulate is bright, not Act 1's near-black, so the water's ordinary
+## shaded, semi-transparent art already renders correctly without it (checked
+## directly — see tests/pond_shot.tscn).
+const WATER_LAYER := "Water"
+const WATER_LAYER_SCRIPT := preload("res://scripts/ldtk_water_layer.gd")
 ## A level's LDtk background image (`bgRelPath`) imports as a plain Sprite2D
 ## named "BG Image" — see level.gd in the addon. This script makes it lag the
 ## camera instead of tracking it 1:1; see its own header for why that is a
@@ -88,6 +96,26 @@ const Z_BANDS := {"Background": -1, "Foreground": 1}
 
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
+	if str(level.name) == "Level_V9":
+		var atrium := preload("res://scenes/props/backdrop/maintenance_atrium/MaintenanceAtrium.tscn").instantiate()
+		level.add_child(atrium)
+		atrium.owner = level
+	var definitions: Array = JSON.parse_string(FileAccess.get_file_as_string("res://resources/levels/act1_expansion.json"))
+	for definition: Dictionary in definitions:
+		if definition.name == str(level.name):
+			var dressing := preload("res://scenes/props/backdrop/office_wing/OfficeWing.tscn").instantiate()
+			dressing.room_size = Vector2(definition.width, definition.height)
+			dressing.theme = definition.theme
+			dressing.route = definition.route
+			dressing.is_escape = definition.direction < 0
+			level.add_child(dressing)
+			dressing.owner = level
+	if str(level.name) == "Level_14":
+		var dressing := preload("res://scenes/props/backdrop/office_wing/OfficeWing.tscn").instantiate()
+		dressing.room_size = Vector2(664,192)
+		dressing.is_encounter = true
+		level.add_child(dressing)
+		dressing.owner = level
 	var bg := level.get_node_or_null(BG_IMAGE_NODE)
 	if bg is Sprite2D:
 		bg.set_script(BG_PARALLAX_SCRIPT)
@@ -104,6 +132,9 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 			mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 			layer.material = mat
 			layer.set_script(THOUGHT_LAYER_SCRIPT)
+		elif layer.name == WATER_LAYER:
+			layer.collision_enabled = false
+			layer.set_script(WATER_LAYER_SCRIPT)
 		elif Z_BANDS.has(layer.name):
 			layer.z_index = Z_BANDS[layer.name]
 		if layer.name == GEOMETRY_LAYER:

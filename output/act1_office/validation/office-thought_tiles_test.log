@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+  PASS  started in TEST room
+  PASS  ThoughtHazards layer exists in room
+  PASS  collision disabled (pass-through)
+  PASS  ldtk_world cached the thought layer
+  PASS  empty cell is not a hazard
+  PASS  _in_thought_tile() is false on empty cell
+  PASS  painted tile is occupied
+  PASS  _in_thought_tile() detects the painted cell
+  PASS  player alive before stepping into tile
+  PASS  player DEAD after stepping into thought tile
+  PASS  thought tiles: a painted cell actually animates over time  [6 distinct frames seen]
+  PASS  ...and different cells read different frames at the same tick (decorrelated, not one shared clock)
+  PASS  ...and the same layout reproduces the same frames on a fresh scan (hashed, not random)
+THOUGHT TILES TEST: ALL PASS  (13 checks)
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1028)
+WARNING: Act1Beats: Level_25 has no Exit to send home.
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] _wire_loop_home (res://scripts/act1_beats.gd:1171)
+         [1] _ready (res://scripts/act1_beats.gd:399)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
