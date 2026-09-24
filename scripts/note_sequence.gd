@@ -25,6 +25,15 @@ signal completed
 ## Play a cue when the order is broken / when the run completes.
 @export var play_feedback := true
 
+const EXIT_SCENE = preload("res://scenes/props/music_exit/MusicExit.tscn")
+## Seconds for the room to brighten after the melody unlocks the exit.
+@export var light_release_time := 1.2
+var _world: LdtkWorld
+var _room: Node2D
+var _room_tiles: Array[NoteTile] = []
+var _exits: Dictionary = {}
+var _light_tween: Tween
+
 var progress := 0          # how many correct steps so far (0..total)
 var total := 0
 var _solved := false
@@ -62,13 +71,15 @@ func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player") as Player
 	if _player != null:
 		_player.died.connect(_revoke)
-	var world := _find_world()
-	if world != null:
-		world.room_changed.connect(func(_room: Node2D) -> void: _revoke())
+	_world = _find_world()
+	if _world != null:
+		_build_exits(tiles)
+		_world.room_changed.connect(_room_changed)
+		_room_changed(_world.current_room)
 
 
 func _on_tile_stepped(tile: NoteTile) -> void:
-	if _solved:
+	if _solved or (_world != null and tile not in _room_tiles):
 		return
 	var now := Time.get_ticks_msec() / 1000.0
 	if tile == _last_tile and now - _last_time < repeat_grace:
@@ -97,6 +108,8 @@ func _on_tile_stepped(tile: NoteTile) -> void:
 		if play_feedback and tile.note_index != 1:
 			_play("res://assets/notes/wrong.wav")
 
+	_update_exit()
+
 
 func _complete() -> void:
 	_solved = true
@@ -106,6 +119,11 @@ func _complete() -> void:
 	var player := get_tree().get_first_node_in_group("player") as Player
 	if player != null:
 		player.grant_glow()
+	_update_exit()
+	if _world != null and _room != null:
+		if _light_tween and _light_tween.is_valid():_light_tween.kill()
+		_light_tween = create_tween()
+		_light_tween.tween_property(_world.get_node("CanvasModulate"), "color", _world._ambient_color, light_release_time)
 
 
 func _play(path: String) -> void:
@@ -124,6 +142,10 @@ func reset() -> void:
 	_last_tile = null
 	_last_time = -999.0
 	_counted.clear()
+	if _light_tween and _light_tween.is_valid():_light_tween.kill()
+	_update_exit()
+	if _world != null and _room != null and not _room_tiles.is_empty():
+		_world.get_node("CanvasModulate").color = _world.music_room_color
 
 
 ## Take the glow back and re-arm the tiles. Fires on death and on leaving the
@@ -143,3 +165,51 @@ func _find_world() -> LdtkWorld:
 			return n
 		n = n.get_parent()
 	return null
+
+
+func _build_exits(tiles: Array[Node]) -> void:
+	# Include shelved rooms too, so they can be edited/tested without restoring
+	# unrelated story rooms to the route. Ownership is always room-local.
+	for tile in tiles:
+		var room: Node = tile.get_parent()
+		while room != null and not room is LDTKLevel:room = room.get_parent()
+		if room == null or _exits.has(room):continue
+		var exit: Node2D = _world._exit_in(room)
+		if exit == null:continue
+		var portal = EXIT_SCENE.instantiate()
+		var bounds: Rect2 = _world.room_rect(room)
+		var collider: CollisionShape2D
+		for child in exit.get_children():
+			if child is CollisionShape2D:collider=child
+			elif child is CanvasItem:child.hide()
+		if collider == null:
+			portal.free();continue
+		var top: float = collider.global_position.y - collider.shape.size.y / 2
+		var x: float = bounds.end.x-32 if exit.global_position.x>bounds.get_center().x else bounds.position.x
+		room.add_child(portal)
+		portal.global_position=Vector2(x,top)
+		portal.visible=false
+		_exits[room]=portal
+		room.set_meta("exit_locked",true)
+
+func _room_changed(room: Node2D) -> void:
+	if _room != null and _exits.has(_room):
+		_exits[_room].visible=false
+		_exits[_room].spill.enabled=false
+	_room=room
+	_room_tiles.clear()
+	total=0
+	for tile in get_tree().get_nodes_in_group("note_tile"):
+		if room != null and room.is_ancestor_of(tile):
+			_room_tiles.append(tile)
+			total=maxi(total,tile.note_index)
+	_revoke()
+	if _exits.has(room):
+		_exits[room].visible=true
+		_exits[room].spill.enabled=true
+		_exits[room].spill.energy=0
+
+func _update_exit() -> void:
+	if _room == null or not _exits.has(_room):return
+	_room.set_meta("exit_locked",not _solved)
+	_exits[_room].set_state(progress,total,_solved)

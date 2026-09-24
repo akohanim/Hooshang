@@ -21,3 +21,40 @@ anchor_bottom = 1.0
 expand = true
 stream = ExtResource("2_ogv")
 mouse_filter = 2
+
+[node name="SkipPrompt" type="ColorRect" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -124.0
+offset_top = -30.0
+offset_right = -8.0
+offset_bottom = -8.0
+color = Color(0.055, 0.05, 0.09, 0.85)
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="SkipPrompt"]
+offset_left = 5.0
+offset_top = 2.0
+offset_right = 111.0
+offset_bottom = 16.0
+theme_override_colors/font_color = Color(1, 0.82, 0.42, 1)
+theme_override_font_sizes/font_size = 8
+text = "Hold X to skip intro"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="Track" type="ColorRect" parent="SkipPrompt"]
+offset_left = 5.0
+offset_top = 18.0
+offset_right = 111.0
+offset_bottom = 20.0
+color = Color(0.3, 0.25, 0.16, 0.65)
+mouse_filter = 2
+
+[node name="Fill" type="ColorRect" parent="SkipPrompt/Track"]
+anchor_bottom = 1.0
+color = Color(1, 0.82, 0.42, 1)
+mouse_filter = 2

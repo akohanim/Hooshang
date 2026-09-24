@@ -254,11 +254,11 @@ func _check_way_back_survives() -> void:
 
 	# Walk it. The dictionary being right and the door being wrong is exactly the
 	# bug this whole field exists to prevent, so the assertion is the doorway.
-	# Walked in through the room BEFORE the boss (Level_V14 now — Level_13 is on
-	# hold, see LdtkWorld.SHELVED_ROOMS) rather than dropped into Level_14,
-	# because arriving is what hangs the return door — a room you were simply
-	# placed in has no doorway behind you to try.
-	await _open_room("Level_V14")
+	# Walked in through the room BEFORE the boss (Level_13, now that 7-13 are back
+	# in the route — see LdtkWorld.SHELVED_ROOMS/INSERTED_ROOMS) rather than
+	# dropped into Level_14, because arriving is what hangs the return door — a
+	# room you were simply placed in has no doorway behind you to try.
+	await _open_room("Level_13")
 	await _walk_forward()
 	_check(world.current_room != null and world.current_room.name == "Level_14",
 		"walked into Level_14  [%s]"
@@ -315,11 +315,15 @@ func _check_menu_offers() -> void:
 
 	menu._show_levels(0)
 	var rooms := _labels()
-	# 14 and 5, not 13 and 4: rooms are numbered index PLUS ONE, and the insert
-	# that put the dash tutorial second moved every room after the first along by
-	# one. Same class of thing as room_number above — a room named by NUMBER,
-	# which a Level_N rename cannot see.
-	_check(rooms.has("ROOM 14") and not rooms.has("ROOM 5"),
+	# Slot 0's run walked Level_13 -> Level_14 -> Level_15 (the way_back section
+	# above), so Level_14 is offered and the wiped Level_5 from the earlier save
+	# is not. Build the expected labels from the SAME formula the menu uses
+	# (LdtkWorld.index_in_name + 1) rather than hardcoding a number, so this stays
+	# correct through the index_in_name scaling and any future renumber — the
+	# intent is "the rooms the run stood in, and no others", not a literal string.
+	var room_14 := "ROOM %d" % (LdtkWorld.index_in_name("Level_14") + 1)
+	var room_5 := "ROOM %d" % (LdtkWorld.index_in_name("Level_5") + 1)
+	_check(rooms.has(room_14) and not rooms.has(room_5),
 		"level select offers the rooms that run stood in and no others  %s" % str(rooms))
 
 	menu._show_confirm(0)
@@ -399,16 +403,40 @@ func _open_room(room: String) -> void:
 		return
 	world._enter_room(target, true)
 	await _frames(5)
+	await _finish_dialogue()
 
 
-## Leave the current room by tripping its Exit — the forward door.
+## Leave the current room by tripping its Exit — the forward door. Step onto the
+## trigger from the room's inside in two hops (like backtrack_test._go_forward),
+## landing on the SHAPE's centre rather than the entity origin — a floor Exit's
+## pivot is bottom-centre, so its box sits offset from global_position and a flat
+## `+(0,-8)` can miss it entirely (it did for Level_13's exit, which is why the
+## old one-hop version stopped advancing once the room before the boss stopped
+## being the pivot-centred Level_V14).
 func _walk_forward() -> void:
 	var from: Node2D = world.current_room
 	var exit := world._exit_in(from)
 	if exit == null:
 		_check(false, "%s has no Exit to walk out of" % from.name)
 		return
-	world.player.global_position = exit.global_position + Vector2(0, -8)
+	# Clear the security circuit first if this room's exit is locked behind a
+	# puzzle — the same unlock backtrack_test._go_forward uses. Level_13 is a
+	# musical-tile room (it holds NoteTiles), so its exit stays locked until the
+	# melody is played; before it was un-shelved into the route this never
+	# mattered here, and the walk silently stalled on the locked door.
+	if from.get_meta("exit_locked", false):
+		if from.has_node("DarknessRoom"):
+			from.get_node("DarknessRoom")._solve()
+		else:
+			world.get_node("NoteSequence")._complete()
+		await _frames(3)
+	var shape := exit.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	var offset: Vector2 = shape.position if shape != null else Vector2.ZERO
+	var rect := world.room_rect(from)
+	var dir := 1.0 if exit.global_position.x < rect.get_center().x else -1.0
+	world.player.global_position = exit.global_position + offset + Vector2(dir * 12.0, 0.0)
+	await _frames(1)
+	world.player.global_position = exit.global_position + offset
 	await _until_room_changes(from)
 
 
@@ -436,8 +464,22 @@ func _settle() -> void:
 		if world != null and not world.rooms.is_empty():
 			break
 	await _frames(10)
-	if world != null and world.player != null:
-		world.player.input_locked = false
+	await _finish_dialogue()
+
+
+## Dialogue now owns a physics hold, not a flag a fixture can clear behind it.
+## Finish any opening/arrival conversation through the real skip path before
+## testing save/pause behavior in gameplay.
+func _finish_dialogue() -> void:
+	for i in 900:
+		if not is_instance_valid(Dialogue._conversation_owner):
+			return
+		if Dialogue._active:
+			Input.action_press("skip_dialogue")
+			Dialogue._process(Dialogue.skip_hold_time + 0.1)
+			Input.action_release("skip_dialogue")
+		await _frames(1)
+	_check(false, "arrival dialogue completes before save/pause checks")
 
 
 func _room(name: String) -> Node2D:

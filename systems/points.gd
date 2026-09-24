@@ -22,7 +22,7 @@ var total := 0
 
 ## What a lemon is worth. The number on the tag in the reference art, and the
 ## only award in the game so far.
-const LEMON := 1000
+const LEMON = preload("res://resources/scoring/act_score.gd").LEMON
 
 ## The counter rolls rather than jumps — a score that snaps is a number, a score
 ## that runs up is a reward. This is how long it takes to catch up, whatever the

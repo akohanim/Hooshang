@@ -57,7 +57,7 @@ func any_jump(a: Vector3, b: Vector3) -> bool:
 		if await jump_leg(a, b, timing): return true
 	return false
 
-func jump_leg(a: Vector3, b: Vector3, dash_at: int) -> bool:
+func jump_leg(a: Vector3, b: Vector3, dash_at: int, wait_frames: int = 0) -> bool:
 	release()
 	for crumble in get_tree().get_nodes_in_group("crumbling"):
 		if world.current_room.is_ancestor_of(crumble): crumble.reset()
@@ -65,7 +65,7 @@ func jump_leg(a: Vector3, b: Vector3, dash_at: int) -> bool:
 	var start_x := a.x + a.z - 8 if direction > 0 else a.x + 8
 	player.respawn(origin + Vector2(start_x, a.y - 6))
 	player.has_dash = true
-	await frames(5)
+	await frames(5 + wait_frames)
 	var target := origin + Vector2(b.x + b.z / 2, b.y - 6)
 	for frame in 90:
 		var dx := target.x - player.global_position.x

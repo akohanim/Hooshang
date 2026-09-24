@@ -1,7 +1,10 @@
 @tool
 class_name MagicCarpet
 extends Area2D
-## A rideable moving platform: stand on it and it carries you, the same
+## A rideable moving platform: waits at its placed point until a real top
+## landing activates it. After dismounting, it flies on for five seconds
+## before returning to its parked origin; boarding again cancels that return.
+## Stand on it and it carries you, the same
 ## "carries a rider, lets go the instant they're airborne" contract
 ## conveyor_belt.gd documents and proves (layer 4 trigger, mask the player
 ## only, process_physics_priority AFTER the player's own move_and_slide, the
@@ -10,41 +13,23 @@ extends Area2D
 ## GENERALIZES THE BELT'S TRICK TO 2D. A belt moves nothing itself — it stays
 ## put and displaces the RIDER by `drift() * delta` every frame. A carpet has
 ## to move itself too (it is the platform doing the flying), so instead this
-## computes its own planned displacement for the frame from `pattern`, moves
+## computes its own planned displacement from flight speed and input, moves
 ## ITSELF by it, and then move_and_collide()s every current rider by that same
 ## vector. One code path covers both the carpet's own autonomous motion and a
 ## rider steering it — the rider is just along for whatever displacement the
 ## carpet decided on this frame, exactly the way ConveyorBelt's rider is along
 ## for whatever the belt decided.
 ##
-## ONE ENTITY WITH A PATTERN FIELD, not four entities — same call as
-## DarkThought.Motion: which pattern is chosen is a thing two placed carpets
-## can legitimately disagree about, and a carpet whose Pattern nobody set
-## still visibly does something (RIDE, the default) rather than silently being
-## an unused fourth entity type. Each pattern gets its own rug art
-## (tools/gen_magic_carpet.py) so the function reads from the art, not a
-## tooltip — the same rule this project's other hazards already follow.
-##
-## Position is recomputed from `_clock` every frame for the autonomous
-## patterns (BOB/SWEEP/BOUNCE), never integrated — same reasoning
-## dark_thought.gd's _process gives: a velocity added up frame to frame drifts,
-## and a repeating path that does not actually repeat is a path a room cannot
-## be built around. RIDE's vertical steering is the one genuinely stateful
-## piece here (it depends on live input history, not just elapsed time), kept
-## in `_steer_y` and clamped to `steer_range`.
-
-enum CarpetPattern {
-	RIDE,    ## Default: drifts right at `speed`; a rider steers it vertically.
-	BOB,     ## Autonomous vertical sine around its placed point.
-	SWEEP,   ## Autonomous horizontal sine around its placed point.
-	BOUNCE,  ## Drifts right at `speed` while pulsing in a springy vertical hop.
-}
+## All colors share the same ride: forward drift and unrestricted vertical
+## steering, stopped by room edges and solid geometry (including rider clearance).
+enum CarpetPattern { RIDE }
+enum CarpetColor { CRIMSON, TEAL, VIOLET, AMBER }
 
 const TILES := {
-	CarpetPattern.RIDE: preload("res://assets/props/magic_carpet/ride.png"),
-	CarpetPattern.BOB: preload("res://assets/props/magic_carpet/bob.png"),
-	CarpetPattern.SWEEP: preload("res://assets/props/magic_carpet/sweep.png"),
-	CarpetPattern.BOUNCE: preload("res://assets/props/magic_carpet/bounce.png"),
+	CarpetColor.CRIMSON: preload("res://assets/props/magic_carpet/ride.png"),
+	CarpetColor.TEAL: preload("res://assets/props/magic_carpet/bob.png"),
+	CarpetColor.VIOLET: preload("res://assets/props/magic_carpet/sweep.png"),
+	CarpetColor.AMBER: preload("res://assets/props/magic_carpet/bounce.png"),
 }
 const TILE := Vector2(16.0, 8.0)
 
@@ -56,30 +41,28 @@ const TILE := Vector2(16.0, 8.0)
 		size = value
 		_update_extents()
 
-## Which path it flies. See the CarpetPattern doc above.
-@export var pattern: CarpetPattern = CarpetPattern.RIDE:
+## Rug color and motif; does not change the ride controls.
+@export var carpet_color: CarpetColor = CarpetColor.CRIMSON:
 	set(value):
-		pattern = value
+		carpet_color = value
 		_rebuild_visual()
 
-## RIDE/BOUNCE: how fast it drifts right, px/s. BOB/SWEEP: 0 by default (a
-## stationary lift / sweep); set it above 0 to also drift while oscillating.
+## Legacy packed scenes preserve their old artwork but always use Ride.
+@export_storage var pattern: int = CarpetPattern.RIDE:
+	set(value):
+		if value > 0:
+			carpet_color = clampi(value, 0, 3) as CarpetColor
+		pattern = CarpetPattern.RIDE
+
+## Forward flight speed in pixels per second.
 @export var speed := 40.0
-## BOB/SWEEP/BOUNCE: how far the oscillation swings — half the travel either
-## side of the placed point for BOB/SWEEP, or the pulse height for BOUNCE.
-@export var amplitude := 20.0
-## BOB/SWEEP/BOUNCE: full cycles per second.
-@export var cycle_speed := 0.4
-## Where in the cycle it starts, 0..1 — same job as DarkThought.phase: two
-## carpets in one room should be able to disagree about where they start.
-@export var phase := 0.0
-## RIDE only: how far a rider may steer it, in px, above or below its placed y.
-@export var steer_range := 20.0
-## RIDE only: how fast up/down input moves it, px/s.
+## Vertical steering speed in pixels per second.
 @export var steer_speed := 36.0
 ## How far ABOVE the drawn box a body still counts as riding — same job as
 ## ConveyorBelt.rider_reach, same default (the player's hitbox height).
 @export var rider_reach := 12.0
+## Seconds of continued flight after dismounting before returning to the start.
+@export_range(0.1, 30.0) var respawn_delay := 5.0
 
 const ZONE_FLOOR_SCENE := preload("res://scenes/props/zones/ZoneFloor.tscn")
 
@@ -96,10 +79,11 @@ var riders: Array[Node2D] = []
 var _riding := {}
 
 var _origin := Vector2.ZERO
-var _clock := 0.0
-## RIDE only: accumulated vertical steer offset from `_origin`, clamped to
-## +/- steer_range.
-var _steer_y := 0.0
+var _had_rider := false
+## Negative means no return is pending; counts gameplay seconds while empty.
+var _return_left := -1.0
+## Armed by a real top landing, reset on death/room entry.
+var activated := false
 
 
 func _ready() -> void:
@@ -134,9 +118,39 @@ func carrying(body: Node2D) -> bool:
 
 
 func _physics_process(delta: float) -> void:
-	_clock += delta
+	if not activated:
+		# A reset/respawn can leave a body inside the same sensor, so no new
+		# body_entered signal follows. Reacquire before testing its feet.
+		for body in get_overlapping_bodies():
+			_on_body_entered(body)
+		for body in riders:
+			if carrying(body) and body is Player:
+				var feet: float = (body as Player).hitbox_rect().end.y
+				var top := global_position.y - size.y * 0.5
+				if absf(feet-top) <= 3.0 and (body as Player).velocity.y >= 0.0:
+					activated = true
+					var sound := get_node_or_null("FeedbackSound") as AudioStreamPlayer2D
+					if sound != null:sound.play()
+					break
+		if not activated:
+			return
+	var occupied := false
+	for body in riders:
+		if body is Player and carrying(body):
+			occupied = true
+			break
+	if occupied:
+		_return_left = -1.0
+	elif _had_rider:
+		_return_left = respawn_delay
+	_had_rider = occupied
+	if _return_left >= 0.0:
+		_return_left -= delta
+		if _return_left <= 0.00001:
+			reset()
+			return
 	var old_pos := position
-	position = _origin + _offset(delta)
+	_move_flight(delta)
 	var carry := position - old_pos
 	for body in riders:
 		var riding := carrying(body)
@@ -149,7 +163,7 @@ func _physics_process(delta: float) -> void:
 ## ZoneFloor child) just gave themselves two lines up in `_physics_process`.
 ##
 ## The exception with `_floor` here is load-bearing, not a style nicety. By
-## the time this runs, `position = _origin + _offset(delta)` has already
+## the time this runs, `_move_flight(delta)` has already
 ## moved ZoneFloor's Node2D transform (a child's global transform updates the
 ## instant a parent's `position` changes) — but the PHYSICS SERVER's own copy
 ## of that StaticBody2D's transform does not catch up until the NEXT physics
@@ -185,34 +199,65 @@ func _carry_body(body: CharacterBody2D, carry: Vector2) -> void:
 	body.remove_collision_exception_with(_floor)
 
 
-## Where the carpet sits relative to `_origin`, this frame. RIDE/BOUNCE drift
-## right without bound (a level places one only as long as the room needs it
-## to travel, same as ConveyorBelt places no bound of its own on how far a
-## belt runs); BOB/SWEEP orbit the placed point and never drift away from it.
-func _offset(delta: float) -> Vector2:
-	var theta := TAU * (_clock * cycle_speed + phase)
-	match pattern:
-		CarpetPattern.BOB:
-			return Vector2(speed * _clock, sin(theta) * amplitude)
-		CarpetPattern.SWEEP:
-			return Vector2(sin(theta) * amplitude, 0.0)
-		CarpetPattern.BOUNCE:
-			return Vector2(speed * _clock, -absf(sin(theta)) * amplitude)
-		_:  # RIDE
-			var steer := 0.0
-			if not riders.is_empty() and not Engine.is_editor_hint():
-				steer = Input.get_axis("move_up", "move_down")
-			_steer_y = clampf(_steer_y + steer * steer_speed * delta,
-				-steer_range, steer_range)
-			return Vector2(speed * _clock, _steer_y)
+## Move each axis separately so a wall stops forward drift without preventing
+## steering away. Integrate only actual travel; a blocked move never builds up
+## an offset that would later teleport the carpet through an obstacle.
+func _move_flight(delta: float) -> void:
+	var steer := 0.0
+	var riding_bodies: Array[Player] = []
+	for body in riders:
+		if body is Player and carrying(body):
+			riding_bodies.append(body)
+			steer = Input.get_axis("move_up", "move_down")
+	var footprint := Rect2(global_position - size * 0.5, size)
+	for body in riding_bodies:
+		footprint = footprint.merge(body.hitbox_rect())
+	var bounds := Rect2()
+	var ancestor := get_parent()
+	while ancestor != null:
+		if ancestor is LDTKLevel:
+			bounds = Rect2(ancestor.global_position, Vector2(ancestor.size))
+			break
+		ancestor = ancestor.get_parent()
+	var travel := Vector2.ZERO
+	for motion in [Vector2(speed * delta, 0), Vector2(0, steer * steer_speed * delta)]:
+		if bounds.has_area():
+			motion.x = clampf(motion.x, minf(0, bounds.position.x - footprint.position.x), maxf(0, bounds.end.x - footprint.end.x))
+			motion.y = clampf(motion.y, minf(0, bounds.position.y - footprint.position.y), maxf(0, bounds.end.y - footprint.end.y))
+		var fraction := _clear_fraction(Rect2(global_position - size * 0.5 + travel, size), motion)
+		for body in riding_bodies:
+			var box := body.hitbox_rect()
+			box.position += travel
+			fraction = minf(fraction, _clear_fraction(box, motion))
+		motion *= fraction
+		travel += motion
+		footprint.position += motion
+	global_position += travel
+
+
+## Sweep both the rug and the rider against world solids before moving either.
+## Exclude our own floor: its physics transform lags the visual by one tick.
+func _clear_fraction(box: Rect2, motion: Vector2) -> float:
+	if motion.is_zero_approx():
+		return 1.0
+	var query := PhysicsShapeQueryParameters2D.new()
+	var shape := RectangleShape2D.new()
+	shape.size = box.size
+	query.shape = shape
+	query.transform = Transform2D(0.0, box.get_center())
+	query.motion = motion
+	# Leave more than CharacterBody2D's default 0.08px recovery margin,
+	# otherwise the next player tick depenetrates away from the carpet.
+	query.margin = 0.15
+	query.collision_mask = 1
+	query.exclude = [_floor.get_rid()]
+	return get_world_2d().direct_space_state.cast_motion(query)[0]
 
 
 ## Hand the carpet's current horizontal drift over as real velocity the frame
 ## a rider LEAVES it in mid-air — same reasoning and same shape as
 ## ConveyorBelt._settle_launch, simplified: no "jumping with it" bonus, and
-## HORIZONTAL ONLY (a deliberate scope limit — a vertical launch bonus off a
-## bobbing or bouncing carpet is a feel decision, not a mechanical
-## requirement, and player-feel tuning is out of scope for this task).
+## Only horizontal drift is inherited when jumping off.
 func _settle_launch(body: Node2D, riding: bool) -> void:
 	var was: bool = _riding.get(body.get_instance_id(), false)
 	_riding[body.get_instance_id()] = riding
@@ -249,8 +294,9 @@ func _on_body_exited(body: Node2D) -> void:
 ## clock happened to be at, and RIDE's drift starts back at zero instead of
 ## wherever it had travelled to.
 func reset() -> void:
-	_clock = 0.0
-	_steer_y = 0.0
+	_had_rider = false
+	_return_left = -1.0
+	activated = false
 	position = _origin
 	riders.clear()
 	_riding.clear()
@@ -300,7 +346,7 @@ func _rebuild_visual() -> void:
 		add_child(_visual)
 	for child in _visual.get_children():
 		child.free()
-	var tex: Texture2D = TILES[pattern]
+	var tex: Texture2D = TILES[carpet_color]
 	var count := int(ceilf(size.x / TILE.x))
 	for i in count:
 		var tile := Sprite2D.new()

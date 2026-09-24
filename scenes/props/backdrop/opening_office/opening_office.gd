@@ -38,13 +38,9 @@ func _draw() -> void:
 	draw_rect(Rect2(96, 82, 10, 1), Color("24343e"))
 	draw_rect(Rect2(100, 83, 2, 2), Color("50616a"))
 	draw_rect(Rect2(94, 84, 10, 1), Color("909c99"))
-	# Ceiling conduit and a modest clock above the workstation.
+	# Ceiling conduit above the workstation.
 	draw_line(Vector2(51, 23), Vector2(139, 23), Color("303e48"))
 	draw_line(Vector2(139, 23), Vector2(139, 45), Color("303e48"))
-	draw_circle(Vector2(117, 36), 6, Color("1c2933"))
-	draw_circle(Vector2(117, 36), 4, Color("949c92"))
-	draw_line(Vector2(117, 33), Vector2(117, 36), Color("35434b"))
-	draw_line(Vector2(117, 36), Vector2(120, 37), Color("35434b"))
 	# Sill and low cool reflections visually anchor the tall night window.
 	draw_rect(Rect2(146, 94, 105, 2), Color("384856"))
 	draw_line(Vector2(148, 94), Vector2(224, 94), Color("536674"))

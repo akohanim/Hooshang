@@ -7,10 +7,10 @@ path="res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea
 
 [deps]
 
-files=["res://ldtk/levels/Level1_ManagerCorridor_ExitShaft.scn", "res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea9103f40c3d88376d94c3.scn"]
+files=["res://ldtk/levels/hooshang_level1_corridor_and_shaft/Level1_ManagerCorridor_ExitShaft.scn", "res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea9103f40c3d88376d94c3.scn"]
 
 source_file="res://ldtk/hooshang_level1_corridor_and_shaft.ldtk"
-dest_files=["res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea9103f40c3d88376d94c3.scn", "res://ldtk/levels/Level1_ManagerCorridor_ExitShaft.scn", "res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea9103f40c3d88376d94c3.scn"]
+dest_files=["res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea9103f40c3d88376d94c3.scn", "res://ldtk/levels/hooshang_level1_corridor_and_shaft/Level1_ManagerCorridor_ExitShaft.scn", "res://.godot/imported/hooshang_level1_corridor_and_shaft.ldtk-c62c3a04dbea9103f40c3d88376d94c3.scn"]
 
 [params]
 

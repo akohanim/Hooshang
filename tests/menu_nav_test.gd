@@ -97,6 +97,7 @@ func _ready() -> void:
 	await _frames(2)
 	_check(menu.selected == 1, "up moves one row too  [row %d]" % menu.selected)
 
+	await _mouse_checks()
 	_finish()
 
 
@@ -124,3 +125,75 @@ func _finish() -> void:
 	else:
 		print("MENU NAV TEST: %d FAILURE(S)" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+
+func _mouse_checks() -> void:
+	# Actual viewport input, including the CanvasLayer scale, rather than
+	# invoking menu callbacks. A click must select its target without a prior hover.
+	menu.show_root()
+	await _frames(2)
+	var first := menu.rows.get_child(0) as Control
+	_mouse(menu.rows.get_child(1), false)
+	_check(menu.selected == 1, "mouse hover selects the pointed title row")
+	_mouse(first, true)
+	_check(menu.page == MainMenu.Page.SLOTS, "click opens the new-game slot menu")
+	_mouse(menu.back_button, true)
+	_check(menu.page == MainMenu.Page.ROOT, "clickable Back returns to title")
+	menu._show_confirm(0)
+	_mouse(menu.rows.get_child(0), true)
+	_check(menu.page == MainMenu.Page.SLOTS, "click Keep It cancels overwrite")
+	menu.show_root()
+	var miss := InputEventMouseButton.new()
+	miss.button_index = MOUSE_BUTTON_LEFT
+	miss.pressed = true
+	miss.position = Vector2(1, 1)
+	get_viewport().push_input(miss, true)
+	_check(menu.page == MainMenu.Page.ROOT, "background click does not activate a row")
+
+	var entries: Array[Dictionary] = []
+	for i in 10:
+		entries.append(menu._row("ROOM %d" % i, "", func() -> void: menu.set_meta("clicked", i)))
+	menu._populate(entries)
+	for i in 7:
+		var wheel := InputEventMouseButton.new()
+		wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+		wheel.pressed = true
+		get_viewport().push_input(wheel, true)
+	_check(menu._top > 0, "mouse wheel reveals rows beyond the visible window")
+	var expected: int = menu._top + 2
+	_mouse(menu.rows.get_child(2), true)
+	_check(menu.get_meta("clicked", -1) == expected, "click activates the correct scrolled entry")
+	menu._move(1)
+	var keyboard_row: int = menu.selected
+	await _frames(3)
+	_check(menu.selected == keyboard_row, "stationary mouse leaves keyboard selection alone")
+
+	menu.visible = false
+	menu.process_mode = Node.PROCESS_MODE_DISABLED
+	# Exercise the pause menu through the viewport while the tree is paused.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	Pause.open = true
+	Pause.visible = true
+	get_tree().paused = true
+	_mouse(Pause.rows.get_child(PauseMenu.Item.RETRY), false)
+	_check(Pause.selected == PauseMenu.Item.RETRY, "mouse hover selects a paused menu row")
+	_mouse(Pause.rows.get_child(PauseMenu.Item.RESUME), true)
+	_check(not Pause.open and not get_tree().paused, "click Resume unpauses the game")
+	await _hold(Pause.fade_time + 0.05)
+
+
+func _mouse(control: Control, click: bool) -> void:
+	var point := control.get_global_transform_with_canvas() * (control.size * 0.5)
+	if click:
+		var event := InputEventMouseButton.new()
+		event.position = point
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.pressed = true
+		get_viewport().push_input(event, true)
+		event = event.duplicate()
+		event.pressed = false
+		get_viewport().push_input(event, true)
+	else:
+		var event := InputEventMouseMotion.new()
+		event.position = point
+		get_viewport().push_input(event, true)

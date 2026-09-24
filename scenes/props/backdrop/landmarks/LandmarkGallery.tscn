@@ -1,0 +1,14 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/backdrop/landmarks/landmark_gallery.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_landmarks/shah_mosque.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_landmarks/persepolis.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_landmarks/si_o_se_pol.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_landmarks/hafez.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_landmarks/dowlat_abad.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_landmarks/cyrus.png" id="7"]
+
+[node name="Landmarks" type="Node2D"]
+script = ExtResource("1")
+room_names = PackedStringArray("Act_2_Level_3", "Act_2_Level_4", "Act_2_Level_5", "Act_2_Level_6", "Act_2_Level_7", "Act_2_Level_8")
+paintings = Array[Texture2D]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7")])

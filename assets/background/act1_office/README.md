@@ -1,7 +1,7 @@
 # Act I office backgrounds
 
-Every one of the 34 authored Act I rooms has a distinct native-resolution
-pixel-art back wall, including the six inserted V rooms and both test rooms.
+Every authored Act I room has a pixel-art back wall, including the inserted
+V rooms and both test rooms. Expanded rooms reuse office art where appropriate.
 The first ten numbered rooms retain their existing art.
 
 ## Visual progression
@@ -78,3 +78,12 @@ moons into repeating art.
 - `office_moon_render_test.tscn` (windowed): luminous core under black ambient
   and actual nearby-surface illumination.
 - `chase_route_test.tscn` and `collapse_test.tscn`: original story behaviour.
+
+## Expanded V-room coverage
+
+V5–V9 use the existing office collection: V5 uses the waiting corridor,
+V6 and V8 use the service well, V7 uses the maintenance shaft, and V9 uses
+the overflow-storage corridor. The world fits each backdrop to its room.
+Assignment keys match LDtk exactly (`Level_V5` and `Level_V6`, uppercase V);
+the lowercase texture filenames are retained. No LDtk import is needed for
+these wrapper-scene assignments.

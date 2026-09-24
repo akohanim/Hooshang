@@ -1,5 +1,7 @@
 @tool
 extends Node2D
+const PATH_ART = preload("res://scenes/props/backdrop/thought_path_art.gd")
+@export var thought_paths:Array=[]
 ## Room-local architectural dressing. Routes remain editable in LDtk; this
 ## prefab renders no collision and never owns story or chase state.
 @export var room_size := Vector2(640,224)
@@ -7,6 +9,7 @@ extends Node2D
 @export var route: Array = []
 @export var is_escape := false
 @export var is_encounter := false
+@export var is_return_portal := false
 var _clock := 0.0
 var _alarm := 0.0
 var _last_frame := -1
@@ -66,6 +69,13 @@ func _draw() -> void:
 				p=q
 			box(x-4,20,8,3,"623a3c")
 			box(x-2,21,4,1,"bd755b")
+	if is_return_portal:
+		box(294, 88, 24, 40, "080b12")
+		box(292, 86, 2, 42, "4f4754")
+		box(294, 86, 24, 2, "4f4754")
+		for y in range(92, 128, 5):box(296, y, 22, 1, "232737")
+		if _alarm > 0:
+			_arrow(Vector2(278, 103), -1, Color("e3aa77"))
 	if is_encounter:
 		# Quiet procession toward the reveal; reverse arrows wake with the alarm.
 		for x in range(40,int(room_size.x)-24,48):
@@ -79,6 +89,7 @@ func _draw() -> void:
 		box(610,24,40,140,"10151e")
 		box(609,24,1,140,"47505c")
 		for y in range(32,158,7):box(614,y,30,1,"232d3a")
+	PATH_ART.draw_paths(self,thought_paths)
 	for i in 24:
 		var xx:=16+(i*79)%maxi(1,int(room_size.x)-32)
 		var yy:=16+fposmod(i*31+_clock*(3 if is_escape else 0.6),room_size.y-32)

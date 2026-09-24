@@ -1,6 +1,6 @@
 extends Node
 ## Play both preserved conversations through the real dialogue box, then verify
-## the normal Act II handoff. No line data is replaced or emitted by this test.
+## the existing authored handoff. No line data is replaced or emitted by this test.
 var world:LdtkWorld
 var pages:Array[String]=[]
 var last_page:=""
@@ -15,7 +15,11 @@ func _ready()->void:
 	var destination:String=world.get_node("Act1Beats").act_two_scene
 	var boss:=world.current_room
 	world.player.has_dash=true
-	world.player.global_position=boss.global_position+Vector2(520,162)
+	check(await approach(148,false),"reveal approach reaches the first gap")
+	check(await approach(240,true),"reveal approach clears the first gap")
+	check(await approach(284,false),"reveal approach reaches the second gap")
+	check(await approach(380,true),"reveal approach clears the second gap")
+	check(await approach(520,false),"reveal approach reaches the story trigger")
 	var started:=false
 	for i in 2400:
 		await tick()
@@ -40,7 +44,7 @@ func _ready()->void:
 		if Screen.current!=world:break
 	Input.action_release("move_left")
 	var ending:=" ".join(pages)
-	for phrase in ["gone", "stop watering it", "stop", "Let the thought come", "the light"]:
+	for phrase in ["gone", "stop watering it", "stop", "Let the thought come", "its origin story"]:
 		check(phrase in ending,"final conversation preserves: "+phrase)
 	await frames(5)
 	check(Screen.current_path()==destination,"final dialogue preserves its authored handoff")
@@ -61,3 +65,15 @@ func frames(n:int)->void:
 func check(ok:bool,label:String)->void:
 	print("PASS " if ok else "FAIL ",label)
 	if not ok:failures.append(label)
+
+func approach(x:float,jump:bool)->bool:
+	Input.action_press("move_right")
+	if jump:Input.action_press("jump")
+	for i in 240:
+		await frames(1)
+		if i==14:Input.action_release("jump")
+		if world.player.state==Player.State.DEAD:
+			Input.action_release("move_right");Input.action_release("jump");return false
+		if world.player.input_locked or (world.player.global_position.x-world.current_room.global_position.x>=x and world.player.is_on_floor()):
+			Input.action_release("move_right");Input.action_release("jump");return true
+	Input.action_release("move_right");Input.action_release("jump");return false

@@ -26,6 +26,14 @@ so the two agree now. The tiles are still placeholder art.
     apex is also measured only while he is still IN the room — a launch that ends
     in the kill plane respawns him at the checkpoint, which can be a whole row of
     rooms away, and that landed in the reading as "706px of reach"
+  - `Godot --headless --path . res://tests/backtrack_clearance_test.tscn` —
+    every return landing fits the full player body inside the room, clear of
+    solid tiles/props and the actual exit trigger. Also enters Level_5 through
+    Level_6's return strip, walks away, and dies/respawns. A fixed Exit offset
+    placed him inside Level_5's ceiling (and solids in six other rooms) while
+    the older center-inside-room check passed. `_clear_re_entry` validates the
+    normal body against physics geometry and searches nearby pixels; ordinary
+    return landings are rechecked when used because props can move after arming.
   - `Godot --headless --path . res://tests/backtrack_test.tscn` — Exits work
     both ways all the way back, not just one room deep
   - `Godot --headless --path . res://tests/level_v6_return_race_test.tscn` —
@@ -304,6 +312,22 @@ so the two agree now. The tiles are still placeholder art.
     "how far down am I") — a surface cell's shimmer frame actually advances
     while a plain fill/left cell is left alone, and — unlike `Pond` — no fish
     are ever spawned here (see `WaterLayer`'s own class doc for why).
+- `Godot --headless --path . res://tests/forward_entry_test.tscn` — checks
+  imported room identities against each Act's LDtk source, enters Level_2 via
+  Level_1's actual Exit Area, idles on the entrance floor, and dies/respawns
+  without a second death or an unintended room change.
+- `Godot --headless --editor --path . --script res://tests/ldtk_import_isolation_test.gd`
+  — imports two temporary projects sharing `Level_2` in both orders, then
+  reloads their saved worlds from disk to prove neither overwrote the other.
+- **Packed levels are namespaced by SOURCE PROJECT:**
+  `ldtk/levels/hooshang_act1/Level_2.scn`, etc. Keep the `PATCHED (Hooshang)`
+  change in `addons/ldtk-importer/ldtk-importer.gd` through addon updates.
+  Act 2's `Level_2` previously overwrote Act 1's identically named scene in
+  the shared folder. The world still overrode its root name/IID/size, but
+  loaded Act 2's children: no PlayerStart, no entrance floor. The spawn
+  fallback chose empty space and caused a death loop. Names need only be
+  unique within each LDtk project now. Existing flat `ldtk/levels/*.scn`
+  files are legacy output; current packed-world imports use the subfolders.
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -336,7 +360,7 @@ so the two agree now. The tiles are still placeholder art.
   Deleting `ldtk/levels/*.scn` is not enough — the world scene itself is cached
   in `.godot/imported/hooshang_act1.ldtk-*`, and a stale one loaded two rooms
   on top of each other at the same world x while every name looked right.
-  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
+  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn` then
   `--import`.
 - **`addons/ldtk-importer/src/tileset.gd` carries a local PATCH, marked
   `PATCHED (Hooshang)`. Keep it through any addon update.** Upstream builds the
@@ -358,7 +382,7 @@ so the two agree now. The tiles are still placeholder art.
   handled ENTITY goes the same way, arriving as nothing while the hook that
   builds it plainly has a case for it. Restart the editor after changing
   anything in a `.import` OR in a post-import hook, and rebuild:
-  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
+  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn` then
   `--import`.
   **The same staleness bites CONTENT edits too, not just script/import-flag
   ones** — placing an entity or painting tiles in LDtk while the Godot editor
@@ -388,6 +412,18 @@ so the two agree now. The tiles are still placeholder art.
   any scripted edit.
 
 Lighting a room by hand (fixtures, the moon window, seam spill): `LIGHTING.md`.
+
+- `Godot --headless --path . res://tests/ledge_mantle_test.tscn` — land ledge
+  assist: feet at most 8px below a real top and body within 3px of its face.
+  Covers both sides, actual TileMapLayer collision, floating platforms, dash
+  cancellation/refill, clear headroom, no grab while rising/steering away/down,
+  removed support and respawn. `LEDGE_MANTLE` takes a swept, distance-capped
+  up-then-forward path for 0.24s; swimming retains its own bank mantle.
+  Adult `ledge_climb` is six editable Aseprite frames, authored by
+  `tools/build_ledge_climb.lua` and exported with `tools/import_hooshang_aseprite.py`.
+  The child has its own upright `ledge_climb` tag (see
+  `tools/build_child_ledge_climb.lua`), preserving its outline and sock layers.
+  `tests/ledge_mantle_preview.tscn` captures native gameplay for visual review.
 
 ## Art direction## Art direction
 
@@ -1118,13 +1154,23 @@ organized per-character before this pass and needed no change.
   are off. The zone only DESCRIBES the slide — `Player.enter_slide()` takes the
   numbers and player.gd does all the moving, so nothing else writes velocity.
   Place it in LDtk as a `SlideZone` and set the three fields per instance.
-- `assets/characters/hooshang/hooshang_frames.tres` = the player's SpriteFrames: 56 east-facing 88px
-  frames across ten clips, played at 0.39 scale. It points at
-  `assets/characters/hooshang/sprites/chubby/`, NOT at `.../animations/` — the thin pack in
-  `animations/` is the source and `tools/gen_chubby_hooshang.py` is the pass that
-  puts the weight on. `dash` is the Slide clip; west is `flip_h`, not art.
-  (Rumi still reuses the samurai pack, `assets/FREE_Samurai .../Sprites`, tinted
-  gold — `assets/characters/rumi/rumi_frames.tres`.)
+- `assets/characters/hooshang/hooshang_frames.tres` = the adult player's
+  **native 18×18** SpriteFrames, exported from the approved
+  `assets/characters/hooshang/aseprite/hooshang_18px_movement.aseprite`.
+  All 81 frames and 16 tags share `sprites/native18/movement.png`; Aseprite
+  frame timing is preserved. Re-export with `python3 tools/import_hooshang_aseprite.py`.
+  Do not run the legacy native24 generator against the active SpriteFrames.
+  Render at 1:1 nearest, offset `(0,-3)`: standing art is 17px tall and its
+  feet align with the existing 9×12 collider. The smaller collision guides
+  in Aseprite remain design metadata, not active physics.
+  Adult ladders use `climb`, `climb_down`, and paused `climb_idle`; older/child
+  libraries still reverse the climb animation. Holding Down on the ground
+  activates the adult `crouch` pose and brakes walking; release restores
+  movement, while jump and dash remain available. It preserves the existing
+  hitbox and squeeze mechanic. Child art and locked controls are excluded.
+  `tests/crouch_test.tscn` covers the actual Down-arrow mapping and these exits. Metadata still preserves the child's original
+  0.39 scale and `(0,-7)` offset. `tests/hooshang_native24_test.tscn` retains
+  its historical filename but verifies the 18px library and state routing.
 - `tests/room_shot.tscn` — dev capture harness, not a pass/fail test. Stands the
   player in a named room, photographs the 320x180 game surface and prints the
   frame's mean/peak luminance (the units `LIGHTING.md`'s targets are quoted in).
@@ -1552,4 +1598,3 @@ test rather than being noticed months later in play.
   and a future grid change should not either — level geometry is built against
   the pixels, and the cell count is just how it reads on the current grid.
 - Checkpoints are silent Area2Ds; death is instant respawn, no penalty.
-

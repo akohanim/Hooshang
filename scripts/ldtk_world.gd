@@ -462,40 +462,40 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 ## derivable from their name. Keyed by identifier; value is [the numbered room
 ## they follow, their order among any others inserted at the same point].
 ##
-## `Level_V1`..`Level_V7` all land between Level_6 and the escape row as one
-## block — the current spine of the game is `Level_0`..`Level_6` then this V
-## block then `Level_14`..`Level_25`, with `Level_7`..`Level_13` on hold (see
-## SHELVED_ROOMS below). THIS TABLE IS THE ONLY PLACE THAT SAYS SO — the .ldtk's
+## `Level_V1`..`Level_V10` all land between Level_6 and Level_7 as one block —
+## the spine of the game is `Level_0`..`Level_6` then this V block then
+## `Level_7`..`Level_25`, with nothing shelved (see SHELVED_ROOMS below). THIS
+## TABLE IS THE ONLY PLACE THAT SAYS SO — the .ldtk's
 ## own Exit entities carry no NextRoom override for any of this (checked: every
 ## one is empty), so index_in_name() below is not just how the debug picker
 ## numbers things, it is the ONLY thing routing actual play through here. Get it
 ## wrong and the game does not misnumber a menu, it walks into a dead end: that
 ## is what an empty NextRoom chain plus the OLD digit-matching rule did — `V1`..
-## `V7` all carry a non-digit after `Level_` and fall to index_in_name()'s
+## `V9` all carry a non-digit after `Level_` and fall to index_in_name()'s
 ## sort-last bucket unless they are pinned here (which is exactly the state a
 ## rename to `Level_V6`/`Level_V7` left them in before this table was updated:
 ## routed 6->V1->V2->V3->V4, then a dead end, with V5/V6/V7 orphaned at the very
 ## end of the array). Add to this block rather than trusting a V-room's digits.
+## Level_V10 follows V9 before the route resumes at Level_7.
 const INSERTED_ROOMS := {
 	"Level_V1": [6, 0], "Level_V2": [6, 1], "Level_V3": [6, 2], "Level_V4": [6, 3],
 	"Level_V5": [6, 4], "Level_V6": [6, 5], "Level_V7": [6, 6],
-	"Level_V8": [6, 7], "Level_V9": [6, 8],
-	"Level_V10": [6, 9], "Level_V11": [6, 10], "Level_V12": [6, 11],
-	"Level_V13": [6, 12], "Level_V14": [6, 13],
+	"Level_V8": [6, 7], "Level_V9": [6, 8], "Level_V10": [6, 9],
 }
 
-## Rooms taken OUT of the play route for now (a level-design pass shelved
-## `Level_7`..`Level_13`; they were also moved well clear in the .ldtk). rooms_in
-## skips them: no Exit ever slides into one, the debug picker does not list them,
-## and the escape row (`Level_14`..) follows the V block directly. Their NODES
-## still exist in the loaded world, so a name lookup that used to find one
-## (act1_beats' `music_room_name` = "Level_7", say) now resolves to null and its
-## caller no-ops gracefully rather than crashing. Empty this array to bring them
-## back. NOTE: several tests still target these rooms (music/intro/chase_route/
-## save) and will fail until retargeted — shelving is a routing change, not a
-## deletion, so that is expected and left for a follow-up.
+## The spine runs `Level_0`..`Level_6` -> the `Level_V1`..`Level_V10` block ->
+## `Level_7`..`Level_25` with no gaps. (`Level_10`..`Level_12` used to sit out
+## here awaiting a design pass; they are back in the route now.)
+##
+## `Level_V11`..`Level_V14` are shelved because they are STALE ORPHANS: the
+## `.ldtk` no longer defines them (its V rooms are V1..V10), but the imported
+## world scene still carries them from an earlier import that did — so `rooms_in`
+## would otherwise sort them in and route play through empty ghosts. Shelving
+## keeps them out regardless; it also stays harmless if a future re-import drops
+## them for real (rooms_in simply never sees them). Re-import the world with the
+## editor CLOSED to remove them properly, then this entry can go.
 const SHELVED_ROOMS: Array[String] = [
-	"Level_7", "Level_8", "Level_9", "Level_10", "Level_11", "Level_12", "Level_13",
+	"Level_V11", "Level_V12", "Level_V13", "Level_V14",
 ]
 
 ## The number in a room's identifier — the 16 in `Level_16` — or an
@@ -619,6 +619,13 @@ func _add_backdrop(room: Node2D) -> void:
 		regions.resize(64)
 		wall_material.set_shader_parameter("moon_regions", regions)
 		panel.material = wall_material
+		if str(room.name) == "Level_25":
+			var dawn := Node2D.new()
+			dawn.name = "OfficeDawn"
+			dawn.set_script(preload("res://scenes/props/backdrop/office_dawn/office_dawn.gd"))
+			dawn.z_index = -1
+			room.add_child(dawn)
+			return  # The homecoming sky has no moon or stars.
 		for region in [room_moon_regions[str(room.name)][0]]:
 			var moon := OFFICE_MOON.instantiate()
 			panel.add_child(moon)
@@ -992,6 +999,8 @@ func _room_before(room: Node2D) -> Node2D:
 func _on_exit_reached(body: Node2D, exit: Node2D) -> void:
 	if body != player or _transitioning:
 		return
+	if current_room.get_meta("exit_locked",false):
+		return  # Doorway security also rejects a dash/teleport inside its trigger.
 	if not current_room.is_ancestor_of(exit):
 		return  # Only allow exits inside the active room to be triggered
 	if _door_in(current_room) != null:
@@ -1056,9 +1065,14 @@ func _arm_return(from_room: Node2D) -> void:
 	# transition portals reached the ordinary way (like Level_V1 -> Level_2), we
 	# still need to look at which half of from_room its OWN forward Exit — the
 	# doorway that actually led here — is located in.
-	var on_left := from_room != null and from_room.position.x < current_room.position.x
+	# A story portal may have no forward Exit and need not be spatially adjacent.
+	# In that case the authored entrance, not LDtk canvas placement, determines
+	# which edge is the way back. Long escape rooms live on a separate row.
+	var on_left := spawn_point_for(current_room).x < rect.get_center().x
 	var exit := _exit_in(from_room) if from_room != null else null
-	if exit != null:
+	# Authored portal rooms may enter from a fixed side even when the prior
+	# exit sits inside a much larger room (Act 2's tall draft room).
+	if exit != null and not current_room.get_meta("return_at_spawn_edge", false):
 		var r_rect := room_rect(from_room)
 		on_left = exit.global_position.x > r_rect.get_center().x
 	var x := (rect.position.x + 6.0) if on_left else (rect.end.x - 6.0)
@@ -1134,8 +1148,61 @@ func _re_entry_point(room: Node2D) -> Vector2:
 	if exit == null:
 		return spawn_point_for(room)
 	var rect := room_rect(room)
+	# A ceiling exit is VERTICAL — this room was left UPWARD through its ceiling
+	# (see _build_exit_ceiling), so coming back you drop in from above and land
+	# just BELOW that opening, inside the room, rather than beside a side wall.
+	# Offsetting flat in x the way the doorway case does would put the landing
+	# a whole `back_entry_offset` off the shaft, and its y (exit.y - 10) sits
+	# ABOVE the ceiling — outside the room entirely (backtrack_test's "re-enters
+	# INSIDE itself" caught exactly that). Clear the trigger box downward by its
+	# own half-height plus the same margin the doorway keeps.
+	if exit.name == "ExitCeiling":
+		return _clear_re_entry(room, exit, exit.global_position + Vector2(0.0, _exit_half_extent(exit).y + back_entry_offset))
 	var inward := 1.0 if exit.global_position.x < rect.get_center().x else -1.0
-	return exit.global_position + Vector2(inward * back_entry_offset, -10.0)
+	return _clear_re_entry(room, exit, exit.global_position + Vector2(inward * back_entry_offset, -10.0))
+
+
+## Exit offsets are only preferences: authored terrain can occupy that point
+## (Level_5's exit is just below its ceiling). Check the full NORMAL body,
+## including prop colliders, rather than trusting the centre or tile cells.
+func _clear_re_entry(room: Node2D, exit: Node2D, preferred: Vector2) -> Vector2:
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(Player.HALF_WIDTH, Player.HALF_HEIGHT) * 2.0
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = shape
+	query.collision_mask = player.collision_mask
+	query.exclude = [player.get_rid()]
+	query.margin = 0.05
+	var bounds := room_rect(room)
+	var exit_shape := exit.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	var exit_center := exit_shape.global_position if exit_shape != null else exit.global_position
+	var exit_box := Rect2(exit_center - _exit_half_extent(exit), _exit_half_extent(exit) * 2.0)
+	# Search outward in pixel rings, preserving existing placements when clear.
+	# The room bounds keep the search finite even for malformed level geometry.
+	var limit := ceili(maxf(bounds.size.x, bounds.size.y))
+	for radius in range(limit + 1):
+		for dy in range(-radius, radius + 1):
+			var xs := range(-radius, radius + 1) if absi(dy) == radius else [-radius, radius]
+			for dx in xs:
+				var at := preferred + Vector2(dx, dy)
+				var body := Rect2(at - shape.size * 0.5, shape.size)
+				if not bounds.encloses(body) or body.grow(1.0).intersects(exit_box):
+					continue
+				query.transform = Transform2D(0.0, at)
+				if get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+					return at
+	push_error("No clear return landing in %s" % room.name)
+	return spawn_point_for(room)
+
+
+## Half-size of an exit trigger's own collision box, for placing a returning
+## player clear of it. Falls back to a small default if the shape isn't the
+## expected rectangle.
+func _exit_half_extent(exit: Node2D) -> Vector2:
+	var cs := exit.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if cs != null and cs.shape is RectangleShape2D:
+		return (cs.shape as RectangleShape2D).size * 0.5
+	return Vector2(8.0, 8.0)
 
 
 ## Point the doorway you came IN through at a different room, permanently.
@@ -1227,7 +1294,10 @@ func _on_return_entered(body: Node2D) -> void:
 	if body != player or not _return_armed or _transitioning or _return_room == null:
 		return
 	var room := _return_room
+	# Platforms/props may have moved since this door was armed.
 	var pos := _return_pos
+	if str(_way_back.get(current_room.name, "")) == "":
+		pos = _re_entry_point(room)
 	_clear_return()
 	await _slide_to_room(room, pos)
 	# Arm the NEXT step back, or backtracking would only ever work one room deep:

@@ -198,6 +198,76 @@ var _velocity := Vector2.ZERO
 ## see _resolve_catch().
 var _owed_death: Player
 var _died_connected := false
+## Set by the active room. Empty retains the original free-space chase entry.
+var entry_room_bounds := Rect2()
+@export var power_entry_delay := 0.35
+var _power_entry_time := 0.0
+var _locked_charge: Node2D
+
+## Every attack uses this gate, including authored eruptions and legacy surges.
+func powers_available() -> bool:
+	return visible and not _holding_entry and state in [State.FOLLOWING, State.SURGING] and _player != null and not _player.input_locked and _player.state != Player.State.DEAD and _power_entry_time >= power_entry_delay
+
+func _tick_power_entry(delta: float) -> void:
+	if not visible or _holding_entry or state == State.DORMANT or state == State.CAUGHT or _player == null or _player.input_locked or _player.state == Player.State.DEAD:
+		_power_entry_time = 0
+		return
+	if entry_room_bounds.has_area() and not entry_room_bounds.encloses(Rect2(global_position-catch_size/2,catch_size)):
+		_power_entry_time = 0
+		return
+	_power_entry_time += delta
+
+## Track the player's height during pre-charge, then freeze a horizontal lane.
+func locked_charge(warning: float, speed: float, distance: float, recovery: float) -> bool:
+	if state != State.FOLLOWING or not powers_available():
+		return false
+	var aim := Vector2(_player.global_position.x-global_position.x,0)
+	if aim.is_zero_approx(): aim = _route()
+	var reach := maxf(distance * 2.0, aim.length() + 160.0)
+	if not _locked_charge.begin(aim, warning, speed, reach, recovery):
+		return false
+	_locked_charge.track_player_height = true
+	if charge_view_rect().has_area():
+		_locked_charge.stage(self)
+	_pending_surge = Vector2.ZERO
+	_warning_timer = 0
+	_surge_timer = 0
+	return true
+
+func charge_view_rect() -> Rect2:
+	if not entry_room_bounds.has_area(): return Rect2()
+	# Use the rendered camera transform, including smoothing, limits and zoom.
+	var view := get_viewport().get_canvas_transform().affine_inverse() * get_viewport_rect()
+	return view.grow(-24).intersection(entry_room_bounds.grow(-20))
+
+func charge_hover_position() -> Vector2:
+	var view := charge_view_rect()
+	if not view.has_area(): return global_position
+	return Vector2(view.end.x-8,_player.global_position.y)
+
+func charge_return_position() -> Vector2:
+	var target := _player.global_position-_route()*respawn_gap
+	if entry_room_bounds.has_area():
+		var inset := entry_room_bounds.grow_individual(-20,-12,-20,-12)
+		target = target.clamp(inset.position,inset.end)
+	return target
+
+func _finish_locked_charge() -> void:
+	# The old tape leads back to where he was before attacking. Start a fresh
+	# trail behind where the player is NOW instead; never re-arm room triggers
+	# or the walking-entry threshold as a side effect of finishing an attack.
+	if _locked_charge.staged:
+		var trail := global_position-_player.global_position
+		buffer.clear_and_seed(_player.global_position,trail.normalized(),trail.length()/maxf(follow_delay,.001))
+		read_delay = follow_delay
+		_grace_timer = respawn_grace
+	else:
+		_place_behind(_player.global_position)
+		_fit_pursuit_to_room(_player.global_position)
+	_reattach = 0
+	_velocity = Vector2.ZERO
+	_power_entry_time = 0
+
 
 
 func _ready() -> void:
@@ -220,6 +290,8 @@ func _ready() -> void:
 	buffer.name = "PositionBuffer"
 	add_child(buffer)
 	buffer.teleported.connect(_on_player_teleported)
+	_locked_charge = preload("res://scenes/props/chase/powers/LockedCharge.tscn").instantiate()
+	add_child(_locked_charge)
 	_attach_visual()
 	add_to_group("darkshang", true)
 
@@ -235,6 +307,7 @@ func _exit_tree() -> void:
 func _physics_process(delta: float) -> void:
 	_grace_timer = maxf(_grace_timer - delta, 0.0)
 	_find_player()
+	_tick_power_entry(delta)
 	if _player == null:
 		return
 	if state == State.DORMANT:
@@ -250,6 +323,19 @@ func _physics_process(delta: float) -> void:
 		_tick_entry_hold()
 		return
 
+	if _locked_charge.phase != 0:
+		if _player.state == Player.State.DEAD:
+			_locked_charge.cancel()
+			return
+		if _player.input_locked: return
+		var before := global_position
+		_locked_charge.tick(delta, self, _player)
+		if _locked_charge.phase == 0 and state != State.CAUGHT and _player.state != Player.State.DEAD:
+			_finish_locked_charge()
+		else:
+			_velocity = (global_position-before)/maxf(delta,.001)
+		_push_visual()
+		return
 	var was := global_position
 	_tick_surge(delta)
 	match state:
@@ -296,6 +382,7 @@ func reveal() -> void:
 ## one thing that starts a chase is the one thing that makes him visible, and
 ## they cannot get out of step.
 func start_chase() -> void:
+	_power_entry_time = 0
 	if state != State.DORMANT:
 		return
 	visible = true
@@ -335,6 +422,8 @@ func hold(seconds: float) -> void:
 ## than being freed, so the narrative beat still has something on screen to talk
 ## to, and so restarting the chase is one call rather than a respawn.
 func stop_chase() -> void:
+	_power_entry_time = 0
+	if _locked_charge != null: _locked_charge.cancel()
 	if state == State.DORMANT:
 		return
 	# An ingestion in flight when the chase ends still owes its death. Paying it
@@ -411,6 +500,9 @@ func dissolve(seconds: float) -> void:
 ## wind up. A surge that started on contact would be an unavoidable death for
 ## anyone who happened to be standing in the wrong place.
 func surge(duration: float, intensity: float) -> void:
+	if not powers_available(): return
+	if _locked_charge != null and _locked_charge.phase != 0:
+		return
 	if state != State.FOLLOWING or _warning_timer > 0.0:
 		return
 	_pending_surge = Vector2(maxf(duration, 0.0), clampf(intensity, 0.0, 1.0))
@@ -599,6 +691,7 @@ func _on_player_died() -> void:
 ## this cannot drift out of step with a level that holds longer.
 func _wait_for_respawn() -> void:
 	for i in 600:
+		if not is_inside_tree():return
 		await get_tree().physics_frame
 		if not is_instance_valid(_player):
 			return
@@ -627,6 +720,8 @@ func _on_player_teleported(to: Vector2) -> void:
 ## to where the player actually is, the delay is back at base, he is FOLLOWING
 ## (never mid-surge), and contact cannot register for respawn_grace seconds.
 func reset_to_checkpoint(at: Vector2) -> void:
+	_power_entry_time = 0
+	if _locked_charge != null: _locked_charge.cancel()
 	_place_behind(at)
 	state = State.FOLLOWING
 	_surge_timer = 0.0
@@ -668,6 +763,8 @@ func _place_behind(at: Vector2) -> void:
 ## Keep him out of the room until the player has travelled `entry_hold_distance`
 ## along the route from where the reset put him.
 ##
+## Room-bound chases then fit that placement inside the entrance and reseed
+## from the fitted point. Unbounded chases retain the full respawn_gap.
 ## The release RE-PLACES him from where the player is NOW, not from where the
 ## room put him. That is the whole point: the two differ by however far the
 ## player walked to earn it, and seeding from the stale point would drop him in
@@ -678,6 +775,18 @@ func _tick_entry_hold() -> void:
 	_holding_entry = false
 	visible = true
 	_place_behind(_player.global_position)
+	_fit_pursuit_to_room(_player.global_position)
+	_power_entry_time = 0
+
+func _fit_pursuit_to_room(at: Vector2) -> void:
+	if not entry_room_bounds.has_area(): return
+	# Keep edge-of-room returns visible, and seed from the fitted position so
+	# the next follow tick cannot snap him outside or back onto the old trail.
+	var inset := entry_room_bounds.grow_individual(-20,-12,-20,-12)
+	global_position = global_position.clamp(inset.position,inset.end)
+	var trail := global_position-at
+	buffer.clear_and_seed(at,trail.normalized(),trail.length()/maxf(follow_delay,.001))
+
 
 
 ## Seed the tape with a synthetic run-in, so the very first Following read puts
@@ -764,6 +873,8 @@ func _push_visual() -> void:
 			motion = Motion.MOVE
 		State.SURGING:
 			motion = Motion.SURGE
+	if _locked_charge != null and _locked_charge.phase != 0:
+		motion = Motion.SURGE if _locked_charge.phase == 2 else Motion.IDLE
 	_visual.set_motion(int(motion), velocity())
 
 

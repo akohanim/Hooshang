@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/props/backdrop/recovery_wing/recovery_wing.gd" id="1"]
+[sub_resource type="CanvasItemMaterial" id="WarmArt"]
+light_mode = 1
+[node name="RecoveryWing" type="Node2D"]
+z_index = -1
+material = SubResource("WarmArt")
+script = ExtResource("1")

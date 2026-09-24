@@ -85,7 +85,7 @@ RUMI
 They are not memories, jaan. They are still alive. And they will not let you by until you face them.
 
 HOOSHANG  
-Look — this really isn't a good time. I just lost my job. I'll get to all that... later.
+Look, this really isn't a good time. I just lost my job. I'll get to all that... later.
 
 RUMI  
 ...Later. Yes. It's always later, isn't it.
@@ -100,7 +100,7 @@ THREE — THE GIFT
 (He walks on, deeper into the office, until the floor gives way beneath him and he is left hanging over a drop with no way up and no way across. RUMI appears again, beside him in the air. Light passes between them.)
 
 RUMI  
-Hold the way you want to go — up and onward — and dash\!
+Hold the way you want to go, up and onward, and dash\!
 
 (Hooshang tries it, and for the first time in his life, does.)
 
@@ -141,7 +141,7 @@ RUMI
 Now both. Watch how they travel. One rises and falls. One crosses. One circles you in the dark.
 
 RUMI  
-Do not sort them, jaan. Pleasant, unpleasant — both are only weather.
+Do not sort them, jaan. Pleasant, unpleasant. Both are only weather.
 
 RUMI  
 Meet them the same way, and the way through opens on its own.
@@ -159,10 +159,10 @@ HOOSHANG
 You show up right before the parts I'm going to hate, don't you?
 
 RUMI  
-The dark awaits you; you think you've lost your rhythm. You haven't. It's only sleeping — here, in these tiles.
+The dark awaits you; you think you've lost your rhythm. You haven't. It's only sleeping, here, in these tiles.
 
 RUMI  
-Wake the notes in their order, one after the next, until they join into a melody. Complete it, and its light will gather on you — enough to carry you through the dark ahead.
+Wake the notes in their order, one after the next, until they join into a melody. Complete it, and its light will gather on you, enough to carry you through the dark ahead.
 
 HOOSHANG  
 So I play the tune, I get a light... Fine.
@@ -215,7 +215,7 @@ RUMI
 Yes. The roots remain. It may green again someday, if ever you water it. But you know the way of it now — you need only stop. Let the thought come, let it stand, let it go. Do not water it with your fear, and it withers on its own.
 
 RUMI  
-Come. Let us see where this seed came from -- its origin story.
+Come. Let us see where this seed came from - its origin story.
 
 (Rumi's own glow rises and swells until it swallows the whole stage in gold.)
 
@@ -819,7 +819,7 @@ What do you mean you can't?
 (The carpet begins to rise.)
 
 HOOSHANG
-No. No, no — Jamshid, get off.
+No. No, no, Jamshid, get off.
 
 (Hooshang grabs his hand.)
 

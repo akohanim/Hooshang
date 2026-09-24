@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 """Generates the five musical-note tiles -> assets/notes/note_1..5.png
 
-PLACEHOLDER ART. These were meant to come from Pixellab, but its MCP server
-was unavailable, so they're drawn procedurally here. They are deliberately
-simple and regenerable: swap in Pixellab output at the same paths/size and
-nothing else needs to change.
-
-One tile = one game cell = 16x16 px (the LDtk grid). Each is a coloured pad
-with a lit rim and an eighth-note glyph, sized to read against the dark Act I
-palette. Colours ascend the same way the pitches do (see gen_note_audio.py).
+Regenerates the existing beveled 16x16 pads, with a numbered upper-left
+corner and a smaller musical glyph in the lower-right. The world uses an 8px
+grid; each entity spans two cells. Godot's individual textures and LDtk's
+shared strip are generated together so both editors show identical artwork.
 
 Run from the repo root:  python3 tools/gen_note_tiles.py
 """
@@ -48,7 +44,16 @@ def shade(c, f):
     return tuple(max(0, min(255, int(v * f))) for v in c)
 
 
-def build(base, rim):
+DIGITS = {
+    "1": ["010", "110", "010", "010", "111"],
+    "2": ["110", "001", "010", "100", "111"],
+    "3": ["110", "001", "010", "001", "110"],
+    "4": ["101", "101", "111", "001", "001"],
+    "5": ["111", "100", "110", "001", "110"],
+}
+
+
+def build(number, base, rim):
     img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
     px = img.load()
     for y in range(SIZE):
@@ -64,22 +69,32 @@ def build(base, rim):
     for i in range(1, SIZE - 1):
         px[i, 1] = rim + (255,)
         px[1, i] = shade(rim, 0.8) + (255,)
-    # note glyph, with a 1px dark drop shadow for contrast on any hue
-    for (x, y) in NOTE_PIXELS:
-        if 0 <= x + 1 < SIZE and 0 <= y + 1 < SIZE:
-            px[x + 1, y + 1] = shade(base, 0.3) + (255,)
-    for (x, y) in NOTE_PIXELS:
+    # Quantize the original glyph to 80% on the native pixel grid: its 7x9
+    # footprint becomes 6x7, with no filtered/half-transparent edge pixels.
+    music = {(8 + round((x - 5) * .8), 7 + round((y - 4) * .8))
+             for x, y in NOTE_PIXELS}
+    digit = {(3 + x, 3 + y) for y, row in enumerate(DIGITS[number])
+             for x, bit in enumerate(row) if bit == "1"}
+    marks = music | digit
+    for x, y in marks:
+        px[x + 1, y + 1] = shade(base, .3) + (255,)
+    for x, y in marks:
         px[x, y] = (250, 250, 245, 255)
     return img
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    for name, base, rim in COLORS:
-        img = build(base, rim)
+    strip = Image.new("RGBA", (SIZE * 5, SIZE))
+    for i, (name, base, rim) in enumerate(COLORS):
+        img = build(name, base, rim)
+        strip.paste(img, (i * SIZE, 0))
         path = os.path.join(OUT, "note_%s.png" % name)
         img.save(path)
         print("wrote", os.path.relpath(path, ROOT))
+
+    strip.save(os.path.join(ROOT, "ldtk", "art", "note_strip.png"))
+    print("wrote ldtk/art/note_strip.png")
 
 
 if __name__ == "__main__":

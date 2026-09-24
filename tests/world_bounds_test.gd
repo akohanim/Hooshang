@@ -53,6 +53,12 @@ func _ready() -> void:
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	add_child(world)
 	await _frames(10)
+	# This sweep deliberately places the player on the highest ledge, which
+	# can be the exit itself (the rebuilt switchback well). A doorway must
+	# not teleport the ceiling probe into the next room during settling.
+	for exit in get_tree().get_nodes_in_group("exit"):
+		exit.set_deferred("monitoring", false)
+	await _frames(2)
 	var checked := 0
 	for room: Node2D in world.rooms:
 		if await _check_room(room):

@@ -21,6 +21,13 @@ extends Area2D
 
 const CELL := 8.0
 const RUNG := preload("res://assets/props/ladder_rung.png")
+const PSYCHEDELIC_RUNG := preload("res://assets/act3/ladder.png")
+
+@export var psychedelic_palette := false:
+	set(value):
+		psychedelic_palette = value
+		if _rungs != null:
+			_rebuild_rungs()
 
 var _shape: CollisionShape2D
 var _rungs: Node2D
@@ -56,7 +63,7 @@ func _rebuild_rungs() -> void:
 	var cells := maxi(int(round(height / CELL)), 1)
 	for i in cells:
 		var tile := Sprite2D.new()
-		tile.texture = RUNG
+		tile.texture = PSYCHEDELIC_RUNG if psychedelic_palette else RUNG
 		tile.centered = false
 		tile.position = Vector2(-CELL * 0.5, i * CELL - height * 0.5)
 		_rungs.add_child(tile)
@@ -86,7 +93,7 @@ func _physics_process(_delta: float) -> void:
 			var reaching := not inside.input_locked \
 				and Input.get_axis("move_up", "move_down") != 0.0
 			if reaching:
-				inside.enter_ladder(self, global_position.x)
+				inside.enter_ladder(self, global_position.x, global_position.y - height * 0.5)
 				_held = inside
 	elif _held != null:
 		if is_instance_valid(_held):

@@ -41,7 +41,7 @@ var _t := 0.0
 var _audio: AudioStreamPlayer
 var _shader: ShaderMaterial
 ## Full-strength fire ambience; quiet enough to leave dialogue clear.
-@export var roar_volume_db := -16.0
+@export var roar_volume_db := -10.0
 
 
 func _ready() -> void:

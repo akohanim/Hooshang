@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scenes/characters/hooshang/player.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://assets/characters/hooshang/hooshang_frames.tres" id="2_frames"]
 [ext_resource type="PackedScene" path="res://scenes/characters/hooshang/Juice.tscn" id="3_juice"]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="4_light"]
+[ext_resource type="PackedScene" path="res://scenes/characters/hooshang/SockPixels.tscn" id="5_socks"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(9, 12)
@@ -19,11 +20,13 @@ shape = SubResource("RectangleShape2D_body")
 [node name="SpriteSquash" type="Node2D" parent="."]
 
 [node name="Visual" type="AnimatedSprite2D" parent="SpriteSquash"]
-scale = Vector2(0.39, 0.39)
+texture_filter = 1
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
 autoplay = "idle"
-offset = Vector2(0, -7)
+offset = Vector2(0, -3)
+
+[node name="SockPixels" parent="." instance=ExtResource("5_socks")]
 
 [node name="GlowLight" type="PointLight2D" parent="."]
 enabled = false
@@ -35,7 +38,7 @@ texture_scale = 0.75
 [node name="PresenceLight" type="PointLight2D" parent="."]
 enabled = true
 color = Color(1, 0.96, 0.88, 1)
-energy = 0.35
+energy = 0.245
 texture = ExtResource("4_light")
 texture_scale = 0.55
 

@@ -3,10 +3,10 @@ extends Node
 func _ready() -> void:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(640,352)
-	viewport.default_canvas_item_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
+	viewport.canvas_item_default_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(viewport)
-	var room: Node2D = load("res://ldtk/levels/Level_V9.scn").instantiate()
+	var room: Node2D = load("res://ldtk/levels/hooshang_act1/Level_V9.scn").instantiate()
 	room.position = Vector2.ZERO
 	viewport.add_child(room)
 	var ambient := CanvasModulate.new()

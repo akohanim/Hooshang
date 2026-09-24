@@ -2,15 +2,8 @@ class_name IntroVideo
 extends CanvasLayer
 ## The opening film, played once when a run BEGINS and never again.
 ##
-## It CANNOT be skipped — see _input below.
-##
-## Story setup belongs to starting a story. A player who picks CONTINUE has
-## already seen it and is coming back to play, so replaying it there would be a
-## 47-second toll on every session — which is how a good intro becomes the thing
-## people remember disliking. The two rules work together: it is unskippable
-## precisely BECAUSE it is asked for once and never again. Wired to the two NEW
-## GAME paths in main_menu.gd and to nothing else — CONTINUE, LOAD, level select
-## and both debug pickers get past it by never asking for it at all.
+## Hold the dialogue-skip button to leave the film early. CONTINUE and level
+## select still bypass it entirely; NEW GAME offers the film with a skip prompt.
 ##
 ## FORMAT. The stream is Ogg Theora, because that is the only container Godot's
 ## VideoStreamPlayer reads — it does not play MP4/H.264, and it fails SILENTLY,
@@ -24,9 +17,16 @@ extends CanvasLayer
 
 ## How long the fade out at the end takes.
 @export var fade_time := 0.6
+@export var skip_hold_time := 1.0
+
+@onready var skip_prompt: Control = $SkipPrompt
+@onready var skip_label: Label = $SkipPrompt/Label
+@onready var skip_fill: ColorRect = $SkipPrompt/Track/Fill
+var _skip_held := 0.0
+var _skip_needs_release := false
 
 ## Fired when the film is over — played out, or never started because the stream
-## is missing. Always exactly once, so a caller can await it and know it will be
+## is missing, or deliberately skipped. Always exactly once, so a caller can await it and know it will be
 ## resumed whatever happens.
 signal done()
 
@@ -57,11 +57,12 @@ static func play_for(tree: SceneTree) -> void:
 func _ready() -> void:
 	# ALWAYS: whatever else is going on, the film has to keep running.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_skip_needs_release = Input.is_action_pressed("skip_dialogue")
+	_update_skip_prompt()
 	if video.stream == null:
 		# Missing or unconvertible stream. Finish immediately rather than sitting
 		# on a black rectangle forever — the intro is not worth being the reason
-		# a new game cannot start. The one case that is NOT unskippable, because
-		# there is nothing to watch.
+		# a new game cannot start.
 		push_warning("IntroVideo: no stream — skipping the opening film.")
 		_finish()
 		return
@@ -85,27 +86,42 @@ func _hold_on_title() -> void:
 	if _over:
 		return
 	_waiting = true
+	skip_prompt.hide()
 
 
-## Two different jobs, either side of the film ending.
-##
-## WHILE IT PLAYS it is NOT SKIPPABLE, on purpose: 47 seconds is the only place
-## the premise of the game is stated, and a player who taps past it starts Act I
-## not knowing the building is his own head — the whole first conversation with
-## Rumi then lands as nonsense. It is asked for on a NEW run and nowhere else, so
-## nobody is ever made to sit through it twice, which is the only thing that
-## makes an unskippable cutscene defensible.
-##
-## ONCE IT HAS ENDED the first press is what starts the run.
-##
-## Input is swallowed in BOTH states, never ignored. Without that the presses
-## land on whatever is behind the film — the main menu is still in the tree with
-## its rows live — so mashing a button during the film would be quietly
-## navigating a menu nobody can see, and arriving in the world with a different
-## row chosen. Consuming it is what makes "unskippable" mean nothing happens.
-func _input(event: InputEvent) -> void:
-	if _over:
+func _process(delta: float) -> void:
+	if _over or _waiting:
 		return
+	_update_skip_prompt()
+	if not Input.is_action_pressed("skip_dialogue"):
+		_skip_needs_release = false
+		_skip_held = 0.0
+	elif not _skip_needs_release:
+		_skip_held += delta
+	skip_fill.anchor_right = clampf(_skip_held / skip_hold_time, 0.0, 1.0)
+	if _skip_held >= skip_hold_time:
+		_finish()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_skip_held = 0.0
+		_skip_needs_release = true
+
+
+func _update_skip_prompt() -> void:
+	var button := "X / □" if InputDevice.is_controller() else "X"
+	if not InputDevice.is_controller():
+		for event in InputMap.action_get_events("skip_dialogue"):
+			if event is InputEventKey:
+				button = OS.get_keycode_string(event.physical_keycode if event.physical_keycode else event.keycode)
+				break
+	skip_label.text = "Hold %s to skip intro" % button
+
+
+## Consume input throughout playback and the exit fade so it cannot reach the
+## menu underneath. Ordinary taps only dismiss the completed film's title card.
+func _input(event: InputEvent) -> void:
 	# Typed, not inferred: `event.pressed` on an untyped InputEvent is a Variant,
 	# and `:=` refuses to guess a bool from it.
 	var pressed: bool = (event is InputEventKey and event.pressed and not event.echo) \
@@ -114,9 +130,10 @@ func _input(event: InputEvent) -> void:
 	# Motion is consumed too, but never counts as the press: a stick resting off
 	# centre, or a mouse crossing the window, would otherwise dismiss the title
 	# card before the player had looked at it.
-	if pressed or event is InputEventMouseMotion or event is InputEventJoypadMotion:
+	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton \
+			or event is InputEventMouseMotion or event is InputEventJoypadMotion:
 		get_viewport().set_input_as_handled()
-	if pressed and _waiting:
+	if pressed and _waiting and not _over:
 		_finish()
 
 
@@ -128,9 +145,11 @@ func _finish() -> void:
 		return
 	_over = true
 	_waiting = false
+	skip_prompt.hide()
 	var t := create_tween()
 	t.tween_property($Background, "modulate:a", 0.0, fade_time)
 	t.parallel().tween_property(video, "modulate:a", 0.0, fade_time)
+	t.parallel().tween_property(video, "volume", 0.0, fade_time)
 	await t.finished
 	# Stopped only now. stop() clears the held last frame, so calling it before
 	# the fade would blank the title card and fade out a black rectangle.

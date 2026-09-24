@@ -27,6 +27,7 @@ Act2Quest="*res://systems/act2_quest.gd"
 Deaths="*res://systems/deaths.gd"
 Points="*res://systems/points.gd"
 SaveGame="*res://systems/save_game.gd"
+ActStats="*res://systems/act_stats.gd"
 Settings="*res://systems/settings.gd"
 Pause="*res://scenes/ui/PauseMenu.tscn"
 

@@ -14,7 +14,7 @@ extends CharacterBody2D
 
 signal died
 
-enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB, SWIM, EXIT_WATER, DEAD }
+enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB, SWIM, EXIT_WATER, DEAD, LEDGE_MANTLE }
 
 ## Half of the 9x12 hitbox in Hooshang.tscn — his NORMAL width. Kept here because
 ## the footing check has to probe at the box's own edges; if the shape is ever
@@ -39,6 +39,12 @@ enum State { IDLE, RUN, JUMP, FALL, DASH, WALL_SLIDE, CLIMB, SWIM, EXIT_WATER, D
 ## `squeeze_width` is an ABSOLUTE width and therefore did not move with this.
 const HALF_WIDTH := 4.5
 const HALF_HEIGHT := 6.0
+
+@export_group("Controller")
+## Stick distance from centre required before gameplay responds.
+@export_range(0.05, 0.5) var stick_deadzone := 0.25
+## Degrees either side of a cardinal; smaller values make diagonals easier.
+@export_range(10.0, 30.0) var stick_cardinal_angle := 20.0
 
 @export_group("Run")
 ## Top horizontal speed.
@@ -365,6 +371,15 @@ const HALF_HEIGHT := 6.0
 ## exit_water_anim_time or the beat ends before he is up.
 @export var exit_water_climb_speed := 80.0
 
+@export_group("Ledge assist")
+## Rescue a near miss only when the feet are at most one tile below the top.
+@export var ledge_assist_height := 8.0
+## Small horizontal grace beyond the body's leading edge; no distant grabs.
+@export var ledge_assist_reach := 3.0
+## Short pull-up, including the planted recovery pose.
+@export var ledge_assist_time := 0.24
+@export var ledge_assist_speed := 110.0
+
 @export_group("Footing")
 ## How much solid ground he needs under his MIDDLE to keep standing, in px
 ## either side of his centre. 0 disables the check.
@@ -431,6 +446,8 @@ const HALF_HEIGHT := 6.0
 ## Probe resolution. Half a pixel: the hole is 8 wide and he is 6, so a coarser
 ## step can misplace him by more than the clearance he has.
 @export var squeeze_step := 0.5
+## Extra downward reach for slot detection; allows banks staggered by one tile.
+@export var squeeze_depth := 8.0
 
 @export_group("Death")
 ## How long the death animation owns the screen before he respawns, in seconds.
@@ -517,6 +534,7 @@ var slide_speed := 0.0          # px/s it has built to so far
 # while he climbs lives here, in one frame order.
 var ladder_zone: Node = null    # which ladder, so a second one leaving can't clear it
 var ladder_x := 0.0             # the rail's x his box is held to while climbing
+var ladder_top := -INF          # the rail's top edge (world y); he stands on it as a platform, see _state_climb
 
 # Ponds. Same split again: a Pond grabs him on overlap (see pond.gd, the same
 # "asked fresh every frame" polling SlideZone documents — falling into one, a
@@ -560,6 +578,11 @@ var _mantle_phase := MantlePhase.RISE
 ## Computed ONCE when the climb commits, so the whole beat aims at a fixed
 ## point rather than re-deriving a moving target every frame.
 var _mantle_to := Vector2.ZERO
+var _ledge_target := Vector2.ZERO
+var _ledge_phase := MantlePhase.RISE
+var _ledge_elapsed := 0.0
+var _ledge_cooldown := 0.0
+var _ledge_carry := 0.0
 ## True while actively steering in the water this frame (any move key held),
 ## set by _state_swim and read by _update_visual to pick "swim" (the active
 ## stroke) over "swim_idle" (floating, treading water) — the same "one state,
@@ -601,8 +624,9 @@ var _swim_visual_angle := 0.0
 ## left included.
 var _swim_visual_flip := false
 
-# The sprite sits at 0.39 scale (88px source frames -> ~17px tall on screen)
-# with its feet offset-pinned to the bottom of the 9x12 hitbox. It lives
+# Adult frames are native 24px art at 1:1, with their feet pinned to the
+# bottom of the 9x12 hitbox. Each library supplies its scale and offset;
+# the childhood library retains its original 88px/0.39 presentation. It lives
 # inside SpriteSquash, a wrapper Node2D that Juice scale-tweens for squash &
 # stretch — Visual's own scale/offset above are never touched by that, so
 # they stay exactly as tuned regardless of what juice.gd is doing.
@@ -647,8 +671,10 @@ func _physics_process(delta: float) -> void:
 	if sliding():
 		jump_buffer_timer = 0.0
 
-	var input_x := 0.0 if input_locked else Input.get_axis("move_left", "move_right")
-	if input_x != 0.0:
+	var input_x := 0.0 if input_locked else _movement_input().x
+	if crouching():
+		input_x = 0.0
+	if input_x != 0.0 and state != State.LEDGE_MANTLE:
 		facing = 1 if input_x > 0.0 else -1
 	if not input_locked:
 		if Input.is_action_just_pressed("jump"):
@@ -677,17 +703,22 @@ func _physics_process(delta: float) -> void:
 			_state_swim(delta, input_x)
 		State.EXIT_WATER:
 			_state_exit_water(delta)
+		State.LEDGE_MANTLE:
+			_state_ledge_mantle(delta)
 
 	if sliding():
 		_apply_slide(delta)
 
 	var incoming_vel_y := velocity.y  # fall speed just before landing is resolved, for juice.on_land()
+	var incoming_vel_x := velocity.x
 	move_and_slide()
+	_try_ledge_mantle(input_x, incoming_vel_x)
 	_post_move(was_on_floor, input_x, incoming_vel_y)
 	_update_visual()
 
 
 func _tick_timers(delta: float) -> void:
+	_ledge_cooldown = maxf(0.0, _ledge_cooldown - delta)
 	coyote_timer = maxf(coyote_timer - delta, 0.0)
 	_exit_swim_grace_timer = maxf(_exit_swim_grace_timer - delta, 0.0)
 	_swim_breach_timer = maxf(_swim_breach_timer - delta, 0.0)
@@ -779,10 +810,25 @@ func _state_wall_slide(delta: float) -> void:
 ## grip the same way it started: the ladder notices the overlap is gone and
 ## calls exit_ladder (see ladder.gd), not this function.
 func _state_climb(delta: float, input_x: float) -> void:
+	# How close his box centre must be to the rail's top edge to count as
+	# standing on the top rung (a few px of slack over the exact clamp point).
+	const LADDER_TOP_BAND := 3.0
+	# Standing on the very top rung: the ladder reads as a platform there — a
+	# full-power jump instead of the reduced hop-off, and he cannot climb clear
+	# off the top (see the rise clamp below), only stand or climb back down.
+	var at_top := is_finite(ladder_top) \
+		and global_position.y <= ladder_top + LADDER_TOP_BAND
 	if jump_buffer_timer > 0.0:
 		jump_buffer_timer = 0.0
-		velocity = Vector2(facing * max_run_speed * 0.6, -jump_speed * 0.6)
-		jump_hold_timer = 0.0
+		if at_top:
+			# A normal jump off a platform: full speed, full hold, air control
+			# from the direction he is pushing (straight up on neutral).
+			velocity = Vector2(input_x * max_run_speed, -jump_speed)
+			jump_hold_timer = jump_hold_time
+		else:
+			# Mid-rail hop: a shove away from the ladder, no sustained thrust.
+			velocity = Vector2(facing * max_run_speed * 0.6, -jump_speed * 0.6)
+			jump_hold_timer = 0.0
 		# Refill the dash as he leaves the rail — gripping a ladder is a reset
 		# point like landing, so a jump off it always has a dash even when he
 		# grabbed the ladder mid-air with the dash already spent.
@@ -795,8 +841,16 @@ func _state_climb(delta: float, input_x: float) -> void:
 		_clear_ladder()
 		state = State.RUN
 		return
-	var vertical := 0.0 if input_locked else Input.get_axis("move_up", "move_down")
+	var vertical := 0.0 if input_locked else _movement_input().y
 	velocity.y = vertical * climb_speed
+	# Don't let a climb carry him off the top: cap the rise so his box settles
+	# with its centre at the rail's top edge (still overlapping the ladder, so
+	# it keeps gripping him — see ladder.gd) rather than sliding out above it.
+	# minf(..., 0) so this only ever LIMITS a rise, never adds downward speed if
+	# a floor at the top has already nudged his centre above the edge. Pressing
+	# down is untouched, so he can always climb back down from the top.
+	if is_finite(ladder_top) and velocity.y < 0.0 and delta > 0.0:
+		velocity.y = maxf(velocity.y, minf((ladder_top - global_position.y) / delta, 0.0))
 	# Snapped to the rail via velocity, not a direct position write — everything
 	# that moves him goes through move_and_slide, the same rule enter_slide's
 	# own note gives for why a zone never writes velocity from outside this
@@ -821,7 +875,7 @@ func _state_climb(delta: float, input_x: float) -> void:
 ## same way SlideZone/Ladder do) — this function never checks whether he
 ## should still be swimming, only how he moves while he is.
 func _state_swim(delta: float, input_x: float) -> void:
-	var input_y := 0.0 if input_locked else Input.get_axis("move_up", "move_down")
+	var input_y := 0.0 if input_locked else _movement_input().y
 	_swim_paddling = input_x != 0.0 or input_y != 0.0
 	_tick_swim_orientation(delta, input_x, input_y)
 	velocity.x = move_toward(velocity.x, input_x * swim_speed, swim_accel * delta)
@@ -934,6 +988,110 @@ func _try_bank_mantle(input_x: float, surface: float) -> bool:
 			exit_water_timer = exit_water_anim_time
 			return true
 	return false
+
+
+## A close miss at a real top face, measured in world pixels. Ray queries work
+## for collision tiles and floating prop bodies alike. Rising jumps retain
+## their natural arc; pressing away/down, chimney squeezes and locked controls
+## never become an unsolicited pull-up.
+func _try_ledge_mantle(input_x: float, approach_speed := 0.0) -> bool:
+	if state not in [State.JUMP, State.FALL, State.WALL_SLIDE, State.DASH]:
+		return false
+	if input_locked or squeezing or sliding() or swimming() or is_on_floor() or _ledge_cooldown > 0.0:
+		return false
+	if _movement_input().y > 0.0:
+		return false
+	var intent := input_x
+	if state == State.DASH:
+		if absf(dash_dir.x) < 0.5 or dash_dir.y < -0.1:
+			return false
+		if input_x != 0.0 and signf(input_x) != signf(dash_dir.x):
+			return false
+		intent = dash_dir.x
+	elif velocity.y < -30.0:
+		return false
+	if is_zero_approx(intent):
+		return false
+	var dir := signf(intent)
+	var feet := global_position.y + HALF_HEIGHT
+	var edge_x := global_position.x + dir * (HALF_WIDTH + ledge_assist_reach)
+	var space := get_world_2d().direct_space_state
+	var query := PhysicsRayQueryParameters2D.create(
+		Vector2(edge_x, feet - ledge_assist_height - 0.1),
+		Vector2(edge_x, feet + 0.1), collision_mask, [get_rid()])
+	var top_hit := space.intersect_ray(query)
+	if top_hit.is_empty() or top_hit.normal.y > -0.9:
+		return false
+	var top: float = top_hit.position.y
+	if feet - top < 0.1 or feet - top > ledge_assist_height + 0.01:
+		return false
+	# Locate the actual lip, not the probe's arbitrary x coordinate.
+	query.from = Vector2(global_position.x, top + 0.5)
+	query.to = Vector2(edge_x, top + 0.5)
+	var side := space.intersect_ray(query)
+	if side.is_empty() or side.normal.x * dir > -0.9:
+		return false
+	for over in [HALF_WIDTH, footing_width + 0.5]:
+		var landing := Vector2(side.position.x + dir * over, top - HALF_HEIGHT - 0.2)
+		var raised := Vector2(global_position.x, landing.y)
+		# Check BOTH legs, including a low ceiling and full landing volume.
+		if test_move(global_transform, raised - global_position):
+			continue
+		if test_move(Transform2D(0.0, raised), landing - raised):
+			continue
+		if test_move(Transform2D(0.0, landing), Vector2.ZERO, null, 0.08, true):
+			continue
+		var support := KinematicCollision2D.new()
+		if not test_move(Transform2D(0.0, landing), Vector2(0, 0.5), support) or support.get_normal().y > -0.9:
+			continue
+		_ledge_carry = dir * minf(maxf(absf(velocity.x), absf(approach_speed)), max_run_speed)
+		if state == State.DASH:
+			_ledge_carry = dir * max_run_speed
+			juice.on_dash_end(dash_dir)
+		_ledge_target = landing
+		_ledge_phase = MantlePhase.RISE
+		_ledge_elapsed = 0.0
+		facing = int(dir)
+		velocity = Vector2.ZERO
+		jump_hold_timer = 0.0
+		wall_jump_timer = 0.0
+		wall_lock_timer = 0.0
+		wall_coyote_timer = 0.0
+		coyote_timer = 0.0
+		boost_timer = 0.0
+		dash_timer = 0.0
+		state = State.LEDGE_MANTLE
+		return true
+	return false
+
+
+func _state_ledge_mantle(delta: float) -> void:
+	_ledge_elapsed += delta
+	# Clamp each leg to its remaining distance. No extra rise frame or sideways
+	# overshoot at phase changes, even on a narrow one-cell platform.
+	if _ledge_phase == MantlePhase.RISE and global_position.y <= _ledge_target.y + 0.01:
+		_ledge_phase = MantlePhase.FORWARD
+	if _ledge_phase == MantlePhase.FORWARD and absf(global_position.x - _ledge_target.x) <= 0.01:
+		_ledge_phase = MantlePhase.SETTLE
+	match _ledge_phase:
+		MantlePhase.RISE:
+			velocity = Vector2(0, -minf(ledge_assist_speed, maxf(0, global_position.y - _ledge_target.y) / delta))
+		MantlePhase.FORWARD:
+			velocity = Vector2(clampf((_ledge_target.x - global_position.x) / delta, -ledge_assist_speed, ledge_assist_speed), 0)
+		MantlePhase.SETTLE:
+			velocity = Vector2(0, 20)
+	# A removed/moving support or obstruction cannot leave him hovering.
+	if _ledge_elapsed >= ledge_assist_time and is_on_floor():
+		dash_available = true
+		_bounce_gravity_scale = 1.0
+		var input_x := 0.0 if input_locked else _movement_input().x
+		velocity = Vector2(_ledge_carry if signf(input_x) == facing else 0.0, 0)
+		state = State.RUN if input_x != 0.0 else State.IDLE
+		_ledge_cooldown = 0.15
+	elif _ledge_elapsed > ledge_assist_time + 0.12:
+		state = State.FALL
+		velocity = Vector2.ZERO
+		_ledge_cooldown = 0.15
 
 
 ## Could he stand at `at` -- clear of brick, with ground under his feet?
@@ -1067,7 +1225,7 @@ func _state_exit_water(delta: float) -> void:
 	exit_water_timer -= delta
 	if exit_water_timer <= 0.0:
 		_mantle_dir = 0
-		var input_x := 0.0 if input_locked else Input.get_axis("move_left", "move_right")
+		var input_x := 0.0 if input_locked else _movement_input().x
 		state = State.RUN if input_x != 0.0 else State.IDLE
 
 
@@ -1224,6 +1382,27 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 	juice.on_jump()
 
 
+## Read raw strengths before the per-axis deadzones erase the weaker axis.
+## A circular deadzone plus angular sectors gives a light diagonal tilt the
+## same aim as a full tilt. Keep analog speed, but allow full horizontal speed
+## while aiming diagonally (keyboard and d-pad retain their existing vectors).
+func _movement_input() -> Vector2:
+	var raw := Vector2(
+		Input.get_action_raw_strength("move_right") - Input.get_action_raw_strength("move_left"),
+		Input.get_action_raw_strength("move_down") - Input.get_action_raw_strength("move_up")
+	)
+	var strength := raw.length()
+	if strength <= stick_deadzone:
+		return Vector2.ZERO
+	var threshold := tan(deg_to_rad(stick_cardinal_angle))
+	var direction := Vector2(signf(raw.x), signf(raw.y))
+	if absf(raw.y) < absf(raw.x) * threshold:
+		direction.y = 0.0
+	elif absf(raw.x) < absf(raw.y) * threshold:
+		direction.x = 0.0
+	return direction * clampf((strength - stick_deadzone) / (1.0 - stick_deadzone), 0.0, 1.0)
+
+
 func _try_dash() -> bool:
 	if not has_dash:
 		return false  # ability not unlocked yet (see Level 1's Rumi scene)
@@ -1233,15 +1412,11 @@ func _try_dash() -> bool:
 		return false  # the ladder owns him until he lets go (jump)
 	if swimming():
 		return false  # the pond owns him until he surfaces or reaches the bank
-	if state == State.DASH or state == State.DEAD or state == State.EXIT_WATER:
+	if state in [State.DASH, State.DEAD, State.EXIT_WATER, State.LEDGE_MANTLE]:
 		return false  # committed to climbing out; see _state_exit_water's own doc
 	if not dash_available or dash_cooldown_timer > 0.0:
 		return false
-	# 8-directional: snap analog input to -1/0/1 per axis; neutral = forward.
-	var dir := Vector2(
-		roundf(Input.get_axis("move_left", "move_right")),
-		roundf(Input.get_axis("move_up", "move_down"))
-	)
+	var dir := _movement_input()
 	if dir == Vector2.ZERO:
 		dir = Vector2(facing, 0)
 	dash_dir = dir.normalized()
@@ -1265,6 +1440,8 @@ func _try_dash() -> bool:
 
 ## Transitions that depend on what move_and_slide() just discovered.
 func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> void:
+	if state == State.LEDGE_MANTLE:
+		return
 	# Still within the window a swim's end counts as "reaching a bank" — see
 	# _exit_swim_grace_timer's own doc. NOT cleared here: only the branch
 	# below that actually acts on it zeroes it, so it survives however many
@@ -1431,8 +1608,13 @@ func _tick_squeeze() -> void:
 	var mid := _slot_under()
 	if is_inf(mid):
 		return
-	squeezing = true
 	_set_box_width(squeeze_width)
+	var centered := global_transform
+	centered.origin.x += mid
+	if test_move(centered, Vector2.ZERO, null, 0.08, true):
+		_set_box_width(_box_width)
+		return
+	squeezing = true
 	# Put down the MIDDLE of the hole rather than dropped from wherever he
 	# happened to be standing. Six in eight leaves a pixel either side, and
 	# whether he fits should not come down to where his foot landed.
@@ -1489,21 +1671,22 @@ func hitbox_rect() -> Rect2:
 ## The centre of the one-cell hole he is standing over, as an offset from his
 ## own centre — or INF if what is under him is not one.
 ##
-## Probed with the footing ray rather than read off the tilemap, because this has
+## Probed with rays rather than read off the tilemap, because this has
 ## to work over a platform prop and a room seam as much as over painted brick and
 ## none of those are the same object. Both walls have to be FOUND: running out of
 ## probe on either side means he is at the edge of a drop, not bridging a slot,
-## and a drop is not something you squeeze into.
+## and a drop is not something you squeeze into. The extra downward reach sees
+## a lower bank; start-inside hits retain the taller bank beside his feet.
 func _slot_under() -> float:
-	if _ground_under(0.0):
+	if _slot_ground_under(0.0):
 		return INF                          # solid under his middle: no hole
 	var left := 0.0
-	while left > -squeeze_probe and not _ground_under(left - squeeze_step):
+	while left > -squeeze_probe and not _slot_ground_under(left - squeeze_step):
 		left -= squeeze_step
 	if left <= -squeeze_probe:
 		return INF
 	var right := 0.0
-	while right < squeeze_probe and not _ground_under(right + squeeze_step):
+	while right < squeeze_probe and not _slot_ground_under(right + squeeze_step):
 		right += squeeze_step
 	if right >= squeeze_probe:
 		return INF
@@ -1512,6 +1695,17 @@ func _slot_under() -> float:
 	if right - left + squeeze_step < squeeze_width + squeeze_step:
 		return INF                          # too tight even side-on
 	return (left + right) * 0.5
+
+
+## Only the slot search looks a tile deeper; ordinary footing stays local.
+## Start-inside hits also see the taller bank after his feet pass its top.
+func _slot_ground_under(dx: float) -> bool:
+	var from := global_position + Vector2(dx, HALF_HEIGHT - 1.0)
+	var query := PhysicsRayQueryParameters2D.create(
+		from, from + Vector2(0.0, footing_width + 2.0 + squeeze_depth), collision_mask)
+	query.exclude = [get_rid()]
+	query.hit_from_inside = true
+	return not get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 
 ## Slide him off a ledge he no longer has his footing on.
@@ -1605,8 +1799,24 @@ func is_on_solid_ground() -> bool:
 	return false
 
 
+## Hold Down for the adult pack's crouch pose. This does not resize the body;
+## one-cell clearance remains owned by the existing squeeze/chimney mechanic.
+func crouching() -> bool:
+	return not input_locked and is_on_floor() and not sliding() \
+		and state in [State.IDLE, State.RUN] \
+		and not visual.sprite_frames.get_meta("child_hooshang", false) \
+		and visual.sprite_frames.has_animation("crouch") \
+		and _movement_input().y > 0.0
+
+
 ## The ONE place player visuals are decided (future palette/power-mode hook).
 func _update_visual() -> void:
+	# Libraries can be swapped at runtime by Act2Beats. Read their presentation
+	# contract here so changing the adult art never enlarges childhood Hooshang.
+	visual.scale = Vector2.ONE * float(visual.sprite_frames.get_meta("visual_scale", 0.39))
+	visual.offset = visual.sprite_frames.get_meta("visual_offset", Vector2(0, -7))
+	# Descending a ladder plays backwards; subsequent actions play forwards.
+	visual.speed_scale = 1.0
 	visual.flip_h = facing < 0
 	# Every OTHER state keeps the sprite level — only SWIM's own case below
 	# overrides this, so leaving a swim tilt behind him on land or mid-climb
@@ -1617,9 +1827,9 @@ func _update_visual() -> void:
 	visual.rotation = 0.0
 	match state:
 		State.IDLE:
-			visual.play("idle")
+			visual.play("crouch" if crouching() else "idle")
 		State.RUN:
-			visual.play("run")
+			visual.play("crouch" if crouching() else "run")
 		State.JUMP:
 			# A wall jump is an ordinary JUMP state — the dedicated kick is
 			# selected by how the jump STARTED, which only this timer records.
@@ -1633,25 +1843,18 @@ func _update_visual() -> void:
 		State.WALL_SLIDE:
 			visual.play("wall_slide")  # dedicated Slide pose
 		State.CLIMB:
-			# The one clip drawn from BEHIND rather than in profile — he faces
-			# into the ladder, away from the camera, which a side view cannot
-			# show. flip_h above still applies to it harmlessly (a back view
-			# mirrors near-symmetrically either way).
-			#
-			# One clip, played BACKWARDS for the way down rather than a second
-			# generation — a climb is symmetric, reaching up to go up and
-			# reaching up (in reverse) to lower himself down. speed_scale's
-			# sign picks the direction; play("climb") is safe to call every
-			# frame here (same-name replay does not reset the frame or
-			# speed_scale — verified empirically, not from the docs), and
-			# pausing right after it is what freezes him mid-reach the instant
-			# he stops climbing rather than looping in place like a treadmill.
-			visual.play("climb")
-			# velocity.y < 0 is UP (screen -y): the clip was authored reaching
-			# up, so that direction is forward; > 0 is down, played in reverse.
-			visual.speed_scale = 1.0 if velocity.y < 0.0 else -1.0
-			if is_zero_approx(velocity.y):
+			# The adult Aseprite pack supplies separate down/hold clips.
+			# Older libraries (including the child) retain reversed climbing.
+			if is_zero_approx(velocity.y) and visual.sprite_frames.has_animation("climb_idle"):
+				visual.play("climb_idle")
 				visual.pause()
+			elif velocity.y > 0.0 and visual.sprite_frames.has_animation("climb_down"):
+				visual.play("climb_down")
+			else:
+				visual.play("climb")
+				visual.speed_scale = 1.0 if velocity.y < 0.0 else -1.0
+				if is_zero_approx(velocity.y):
+					visual.pause()
 		State.SWIM:
 			# Active stroke while steering, a calmer float the instant input
 			# lets go — see _swim_paddling's own doc.
@@ -1661,10 +1864,19 @@ func _update_visual() -> void:
 			# reads as pointing down, not the last horizontal key pressed on
 			# land) — see _swim_visual_flip's own doc.
 			visual.flip_h = _swim_visual_flip
-			# Child clip itself unfolds from horizontal swimming to standing.
-			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
+			# Both libraries author the stroke head-up; orient it along input.
+			visual.rotation = _swim_visual_angle
+		State.LEDGE_MANTLE:
+			var clip := "ledge_climb" if visual.sprite_frames.has_animation("ledge_climb") else "exit_water"
+			visual.play(clip)
+			# Physics drives the pose, keeping identical timing in headless tests
+			# and actual play regardless of render cadence.
+			var count := visual.sprite_frames.get_frame_count(clip)
+			visual.set_frame_and_progress(mini(count - 1, int(_ledge_elapsed / ledge_assist_time * count)), 0.0)
+			visual.pause()
 		State.EXIT_WATER:
 			visual.play("exit_water")  # climbing onto the bank, one-shot
+			# The child's climb-out already unfolds into standing in the art.
 			# He arrives here mid-stroke, lying flat against the bank — a
 			# climb-out is entered by swimming INTO it, so the swim tilt is
 			# at its most extreme (a full 90 degrees) on exactly the frame
@@ -1745,6 +1957,9 @@ func respawn(at: Vector2) -> void:
 	# same zone would not, and he would come back sliding with no zone to blame.
 	# Cheaper to start every life with full control and let the zone re-take it.
 	_clear_slide()
+	# A retry inside the same rail must reacquire CLIMB, not retain a stale
+	# ladder_zone while respawn changes the movement state back to FALL.
+	_clear_ladder()
 	# Same reasoning for a pond: a checkpoint sitting in or near the water is a
 	# very ordinary thing to place, and without this a respawn there comes back
 	# stuck in FALL forever — swim_zone still points at the pond, so its own
@@ -1756,6 +1971,8 @@ func respawn(at: Vector2) -> void:
 	# solid ground) would misread as him climbing out of water rather than
 	# an ordinary respawn.
 	_exit_swim_grace_timer = 0.0
+	_ledge_elapsed = 0.0
+	_ledge_cooldown = 0.0
 	_mantle_dir = 0  # dying mid-climb must not carry the climb into the next life
 	_bounce_gravity_scale = 1.0  # dying mid-spring-arc must not float the next life
 	visible = true
@@ -1829,6 +2046,20 @@ func bounce(vy: float, gravity_scale := 1.0) -> void:
 	state = State.JUMP
 
 
+## Side spring impulse: horizontal at release, then a normal gravity arc.
+## Reuse handed-momentum decay so the run controller does not erase the launch.
+func bounce_horizontal(speed: float, gravity_scale := 1.0) -> void:
+	if state == State.DEAD:
+		return
+	velocity = Vector2(speed, 0.0)
+	boost_timer = boost_time
+	_bounce_gravity_scale = maxf(gravity_scale, 0.01)
+	jump_hold_timer = 0.0
+	jump_buffer_timer = 0.0
+	coyote_timer = 0.0
+	state = State.FALL
+
+
 func enter_slide(zone: Node, direction: Vector2, control: float, ramp: float) -> void:
 	if direction == Vector2.ZERO:
 		return
@@ -1867,11 +2098,12 @@ func climbing() -> bool:
 ## vertical speed answers move_up/move_down directly (see _state_climb). The
 ## ladder calls this — touching it and reaching up or down — the same split
 ## enter_slide uses; this node only does the moving.
-func enter_ladder(zone: Node, center_x: float) -> void:
-	if state == State.DEAD or climbing():
+func enter_ladder(zone: Node, center_x: float, top_y := -INF) -> void:
+	if state in [State.DEAD, State.LEDGE_MANTLE] or climbing():
 		return
 	ladder_zone = zone
 	ladder_x = center_x
+	ladder_top = top_y
 	velocity = Vector2.ZERO
 	state = State.CLIMB
 
@@ -1886,6 +2118,7 @@ func exit_ladder(zone: Node) -> void:
 
 func _clear_ladder() -> void:
 	ladder_zone = null
+	ladder_top = -INF
 	if state == State.CLIMB:
 		state = State.FALL
 

@@ -96,8 +96,13 @@ func _ready() -> void:
 		if not rect.has_point(at):
 			stranded.append("%s at x=%.0f, room %.0f-%.0f"
 				% [room.name, at.x, rect.position.x, rect.end.x])
-		# 16px trigger, so anything inside 8px of its centre is standing on it.
-		if absf(at.x - exit.global_position.x) < 8.0:
+		# 16px trigger, so anything inside 8px of its centre is standing on it —
+		# measured along whichever axis the exit faces. A side Exit is cleared
+		# horizontally; a ceiling Exit is cleared vertically (the return drops in
+		# BELOW it, at the same x), so an x-only check would false-alarm on it.
+		var on_it := absf(at.y - exit.global_position.y) < 8.0 if exit.name == "ExitCeiling" \
+			else absf(at.x - exit.global_position.x) < 8.0
+		if on_it:
 			on_the_trigger.append(str(room.name))
 	_check(stranded.is_empty(),
 		"every room re-enters INSIDE itself  [%s]" % ", ".join(stranded))
@@ -123,6 +128,12 @@ func _has_way_onward(room: Node2D) -> bool:
 ## one (the door owns that doorway), otherwise by tripping its Exit.
 func _go_forward() -> void:
 	var from: Node2D = world.current_room
+	# Routing starts after the security circuit is cleared; puzzle completion
+	# and locked-exit rejection are exercised by security_gate_test.
+	if from.get_meta("exit_locked",false):
+		if from.has_node("DarknessRoom"):from.get_node("DarknessRoom")._solve()
+		else:world.get_node("NoteSequence")._complete()
+		await _frames(3)
 	var door := world._door_in(from)
 	if door != null:
 		# Through the door's OWN detection — walk him to the opening and let it

@@ -7,7 +7,7 @@ func _ready() -> void:
 	# Level_0 importing with ZERO cells when the saved source had only 26 tiles.
 	var world_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://ldtk/hooshang_act1.ldtk"))
 	for level_data in world_data.levels:
-		var room = load("res://ldtk/levels/%s.scn" % level_data.identifier).instantiate()
+		var room = load("res://ldtk/levels/hooshang_act1/%s.scn" % level_data.identifier).instantiate()
 		var layer: TileMapLayer = room.get_node("Collisions")
 		for layer_data in level_data.layerInstances:
 			if layer_data.__identifier != "Collisions":

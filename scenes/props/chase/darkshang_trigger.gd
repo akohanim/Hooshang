@@ -159,8 +159,7 @@ func _play(player: Player) -> void:
 		# printed (CLAUDE.md, dialogue rules): he is put at his spawn point and
 		# shown. reveal() leaves him DORMANT — visible but not yet hunting.
 		shadow.reveal()
-	var locked := player.input_locked
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
 	await get_tree().create_timer(reveal_pause).timeout
 	for line in BEATS.get(dialogue_id, []):
 		if line[0] == "Rumi":
@@ -172,7 +171,7 @@ func _play(player: Player) -> void:
 				DialogueBox.Side.RIGHT)
 		else:
 			await Dialogue.say("Hooshang", line[1], HOOSHANG_PALE, FACES.get(line[2]))
-	player.input_locked = locked
+	Dialogue.end_conversation()
 	if shadow != null:
 		shadow.start_chase()
 	chase_begun.emit()

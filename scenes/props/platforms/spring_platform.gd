@@ -1,7 +1,10 @@
 @tool
 class_name SpringPlatform
 extends Platform
-## A bounce pad: touch it and it launches him straight up, hard —
+## A bounce pad: touch it and it launches him along its face — up by default,
+## or horizontally when rotated +/-90 degrees. Side faces require approach
+## from the front; moving away cannot retrigger them.
+## The upward configuration launches him straight up, hard —
 ## Celeste/Mario-style, not a jump he chose. Extends Platform for the
 ## StaticBody2D/@tool/CollisionShape2D boilerplate it shares with
 ## CrumblingPlatform, NOT for Platform's own _rebuild() any more — see FIXED
@@ -75,6 +78,8 @@ const FIXED_SIZE := Vector2(16.0, 8.0)
 ## knobs are tuned together against tests/spring_platform_test's apex check;
 ## move one and the other has to move with it.
 @export var launch_speed := 415.0
+## Sideways launch speed; rotate this entity +/-90 degrees to aim its face.
+@export var horizontal_launch_speed := 240.0
 ## Gravity the player feels for the WHOLE spring-launched arc, as a fraction of
 ## his ordinary gravity — handed to Player.bounce() and restored to 1.0 the
 ## moment he lands, so it floats the bounce without changing how any other jump
@@ -220,6 +225,9 @@ func _on_touched(body: Node2D) -> void:
 ## re-satisfy this on the very next physics frame and launch him again before
 ## he has actually left, forever.
 func _touching(who: Player) -> bool:
+	var direction := Vector2.UP.rotated(global_rotation)
+	if absf(direction.x) > 0.5:
+		return who.velocity.x * signf(direction.x) <= 0.0 and (who.global_position-global_position).dot(direction) >= 0.0
 	return who.velocity.y >= 0.0
 
 
@@ -229,8 +237,14 @@ func _try_launch(body: Node2D) -> void:
 	var who := body as Player
 	if not _touching(who):
 		return
-	who.bounce(launch_speed, bounce_gravity_scale)
+	var direction := Vector2.UP.rotated(global_rotation)
+	if absf(direction.x) > 0.5:
+		who.bounce_horizontal(signf(direction.x) * horizontal_launch_speed, bounce_gravity_scale)
+	else:
+		who.bounce(launch_speed, bounce_gravity_scale)
 	_play_bounce()
+	var sound := get_node_or_null("FeedbackSound") as AudioStreamPlayer2D
+	if sound != null and who.state != Player.State.DEAD:sound.play()
 
 
 ## Every player currently inside the detection skin — same shape as

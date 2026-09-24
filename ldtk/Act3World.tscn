@@ -7,10 +7,10 @@
 script = ExtResource("1_world")
 world_scene = ExtResource("2_ldtk")
 room_backdrop_texture = null
-room_backdrop_color = Color(0.55, 0.82, 0.88, 1)
+room_backdrop_color = Color(0, 0, 0, 1)
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
-color = Color(0.72, 0.9, 0.94, 1)
+color = Color(1, 1, 1, 1)
 
 [node name="Backdrop" type="Node2D" parent="."]
 

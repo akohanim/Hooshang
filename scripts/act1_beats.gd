@@ -46,26 +46,13 @@ const FACES := {
 	"annoyed": preload("res://assets/characters/hooshang/portraits/hooshang_annoyed.png"),
 	"vulnerable": preload("res://assets/characters/hooshang/portraits/hooshang_vulnerable.png"),
 	"shocked": preload("res://assets/characters/hooshang/portraits/hooshang_shocked.png"),
-	# Four states the beats ask for that have no drawing of their own, pointed at
-	# the nearest one that does. They are listed as their own states rather than
-	# the beats just saying "skeptical" twice, because the beat is where the
-	# ACTING is described — when the sheet is re-cut these get their own faces
-	# and not one line of dialogue moves.
-	#
-	# "confused" HAD its own drawing and lost it: the painted set that replaced
-	# the pixel-art heads has a `shocked` where the old sheet had a `confused`.
-	# It points at hesitant rather than shocked because both lines it serves are
-	# quiet ones — "This doesn't feel like my cubicle..." and "I can't see a
-	# thing." — and shocked is a startle, mouth open. Aliasing beat the
-	# alternative, which was one 8-bit head in the middle of six paintings.
-	"confused": preload("res://assets/characters/hooshang/portraits/hooshang_hesitant.png"),
-	"wary": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
-	"unconvinced": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
-	"deflecting": preload("res://assets/characters/hooshang/portraits/hooshang_hesitant.png"),
-	# Deadpan. Aliased to skeptical because the line it serves is a dry
-	# restatement of something absurd, which is doubt with the inflection taken
-	# out — the nearest thing already drawn.
-	"flat": preload("res://assets/characters/hooshang/portraits/hooshang_skeptical.png"),
+	# Previously aliases; the cardigan set gives each acting direction its own
+	# fifteen poses. Voice-pool aliases live with the animation manifest.
+	"confused": preload("res://assets/characters/hooshang/portraits/hooshang_confused.png"),
+	"wary": preload("res://assets/characters/hooshang/portraits/hooshang_wary.png"),
+	"unconvinced": preload("res://assets/characters/hooshang/portraits/hooshang_unconvinced.png"),
+	"deflecting": preload("res://assets/characters/hooshang/portraits/hooshang_deflecting.png"),
+	"flat": preload("res://assets/characters/hooshang/portraits/hooshang_flat.png"),
 }
 
 ## Rumi's face per line, same convention as Hooshang's: a beat names the state
@@ -252,7 +239,7 @@ const EMOTE_LINES := {
 @export var whirl_time := 2.2
 @export var whirl_color := Color(1.0, 0.86, 0.55)
 ## The card that lands on the other side of it.
-@export var act_card_text := "ACT II\n\nChildhood, Iran"
+@export var act_card_text := "ACT II · CHILDHOOD, IRAN"
 @export var card_fade := 0.9
 @export var card_hold := 2.4
 
@@ -463,7 +450,7 @@ func _play_waking() -> void:
 		return
 	_opening_played = true
 	var player := _world.player
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
 	# He wakes standing roughly mid-room, well clear of the ceiling — the top of
 	# the screen is open.
 	_dialogue_vside = DialogueBox.VSide.TOP
@@ -483,6 +470,10 @@ func _play_waking() -> void:
 	await _hold(come_round_pause)
 
 	await _hooshang("Where am I?", "dazed")
+	if Dialogue.scene_skip_requested(self):
+		player.look(1)
+		Dialogue.end_conversation()
+		return
 
 	# "(looking around)" is a stage direction, so play it rather than print it.
 	player.look(-1)
@@ -491,13 +482,19 @@ func _play_waking() -> void:
 	await _hold(look_time)
 
 	await _hooshang("This doesn't feel like my cubicle...", "confused")
-	player.input_locked = false
+	Dialogue.end_conversation()
 
 
 # ------------------------------------------------------------ 2. meeting ----
 
+func _finish_meeting_skip(_player: Player, trigger: LdtkRumiTrigger) -> void:
+	trigger.vanish_immediately()
+	trigger.arm_room_door()
+	Dialogue.end_conversation()
+
+
 func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
 	_rumi_trigger = trigger
 	# Same room as the waking scene, and Rumi arrives at floor height beside him
 	# — both of them stay in the lower half. Top is clear.
@@ -513,11 +510,20 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.breathe(true)
 
 	await _hooshang("!", "confused")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _hooshang("Hello??", "hesitant")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	#await _hooshang("...", "hesitant")
 	await _hooshang(
 		"Who are you? [p] I've worked in this office fifteen years. I've never seen you once.",
 		"skeptical")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	# He says nothing yet. He only stands there, unhurried, the light along his
 	# sleeves breathing slightly — that breathing is trigger.breathe(true),
@@ -527,16 +533,28 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _hooshang(
 		"Are you going to say something, or just stand there glowing at me...",
 		"annoyed")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	#await _hooshang("...", "vulnerable")
 	await _hooshang("...[p] I think I hit my head harder than I thought.", "vulnerable")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	await _hold(before_rumi_speaks)
 	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan.", "warm_open")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	# "(muttering)" is carried by the wording and his face. It used to slow the
 	# typewriter down, but a line that types at its own rate reads as a different
 	# KIND of text rather than a quieter one — every line reveals at
 	# DialogueBox.chars_per_second now.
 	await _hooshang("A journey? I just wanted to make it to my car.", "skeptical")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	# The turn: the building is not a building. Rumi names the premise of the
 	# whole game here, and Hooshang argues with it rather than accepting it,
@@ -544,30 +562,63 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# "[p]" is a breath held mid-line (DialogueBox.PAUSE_MARK) — stripped before
 	# it is drawn, so it costs the reader nothing and paces the delivery.
 	await _rumi("You will not reach the parking lot from here. This is not that building.[p] It is the one you carry inside you.", "serene")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _hooshang("...Inside me?", "wary")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _rumi("Your mind has built its own rooms, and you must go down through every one.", "serene")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _rumi("The office that swallowed your years.[p] Your childhood.[p] And beneath them the places and things you have never let go of.", "sorrowful")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _hooshang("And I'm supposed to just walk through my own head.", "unconvinced")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	# One thought per banner. These four were a single line, and at ~310
 	# characters it grew the box to eight rows and most of the screen — the
 	# banner is built to grow (DialogueBox._fit_banner) so nothing was clipped,
 	# it simply stopped reading as dialogue and started reading as a page. Every
 	# other line in this scene is under 110; these now are too.
 	await _rumi("Not walk through. You have done that your whole life.", "serene")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _rumi("To pass, you must meet what waits in each room.", "serene")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	#await _rumi("The grief you swallowed.[p] The dreams you set down \"for later.\"[p] The thoughts that still circle you in the dark.")
 	await _rumi("They are not memories, jaan. They are still alive.[p] And they will not let you by until you face them.", "urgent")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	# He asks for an extension, in the exact words he has used his whole life —
 	# and Rumi does not argue, he just repeats the word back. That is the beat
 	# the scene is built around, so nothing else happens on top of it.
 	await _hooshang("Look this really isn't a good time. I just lost my job.[p] I'll get to all that[p] ...Later.", "deflecting")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 	await _rumi("...Later.[p] Yes, it's always later isn't it.", "wistful")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	await _rumi("You have knocked on this door your whole life, from the inside.[p] Now it opens.", "warm_open")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	await trigger.vanish()
-	player.input_locked = false
+	Dialogue.end_conversation()
 	trigger.arm_room_door()
 
 
@@ -577,7 +628,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 ## the room is the gift. Hooshang cannot see the way across, and what Rumi hands
 ## him is the reason to step onto it anyway.
 func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
 	_rumi_trigger = trigger
 	# PlayerStart and the trigger both sit near the CEILING here — this room
 	# descends through the tiles rather than crossing them at floor height — so
@@ -587,6 +638,9 @@ func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# He speaks into the dark FIRST — the complaint is what Rumi answers by
 	# turning up at all.
 	await _hooshang("I can't see a thing.", "confused")
+	if Dialogue.scene_skip_requested(self):
+		_finish_meeting_skip(player, trigger)
+		return
 
 	# "glowing faintly at the edge of the dark" is staging, so it gets played: he
 	# arrives dim, across the unlit stretch, and stays dim. See rumi_faint_energy
@@ -607,21 +661,25 @@ func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# scripts/note_sequence.gd). It is the only tutorial the puzzle gets — the
 	# stretch is unlit and there is nothing to read the mechanic off — so if
 	# the sequence rule ever changes, this line is part of the change.
-	await _rumi("Wake the notes in their order, one after the next, until they join into a melody.[p] Complete it, and its light will gather on you, enough to carry you through the dark ahead.", "serene")
+	await _rumi("Wake the notes in their order, one after the next, until they join into a melody.[p] Complete it, and its light will gather on you.[p] The exit will open, and light will enter through it.", "serene")
 
 	# He answers with Rumi still standing there, same as the cubicle scene — the
 	# deadpan only lands if the person it is aimed at is still in the room.
 	await _hooshang("So I play the tune, I get a light.[p] ...Fine.", "flat")
 
-	await trigger.vanish()
-	player.input_locked = false
+	if Dialogue.scene_skip_requested(self):
+		trigger.vanish_immediately()
+	else:
+		await trigger.vanish()
+	Dialogue.end_conversation()
 	trigger.arm_room_door()
 
 
 # ------------------------------------------------------------- 4.5. vertical beats ----
 
 func _play_level_v1_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
+	# Stop momentum and gravity as well as input for the entire conversation.
 	_rumi_trigger = trigger
 	_dialogue_vside = DialogueBox.VSide.TOP
 	player.look(1)  # face the visitor appearing on the right
@@ -636,13 +694,16 @@ func _play_level_v1_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _rumi("Let it come, watch it travel,[p] and step where it is not.", "serene")
 
 	trigger.breathe(false)
-	await trigger.vanish()
-	player.input_locked = false
+	if Dialogue.scene_skip_requested(self):
+		trigger.vanish_immediately()
+	else:
+		await trigger.vanish()
+	Dialogue.end_conversation()
 	trigger.arm_room_door()
 
 
 func _play_level_v2_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
 	_rumi_trigger = trigger
 	_dialogue_vside = DialogueBox.VSide.TOP
 	player.look(1)  # face the visitor appearing on the right
@@ -658,17 +719,17 @@ func _play_level_v2_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await _rumi("Craving is the heavier of the two.[p] Fear, at least, you already know you shouldn’t chase.", "serene")
 
 	trigger.breathe(false)
-	await trigger.vanish()
-	player.input_locked = false
+	if Dialogue.scene_skip_requested(self):
+		trigger.vanish_immediately()
+	else:
+		await trigger.vanish()
+	Dialogue.end_conversation()
 	trigger.arm_room_door()
 
 
 func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
-	# freeze(), not a bare input_locked — input_locked alone leaves gravity and
-	# any existing run speed / jump arc running, so a player who reaches this
-	# trigger still moving visibly slides or sails through the first moment of
-	# the conversation instead of standing still for it. See Player.freeze().
-	player.freeze()
+	# Dialogue owns the full physics hold, including the arrival/departure.
+	Dialogue.begin_conversation(self, player)
 	_rumi_trigger = trigger
 	_dialogue_vside = DialogueBox.VSide.TOP
 	player.look(1)  # face the visitor appearing on the right
@@ -679,12 +740,15 @@ func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	trigger.breathe(true)
 
 	await _rumi("Now both. Watch how they travel.[p] One rises and falls. One crosses. One circles you in the dark.", "serene")
-	await _rumi("Do not sort them, jaan. Pleasant, unpleasant —[p] both are only weather.", "warm_open")
+	await _rumi("Do not sort them, jaan. Pleasant, unpleasant.[p] Both are only weather.", "warm_open")
 	await _rumi("Meet them the same way, and the way through opens on its own.", "serene")
 
 	trigger.breathe(false)
-	await trigger.vanish()
-	player.unfreeze()
+	if Dialogue.scene_skip_requested(self):
+		trigger.vanish_immediately()
+	else:
+		await trigger.vanish()
+	Dialogue.end_conversation()
 	trigger.arm_room_door()
 
 
@@ -871,6 +935,8 @@ func _on_room_changed(room: Node2D) -> void:
 	# here, once, rather than rescaling every export to match it.
 	var here := LdtkWorld.play_index(room) / 100
 	_apply_room_mood(room, here)
+	if room.get_node_or_null("DarknessRoom") != null:
+		return  # Recovery rooms stay intact; their fruit never collapses.
 	if here < collapse_first_room or here > collapse_last_room:
 		return
 	if _collapsed.has(room.name):
@@ -931,13 +997,13 @@ func _process(_delta: float) -> void:
 ##
 ## Rumi is STAGED here rather than triggered. Room 22 has no entities to spare
 ## (LdtkRumiTrigger.staged), and he stands between Hooshang and the sunrise
-## window on purpose: his last line points at the light, and he is already in
-## front of it when he says so.
+## window on purpose: his last line introduces the seed's origin, before the
+## light carries them into childhood.
 func _play_chase_end() -> void:
 	var player := _world.player
 	if player == null:
 		return
-	player.input_locked = true
+	Dialogue.begin_conversation(self, player)
 	# Both of them end up on the floor of a five-tile room, so the top of the
 	# screen is the clear half (CLAUDE.md, dialogue rules).
 	_dialogue_vside = DialogueBox.VSide.TOP
@@ -953,6 +1019,9 @@ func _play_chase_end() -> void:
 	# EMPHASIS note in dialogue_box.gd for the tag syntax and why tags stay
 	# bare (no internal spaces).
 	await _hooshang("It's... [shake]gone[/shake]?", "shocked")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
 
 	_rumi_trigger = LdtkRumiTrigger.staged(
 		Vector2(player.global_position.x + rumi_end_offset, player.global_position.y))
@@ -971,15 +1040,27 @@ func _play_chase_end() -> void:
 	await _hold(arrival_pause)
 
 	await _rumi("No, jaan. A darkness grown this strong cannot be defeated overnight.[p] But [color=#ffd16b]stop watering it[/color], and it stops growing.", "serene")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
 	# The thesis of the whole Act, so it gets the one un-subtle beat in the
 	# scene: a slow pulse on "stop", not a shake — this is a realization
 	# settling in, not a shock.
 	await _hooshang("So I never had to defeat it. I just had to [pulse]stop[/pulse] feeding it.", "vulnerable")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
 	# The three-part mantra gets a shared, gentle wave — one continuous motion
 	# across "let it come, let it stand, let it go" rather than three separate
 	# effects, so it reads as one calm breath instead of a list.
-	await _rumi("Yes. The roots remain. It may green again someday, if ever you water it.[p] But you know the way of it now, you need only stop. [wave]Let the thought come, let it stand, let it go.[/wave] Do not water it with your fear, and it withers on its own.", "wistful")
-	await _rumi("Come. Not every seed you carry grew into this.[p] Let me show you the ones that grew toward [color=#ffd16b]the light[/color].", "warm_open")
+	await _rumi("Yes. The roots remain. It may green again someday, if ever you water it.[p] But you know the way of it now — you need only stop. [wave]Let the thought come, let it stand, let it go.[/wave] Do not water it with your fear, and it withers on its own.", "wistful")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
+	await _rumi("Come. Let us see where this seed came from - [color=#ffd16b]its origin story[/color].", "warm_open")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
 
 	await _play_act_two()
 
@@ -1007,6 +1088,22 @@ func _play_act_two() -> void:
 
 	await _show_act_card()
 
+	_handoff_act_two()
+
+
+## Shared by the played finale and skip: bank progress and enter the next Act.
+var _results_open := false
+
+func _handoff_act_two() -> void:
+	if _results_open:
+		return
+	_results_open = true
+	var results := preload("res://scenes/ui/ActResults.tscn").instantiate()
+	results.stats = ActStats.finish()
+	get_tree().root.add_child(results)
+	await results.continued
+	Dialogue.end_conversation()
+	results.queue_free()
 	SaveGame.save_now()
 
 	# DEFERRED, and with the tree captured first. Both hand-offs tear the current
@@ -1098,6 +1195,9 @@ func _stir_building(room: Node2D, here: int) -> void:
 		var bt := float(here - brick_first_room) / float(brick_span)
 		masonry = lerpf(brick_first_strength, brick_last_strength,
 			pow(bt, maxf(ambience_curve, 0.01)))
+	if room.get_node_or_null("DarknessRoom") != null:
+		strength = 0.0
+		masonry = 0.0
 	_ambience.play_in(_world.room_rect(room), strength, masonry)
 
 

@@ -217,6 +217,7 @@ func start_new(i: int) -> void:
 	Act2Quest.reset()
 	Deaths.reset()
 	Points.reset()
+	ActStats.reset()
 	Game.current_index = 0
 	Game.completed = false
 	_enter_world(FIRST_WORLD, "")
@@ -280,6 +281,7 @@ func open_finished(room: String) -> void:
 	Act2Quest.reset()
 	Deaths.reset()
 	Points.reset()
+	ActStats.reset()
 	Game.current_index = 0
 	Game.completed = false
 	_pending = {
@@ -376,6 +378,7 @@ func _apply(payload: Dictionary) -> void:
 	Act2Quest.load_state(payload.get("act2_quest", {}))
 	Deaths.load_state(payload.get("deaths", {}))
 	Points.load_state(payload.get("points", {}))
+	ActStats.load_state(payload.get("act_stats", {}))
 	Game.current_index = int(payload.get("game_index", 0))
 	Game.completed = false
 
@@ -402,6 +405,7 @@ func _gather() -> Dictionary:
 		"act2_quest": Act2Quest.save_state(),
 		"deaths": Deaths.save_state(),
 		"points": Points.save_state(),
+		"act_stats": ActStats.save_state(),
 	}
 	if world is LdtkWorld:
 		payload["world_state"] = (world as LdtkWorld).save_state()

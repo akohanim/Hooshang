@@ -1,9 +1,15 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/dialogue_box.gd" id="1_dlg"]
 [ext_resource type="Texture2D" path="res://assets/characters/rumi/sprites/portrait.png" id="2_idle"]
 [ext_resource type="Texture2D" path="res://assets/ui/persian_trim.png" id="3_trim"]
 [ext_resource type="Script" path="res://scripts/hooshang_dialogue_animator.gd" id="4_animator"]
+
+[sub_resource type="StyleBoxFlat" id="SkipTrack"]
+bg_color = Color(0.3, 0.25, 0.16, 0.65)
+
+[sub_resource type="StyleBoxFlat" id="SkipFill"]
+bg_color = Color(1, 0.82, 0.42, 1)
 
 [node name="DialogueBox" type="CanvasLayer"]
 layer = 95
@@ -119,13 +125,13 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="Arrow" type="Label" parent="."]
-offset_left = 1180.0
+offset_left = 820.0
 offset_top = 156.0
 offset_right = 1244.0
 offset_bottom = 200.0
 theme_override_colors/font_color = Color(1, 0.82, 0.42, 0.85)
-theme_override_font_sizes/font_size = 28
-text = ">"
+theme_override_font_sizes/font_size = 20
+text = "Space / Enter  Continue"
 horizontal_alignment = 2
 vertical_alignment = 2
 
@@ -136,7 +142,19 @@ offset_right = 700.0
 offset_bottom = 200.0
 theme_override_colors/font_color = Color(1, 0.82, 0.42, 0.65)
 theme_override_font_sizes/font_size = 20
-text = "Hold X to skip"
+text = "Hold X to skip scene"
 visible = false
 horizontal_alignment = 0
-vertical_alignment = 2
+vertical_alignment = 1
+
+[node name="Progress" type="ProgressBar" parent="SkipHint"]
+layout_mode = 0
+offset_top = 40.0
+offset_right = 280.0
+offset_bottom = 44.0
+mouse_filter = 2
+theme_override_styles/background = SubResource("SkipTrack")
+theme_override_styles/fill = SubResource("SkipFill")
+max_value = 1.0
+step = 0.0
+show_percentage = false

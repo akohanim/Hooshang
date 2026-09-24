@@ -101,6 +101,7 @@ var _repeat_in := 0.0
 @onready var rows: Control = $Root/Rows
 @onready var detail: Label = $Root/Detail
 @onready var hint: Label = $Root/Hint
+@onready var back_button: Label = $Root/Back
 @onready var more_above: Label = $Root/MoreAbove
 @onready var more_below: Label = $Root/MoreBelow
 
@@ -307,6 +308,7 @@ func _row(text: String, note: String, action: Callable) -> Dictionary:
 
 
 func _populate(built: Array[Dictionary]) -> void:
+	back_button.visible = page != Page.ROOT
 	_rows = built
 	# Every page opens on its first row. Carrying a cursor across pages that
 	# hold different things means landing on whatever happens to sit at that
@@ -387,6 +389,11 @@ func _place_caret() -> void:
 ## forwards events into — which matters the moment a level is loading behind a
 ## menu that has not finished fading out.
 func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+	if event is InputEventMouse:
+		_mouse_input(event)
+		return
 	var taken := Callable()
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("pause"):
 		taken = back
@@ -411,6 +418,36 @@ func _input(event: InputEvent) -> void:
 	# which is why it survived every test.
 	get_viewport().set_input_as_handled()
 	taken.call()
+
+
+## Convert viewport coordinates through the canvas transform: the menu is
+## authored at 1280x720 but its CanvasLayer is scaled down to the game design size.
+func _mouse_input(event: InputEventMouse) -> void:
+	get_viewport().set_input_as_handled()
+	var click: bool = event is InputEventMouseButton and event.pressed
+	if click and event.button_index == MOUSE_BUTTON_RIGHT:
+		back()
+		return
+	if click and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		if not _rows.is_empty():
+			_move(-1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1)
+		return
+	if click and event.button_index == MOUSE_BUTTON_LEFT and back_button.visible:
+		var back_point := back_button.get_global_transform_with_canvas().affine_inverse() * event.position
+		if Rect2(Vector2.ZERO, back_button.size).has_point(back_point):
+			back()
+			return
+	if not event is InputEventMouseMotion and not (click and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	for i in rows.get_child_count():
+		var row := rows.get_child(i) as Control
+		var point := row.get_global_transform_with_canvas().affine_inverse() * event.position
+		if Rect2(Vector2.ZERO, row.size).has_point(point):
+			selected = _top + i
+			_refresh()
+			if click:
+				choose()
+			return
 
 
 ## Whether this event is one of the navigation actions, in any of their bindings.
@@ -517,7 +554,7 @@ func _build_font() -> void:
 	_font.base_font = ThemeDB.fallback_font
 	_font.variation_embolden = font_weight
 	_font.spacing_glyph = letter_spacing
-	for node: Control in [title, subtitle, caret, detail, hint, more_above, more_below]:
+	for node: Control in [title, subtitle, caret, detail, hint, back_button, more_above, more_below]:
 		node.add_theme_font_override("font", _font)
 
 

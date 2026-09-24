@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://daejyl8ovusga" path="res://ldtk/hooshang_act2.ldtk" id="2_ldtk"]
-[ext_resource type="Script" path="res://scripts/act2_parallax_backdrop.gd" id="3_sky"]
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/Act2Backdrop.tscn" id="3_sky"]
 [ext_resource type="Script" path="res://scripts/act2_beats.gd" id="4_beats"]
+
+[ext_resource type="Script" path="res://scripts/act2_expansion.gd" id="5_gardens"]
 
 [node name="Act2World" type="Node2D"]
 script = ExtResource("1_world")
@@ -16,8 +18,7 @@ color = Color(0.95, 0.9, 0.78, 1)
 
 [node name="Backdrop" type="Node2D" parent="."]
 
-[node name="SkyBackdrop" type="Node2D" parent="Backdrop"]
-script = ExtResource("3_sky")
+[node name="SkyBackdrop" parent="Backdrop" instance=ExtResource("3_sky")]
 
 [node name="Props" type="Node2D" parent="."]
 
@@ -27,3 +28,6 @@ script = ExtResource("3_sky")
 script = ExtResource("4_beats")
 
 [node name="EditorPreview" parent="." instance=ExtResource("2_ldtk")]
+
+[node name="SkyGardens" type="Node" parent="."]
+script = ExtResource("5_gardens")

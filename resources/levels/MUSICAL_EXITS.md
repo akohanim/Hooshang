@@ -1,0 +1,11 @@
+# Musical exit puzzles
+
+Level_7, Level_8, Level_9 and Level_13 are restored to the route between Level_V14 and the Level_14 reveal. Level_18 is now the escape segment’s dedicated musical-platform room: its five notes are the landings, with a safe recovery floor and no pursuit. Level_24 is a short unlocked finish. See [PRECISION_ESCAPE.md](PRECISION_ESCAPE.md). Level_10–12 remain shelved.
+
+Touch the musical tiles in pitch order 1–5 by walking, landing or hitting them from underneath. Each tile carries its number in the upper-left and a smaller music symbol in the lower-right. There are no floating number plaques, next-note arrows, or completion outlines. Both resting and sounding tile glow are increased by 30%. Duplicate pitches in Level_9 are alternatives, not extra steps. Wrong order resets progress. One landing on a seam counts only one note.
+
+Each room uses the same SecurityGate prefab as the later escape rooms, wrapped by MusicExit to add doorway lighting. The shutter is 32×32 and the existing exit trigger remains blocked by exit_locked until the melody is complete. The gate shows the current note count. Completion grants the existing player glow, retracts the shutter, raises ambient light from the musical room's darkness to the normal room brightness over 1.2 seconds, and releases warm light through the door. Death and re-entry reset both the gate and the glow, preserving the musical puzzle's existing per-life reward rule.
+
+NoteSequence now scopes its tile list and total to the current room, so tiles in another loaded room cannot progress this room's lock. The existing music tutorial now explains the gate and light reward.
+
+Validation: music_test passes real contact/seam/duplicate/order checks; music_exit_test passes gate authorization, room isolation, wrong-order rejection, glow, light release, hints and death reset for all five rooms. precision_escape_test verifies that the rebuilt Level_18 opens its gate through five real musical landings and reaches the exit. Route-order and chase-route checks pass with the restored rooms. Before/after native renders are in output/music_exit/. The current regression status is recorded in PRECISION_ESCAPE.md; the musical tests pass.

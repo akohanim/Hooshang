@@ -229,10 +229,13 @@ func _import(
 
 		# Save Levels (after Level Post-Import)
 		if (Util.options.pack_levels):
-			var levels_path := base_dir + 'levels/'
+			# PATCHED (Hooshang): identifiers are unique only WITHIN an LDtk
+			# project. Act 2's Level_2 otherwise overwrites Act 1's Level_2,
+			# including its terrain and PlayerStart, on every Act 2 import.
+			var levels_path := base_dir + 'levels/' + world_name + '/'
 			var directory = DirAccess.open(base_dir)
 			if not directory.dir_exists(levels_path):
-				directory.make_dir(levels_path)
+				directory.make_dir_recursive(levels_path)
 
 			# Resolve Refs + Cleanup Resolvers. We don't want to save 'NodePathResolver' in the Level scene.
 			#if (Util.options.verbose_output): Util.print("block", "References")

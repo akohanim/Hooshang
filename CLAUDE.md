@@ -350,6 +350,22 @@ so the two agree now. The tiles are still placeholder art.
     deferred to the cutscene, reaching him LOCKS the player, both speak, the sky
     reaches full NIGHT with the stars out, it ends at DAWN with the stars gone,
     Jamshid leaves and control returns
+- `Godot --headless --path . res://tests/forward_entry_test.tscn` — checks
+  imported room identities against each Act's LDtk source, enters Level_2 via
+  Level_1's actual Exit Area, idles on the entrance floor, and dies/respawns
+  without a second death or an unintended room change.
+- `Godot --headless --editor --path . --script res://tests/ldtk_import_isolation_test.gd`
+  — imports two temporary projects sharing `Level_2` in both orders, then
+  reloads their saved worlds from disk to prove neither overwrote the other.
+- **Packed levels are namespaced by SOURCE PROJECT:**
+  `ldtk/levels/hooshang_act1/Level_2.scn`, etc. Keep the `PATCHED (Hooshang)`
+  change in `addons/ldtk-importer/ldtk-importer.gd` through addon updates.
+  Act 2's `Level_2` previously overwrote Act 1's identically named scene in
+  the shared folder. The world still overrode its root name/IID/size, but
+  loaded Act 2's children: no PlayerStart, no entrance floor. The spawn
+  fallback chose empty space and caused a death loop. Names need only be
+  unique within each LDtk project now. Existing flat `ldtk/levels/*.scn`
+  files are legacy output; current packed-world imports use the subfolders.
 - If the editor is open, headless `--import` may stall — retry once, or close
   the editor. Never kill the user's `--editor` process.
 - **Editing `scripts/ldtk_entities_post_import.gd` does not re-import the
@@ -359,34 +375,42 @@ so the two agree now. The tiles are still placeholder art.
   no error anywhere. `touch ldtk/hooshang_act1.ldtk` then `--import`.
 - **Level identifiers ARE the play order**, and `LdtkWorld.rooms` is sorted by
   them. `Level_0` is the opening room. **The current spine is `Level_0`..`Level_6`
-  -> `Level_V1`..`Level_V7` -> `Level_14`..`Level_25`.** `Level_7`..`Level_13` are
-  ON HOLD (`LdtkWorld.SHELVED_ROOMS`, a 2026 level-design pass): moved ~1000px
-  clear in the `.ldtk` and skipped by `rooms_in`, so no Exit slides into one and
-  the debug picker does not list them — their nodes still exist, so a name lookup
-  (act1_beats' `music_room_name` = "Level_7") resolves to null gracefully rather
-  than crashing. The escape row `Level_14`..`Level_23` runs RIGHT to left along
-  the bottom of the grid (it used to retrace rooms 11-3; with 7-13 shelved that
-  pairing is dormant). Sorting by world position — which this used to do — reads
+  -> `Level_V1`..`Level_V9` -> `Level_7`..`Level_25`, with nothing shelved
+  (`LdtkWorld.SHELVED_ROOMS` is empty).** The V block is a vertical climb spliced
+  in between `Level_6` and `Level_7`: `Level_V5` exits right into `Level_V6`, then
+  `Level_V6`/`Level_V7` are stacked and left UPWARD through an `ExitCeiling` (a
+  ceiling-mounted twin of `Exit`, same "exit" group, built by
+  `ldtk_entities_post_import._build_exit_ceiling`) up to `Level_V8`, which exits
+  right to `Level_V9` and on to `Level_7`. Backtracking down that shaft is handled
+  by the same two-way return door as everywhere else — `_re_entry_point` and the
+  backtrack test both special-case a ceiling exit (the return drops in BELOW the
+  opening, cleared vertically, instead of beside a side wall). (`Level_7`..`Level_13`
+  and `Level_10`..`Level_12` were previously shelved for a design pass; they are
+  back in the route now. There is no `Level_V0`; the .ldtk's V rooms are V1..V9,
+  and orphaned `Level_V10`..`Level_V14` .scn files on disk are NOT in the world.)
+  The escape row `Level_14`..`Level_23` runs RIGHT to left along
+  the bottom of the grid. Sorting by world position — which this used to do — reads
   that row backwards, and every "next room" fallback then hands you the room you
   just left. Renumber when you insert a room, and re-letter its lights
   (`LIGHTING.md`).
   **This is not cosmetic.** No Exit in the `.ldtk` carries a NextRoom
   override — checked directly, every one is empty — so `LdtkWorld.rooms`'s
   array order is not just how the debug picker numbers things, it is the ONLY
-  thing that routes actual play from one room to the next. `Level_V1`..`Level_V7`
-  carry no number of their own but have a real place between `Level_6` and the
-  escape row. Trailing-digit sorting cannot place them (everything after
+  thing that routes actual play from one room to the next. `Level_V1`..`Level_V9`
+  carry no number of their own but have a real place between `Level_6` and
+  `Level_7`. Trailing-digit sorting cannot place them (everything after
   `Level_` is a non-digit, so they fall to `index_in_name`'s sort-last bucket —
   exactly the dead end a `Level_v5`/`v6` -> `Level_V6`/`V7` rename left before
-  the table was updated: routed `6->V1..V4` then nowhere). They are pinned by
+  the table was updated: routed `6->V1..V4` then nowhere). `Level_V1`..`Level_V9`
+  are pinned by
   hand in `LdtkWorld.INSERTED_ROOMS` instead — read that table's own comment, and
   add to it rather than trusting a new room's digits. To shelve/un-shelve a room,
-  edit `SHELVED_ROOMS` beside it.
+  edit `SHELVED_ROOMS` beside it (currently empty).
 - **A renamed level needs the import CACHE cleared, not just a re-import.**
   Deleting `ldtk/levels/*.scn` is not enough — the world scene itself is cached
   in `.godot/imported/hooshang_act1.ldtk-*`, and a stale one loaded two rooms
   on top of each other at the same world x while every name looked right.
-  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
+  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn` then
   `--import`.
 - **`addons/ldtk-importer/src/tileset.gd` carries a local PATCH, marked
   `PATCHED (Hooshang)`. Keep it through any addon update.** Upstream builds the
@@ -408,7 +432,7 @@ so the two agree now. The tiles are still placeholder art.
   handled ENTITY goes the same way, arriving as nothing while the hook that
   builds it plainly has a case for it. Restart the editor after changing
   anything in a `.import` OR in a post-import hook, and rebuild:
-  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn` then
+  `rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn` then
   `--import`.
   **The same staleness bites CONTENT edits too, not just script/import-flag
   ones** — placing an entity or painting tiles in LDtk while the Godot editor

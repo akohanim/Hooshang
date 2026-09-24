@@ -14,12 +14,8 @@ extends Node
 ##      would put a 47-second toll on every session, and nobody would file that
 ##      as a bug — they would just stop playing.
 ##
-##   3. THE SKIP. It is deliberately unskippable DURING playback, and then
-##      deliberately waits for a press once it ends. Both halves matter: the
-##      first is a choice a later
-##      change is very likely to "fix" out of sympathy for the player. It is
-##      only defensible because it is asked for exactly once, so if the routing
-##      above ever breaks, this rule has to break with it — hence both here.
+##   3. THE SKIP. Taps do not dismiss playback; a deliberate hold does.
+##      Natural completion still holds on the title card for confirmation.
 ##
 ## Run:  godot --headless res://tests/intro_video_test.tscn
 
@@ -46,6 +42,32 @@ func _ready() -> void:
 			% ("null" if stream == null else stream.get_class()))
 	_check(intro.layer > 110,
 		"it draws over the main menu  [layer %d]" % intro.layer)
+	intro.set_process(false)
+	Input.action_press("skip_dialogue")
+	intro._process(0.5)
+	_check(not intro._over and intro.skip_fill.anchor_right > 0.0, "short hold shows progress without skipping")
+	Input.action_release("skip_dialogue")
+	intro._process(0.01)
+	_check(intro.skip_fill.anchor_right == 0.0, "releasing cancels the hold")
+	Input.action_press("skip_dialogue")
+	intro._process(0.5)
+	intro._notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
+	intro._process(2.0)
+	_check(not intro._over, "focus loss cancels skip")
+	Input.action_release("skip_dialogue")
+	intro._process(0.01)
+	InputDevice._note(InputDevice.Device.CONTROLLER)
+	intro._process(0.01)
+	_check("□" in intro.skip_label.text, "controller skip prompt updates")
+	var completions := [0]
+	intro.done.connect(func(): completions[0] += 1)
+	Input.action_press("skip_dialogue")
+	intro._process(intro.skip_hold_time + 0.01)
+	_check(intro._over, "completed hold skips the opening film")
+	intro._finish()
+	Input.action_release("skip_dialogue")
+	await _hold(0.8)
+	_check(completions[0] == 1 and not intro.video.is_playing(), "skip stops playback and completes exactly once")
 	intro.free()
 
 	# --- 2. a NEW run plays it ----------------------------------------------
@@ -56,9 +78,7 @@ func _ready() -> void:
 	await _frames(8)
 	_check(_intro_in_tree() != null, "starting a new run plays the film")
 
-	# It must NOT be skippable. Mash the buttons a player would reach for and
-	# assert the film is still running afterwards — this is the whole rule, and
-	# it is the kind of thing a later "let me out of this" change quietly undoes.
+	# Ordinary taps must not accidentally skip the film or reach the menu.
 	var playing := _intro_in_tree()
 	if playing != null:
 		for code in [KEY_ENTER, KEY_SPACE, KEY_ESCAPE, KEY_SHIFT]:
@@ -76,8 +96,8 @@ func _ready() -> void:
 			"mashing enter/space/escape/shift/pad does NOT skip the film")
 		_check((playing.get_node("Video") as VideoStreamPlayer).is_playing(),
 			"and it is still playing, not merely still on screen")
-		_check(playing.get_node_or_null("Prompt") == null,
-			"no engine-drawn prompt over the film — its last frame carries that")
+		_check(playing.get_node("SkipPrompt").visible,
+			"a visible skip prompt is available during playback")
 		# Those presses must not have leaked to the menu behind it either: the
 		# main menu is still in the tree with live rows, so an unconsumed press
 		# would have been navigating a screen nobody can see.

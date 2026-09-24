@@ -31,6 +31,18 @@ extends Hazard
 ## stuck to the wall on the LEFT, LEFT = stuck to the wall on the right.
 enum Facing { UP, DOWN, RIGHT, LEFT }
 
+const SHEETS_PSYCHEDELIC := {
+	Facing.UP: preload("res://assets/act3/cone_spikes.png"),
+	Facing.DOWN: preload("res://assets/act3/cone_spikes_down.png"),
+	Facing.RIGHT: preload("res://assets/act3/cone_spikes_right.png"),
+	Facing.LEFT: preload("res://assets/act3/cone_spikes_left.png"),
+}
+
+@export var psychedelic_palette := false:
+	set(value):
+		psychedelic_palette = value
+		_update_extents()
+
 const SHEETS := {
 	Facing.UP: preload("res://assets/hazards/cone_spikes.png"),
 	Facing.DOWN: preload("res://assets/hazards/cone_spikes_down.png"),
@@ -173,7 +185,7 @@ func _variant(i: int, cells: int) -> Tile:
 func _tile(which: Tile) -> AtlasTexture:
 	var tex := AtlasTexture.new()
 	var sheets := SHEETS_CHILDHOOD if palette == Palette.CHILDHOOD else SHEETS
-	tex.atlas = sheets[facing]
+	tex.atlas = SHEETS_PSYCHEDELIC[facing] if psychedelic_palette else sheets[facing]
 	var step := int(which) * CELL
 	tex.region = Rect2(0.0, step, CELL, CELL) if _vertical() \
 		else Rect2(step, 0.0, CELL, CELL)

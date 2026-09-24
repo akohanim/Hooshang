@@ -29,11 +29,18 @@ var locked_ever := false
 var jamshid_spoke := false
 var hooshang_spoke := false
 var max_blue := -1.0        # how blue (b - r) the sky ever got — night
+var fire_audible := false
+var night_audible := false
+var dawn_audible := false
 var campfire_visible := false
 var blackout_during_talk := false
 var spawned_spring := false
 var original_fish: Fish
 var ellipsis_speakers: Array[Node] = []
+var sun_set := false
+var sun_rose := false
+var sun_hidden_at_night := false
+var previous_descent := 0.0
 var max_stars := 0.0        # peak StarField.amount — the night sky lit up
 
 
@@ -91,6 +98,14 @@ func _run() -> void:
 	for i in 6000:
 		await _frames(1)
 		_press_jump()
+		if is_instance_valid(beats._ambience):
+			var insects: AudioStreamPlayer = beats._ambience.get_node("Crickets")
+			var birds: AudioStreamPlayer = beats._ambience.get_node("Birds")
+			night_audible = night_audible or (insects.playing and insects.volume_db > -30.0)
+			dawn_audible = dawn_audible or (birds.playing and birds.volume_db > -30.0)
+		for child in world.get_children():
+			if child is Campfire:
+				fire_audible = fire_audible or (child._audio.playing and child._audio.volume_db > -15.0)
 		if world.player.input_locked:
 			locked_ever = true
 		if Dialogue.visible and name_label.visible:
@@ -106,12 +121,27 @@ func _run() -> void:
 			max_blue = maxf(max_blue, canvas_mod.color.b - canvas_mod.color.r)
 		if beats != null and beats._stars != null:
 			max_stars = maxf(max_stars, beats._stars.amount)
+		var backdrop = world.get_node("Backdrop/SkyBackdrop")
+		if backdrop.sun_descent > previous_descent + 0.0001:
+			sun_set = true
+		if backdrop.sun_descent < previous_descent - 0.0001:
+			sun_rose = true
+		if backdrop.sun_descent >= 0.999 and not backdrop.sun.visible:
+			sun_hidden_at_night = true
+		previous_descent = backdrop.sun_descent
 		# Done when the cutscene has handed control back AFTER it started.
 		if locked_ever and not world.player.input_locked and jamshid_spoke and i > 30:
 			settled = true
 			break
 	Engine.time_scale = 1.0
 
+	_check(fire_audible, "lit fire plays audible crackling beneath dialogue")
+	_check(night_audible, "night insects fade into the encounter")
+	_check(dawn_audible, "birds fade in at dawn")
+	_check(sun_set, "sun descends during the sunset sequence")
+	_check(sun_hidden_at_night, "sun is fully below the horizon at night")
+	_check(sun_rose, "sun rises during the morning transition")
+	_check(is_zero_approx(world.get_node("Backdrop/SkyBackdrop").sun_descent), "sun returns to its fixed daytime anchor")
 	_check(locked_ever, "reaching Jamshid locks the player's controls")
 	_check(jamshid_spoke, "Jamshid speaks")
 	_check(hooshang_spoke, "Hooshang speaks")
@@ -129,14 +159,18 @@ func _run() -> void:
 				% [canvas_mod.color.r, canvas_mod.color.b])
 		_check(beats._pond_fish == original_fish, "the catch reuses the original swimming fish")
 		_check(not original_fish.visible, "the fish is gone after dinner")
-		_check(ellipsis_speakers == [world.player, jamshid.actor, world.player, jamshid.actor, world.player, jamshid.actor, world.player, jamshid.actor, world.player], "nine automatic bubbles alternate between the cousins")
+		_check(ellipsis_speakers == [world.player, jamshid.actor, world.player, jamshid.actor, world.player, jamshid.actor], "six brief automatic bubbles alternate between the cousins")
 		_check(beats._stars.shots_fired == 3, "three shooting stars cross the timelapse")
 		_check(beats._stars.amount == 0.0, "stars are gone at dawn")
 		for child in world.get_children():
 			if child is Campfire:
 				_check(not child.is_lit(), "the campfire is out at dawn")
+				_check(not child._audio.playing, "extinguished fire stops its loop")
 		_check(not world.player._frozen, "the cutscene releases the physics freeze")
 		_check(not jamshid.visible, "...and Jamshid has ridden off (gone from view)")
+
+	await get_tree().create_timer(0.8).timeout
+	_check(not is_instance_valid(beats._ambience), "encounter ambience fades out and frees after departure")
 
 	if failures.is_empty():
 		print("ACT2 JAMSHID ENCOUNTER TEST: ALL PASS")

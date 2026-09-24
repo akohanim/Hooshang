@@ -40,11 +40,11 @@ const TEXTURE_RADIUS := 64.0
 @export_group("Glow")
 ## Resting glow. The cave is deliberately near-black, so an unlit pad still has
 ## to announce itself as something that can be stepped on — but only just.
-@export var idle_energy := 0.5
+@export var idle_energy := 0.65
 ## Glow while sounding. Kept close to the resting value on purpose: the pad
 ## brightening (lit_boost) is the loud part, this only widens the pool it
-## throws. Pushing it much past ~1.6 clips the tile art to white.
-@export var lit_energy := 1.5
+## throws. The sounding glow is three times the resting energy.
+@export var lit_energy := 1.95
 ## Radius of the pool, in px. Small: five of these sit side by side, and the
 ## cave's darkness is the point.
 @export var glow_radius := 22.0
@@ -213,3 +213,4 @@ func sound() -> void:
 	_glow_tween = create_tween()
 	_glow_tween.tween_property(_light, "energy", idle_energy, lit_time) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+

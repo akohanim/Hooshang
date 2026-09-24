@@ -280,7 +280,9 @@ func _on_player_died() -> void:
 
 func _begin() -> void:
 	_armed = false          # so the catch stops re-entering while this runs
+	Dialogue.begin_conversation(self, _player)
 	await _call_rumi()
+	Dialogue.end_conversation()
 	if _done or not is_instance_valid(_player):
 		return
 	_prompt = load("res://scenes/ui/InputPrompt.tscn").instantiate()
@@ -321,6 +323,10 @@ func _call_rumi() -> void:
 func _give_the_dash() -> void:
 	if not gift_lines.is_empty():
 		await _say(gift_lines[0], "warm_open")
+	if Dialogue.scene_skip_requested(self):
+		# The gift is progression; skipping its presentation must still grant it.
+		_player.has_dash = true
+		return
 	await _rumi.step_to(_player.global_position.x)
 	await _rumi.swell()
 	await _rumi.give_to(_player)

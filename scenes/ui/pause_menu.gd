@@ -197,6 +197,9 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("pause") and pause_game():
 			get_viewport().set_input_as_handled()
 		return
+	if event is InputEventMouse:
+		_mouse_input(event)
+		return
 	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
 		resume_game()
 	elif event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
@@ -208,6 +211,25 @@ func _input(event: InputEvent) -> void:
 	else:
 		return
 	get_viewport().set_input_as_handled()
+
+
+## Hover only responds to motion, so a resting pointer cannot undo pad/key
+## navigation. Consume clicks before choosing: resume/quit can close this menu.
+func _mouse_input(event: InputEventMouse) -> void:
+	get_viewport().set_input_as_handled()
+	var click: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	if not event is InputEventMouseMotion and not click:
+		return
+	var list := _rows()
+	for i in list.size():
+		var row := list[i]
+		var point := row.get_global_transform_with_canvas().affine_inverse() * event.position
+		if Rect2(Vector2.ZERO, row.size).has_point(point):
+			selected = i
+			_refresh()
+			if click:
+				_choose()
+			return
 
 
 ## Whether this event is one of the navigation actions, in any binding.

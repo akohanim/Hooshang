@@ -103,6 +103,9 @@ func _ready() -> void:
 	# threshold is not this file's subject and has its own suite, which drives it
 	# through the real reset path — see tests/chase_entry_test.tscn.
 	shadow.entry_hold_distance = 0.0
+	# This suite isolates chase mechanics; the entrance gate is covered by
+	# darkshang_power_entry_test through real room entry in all ten rooms.
+	shadow.power_entry_delay = 0.0
 	await _frames(4)
 	_check(shadow.get_parent() != null and room.is_ancestor_of(shadow),
 		"and he is inside Level_14, not in a shared scene")

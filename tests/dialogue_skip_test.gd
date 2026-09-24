@@ -1,146 +1,94 @@
 extends Node
-## Hold "skip_dialogue" (X) for skip_hold_time seconds to skip a WHOLE
-## dialogue conversation — scenes/ui/dialogue_box.gd's _tick_skip_hold and
-## _skip_armed — and the "Hold X to skip" reminder that appears after
-## hint_delay seconds (_tick_skip_hint).
-##
-## THIS IS NOT A PAGE-BY-PAGE FAST-FORWARD. The line on screen when the hold
-## crosses the threshold closes itself out with its own ordinary close
-## animation (a smooth transition, not a hard cut), and every line AFTER it
-## in the same conversation never opens at all — say() returns before
-## touching a single node. Covers the shape of bug a hold-timer feature
-## actually breaks in: firing too early, not firing at all, not surviving
-## the gap between two lines of one conversation, and — the one that would
-## be invisible in play until a player literally walked into a cutscene with
-## a finger already resting on the key — firing on a hold that has nothing
-## to do with the dialogue that just opened.
-##
-## Reveal timing is driven BY HAND (box._process(delta), synthetic 1/60
-## deltas) the same way voice_blip_test.gd does, for the same reason: idle
-## delta has no fixed relationship to wall-clock frames in a headless run.
-## Anything that waits on say()'s own entrance/close animation is the
-## exception — those are PHYSICS SceneTreeTimers, so those waits use real
-## physics frames instead, same as intro_test.gd.
-##
-## Run:  godot --headless res://tests/dialogue_skip_test.tscn
-
+## Deterministic input timing with real waits for banner transitions.
 var failures: Array[String] = []
 var _closed_count := 0
 
-
 func _ready() -> void:
 	var box: DialogueBox = Dialogue
-	box.dialogue_closed.connect(func(): _closed_count += 1)
-	# Frozen to a crawl so the NATURAL typewriter reveal can never coincide
-	# with — and be mistaken for — a skip completing it: every "not
-	# revealing" this test observes has to be _tick_skip_hold's doing, not
-	# ordinary pagination/timing arithmetic happening to land on the same
-	# page length at the same moment.
+	box.set_process(false)
 	box.chars_per_second = 0.1
-	const LONG_LINE := "This is a considerably long line of dialogue, written specifically so that it takes several real seconds for the ordinary typewriter reveal to finish on its own."
-
-	# --- released before the threshold: nothing happens -----------------------
-	await _say_line(box, "Hooshang", LONG_LINE)
+	box.dialogue_closed.connect(func(): _closed_count += 1)
+	box.begin_conversation(self)
+	await _say_line(box, "Hooshang", "A long unread sentence. Another sentence follows.")
 	Input.action_press("skip_dialogue")
-	_tick(box, box.skip_hold_time - 0.2)
-	_check(box._revealing, "holding short of the threshold does not skip yet")
+	_tick(box, 0.5)
+	_check(box._active and box._revealing, "short hold leaves speech playing")
+	_check(box.skip_hint.visible and box.skip_progress.value > 0.4, "holding immediately shows progress")
 	Input.action_release("skip_dialogue")
-	_tick(box, 1.0)
-	_check(box._revealing,
-		"...and releasing before the threshold does not carry over either")
-	await _close(box)
-
-	# --- a release resets the accumulated hold, even mid-threshold ------------
-	await _say_line(box, "Hooshang", LONG_LINE)
+	_tick(box, 0.02)
+	_check(box.skip_progress.value == 0.0, "release cancels progress")
 	Input.action_press("skip_dialogue")
-	_tick(box, box.skip_hold_time - 0.2)
+	_tick(box, 0.5)
+	_check(box._active, "separate short holds never accumulate")
+	box._notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
+	_tick(box, 2.0)
+	_check(box._active, "focus loss cancels the hold")
 	Input.action_release("skip_dialogue")
-	_tick(box, 1.0 / 60.0)  # let _tick_skip_hold actually observe the release
-	Input.action_press("skip_dialogue")
-	_tick(box, box.skip_hold_time - 0.2)  # two short holds, neither alone enough
-	_check(box._revealing,
-		"two short holds separated by a release never add up to one long one")
-	Input.action_release("skip_dialogue")
-	await _close(box)
-
-	# --- crossing the threshold closes the CURRENT line, smoothly, on its own -
-	await _say_line(box, "Hooshang", LONG_LINE)
-	var closed_before := _closed_count
+	_tick(box, 0.02)
 	Input.action_press("skip_dialogue")
 	_tick(box, box.skip_hold_time + 0.05)
-	_check(not box._revealing,
-		"crossing the hold threshold finishes the current page's reveal instantly")
-	_check(box.text_label.visible_characters == -1,
-		"...with the [fade] wrapper dropped, same as a natural finish")
-	_check(not box._active,
-		"...and the line starts closing itself the SAME tick — no next page shown, no button needed")
-	# The close-out itself is a real (physics-timed) animation, not a hard
-	# cut — give it real frames to actually run rather than asserting
-	# `visible == false` the instant _active drops.
-	var guard := 0
-	while box.visible and guard < 60:
-		await get_tree().physics_frame
-		guard += 1
-	_check(not box.visible and _closed_count == closed_before + 1,
-		"...and shortly after, the box has genuinely closed (dialogue_closed fired)  [%d frames]" % guard)
-
-	# --- and holding through it: the NEXT line in the conversation never opens at all
-	#
-	# Not "opens, then gets skipped" — never touches a single node. If the
-	# hold had to restart from zero here — the bug this whole test exists to
-	# catch — this would open and start revealing normally.
-	var was_visible := box.visible
-	await box.say("Hooshang", "And a second line, right after the first.")
-	_check(not box._active,
-		"a second line in the same conversation never activates while skip is still armed")
-	_check(box.visible == was_visible,
-		"...the box's visibility never changes — it truly never opened")
+	_check(not box._active, "completed hold closes the current line")
 	Input.action_release("skip_dialogue")
-
-	# --- a stale hold from BEFORE any dialogue cannot zap the first line ------
-	#
-	# The exact scenario a player could hit by accident: resting a finger on
-	# X (dash's own key, inert during dialogue but not before it opens) while
-	# just walking around, then walking into a trigger. This matters MORE now
-	# than it would for a page-by-page skip: a stale hold slipping past this
-	# guard would suppress a whole conversation the player never saw open.
+	_tick(box, 0.02)
+	await _close(box)
+	_check(_closed_count == 1, "one smooth close and one close signal")
+	_tick(box, 3.0)
+	await box.say("Rumi", "This later line should never open, even after a long pause.")
+	_check(not box.visible, "skip remains committed after release and pauses")
+	box.end_conversation()
 	Input.action_press("skip_dialogue")
-	_check(not box._active, "sanity: no line is up yet while the stale hold accrues")
-	_tick(box, box.skip_hold_time + box.SKIP_HOLD_GAP + 1.0)  # well past both
-	await _say_line(box, "Hooshang", LONG_LINE)
-	_check(box._revealing,
-		"a hold that predates the dialogue by more than SKIP_HOLD_GAP does not skip the first line")
+	box.begin_conversation(self)
+	await _say_line(box, "Rumi", "A new conversation must be readable.")
+	_tick(box, 2.0)
+	_check(box._active, "button held before scene cannot skip it")
+	Input.action_release("skip_dialogue")
+	_tick(box, 0.02)
+	var confirm := InputEventAction.new()
+	confirm.action = "ui_accept"
+	confirm.pressed = true
+	box._unhandled_input(confirm)
+	_check(not box._revealing and box._active, "confirm reveals without dismissing")
+	box._unhandled_input(confirm)
+	await _close(box)
+	box.end_conversation()
+	box.begin_conversation(self)
+	await _say_line(box, "", "A line in an eligible conversation.")
+	_tick(box, box.hint_delay + 0.05)
+	_check(box.skip_hint.visible, "hint appears without needing a hold")
+	InputDevice._note(InputDevice.Device.CONTROLLER)
+	_tick(box, 0.02)
+	_check("□" in box.skip_hint.text, "controller prompt shows face button")
+	InputDevice._note(InputDevice.Device.KEYBOARD)
+	_tick(box, 0.02)
+	_check("Hold X" in box.skip_hint.text, "keyboard prompt returns live")
+	await _close(box)
+	box.end_conversation()
+	# No length threshold or protected categories. A one-line conversation and
+	# standalone system text use the exact same hold and release protection.
+	for text in ["A short greeting.", "An opening scene.", "An essential tutorial.", "One long exchange. ".repeat(40)]:
+		box.begin_conversation(self)
+		await _say_line(box, "Rumi", text)
+		Input.action_press("skip_dialogue")
+		_tick(box, box.skip_hold_time + 0.1)
+		_check(not box._active and box._skip_armed(), "every scoped dialogue can be skipped: " + text.left(25))
+		Input.action_release("skip_dialogue")
+		_tick(box, 0.02)
+		await _close(box)
+		box.end_conversation()
+	await _say_line(box, "", "Standalone speech also supports skipping.")
+	Input.action_press("skip_dialogue")
+	_tick(box, 2.0)
+	_check(not box._active and box._skip_armed(), "standalone speech uses the same skip action")
 	Input.action_release("skip_dialogue")
 	await _close(box)
-
-	# --- the "Hold X to skip" reminder appears after hint_delay, not before ---
-	await _say_line(box, "Hooshang", LONG_LINE)
-	_check(not box.skip_hint.visible, "the skip hint is not shown the moment a line opens")
-	_tick(box, box.hint_delay - 0.2)
-	_check(not box.skip_hint.visible, "...nor just short of hint_delay")
-	_tick(box, 0.3)
-	_check(box.skip_hint.visible,
-		"...but appears once the line has been up for hint_delay seconds")
+	_check(not box._skip_armed(), "standalone close clears skip for next line")
+	await _say_line(box, "", "This next standalone line must open normally.")
+	_check(box._active, "standalone skip cannot leak to next dialogue")
 	await _close(box)
-	_check(not box.skip_hint.visible, "...and disappears once the line closes")
-
-	# --- and does not carry over to the next line ------------------------------
-	await _say_line(box, "Hooshang", "A second, unrelated line.")
-	_check(not box.skip_hint.visible,
-		"a fresh line does not inherit the previous line's already-shown hint")
-	await _close(box)
-
-	if failures.is_empty():
-		print("DIALOGUE SKIP TEST: ALL PASS")
-	else:
-		print("DIALOGUE SKIP TEST: %d FAILURE(S)" % failures.size())
+	print("DIALOGUE SKIP TEST: %s" % ("ALL PASS" if failures.is_empty() else str(failures)))
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 
-## Drive box._process() with fixed 1/60 steps for `seconds` of synthetic
-## time — the same "by hand, no real awaits" trick voice_blip_test.gd's
-## _reveal_all uses, so a held button's accumulated time is exact rather
-## than at the mercy of headless idle-frame timing.
 func _tick(box: DialogueBox, seconds: float) -> void:
 	var steps := int(ceil(seconds * 60.0))
 	for i in steps:

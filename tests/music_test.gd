@@ -42,6 +42,7 @@ var steps: Array[int] = []
 
 
 func _ready() -> void:
+	LdtkWorld.debug_start_room = ROOM
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	add_child(world)
 	await _frames(30)
@@ -156,7 +157,7 @@ func _step_pad(index: int) -> void:
 
 ## Stand him clear of every pad, so the next arrival is a real arrival.
 func _clear() -> void:
-	await _park(NEUTRAL, BETWEEN_STEPS)
+	await _park(room.global_position + Vector2(200,24), BETWEEN_STEPS)
 
 
 ## Wipe the puzzle AND the glow, so each case starts from the same place.

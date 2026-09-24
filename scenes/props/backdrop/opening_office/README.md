@@ -1,7 +1,7 @@
 # Opening office
 
 Level_0 art pass: cool woven partition, pinned notes and calendar, grounded desk,
-coffee and paperwork, a late-night clock, warm pendant light and sparse moonlit
+coffee and paperwork, a flickering warm pendant light and sparse moonlit
 motes. All geometry is decorative. The existing player start, solids, door and
 story triggers remain authored in LDtk.
 

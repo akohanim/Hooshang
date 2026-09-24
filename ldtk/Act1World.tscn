@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cnrwx577guta"]
 
+[ext_resource type="Script" path="res://scripts/act1_chase_pacing.gd" id="chase_pacing"]
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/office_posters/OfficePosters.tscn" id="office_posters"]
 [ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://dc8v6mkhcimnl" path="res://ldtk/hooshang_act1.ldtk" id="2_ldtk"]
 [ext_resource type="PackedScene" path="res://scenes/props/lighting/LampFixture.tscn" id="3_lamp"]
@@ -93,8 +95,11 @@ room_backdrop_overrides = Dictionary[String, Texture2D]({
 "Level_V2": ExtResource("office_Level_V2"),
 "Level_V3": ExtResource("office_Level_V3"),
 "Level_V4": ExtResource("office_Level_V4"),
-"Level_v5": ExtResource("office_Level_v5"),
-"Level_v6": ExtResource("office_Level_v6"),
+"Level_V5": ExtResource("office_Level_V1"),
+"Level_V6": ExtResource("office_Level_v5"),
+"Level_V7": ExtResource("office_Level_v6"),
+"Level_V8": ExtResource("office_Level_v5"),
+"Level_V9": ExtResource("office_Level_V4"),
 "Level_V_test": ExtResource("office_Level_V_test"),
 "TEST": ExtResource("office_TEST")
 })
@@ -179,6 +184,7 @@ halo_color = Color(0.7, 0.44, 0.7467, 1)
 halo_amount = 0.64
 
 [node name="MoonWindowRoom18" parent="Backdrop" unique_id=1602855732 instance=ExtResource("8_moon")]
+visible = false
 position = Vector2(2300, 1244)
 moon_color = Color(0.9, 0.34, 0.22, 1)
 sky_color = Color(0.165, 0.076, 0.1275, 1)
@@ -188,6 +194,7 @@ halo_color = Color(0.775, 0.485, 0.645, 1)
 halo_amount = 0.58
 
 [node name="MoonWindowRoom20" parent="Backdrop" unique_id=86389677 instance=ExtResource("8_moon")]
+visible = false
 position = Vector2(1700, 1244)
 moon_color = Color(0.95, 0.45, 0.28, 1)
 sky_color = Color(0.1783, 0.084, 0.1283, 1)
@@ -302,13 +309,6 @@ light_energy = 1.9
 light_scale = 3.0
 show_body = false
 
-[node name="TileLampRoom6" parent="Lights" unique_id=1745046324 instance=ExtResource("3_lamp")]
-position = Vector2(1704, 214)
-light_color = Color(1, 0.87, 0.66, 1)
-light_energy = 0.0
-light_scale = 1.3
-cable_length = 38.0
-
 [node name="MoonGlowRoom14" parent="Lights" unique_id=1111313830 instance=ExtResource("3_lamp")]
 position = Vector2(5232, 88)
 light_color = Color(0.62, 0.74, 1, 1)
@@ -336,6 +336,7 @@ light_scale = 3.0
 show_body = false
 
 [node name="MoonGlowRoom18" parent="Lights" unique_id=2025521353 instance=ExtResource("3_lamp")]
+visible = false
 position = Vector2(2300, 1248)
 light_color = Color(0.93, 0.44, 0.35, 1)
 light_energy = 2.4
@@ -350,6 +351,7 @@ light_scale = 3.2
 show_body = false
 
 [node name="MoonGlowRoom20" parent="Lights" unique_id=1156392887 instance=ExtResource("3_lamp")]
+visible = false
 position = Vector2(1700, 1248)
 light_color = Color(0.9533, 0.5333, 0.38, 1)
 light_energy = 2.4
@@ -384,33 +386,29 @@ light_scale = 1.3
 show_body = false
 
 [node name="DawnGlowRoom25" parent="Lights" unique_id=645968790 instance=ExtResource("3_lamp")]
-visible = false
 position = Vector2(176, 1234)
 light_color = Color(1, 0.72156864, 0.42352942, 1)
-light_energy = 2.6
+light_energy = 1.2
 light_scale = 1.25
 show_body = false
 
 [node name="DawnSpillRoom25a" parent="Lights" unique_id=1013606261 instance=ExtResource("3_lamp")]
-visible = false
 position = Vector2(96, 1250)
 light_color = Color(1, 0.827451, 0.6392157, 1)
-light_energy = 0.5
+light_energy = 0.32
 light_scale = 2.4
 show_body = false
 
 [node name="DawnSpillRoom25b" parent="Lights" unique_id=1151680300 instance=ExtResource("3_lamp")]
-visible = false
 position = Vector2(16, 1256)
 light_color = Color(1, 0.85882354, 0.7019608, 1)
-light_energy = 0.34
+light_energy = 0.22
 light_scale = 2.0
 show_body = false
 
 [node name="SunShaftRoom25" parent="Lights" unique_id=1918346679 instance=ExtResource("12_shaft")]
-visible = false
 position = Vector2(174, 1228)
-beam_energy = 2.1
+beam_energy = 1.3
 beam_scale = 1.5
 angle_degrees = 69.0
 beam_count = 3
@@ -432,13 +430,6 @@ position = Vector2(53, 1263)
 light_energy = 0.55
 light_scale = 0.8
 screen_size = Vector2(7, 6)
-
-[node name="LedgeLampRoom2" parent="Lights" unique_id=820196529 instance=ExtResource("3_lamp")]
-position = Vector2(536, 214)
-light_color = Color(1, 0.86, 0.62, 1)
-light_energy = 1.5
-light_scale = 1.35
-cable_length = 46.0
 
 [node name="OfficeWindow_Level_V1_0" parent="Backdrop" instance=ExtResource("8_moon")]
 position = Vector2(2120, 520)
@@ -666,3 +657,8 @@ script = ExtResource("15_jumptut")
 
 [node name="HomecomingOffice" parent="Props" instance=ExtResource("opening_polish")]
 position = Vector2(-48, 1184)
+
+[node name="ChasePacing" type="Node" parent="."]
+script = ExtResource("chase_pacing")
+
+[node name="OfficePosters" parent="." instance=ExtResource("office_posters")]

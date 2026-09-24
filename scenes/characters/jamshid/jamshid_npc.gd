@@ -131,11 +131,12 @@ func _stand_on_floor() -> void:
 ## The greeting. Takes his controls for the duration, the same as every other
 ## scripted beat in the project, and hands them back however the script ends.
 func _greet(player: Player) -> void:
-	player.input_locked = true
-	for beat: Dictionary in script_beats():
+	var beats := script_beats()
+	Dialogue.begin_conversation(self, player)
+	for beat: Dictionary in beats:
 		await Dialogue.say("Jamshid", beat["text"], JAMSHID_WARM,
 			Jamshid.portrait(beat["face"]), portrait_side(player))
-	player.input_locked = false
+	Dialogue.end_conversation()
 
 
 ## `dialogue_line` parsed into [{text, face}], in order, with a line that names

@@ -1,36 +1,13 @@
 #!/usr/bin/env python3
-"""Add the MagicCarpet entity — and the CarpetPattern enum it reads — to Act 2's
-LDtk project.
-
-ONE ENTITY WITH FIELDS, not four, for the same reason tools/ldtk_add_dark_thought.py
-gives for DarkThought's Motion: which pattern a carpet flies is a thing two
-placed carpets can legitimately disagree about, and a carpet whose Pattern
-nobody set still visibly does something (RIDE, the default) rather than being a
-silently-unused fourth entity type.
-
-The enum/field JSON shapes below are copied from ldtk_add_dark_thought.py's own
-field_def()/enum_def() helpers — verified there against LDtk's own serializer
-(data.FieldDef.toJson, every key present even when null) — rather than
-reinvented, so a form built from this still parses the way LDtk itself would
-have written it.
-
-hooshang_act2.ldtk is a small (~140KB) file, unlike the 2MB hooshang_act1.ldtk
-ldtk_add_dark_thought.py has to avoid reformatting wholesale — so this uses the
-plain json.load/dump round trip tools/ldtk_add_platforms.py already uses, not
-that script's text-insertion trick.
-
-LDTK MUST BE CLOSED — see tools/ldtk_add_platforms.py for why.
-
-Idempotent: running it twice adds nothing the second time.
-
-Usage:  python3 tools/ldtk_add_magic_carpet.py          # dry run
-        python3 tools/ldtk_add_magic_carpet.py --apply
+"""Create or migrate Act 2 carpets to Ride with independent color choices.
+Run with --apply while LDtk is closed. Existing placements retain their colors.
 """
 import json
 import os
 import re
 import subprocess
 import sys
+from ldtk_preserve_json import update
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LDTK = os.path.join(ROOT, "ldtk", "hooshang_act2.ldtk")
@@ -42,7 +19,7 @@ ENUM = "CarpetPattern"
 # the boundary (an LDtk enum arrives as a qualified string, see _field_enum),
 # not the order, but keeping them in step lets a reader put the two side by
 # side, same reasoning ldtk_add_dark_thought.py gives.
-PATTERNS = ["Ride", "Bob", "Sweep", "Bounce"]
+PATTERNS = ["Ride"]
 ENUM_COLOR = 16777215
 
 TILE_H = 8.0  # matches magic_carpet.gd's TILE.y — one cell tall, always
@@ -88,6 +65,60 @@ def field_def(identifier, doc, uid, kind, default):
     }
 
 
+def migrate(d):
+    """Keep enum/field IDs stable and update explicit instance overrides too."""
+    entity = next(e for e in d["defs"]["entities"] if e["identifier"] == ENTITY)
+    enums = d["defs"]["enums"]
+    old = next(e for e in enums if e["identifier"] == ENUM)
+    old["values"] = [{"id": "Ride", "tileRect": None, "color": ENUM_COLOR}]
+    uid = max(int(u) for u in re.findall(r'"uid":\s*(\d+)', json.dumps(d))) + 1
+    colors = next((e for e in enums if e["identifier"] == "CarpetColor"), None)
+    if colors is None:
+        colors = enum_def(uid)
+        uid += 1
+        colors["identifier"] = "CarpetColor"
+        colors["values"] = [{"id": v, "tileRect": None, "color": ENUM_COLOR}
+                            for v in ["Crimson", "Teal", "Violet", "Amber"]]
+        enums.append(colors)
+    entity["fieldDefs"] = [f for f in entity["fieldDefs"]
+                           if f["identifier"] not in ("Amplitude", "SteerRange")]
+    for field in entity["fieldDefs"]:
+        if field["identifier"] == "CarpetPattern":
+            field["doc"] = "Ride: forward flight with up/down steering throughout the room."
+            field["defaultOverride"] = {"id": "V_String", "params": ["Ride"]}
+        elif field["identifier"] == "Speed":
+            field["doc"] = "Forward flight speed in pixels per second."
+    color_field = next((f for f in entity["fieldDefs"] if f["identifier"] == "CarpetColor"), None)
+    if color_field is None:
+        color_field = field_def("CarpetColor", "Rug color and motif; all colors use Ride.",
+                               uid, ("LocalEnum.CarpetColor", "F_Enum(%d)" % colors["uid"]),
+                               {"id": "V_String", "params": ["Crimson"]})
+        entity["fieldDefs"].append(color_field)
+    entity["doc"] = "Rideable carpet. Steer up/down freely within the room and clear of obstacles. Color only changes its appearance."
+    def walk(value):
+        if isinstance(value, dict):
+            if value.get("__identifier") == ENTITY and "fieldInstances" in value:
+                fields = value["fieldInstances"]
+                pattern = next((f for f in fields if f["__identifier"] == "CarpetPattern"), None)
+                color = {"Bob": "Teal", "Sweep": "Violet", "Bounce": "Amber"}.get(
+                    pattern["__value"] if pattern else "Ride", "Crimson")
+                if not any(f["__identifier"] == "CarpetColor" for f in fields):
+                    fields.append({"__identifier": "CarpetColor", "__type": "LocalEnum.CarpetColor",
+                                   "__value": color, "defUid": color_field["uid"],
+                                   "realEditorValues": [{"id": "V_String", "params": [color]}]})
+                if pattern:
+                    pattern["__value"] = "Ride"
+                    pattern["realEditorValues"] = [{"id": "V_String", "params": ["Ride"]}]
+                value["fieldInstances"] = [f for f in fields if f["__identifier"] not in ("Amplitude", "SteerRange")]
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+    walk(d.get("levels", []))
+    walk(d.get("worlds", []))
+
+
 def main():
     if ldtk_running():
         raise SystemExit("!! LDtk is open — close it first, or it will write "
@@ -97,7 +128,13 @@ def main():
 
     have_en = {e["identifier"] for e in d["defs"]["entities"]}
     if ENTITY in have_en:
-        print("  %s already defined — skipping" % ENTITY)
+        migrate(d)
+        if APPLY:
+            with open(LDTK, "w") as f:
+                f.write(update(raw, d))
+            print("Applied Ride-only carpet options and preserved placement colors.")
+        else:
+            print("Dry run: migrate carpets to Ride with Crimson/Teal/Violet/Amber colors.")
         return
     if ENUM in {e["identifier"] for e in d["defs"].get("enums", [])}:
         raise SystemExit("!! the %s enum exists but the %s entity does not — "
@@ -113,19 +150,11 @@ def main():
     uid += 1
     fields.append(field_def(
         "CarpetPattern",
-        "Which path it flies. Ride (default) drifts right and a rider steers "
-        "it up/down; Bob/Sweep orbit the placed point on their own; Bounce "
-        "drifts right while pulsing in a springy vertical hop.",
+        "Ride: forward flight with up/down steering throughout the room.",
         uid, ("LocalEnum." + ENUM, "F_Enum(%d)" % enum["uid"]),
         {"id": "V_String", "params": [PATTERNS[0]]}))
     for name, default, docstr in [
-        ("Speed", 40.0, "Ride/Bounce: how fast it drifts right, px/s. "
-                        "Bob/Sweep: 0 by default (stationary); set above 0 "
-                        "to also drift while oscillating."),
-        ("Amplitude", 20.0, "Bob/Sweep/Bounce: how far the oscillation "
-                            "swings, in px."),
-        ("SteerRange", 20.0, "Ride only: how far a rider may steer it, in "
-                             "px, above or below its placed y."),
+        ("Speed", 40.0, "Forward flight speed in pixels per second."),
     ]:
         uid += 1
         fields.append(field_def(name, docstr, uid, ("Float", "F_Float"),
@@ -150,8 +179,7 @@ def main():
     d["defs"]["entities"].append({
         "identifier": ENTITY, "uid": uid, "tags": [],
         "exportToToc": False, "allowOutOfBounds": False,
-        "doc": ("A rideable flying carpet. Which way it moves depends on "
-                "CarpetPattern — see that field's doc. Stretch it SIDEWAYS; "
+        "doc": ("A rideable flying carpet with independent color options. Stretch it SIDEWAYS; "
                 "it is always one cell tall."),
         "width": 32, "height": int(TILE_H),
         "resizableX": True, "resizableY": False,
@@ -167,6 +195,7 @@ def main():
         "pivotX": 0.5, "pivotY": 0.5, "fieldDefs": fields,
     })
 
+    migrate(d)
     print("\nwould add: enum %s, entity %s (fields: %s)"
           % (ENUM, ENTITY, ", ".join(f["identifier"] for f in fields)))
     if APPLY:

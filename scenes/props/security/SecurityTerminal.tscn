@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/props/security/security_terminal.gd" id="1"]
+[sub_resource type="CanvasItemMaterial" id="lit"]
+light_mode = 1
+[node name="SecurityTerminal" type="Node2D"]
+material = SubResource("lit")
+script = ExtResource("1")

@@ -36,11 +36,11 @@ func _ready() -> void:
 	var v5: Node2D = null
 	var v6: Node2D = null
 	for r in world.rooms:
-		if r.name == "Level_v5":
+		if r.name == "Level_V5":
 			v5 = r
-		elif r.name == "Level_v6":
+		elif r.name == "Level_V6":
 			v6 = r
-	_check(v5 != null and v6 != null, "the world has Level_v5 and Level_v6")
+	_check(v5 != null and v6 != null, "the world has Level_V5 and Level_V6")
 
 	# Walk in the front door, exactly like ordinary forward play: enter v5,
 	# arm its own return door, then trip its Exit into v6 (which arms v6's).

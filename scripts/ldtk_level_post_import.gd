@@ -92,7 +92,9 @@ const POOL_DROP := 18.0
 ## than an accident of sibling order: -1 is scenery the player walks IN FRONT of,
 ## 0 is the playable area (tiles, entities, the player), 1 is scenery the player
 ## walks BEHIND.
-const Z_BANDS := {"Background": -1, "Foreground": 1}
+const Z_BANDS := {"Background": -1, "Foreground": 1, "CastleBackground": -2, "CastleDecor": -1}
+## Castle scenery shares an atlas with solid masonry but never blocks movement.
+const CASTLE_SCENERY := ["CastleBackground", "CastleDecor"]
 
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
@@ -103,13 +105,10 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 	var definitions: Array = JSON.parse_string(FileAccess.get_file_as_string("res://resources/levels/act1_expansion.json"))
 	for definition: Dictionary in definitions:
 		if definition.name == str(level.name):
-			var dressing := preload("res://scenes/props/backdrop/office_wing/OfficeWing.tscn").instantiate()
-			dressing.room_size = Vector2(definition.width, definition.height)
-			dressing.theme = definition.theme
-			dressing.route = definition.route
-			dressing.is_escape = definition.direction < 0
-			level.add_child(dressing)
-			dressing.owner = level
+			var chamber := preload("res://scenes/props/darkness/DarknessRoom.tscn").instantiate()
+			chamber.recipe = definition
+			level.add_child(chamber)
+			chamber.owner = level
 	if str(level.name) == "Level_14":
 		var dressing := preload("res://scenes/props/backdrop/office_wing/OfficeWing.tscn").instantiate()
 		dressing.room_size = Vector2(664,192)
@@ -137,6 +136,8 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 			layer.set_script(WATER_LAYER_SCRIPT)
 		elif Z_BANDS.has(layer.name):
 			layer.z_index = Z_BANDS[layer.name]
+		if str(layer.name) in CASTLE_SCENERY:
+			layer.collision_enabled = false
 		if layer.name == GEOMETRY_LAYER:
 			_light_panels(level, layer)
 	return level

@@ -161,10 +161,13 @@ func _run() -> void:
 	_check(not player.input_locked, "...and he keeps his controls")
 
 	# ---- he survived the LDtk round trip -----------------------------------
-	# The packed room, loaded on its own — no LdtkWorld needed, this only has to
+	# The imported room, without LdtkWorld — this only has to
 	# prove the entity became a node with its fields on it. A `Jamshid` entity
 	# the post-import hook did not handle would import as nothing at all.
-	var room: Node2D = load("res://ldtk/levels/Act_2_Level_0.scn").instantiate()
+	var imported: Node = load("res://ldtk/hooshang_act2.ldtk").instantiate()
+	var room: Node2D = imported.get_node("Act_2_Level_0")
+	imported.remove_child(room)
+	imported.free()
 	world.add_child(room)
 	await _frames(2)
 	var placed := _find_npc(room)

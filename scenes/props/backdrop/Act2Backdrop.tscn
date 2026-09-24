@@ -1,0 +1,30 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/act2_parallax_backdrop.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_parallax/continuous_landscape.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/backdrop/act2_parallax/single_sun.png" id="3"]
+
+[ext_resource type="Shader" path="res://scenes/props/backdrop/sun_horizon.gdshader" id="4"]
+
+[ext_resource type="PackedScene" path="res://scenes/props/backdrop/landmarks/LandmarkGallery.tscn" id="5"]
+
+[sub_resource type="ShaderMaterial" id="SunMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("4")
+
+[node name="Act2Backdrop" type="Node2D"]
+z_index = -10
+script = ExtResource("1")
+
+[node name="Landscape" type="Sprite2D" parent="."]
+texture_filter = 2
+texture = ExtResource("2")
+centered = false
+
+[node name="Sun" type="Sprite2D" parent="."]
+material = SubResource("SunMaterial")
+texture_filter = 2
+texture = ExtResource("3")
+
+[node name="Landmarks" parent="." instance=ExtResource("5")]
+

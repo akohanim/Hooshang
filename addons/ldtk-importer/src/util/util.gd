@@ -49,12 +49,28 @@ static func check_version(version: String, latest_version: String) -> bool:
 
 static func recursive_set_owner(node: Node, owner: Node) -> void:
 	node.set_owner(owner)
+	# PATCHED (Hooshang): stop at an instance boundary. If `node` is itself an
+	# instanced scene, its children belong to THAT instance — reassigning their
+	# owner to the pack root bakes them into the packed level as duplicate,
+	# "less nested" copies that clash with the instance's own nodes on load
+	# ("An incoming node's name clashes with .../EntryLight already in the
+	# scene (from a more nested instance)"). This bit save_levels(), which calls
+	# recursive_set_owner(child, level) on every direct child of a level — so a
+	# post-import hook that adds an instanced prop whose OWN children are
+	# instances (scenes/props/backdrop/maintenance_atrium/MaintenanceAtrium.tscn,
+	# added to Level_V9 by scripts/ldtk_level_post_import.gd, its lamps and moon
+	# each a LampFixture/OfficeMoon instance) had every one of those lamps
+	# re-owned to the level and packed twice. Upstream still owns the instance
+	# node itself (below) so it saves; it just must not recurse INTO it.
+	#
+	# The behaviour is identical to upstream for every non-buggy case: a direct
+	# instance CHILD of a plain node still gets its owner set and is not
+	# descended into (upstream's `else` branch did exactly that). Only the case
+	# where recursive_set_owner is invoked with an instance as `node` changes.
+	if node.scene_file_path != "":
+		return
 	for child in node.get_children():
-		# Child is NOT an instantiated scene - this would otherwise cause errors
-		if child.scene_file_path == "":
-			recursive_set_owner(child, owner)
-		else:
-			child.set_owner(owner)
+		recursive_set_owner(child, owner)
 
 #region Performance Measurement
 

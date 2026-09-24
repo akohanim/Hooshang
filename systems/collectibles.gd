@@ -67,9 +67,17 @@ var _show_token := 0
 ## number the rest of the game reads must never depend on an animation finishing
 ## — so the two are kept apart rather than deferring the real count.
 var _shown := 0
+## Lives with the counter so freeing a lemon or changing rooms cannot cut it off.
+var _pickup_sound: AudioStreamPlayer
 
 
 func _ready() -> void:
+	_pickup_sound = AudioStreamPlayer.new()
+	_pickup_sound.name = "LemonPickupSound"
+	_pickup_sound.stream = preload("res://assets/sfx/lemon_pickup.wav")
+	_pickup_sound.volume_db = -8.0
+	_pickup_sound.max_polyphony = 4
+	add_child(_pickup_sound)
 	_build_hud()
 	# The counter stays hidden during play and surfaces only on a pickup (see
 	# _show_briefly). This just makes sure a world going away — back to the title
@@ -104,6 +112,7 @@ func collect(id: String, amount := 1, source: CanvasItem = null) -> void:
 		return
 	_taken[id] = true
 	total += amount
+	_pickup_sound.play()
 	changed.emit(total)
 	collected.emit(total)
 	# The score is a separate number kept by a separate owner — see

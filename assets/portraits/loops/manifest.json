@@ -1,325 +1,822 @@
 {
   "rumi_serene": {
     "sheet": "rumi_serene_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      256,
-      256
+      256.0,
+      256.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3
+    "blink": 3.0
   },
   "rumi_warm_open": {
     "sheet": "rumi_warm_open_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      256,
-      256
+      256.0,
+      256.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3
+    "blink": 3.0
   },
   "rumi_sorrowful": {
     "sheet": "rumi_sorrowful_sheet.png",
-    "frames": 3,
+    "frames": 6,
     "frame_size": [
-      256,
-      256
+      256.0,
+      256.0
     ],
     "fps": 8,
     "loop": true,
     "rest": 0,
     "talk": [
+      2,
+      3,
+      2,
+      1,
+      4,
+      2,
+      3,
       1
     ],
-    "blink": 2
+    "blink": 5,
+    "authored_roles": true,
+    "source": "rumi_speech_v2"
   },
   "rumi_urgent": {
     "sheet": "rumi_urgent_sheet.png",
-    "frames": 3,
+    "frames": 5,
     "frame_size": [
-      256,
-      256
+      256.0,
+      256.0
     ],
     "fps": 8,
     "loop": true,
     "rest": 0,
     "talk": [
+      2,
+      3,
+      2,
       1,
-      2
-    ]
+      4,
+      2,
+      3,
+      1
+    ],
+    "authored_roles": true,
+    "source": "rumi_speech_v2"
   },
   "hooshang_skeptical": {
     "sheet": "hooshang_skeptical_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_skeptical",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_dazed": {
     "sheet": "hooshang_dazed_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_dazed",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_annoyed": {
     "sheet": "hooshang_annoyed_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_annoyed",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_hesitant": {
     "sheet": "hooshang_hesitant_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_hesitant",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_vulnerable": {
     "sheet": "hooshang_vulnerable_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_vulnerable",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_shocked": {
     "sheet": "hooshang_shocked_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_shocked",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_neutral": {
     "sheet": "hooshang_neutral_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_hesitant",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_happy": {
     "sheet": "hooshang_happy_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_vulnerable",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_angry": {
     "sheet": "hooshang_angry_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_annoyed",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_sad": {
     "sheet": "hooshang_sad_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_vulnerable",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "hooshang_surprised": {
     "sheet": "hooshang_surprised_sheet.png",
-    "frames": 4,
+    "frames": 15.0,
     "frame_size": [
-      256,
-      256
+      512.0,
+      512.0
     ],
-    "fps": 8,
-    "loop": true,
-    "rest": 0,
+    "fps": 9.0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
     ],
-    "blink": 3
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_shocked",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   },
   "jamshid_friendly": {
     "sheet": "../../characters/jamshid/source/jamshid_friendly.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
       443.5,
-      887
+      887.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true
   },
   "jamshid_joyful": {
     "sheet": "../../characters/jamshid/source/jamshid_joyful.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
       443.5,
-      887
+      887.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true
   },
   "jamshid_worried": {
     "sheet": "../../characters/jamshid/source/jamshid_worried.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
       443.5,
-      887
+      887.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true
   },
   "jamshid_sad": {
     "sheet": "../../characters/jamshid/source/jamshid_sad.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
       443.5,
-      887
+      887.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true
   },
   "jamshid_determined": {
     "sheet": "../../characters/jamshid/source/jamshid_determined.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
       443.5,
-      887
+      887.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true
+  },
+  "hooshang_confused": {
+    "sheet": "hooshang_confused_sheet.png",
+    "frames": 15.0,
+    "frame_size": [
+      512.0,
+      512.0
+    ],
+    "fps": 9.0,
+    "rest": 0.0,
+    "talk": [
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
+    ],
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_hesitant",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
+  },
+  "hooshang_deflecting": {
+    "sheet": "hooshang_deflecting_sheet.png",
+    "frames": 15.0,
+    "frame_size": [
+      512.0,
+      512.0
+    ],
+    "fps": 9.0,
+    "rest": 0.0,
+    "talk": [
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
+    ],
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_hesitant",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
+  },
+  "hooshang_flat": {
+    "sheet": "hooshang_flat_sheet.png",
+    "frames": 15.0,
+    "frame_size": [
+      512.0,
+      512.0
+    ],
+    "fps": 9.0,
+    "rest": 0.0,
+    "talk": [
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
+    ],
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_skeptical",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
+  },
+  "hooshang_unconvinced": {
+    "sheet": "hooshang_unconvinced_sheet.png",
+    "frames": 15.0,
+    "frame_size": [
+      512.0,
+      512.0
+    ],
+    "fps": 9.0,
+    "rest": 0.0,
+    "talk": [
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
+    ],
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_skeptical",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
+  },
+  "hooshang_wary": {
+    "sheet": "hooshang_wary_sheet.png",
+    "frames": 15.0,
+    "frame_size": [
+      512.0,
+      512.0
+    ],
+    "fps": 9.0,
+    "rest": 0.0,
+    "talk": [
+      1.0,
+      2.0,
+      1.0,
+      3.0,
+      1.0,
+      4.0,
+      2.0,
+      1.0
+    ],
+    "blink": 10.0,
+    "eye_rows": 3.0,
+    "mouth_columns": 5.0,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "voice_key": "hooshang_skeptical",
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "ah",
+      "oh",
+      "ee"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "pixel_v2",
+    "pixel_art": true
   }
 }

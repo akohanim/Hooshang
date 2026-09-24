@@ -73,6 +73,8 @@ func _run() -> void:
 	await _check_single_wall(2000.0, -1, "move_left")   # wall on the LEFT only
 	await _check_no_entry_away_from_wall()
 	await _check_asymmetric_chimney()
+	await _check_staggered_mouth(5000.0, false)
+	await _check_staggered_mouth(6000.0, true)
 
 
 ## A tall wall on exactly one side, nothing on the other. Falling next to it
@@ -155,6 +157,26 @@ func _check_asymmetric_chimney() -> void:
 	_check(reached_bottom, "falls all the way through without getting stuck")
 	_check(max_drift < 1.0,
 		"never drifts toward the side that stopped being a wall  [%.2fpx]" % max_drift)
+
+
+## An 8px opening with one bank a tile lower, as in the reported platform gap.
+func _check_staggered_mouth(ox: float, mirror: bool) -> void:
+	_wall(ox - 16.0, 92.0 + (8.0 if mirror else 0.0), 16.0, 200.0)
+	_wall(ox + 8.0, 92.0 + (0.0 if mirror else 8.0), 16.0, 200.0)
+	await _frames(2)
+	player.respawn(Vector2(ox + 4.0, 70.0))
+	var slid := false
+	var capped := true
+	for f in 180:
+		await _frames(1)
+		if player.global_position.y > 116.0 and player.global_position.y < 180.0:
+			slid = slid or player.state == Player.State.WALL_SLIDE
+			capped = capped and player.velocity.y <= player.wall_slide_max_speed + 0.1
+		if player.global_position.y > 180.0:
+			break
+	_check(player.global_position.y > 180.0,
+		"enters staggered 8px mouth (mirror=%s)" % mirror)
+	_check(slid and capped, "staggered shaft wall-slides at the speed cap")
 
 
 func _frames(n: int) -> void:

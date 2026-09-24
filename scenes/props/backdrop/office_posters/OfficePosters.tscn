@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scenes/props/backdrop/office_posters/office_posters.gd" id="1"]
+[node name="OfficePosters" type="Node"]
+script = ExtResource("1")
+mounts = Dictionary[String, Array]({
+"Level_0": [Rect2(158, 19, 80, 22)],
+"Level_1": [Rect2(128, 69, 40, 46)],
+"Level_2": [Rect2(268, 25, 54, 48), Rect2(558, 27, 54, 48)],
+"Level_3": [Rect2(85, 62, 40, 46)],
+"Level_4": [Rect2(15, 62, 28, 44), Rect2(246, 58, 28, 44)],
+"Level_5": [Rect2(104, 54, 40, 46)],
+"Level_6": [Rect2(58, 106, 80, 22), Rect2(58, 351, 80, 22)],
+"Level_V1": [Rect2(182, 63, 54, 46), Rect2(570, 101, 54, 46)],
+"Level_V2": [Rect2(188, 67, 40, 46), Rect2(526, 60, 80, 22)],
+"Level_V3": [Rect2(31, 86, 38, 48), Rect2(274, 81, 54, 48), Rect2(503, 81, 54, 48)]
+})

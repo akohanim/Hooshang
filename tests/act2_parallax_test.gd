@@ -1,109 +1,102 @@
 extends Node
-
-const Act2ParallaxBackdrop = preload("res://scripts/act2_parallax_backdrop.gd")
-
+## Exercises the expanded nine-room world, finite panorama coverage, camera
+## continuity, backtracking, and a single sun fixed within the painting.
 var failures: Array[String] = []
 
-func _check(condition: bool, description: String) -> void:
-	if condition:
-		print("  PASS  %s" % description)
-	else:
-		print("  FAIL  %s" % description)
-		failures.append(description)
+func _check(ok: bool, label: String) -> void:
+	print("  %s  %s" % ["PASS" if ok else "FAIL", label])
+	if not ok:
+		failures.append(label)
 
 func _ready() -> void:
-	print("--- Running Act 2 Parallax Backdrop Tests ---")
-	var backdrop = Act2ParallaxBackdrop.new()
-	add_child(backdrop)
-
-	# 1. Verify layers created
-	_check(backdrop._layer_sun != null, "Layer 0 (Sun & Sky) Parallax2D exists")
-	_check(backdrop._layer_clouds != null, "Layer 1 (Clouds) Parallax2D exists")
-	_check(backdrop._layer_mountains != null, "Layer 2 (Mountains) Parallax2D exists")
-	_check(backdrop._layer_dunes != null, "Layer 3 (Dunes) Parallax2D exists")
-
-	# 2. Verify scroll scales (depth progression)
-	_check(backdrop._layer_sun.scroll_scale.x < backdrop._layer_clouds.scroll_scale.x,
-		"Sun moves slower than clouds (celestial depth)")
-	_check(backdrop._layer_clouds.scroll_scale.x < backdrop._layer_mountains.scroll_scale.x,
-		"Clouds move slower than mountains")
-	_check(backdrop._layer_mountains.scroll_scale.x < backdrop._layer_dunes.scroll_scale.x,
-		"Mountains move slower than near dunes")
-
-	# 3. Verify horizontal repeat
-	_check(backdrop._layer_clouds.repeat_size.x > 0.0, "Clouds have horizontal repeat")
-	_check(backdrop._layer_mountains.repeat_size.x > 0.0, "Mountains have horizontal repeat")
-	_check(backdrop._layer_dunes.repeat_size.x > 0.0, "Dunes have horizontal repeat")
-
-	# 4. Verify textures loaded
-	_check(Act2ParallaxBackdrop.TEX_SKY_SUN != null and Act2ParallaxBackdrop.TEX_SKY_SUN.get_width() > 0,
-		"Sky & Sun texture valid")
-	_check(Act2ParallaxBackdrop.TEX_CLOUDS != null and Act2ParallaxBackdrop.TEX_CLOUDS.get_width() > 0,
-		"Clouds texture valid")
-	_check(Act2ParallaxBackdrop.TEX_MOUNTAINS != null and Act2ParallaxBackdrop.TEX_MOUNTAINS.get_width() > 0,
-		"Mountains texture valid")
-	_check(Act2ParallaxBackdrop.TEX_DUNES != null and Act2ParallaxBackdrop.TEX_DUNES.get_width() > 0,
-		"Dunes texture valid")
-
-	await _entry_slide_frames_destination()
-
-	if failures.is_empty():
-		print("ACT 2 PARALLAX TEST: ALL PASS")
-		get_tree().quit(0)
-	else:
-		print("ACT 2 PARALLAX TEST: %d FAILURE(S)" % failures.size())
-		get_tree().quit(1)
-
-
-## Regression: the backdrop must be framed for the room being ENTERED for the
-## whole entry slide, not snap to it a beat after the camera lands — the same
-## pop-in the moon had, driven by current_room only advancing at the slide's end
-## (see LdtkWorld.transition_started / MoonVisibility). Driven against a real
-## Act2World with its two real rooms so it exercises the actual signal wiring.
-func _entry_slide_frames_destination() -> void:
 	SaveGame.slot = -1
 	var world = load("res://ldtk/Act2World.tscn").instantiate()
-	add_child(world)
-	for _i in 60:
+	Screen.set_scene(world)
+	for i in 120:
 		await get_tree().process_frame
 		if world.player != null and not world.rooms.is_empty():
 			break
 	var bd = world.get_node("Backdrop/SkyBackdrop")
-	for _i in 30:
-		if bd._world != null:
+	for i in 120:
+		if bd._bounds.size != Vector2.ZERO:
 			break
 		await get_tree().process_frame
-	var l0 = _room_of(world, "Act_2_Level_0")
-	var l1 = _room_of(world, "Act_2_Level_1")
-	if l0 == null or l1 == null or bd._world == null:
-		_check(false, "entry-slide setup: two rooms and a connected backdrop")
-		world.queue_free()
-		return
 	world.player.set_physics_process(false)
-
-	# What each room frames the deep sun at (the layer the eye tracks).
-	world._enter_room(l0, true)
-	var off_origin: Vector2 = bd._layer_sun.scroll_offset
-	bd._on_room_changed(l1)
-	var off_dest: Vector2 = bd._layer_sun.scroll_offset
-	bd._on_room_changed(l0)
-	_check(off_origin != off_dest,
-		"the two rooms frame the backdrop differently (so the check is meaningful)")
-
-	# Begin the real slide. _slide_to_room runs to its first await synchronously,
-	# announcing the destination live — current_room stays on the origin.
-	world._enter_room(l0, true)
-	world._slide_to_room(l1)
-	_check(world.current_room == l0,
-		"current_room does not advance until the slide lands")
-	_check(bd._layer_sun.scroll_offset == off_dest,
-		"backdrop is framed for the DESTINATION during the entry slide, not after")
-
-	world.queue_free()
-
-
-func _room_of(world, n: String):
+	world.get_node("Act2Beats").set_process(false)
+	_check(world.rooms.size() == 9, "all nine authored rooms loaded")
+	var size := Vector2(320, 180)
+	var offsets: Array[float] = []
+	var authored = JSON.parse_string(FileAccess.get_file_as_string("res://ldtk/hooshang_act2.ldtk"))
 	for room in world.rooms:
-		if room.name == n:
-			return room
-	return null
+		var rect: Rect2 = world.room_rect(room)
+		for level in authored.levels:
+			if level.identifier == str(room.name):
+				_check(rect == Rect2(level.worldX, level.worldY, level.pxWid, level.pxHei),
+					"%s uses Act 2 geometry, not a same-named Act 1 import" % room.name)
+		var old_image = room.get_node_or_null("BG Image")
+		_check(old_image == null or not old_image.visible, "%s legacy painting cannot cover the panorama" % room.name)
+		for corner in [rect.position, rect.end - size]:
+			bd._frame_view(Rect2(corner, size), size)
+			var art_rect := Rect2(bd.landscape.position, bd.landscape.texture.get_size() * bd.landscape.scale)
+			_check(art_rect.encloses(Rect2(Vector2.ZERO, size)), "%s panorama covers camera at %s" % [room.name, corner])
+			var expected: Vector2 = bd.landscape.texture.get_size() * bd.landscape.scale * bd.sun_anchor
+			_check((bd.sun.position - bd.landscape.position).is_equal_approx(expected),
+				"%s sun stays anchored to the painting at %s" % [room.name, corner])
+		bd._frame_view(Rect2(rect.get_center() - size * 0.5, size), size)
+		offsets.append(bd.landscape.position.x)
+	_check(offsets[0] > offsets[1] and offsets[1] > offsets[2], "each successive room reveals a new stretch of painting")
+	_check(bd.get_child_count() == 3 and bd.has_node("Landmarks") and bd.sun.texture_repeat != CanvasItem.TEXTURE_REPEAT_ENABLED,
+		"one panorama, one landmark gallery and exactly one non-repeating sun sprite")
+	bd._frame_view(Rect2(bd._bounds.position + Vector2(100, 100), size), size)
+	var sun_before: Vector2 = bd.sun.position
+	var art_before: Vector2 = bd.landscape.position
+	bd._frame_view(Rect2(bd._bounds.position + Vector2(400, 300), size), size)
+	var art_motion: Vector2 = bd.landscape.position - art_before
+	_check(absf(art_motion.x) > 10.0 and absf(art_motion.y) > 1.0,
+		"camera sweep produces meaningful horizontal and vertical scenery travel")
+	_check((bd.sun.position - sun_before).is_equal_approx(art_motion),
+		"sun moves exactly with the background, never following the player")
+	var seam: float = world.room_rect(world.rooms[1]).position.x
+	bd._frame_view(Rect2(Vector2(seam - 0.5, 600), size), size)
+	var before: Vector2 = bd.landscape.position
+	bd._frame_view(Rect2(Vector2(seam + 0.5, 600), size), size)
+	_check(bd.landscape.position.distance_to(before) < 1.0, "camera crosses room boundary without resetting the painting")
+	bd._frame_view(Rect2(Vector2(seam - 0.5, 600), size), size)
+	_check(bd.landscape.position == before, "backtracking returns to exactly the same artwork")
+	# Drive actual transitions: room signals must not snap the painting.
+	world._enter_room(world.rooms[0], true)
+	bd._process(0.0)
+	before = bd.landscape.position
+	world._slide_to_room(world.rooms[1])
+	_check(bd.landscape.position == before, "transition start does not re-anchor the landscape")
+	await get_tree().create_timer(0.6).timeout
+	if DisplayServer.get_name() != "headless":
+		await _capture(world)
+	print("ACT 2 PANORAMA: %s" % ("ALL PASS" if failures.is_empty() else str(failures)))
+	get_tree().quit(0 if failures.is_empty() else 1)
+
+func _capture(world) -> void:
+	DirAccess.make_dir_recursive_absolute("res://output/act2_panorama")
+	var camera: Camera2D = world.player.camera
+	camera.position_smoothing_enabled = false
+	for room in world.rooms:
+		world._enter_room(room, true)
+		var rect: Rect2 = world.room_rect(room)
+		world.player.global_position = Vector2(rect.get_center().x, rect.end.y - 90)
+		camera.reset_smoothing()
+		for i in 8:
+			await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		var shot := Screen.viewport.get_texture().get_image()
+		shot.resize(1280, 720, Image.INTERPOLATE_NEAREST)
+		shot.save_png("res://output/act2_panorama/%s.png" % room.name)
+		if str(room.name) == "Act_2_Level_1":
+			var backdrop = world.get_node("Backdrop/SkyBackdrop")
+			for phase in [0.6, 0.8, 1.0, 0.0]:
+				backdrop.set_sun_descent(phase)
+				for i in 3:
+					await get_tree().process_frame
+				await RenderingServer.frame_post_draw
+				var phase_shot := Screen.viewport.get_texture().get_image()
+				phase_shot.resize(1280, 720, Image.INTERPOLATE_NEAREST)
+				phase_shot.save_png("res://output/act2_panorama/sun_phase_%s.png" % str(phase))

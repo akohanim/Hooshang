@@ -281,6 +281,7 @@ func _play_squash_sequence(keys: Array, ease_mode: Tween.EaseType, trans_mode: T
 
 ## Call once, the moment a dash successfully starts.
 func on_dash_start(dash_dir: Vector2) -> void:
+	$DashSound.play()
 	_trail_timer = 0.0  # spawn the first afterimage immediately
 	hitstop(hitstop_time)
 	_play_squash_sequence([

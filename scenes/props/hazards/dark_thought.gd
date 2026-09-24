@@ -38,7 +38,13 @@ enum Tone { DARK, LIGHT, GREY }
 ## unaffected) or Act 2's rounder childhood-memory cloud (SHEETS_CHILDHOOD).
 ## Path, kill logic, motion and glow are all unchanged either way — only which
 ## texture dict _frame()/_apply_tone() reads.
-enum Palette { OFFICE, CHILDHOOD }
+enum Palette { OFFICE, CHILDHOOD, PSYCHEDELIC }
+
+const SHEETS_PSYCHEDELIC := {
+	Tone.DARK: preload("res://assets/act3/dark_thought.png"),
+	Tone.LIGHT: preload("res://assets/act3/light_thought.png"),
+	Tone.GREY: preload("res://assets/act3/grey_thought.png"),
+}
 
 const SHEETS := {
 	Tone.DARK: preload("res://assets/hazards/dark_thought.png"),
@@ -389,6 +395,8 @@ func _offset(t: float) -> Vector2:
 
 ## Which sheet dict `palette` currently selects.
 func _sheets() -> Dictionary:
+	if palette == Palette.PSYCHEDELIC:
+		return SHEETS_PSYCHEDELIC
 	return SHEETS_CHILDHOOD if palette == Palette.CHILDHOOD else SHEETS
 
 

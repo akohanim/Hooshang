@@ -1,0 +1,42 @@
+{
+  "idle": {
+    "job_id": "94328007-0515-4783-a3b4-0438ae97d228",
+    "count": 5,
+    "prompt": "Subtle breathing idle loop, standing still facing right, feet firmly planted on the same baseline, chest rises and falls by one pixel, no turning, no blinking because the face has only a mustache. Return to the starting stance."
+  },
+  "run": {
+    "job_id": "29d3431c-1b70-4e25-a941-5e66e47efd63",
+    "count": 9,
+    "prompt": "Fast side-scroller running IN PLACE facing right. Complete seamless running cycle, alternating left and right legs and counter-swinging arms, contact down passing up poses, feet touch same baseline, slight forward lean. Stay centered, no translation."
+  },
+  "dash": {
+    "job_id": "1852efaa-80cf-4e2c-8fe4-95f9042efe78",
+    "count": 5,
+    "prompt": "Side-scroller explosive dash toward RIGHT in place, lower center of gravity and lean forward, arms swept back, knees tucked, then extend leading leg. Maintain same body size. No effects, no motion trails, no translation across frame."
+  },
+  "jump": {
+    "job_id": "77ad2b06-8b99-4872-b0de-efa0cf633ac7",
+    "count": 5,
+    "prompt": "Side-scroller jump takeoff then airborne rise facing RIGHT in place: push off with feet, lift arms slightly, bend and tuck knees toward torso, end holding a clear airborne pose. No landing, no camera motion, no translation across frame."
+  },
+  "wall_slide": {
+    "job_id": "5c921d28-ff9e-4279-b5ba-9673945d41b7",
+    "count": 5,
+    "prompt": "Facing RIGHT, brace both hands against an invisible wall to the right while sliding downward in place, knees bent, hands planted, subtle jacket movement. No wall drawn, no scenery, no displacement."
+  },
+  "climb": {
+    "job_id": "0a4302b8-69f3-4e82-8d3c-9beb6ebd8227",
+    "count": 9,
+    "prompt": "Climbing a ladder upward IN PLACE, alternating hands reaching overhead and knees lifting, torso upright, back turned toward the viewer. No ladder drawn, no scenery. Stay centered."
+  },
+  "swim": {
+    "job_id": "2935150b-8724-4147-b99c-c9e0ff0fbdde",
+    "count": 5,
+    "prompt": "Treading water upright in place, head above torso, alternating arms sweeping outward and inward, small leg kicks. Keep the body VERTICAL, do not tip horizontally. No water drawn, no scenery."
+  },
+  "exit_water": {
+    "job_id": "2d1c7699-ffb9-4766-9f8d-235d1e30e271",
+    "count": 5,
+    "prompt": "Facing RIGHT, upright character pulls himself upward using both hands, one knee raised then straightens into a standing pose, climbing out of water onto an invisible bank. Remain upright. No water, no ledge drawn, no scenery."
+  }
+}

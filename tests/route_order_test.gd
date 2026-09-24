@@ -56,9 +56,8 @@ func _ready() -> void:
 			"...and Level_%d backs into Level_%d  [%s]" % [n + 1, n,
 				world._room_before(next).name if world._room_before(next) else "nothing"])
 
-	# 3. The curated chain: 0..6, then the whole V1..V7 block, then the escape
-	#    row 14..25 — Level_7..13 are SHELVED (LdtkWorld.SHELVED_ROOMS) and must
-	#    not appear at all. This array is not a cosmetic listing: no Exit in the
+	# 3. The curated chain: 0..6, then the whole V1..V10 block, then 7..25 with
+	#    no gaps (nothing shelved). This array is not a cosmetic listing: no Exit in the
 	#    .ldtk carries a NextRoom override — checked directly, every one is empty
 	#    — so it is the ONLY thing that routes actual play. Get it wrong and the
 	#    game does not misnumber a menu, it dead-ends (a rename to Level_V6/V7
@@ -67,9 +66,9 @@ func _ready() -> void:
 	var expected: Array[String] = []
 	for n in range(0, 7):
 		expected.append("Level_%d" % n)
-	for v in range(1, 15):
+	for v in range(1, 11):
 		expected.append("Level_V%d" % v)
-	for n in range(14, 26):
+	for n in range(7, 26):
 		expected.append("Level_%d" % n)
 
 	var have_names: Array[String] = []
@@ -83,10 +82,22 @@ func _ready() -> void:
 	_check(got == present,
 		"the curated chain comes out in order  [%s]" % " ".join(got))
 
-	# 3b. The shelved rooms are genuinely gone from the route (not merely last).
-	for n in range(7, 14):
-		_check(not have_names.has("Level_%d" % n),
-			"Level_%d is shelved and off the play route" % n)
+	# V10 must exist, not merely sort correctly if it happens to be present.
+	var v9 := _room(world, "Level_V9")
+	var v10 := _room(world, "Level_V10")
+	var level7 := _room(world, "Level_7")
+	_check(v10 != null, "Level_V10 is on the play route")
+	if v9 != null and v10 != null and level7 != null:
+		_check(world._room_after(v9) == v10, "V9 leads directly into V10")
+		_check(world._room_before(v10) == v9, "V10 returns directly to V9")
+		_check(world._room_after(v10) == level7, "V10 continues into Level_7")
+		_check(world._room_before(level7) == v10, "Level_7 returns to V10")
+
+	# 3b. Rooms 10-12 are back in the route (they used to be shelved) — so the
+	#     7..25 tail runs with no gaps.
+	for n in [10,11,12]:
+		_check(have_names.has("Level_%d" % n),
+			"Level_%d is on the play route (no longer shelved)" % n)
 
 	# 4. Scratch rooms (no recorded place in the chain) sort AFTER it, not into
 	#    the middle of it.

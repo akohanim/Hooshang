@@ -48,8 +48,10 @@ extends CanvasLayer
 ## would let Nearest be correct at all of them. The portraits are imported with
 ## mipmaps to match (see tools/import_portraits.py).
 ##
-## FUTURE: multi-line conversations = await say() in sequence. Rumi still uses a
-## tinted stand-in; give him a portrait set and pass it the same way as Hooshang.
+## Wrap sequential say() calls in begin_conversation(owner)/end_conversation()
+## so one confirmed skip covers all speech, including intervening stage beats.
+## Pass the player to begin_conversation(owner, player); the scope freezes and
+## releases their physics centrally. Standalone say() discovers the player too.
 ##
 ## VOICE. The reveal also drives systems/voice_blips.gd (the `VoiceBlips`
 ## autoload) — Celeste-style synthesized syllable blips, one per revealed
@@ -132,17 +134,14 @@ const CANVAS_HEIGHT := 720.0
 ## than a breath. One mark per line.
 @export var pause_time := 0.5
 const PAUSE_MARK := "[p]"
-## Hold "skip_dialogue" (X) this long, in seconds, before it starts blazing
-## through dialogue — see _tick_skip_hold. Long enough that mashing dash
-## (the same physical key, inert during dialogue since input_locked is
-## always true by then) never trips it by accident.
+## One deliberate hold commits the conversation skip. Releasing early cancels.
 @export var skip_hold_time := 1.0
 ## Seconds a LINE has to have been on screen before the "Hold X to skip"
 ## reminder appears — see _tick_skip_hint. Independent of skip_hold_time
-## (they default to the same number, but nothing ties them together): this
+## (nothing ties them together): this
 ## one is about not cluttering a line the player is already mid-read on the
 ## instant it opens, not about how long a hold has to be.
-@export var hint_delay := 2.0
+@export var hint_delay := 0.35
 ## How long one character takes to fade from transparent to fully opaque as
 ## the typewriter reveals it. Expressed as a duration rather than a fixed
 ## character count so the fade always reads as "this many seconds", however
@@ -266,26 +265,14 @@ var _blink_t := -1.0
 var _active := false
 var _revealing := false
 var _reveal_accum := 0.0
-## Seconds "skip_dialogue" has been held CONTINUOUSLY — counted through the
-## gap between one line closing and the next opening (see SKIP_HOLD_GAP), so
-## a hold does not have to restart its climb once the next line's banner is
-## up. See _tick_skip_hold.
+## A completed hold is latched until the caller ends its conversation.
 var _skip_held_time := 0.0
-## Seconds dialogue has sat inactive while still holding "skip_dialogue".
-var _skip_inactive_time := 0.0
-## How long dialogue can sit inactive before a lingering hold stops counting
-## toward skip. Long enough to cover the close+reopen animation between two
-## lines of the SAME conversation (entrance_time + up to
-## portrait_entrance_time, worst case ~0.54s at the defaults) without
-## dropping the hold; short enough that a player who was simply resting a
-## finger on X (dash's own key, see skip_hold_time's doc) while walking
-## around — never having been in any dialogue at all — can never have that
-## stale hold instantly skip the very first line the moment it opens.
-const SKIP_HOLD_GAP := 1.0
-## Seconds the CURRENT line has been active (see _tick_skip_hint) — unlike
-## _skip_held_time this does NOT survive the gap between lines: it is reset
-## once per say() call, so the reminder judges "has this line been up a
-## while", not "has the whole conversation".
+var _skip_requested := false
+var _conversation_skippable := false
+var _conversation_player: Player
+var _owns_player_freeze := false
+var _skip_needs_release := false
+var _conversation_owner: Node
 var _hint_elapsed := 0.0
 ## Character index the reveal holds at, or -1 for none / already spent.
 var _pause_at := -1
@@ -360,6 +347,7 @@ var _generation := 0
 ## _mirrored's doc for why both live in that list), so it never competes with
 ## the actual text for space.
 @onready var skip_hint: Label = $SkipHint
+@onready var skip_progress: ProgressBar = $SkipHint/Progress
 @onready var portrait: TextureRect = $Portrait
 @onready var portrait_frame: ColorRect = $PortraitFrame
 @onready var portrait_back: ColorRect = $PortraitBack
@@ -504,8 +492,16 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	# Dialogue.say(...)` loop just falls straight through to its next
 	# iteration, and with every remaining call taking this same exit, the
 	# whole loop finishes in the same frame it started skipping in.
+	if _conversation_owner != null and not is_instance_valid(_conversation_owner):
+		end_conversation()
 	if _skip_armed():
 		return
+	if not is_instance_valid(_conversation_owner):
+		# A standalone say() is a one-line conversation with the same controls.
+		_hold_conversation_player()
+		_conversation_skippable = true
+		_skip_held_time = 0.0
+		_skip_needs_release = Input.is_action_pressed("skip_dialogue")
 	# banner/trim/portrait/name/text are ONE set of nodes shared by every
 	# call to say(), not fresh per line — so a call that starts while the
 	# PREVIOUS line's close animation is still mid-flight used to leave that
@@ -554,6 +550,9 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	# portrait gets a voice for free — see systems/voice_blips.gd.
 	_voice_key = "" if not show_portrait or portrait.texture == null \
 		else portrait.texture.resource_path.get_file().get_basename()
+	# Newly distinct acting poses can keep their established voice pool.
+	if not _voice_key.is_empty() and _loop.has("voice_key"):
+		_voice_key = str(_loop["voice_key"])
 	var pages := _paginate(text)
 	# Sized ONCE for the whole speech, not per page. The box stays up between
 	# pages, so a per-page height would be seen as the banner growing and
@@ -656,6 +655,8 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	if my_gen != _generation:
 		return  # a newer line is up by now; do not hide IT
 	visible = false
+	if not is_instance_valid(_conversation_owner):
+		end_conversation()
 	dialogue_closed.emit()
 
 
@@ -898,7 +899,7 @@ func _fit_banner(rows: int) -> void:
 	# so it owes TRIM_HEIGHT of height that is not text. Everything below is
 	# measured off the band rather than off the banner, or the arrow draws on
 	# top of the ornament.
-	banner.offset_bottom = text_label.offset_bottom + BANNER_PAD + TRIM_HEIGHT
+	banner.offset_bottom = text_label.offset_bottom + BANNER_PAD + ARROW_HEIGHT + 8.0 + TRIM_HEIGHT
 	trim_bottom.offset_bottom = banner.offset_bottom
 	trim_bottom.offset_top = banner.offset_bottom - TRIM_HEIGHT
 	arrow.offset_bottom = trim_bottom.offset_top - 2.0
@@ -908,6 +909,7 @@ func _fit_banner(rows: int) -> void:
 	# authored baseline.
 	skip_hint.offset_top = arrow.offset_top
 	skip_hint.offset_bottom = arrow.offset_bottom
+	_update_control_hints()
 
 
 ## Read the frame rigs the generator wrote.
@@ -934,6 +936,8 @@ func _load_rigs() -> void:
 ## callers out of it — a beat names a state, act1_beats turns that into a
 ## preloaded portrait, and the rig follows the art rather than the script.
 func _set_rig(tex: Texture2D) -> void:
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	portrait_loop.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_rig = {}
 	_loop = {}
 	_loop_left = 0.0
@@ -948,6 +952,9 @@ func _set_rig(tex: Texture2D) -> void:
 		return
 	var key := tex.resource_path.get_file().get_basename()
 	if _set_loop(key):
+		if _loop.get("pixel_art", false):
+			portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			portrait_loop.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		return
 	if not _rigs.has(key):
 		return
@@ -1037,6 +1044,9 @@ func _set_loop(key: String) -> bool:
 func _animate_loop(delta: float) -> void:
 	if _loop.is_empty() or not portrait_loop.visible:
 		return
+	if int(_loop.get("eye_rows", 0)) == 3:
+		_animate_expression_grid(delta)
+		return
 	var talk: Array = _loop.get("talk", [])
 	# The blink wins the frame while it is running: it is a tenth of a second,
 	# and a mouth position missed inside one is not a thing anybody can see.
@@ -1065,6 +1075,40 @@ func _animate_loop(delta: float) -> void:
 				_show_frame(portrait_loop, int(talk[_loop_step]))
 		return
 	_show_frame(portrait_loop, int(_loop.get("rest", 0)))
+
+
+## Authored eye x mouth combinations. A blink selects an eye row while the
+## typewriter selects a mouth column, so speech continues THROUGH the blink.
+## Legacy Rumi/Jamshid strips still use their original loop behavior above.
+func _animate_expression_grid(delta: float) -> void:
+	var mouth := 0
+	var talk: Array = _loop.get("talk", [])
+	if _revealing and _pause_left <= 0.0 and not talk.is_empty():
+		var period := 1.0 / maxf(float(_loop.get("fps", 9.0)), 1.0)
+		_loop_left -= delta
+		while _loop_left <= 0.0:
+			_loop_left += period
+			_loop_step = (_loop_step + 1) % talk.size()
+		mouth = int(talk[_loop_step])
+	else:
+		_loop_left = 0.0
+		_loop_step = 0
+	var eye := 0
+	var duration := maxf(float(_loop.get("blink_duration", 0.20)), 0.01)
+	if _blink_t < 0.0:
+		_blink_left -= delta
+		if _blink_left <= 0.0:
+			_blink_t = 0.0
+	else:
+		_blink_t += delta
+	if _blink_t >= 0.0:
+		if _blink_t >= duration:
+			_blink_t = -1.0
+			_blink_left = randf_range(BLINK_GAP.x, BLINK_GAP.y)
+		else:
+			var phase := _blink_t / duration
+			eye = 2 if phase >= 0.20 and phase < 0.65 else 1
+	_show_frame(portrait_loop, eye * int(_loop.get("mouth_columns", 5)) + mouth)
 
 
 ## Run a rigged face for one frame: a mouth driven by the typewriter, and a blink
@@ -1117,6 +1161,14 @@ func _process(delta: float) -> void:
 	_animate_loop(delta)
 	_tick_skip_hold(delta)
 	_tick_skip_hint(delta)
+	if is_instance_valid(_conversation_player):
+		# Other systems may finish a temporary hold/room slide while we speak.
+		# Dialogue remains the owner until end_conversation, not until a line ends.
+		if not _conversation_player._frozen:
+			_conversation_player.freeze()
+			_owns_player_freeze = true
+		_conversation_player.input_locked = true
+		_conversation_player.set_physics_process(false)
 	if not _revealing:
 		return
 	if _pause_left > 0.0:
@@ -1145,92 +1197,119 @@ func _process(delta: float) -> void:
 	_voice_new_chars(shown)
 
 
-## Advance the hold timer for "skip_dialogue" (X). Once _skip_armed() goes
-## true, the CURRENT line closes itself out (see the `break` in say()'s own
-## page loop) and every LATER say() call in the same conversation returns
-## immediately without ever opening a banner (see say()'s own early-return) —
-## a smooth transition on the line you were reading, then straight back to
-## the game, not a page-by-page fast-forward through everything after it.
-##
-## DialogueBox only ever has ONE line active at a time — a multi-line
-## conversation is entirely the CALLER's own `await Dialogue.say()` loop (see
-## the class doc's "FUTURE: multi-line conversations" note and every one of
-## its callers: act1_beats.gd, act2_beats.gd, ldtk_rumi_trigger.gd,
-## jamshid_npc.gd, darkshang_trigger.gd, dash_tutorial.gd). This still skips
-## a WHOLE conversation without any of those callers knowing skipping
-## happened, because _skip_held_time survives the gap between one line's
-## close and the next line's entrance (where `_active` is momentarily false)
-## up to SKIP_HOLD_GAP seconds — so the very first frame the NEXT line WOULD
-## have gone `_active`, say() finds skip already armed and never opens it at
-## all, and so on for as long as the player keeps holding: one continuous
-## press ends the whole conversation. It does NOT survive a longer idle
-## stretch — see SKIP_HOLD_GAP's own doc for why a hold has to actually
-## belong to a conversation already in progress, not just be lying around
-## from before one ever started — which matters MORE now than it did for a
-## page-by-page skip: a stale hold that slipped past this guard would not
-## just fast-forward a line, it would suppress a conversation the player
-## never saw open at all.
+## Scope skipping to a real scene, including pauses between its lines.
+## Callers still execute rewards and scene transitions after skipped speech.
+## Every conversation is skippable, including openings, tutorials and greetings.
+## No length threshold or caller opt-out: the same hold works everywhere.
+func begin_conversation(owner: Node, player: Player = null) -> void:
+	_release_conversation_player()
+	_conversation_owner = owner
+	_hold_conversation_player(player)
+	_conversation_skippable = true
+	skip_hint.visible = false
+	skip_progress.value = 0.0
+	_skip_requested = false
+	_skip_held_time = 0.0
+	_skip_needs_release = Input.is_action_pressed("skip_dialogue")
+
+
+func end_conversation() -> void:
+	_release_conversation_player()
+	_conversation_owner = null
+	_conversation_skippable = false
+	skip_hint.visible = false
+	_skip_requested = false
+	_skip_held_time = 0.0
+	skip_progress.value = 0.0
+
+
+## One owner for every dialogue physics hold. Input locking alone does not
+## stop a dash already in flight, gravity, or a buffered jump. Player.freeze()
+## stops the physics controller too, and keeps it stopped between spoken lines.
+func _hold_conversation_player(player: Player = null) -> void:
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Player
+	if is_instance_valid(player) and _conversation_player == player:
+		return
+	_conversation_player = player
+	if not is_instance_valid(player):
+		return
+	_owns_player_freeze = not player._frozen
+	player.freeze()
+	# Physics no longer ticks to choose a pose, but AnimatedSprite2D keeps
+	# playing. Select idle on entry rather than leaving the arrival run/dash
+	# looping in place. Later authored poses (e.g. sitting) can still override it.
+	player.cutscene_rest(false, player.facing)
+
+
+func _release_conversation_player() -> void:
+	if is_instance_valid(_conversation_player) and _owns_player_freeze:
+		_conversation_player.unfreeze()
+		# A room slide can have owned input on arrival and completed during the
+		# dialogue. Do not restore that stale lock after the conversation ends.
+		_conversation_player.input_locked = false
+	_conversation_player = null
+	_owns_player_freeze = false
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_skip_held_time = 0.0
+		_skip_needs_release = true
+
+
 func _tick_skip_hold(delta: float) -> void:
+	if _conversation_owner != null and not is_instance_valid(_conversation_owner):
+		end_conversation()
 	if not Input.is_action_pressed("skip_dialogue"):
 		_skip_held_time = 0.0
-		_skip_inactive_time = 0.0
-		return
-	if _active:
-		_skip_inactive_time = 0.0
+		_skip_needs_release = false
+	elif _active and _conversation_skippable and not _skip_needs_release and not _skip_requested:
+		_skip_held_time = minf(_skip_held_time + delta, skip_hold_time)
 	else:
-		_skip_inactive_time += delta
-		if _skip_inactive_time > SKIP_HOLD_GAP:
-			# Been idle too long to still be "between lines of this
-			# conversation" — a fresh hold, not a continued one. Reset so a
-			# stale hold from before any dialogue was ever on screen cannot
-			# instantly skip a line the player has not even seen open yet.
-			_skip_held_time = 0.0
-	_skip_held_time += delta
+		_skip_held_time = 0.0
+	skip_progress.value = _skip_held_time / maxf(skip_hold_time, 0.01)
 	if not _active or _skip_held_time < skip_hold_time:
 		return
-	# Once armed: finish revealing if still mid-page, then ALWAYS advance —
-	# this is what turns "waiting on a press" into "closing on its own" the
-	# very same tick armed, rather than needing one more frame to notice the
-	# reveal just finished.
-	if _revealing:
-		_finish_reveal_instantly()
+	_skip_requested = true
+	_revealing = false
+	_pause_left = 0.0
+	# Do not reveal the unread page or play an ending syllable on scene skip.
 	line_finished.emit()
 
 
-## True once a hold has cleared skip_hold_time and is still being held RIGHT
-## NOW — say()'s own gate for "do not even open this line". Read, not just
-## _tick_skip_hold's problem, because the check has to happen again at the
-## top of every LATER say() call in the conversation, not only inside the
-## line that was actually open when the hold first crossed the threshold.
+func scene_skip_requested(owner: Node) -> bool:
+	return owner == _conversation_owner and _skip_armed()
+
+
 func _skip_armed() -> bool:
-	return Input.is_action_pressed("skip_dialogue") and _skip_held_time >= skip_hold_time
+	return _conversation_skippable and _skip_requested
 
 
-## Reveal the "Hold X to skip" reminder once a LINE has been up for
-## hint_delay seconds — not tied to _skip_held_time (holding the key does not
-## make the hint appear any sooner, and it is not needed once someone is
-## already holding it, but this stays simple rather than also suppressing it
-## for a player mid-hold) and not tied to _revealing either, since the hint
-## is just as useful sitting on a finished page waiting for a press as it is
-## mid-reveal.
-##
-## Resets once per LINE (say()'s own _hint_elapsed = 0.0, at the top of the
-## page loop), not once per conversation: unlike the hold timer, there is no
-## reason for this to survive the gap into the next line — a line that opens
-## and closes quickly, on its own, never needed the reminder in the first
-## place, and one that runs long enough to need it will cross hint_delay
-## again on its own.
 func _tick_skip_hint(delta: float) -> void:
-	if not _active or skip_hint.visible:
+	if not _active:
 		return
 	_hint_elapsed += delta
-	if _hint_elapsed >= hint_delay:
-		skip_hint.visible = true
+	skip_hint.visible = _conversation_skippable and (_hint_elapsed >= hint_delay or _skip_held_time > 0.0)
+	_update_control_hints()
 
 
-## Snap the current page to fully shown. Shared by the confirm button's own
-## first-press skip (_unhandled_input) and the hold-to-skip timer above, so
-## the two can never drift into skipping a page two different ways.
+func _update_control_hints() -> void:
+	var key := "X"
+	var confirm := "Space / Enter"
+	if InputDevice.is_controller():
+		key = "X / □"
+		confirm = "A / ×"
+	else:
+		for event in InputMap.action_get_events("skip_dialogue"):
+			if event is InputEventKey:
+				key = OS.get_keycode_string(event.physical_keycode if event.physical_keycode else event.keycode)
+				break
+	skip_hint.text = "Hold %s to skip scene" % key
+	arrow.text = "%s  Continue" % confirm
+
+
+## Confirm reveals the current page; a scene skip leaves unread text alone.
 func _finish_reveal_instantly() -> void:
 	# Drops the [fade] wrapper the same way a natural finish does —
 	# _apply_page_text's own doc explains why leaving it on would hide the
@@ -1276,6 +1355,11 @@ func _voice_new_chars(new_count: int) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _active:
+		return
+	if event.is_action("skip_dialogue"):
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_echo():
 		return
 	if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()

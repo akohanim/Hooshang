@@ -1,441 +1,429 @@
-[gd_resource type="SpriteFrames" format=3 uid="uid://rm3kk2lr82dl"]
+[gd_resource type="SpriteFrames" load_steps=83 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_000.png" id="30_idle0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_001.png" id="31_idle1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_002.png" id="32_idle2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_003.png" id="33_idle3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_004.png" id="34_idle4"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_005.png" id="35_idle5"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_006.png" id="36_idle6"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Breathing_Idle/east/frame_007.png" id="37_idle7"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_000.png" id="40_run0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_001.png" id="41_run1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_002.png" id="42_run2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_003.png" id="43_run3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_004.png" id="44_run4"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_005.png" id="45_run5"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_006.png" id="46_run6"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Running/east/frame_007.png" id="47_run7"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_000.png" id="50_jump0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_001.png" id="51_jump1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_002.png" id="52_jump2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Jumping/east/frame_003.png" id="53_jump3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_000.png" id="60_fall0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_001.png" id="61_fall1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_002.png" id="62_fall2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Falling/east/frame_003.png" id="63_fall3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_000.png" id="130_dash0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_001.png" id="131_dash1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_002.png" id="132_dash2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_003.png" id="133_dash3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_004.png" id="134_dash4"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_005.png" id="135_dash5"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_006.png" id="136_dash6"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Dash/east/frame_007.png" id="137_dash7"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_000.png" id="80_wj0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_001.png" id="80_wj1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_002.png" id="80_wj2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_003.png" id="80_wj3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_004.png" id="80_wj4"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_005.png" id="80_wj5"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_006.png" id="80_wj6"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Jump/east/frame_007.png" id="80_wj7"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_000.png" id="90_ws0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_001.png" id="91_ws1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_002.png" id="92_ws2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_003.png" id="93_ws3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_004.png" id="94_ws4"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_005.png" id="95_ws5"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_006.png" id="96_ws6"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Slide/east/frame_007.png" id="97_ws7"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_000.png" id="95_wl0"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_001.png" id="95_wl1"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_002.png" id="95_wl2"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_003.png" id="95_wl3"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_004.png" id="95_wl4"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_005.png" id="95_wl5"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_006.png" id="95_wl6"]
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/chubby/Wall_Land/east/frame_007.png" id="95_wl7"]
-[ext_resource type="Texture2D" uid="uid://dl8aukap0kkn0" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_000.png" id="100_climb0"]
-[ext_resource type="Texture2D" uid="uid://wnle1bxxiktn" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_001.png" id="100_climb1"]
-[ext_resource type="Texture2D" uid="uid://b3ujh5or565v7" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_002.png" id="100_climb2"]
-[ext_resource type="Texture2D" uid="uid://bxyx4vwqry22l" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_003.png" id="100_climb3"]
-[ext_resource type="Texture2D" uid="uid://c27sgb1fwocwk" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_004.png" id="100_climb4"]
-[ext_resource type="Texture2D" uid="uid://dnsyfe3800me7" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_005.png" id="100_climb5"]
-[ext_resource type="Texture2D" uid="uid://c1jgh5a6p7o50" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_006.png" id="100_climb6"]
-[ext_resource type="Texture2D" uid="uid://bappahj7cwikd" path="res://assets/characters/hooshang/sprites/chubby/Climb/east/frame_007.png" id="100_climb7"]
-[ext_resource type="Texture2D" uid="uid://c36fbhnm46ts0" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_000.png" id="110_swim0"]
-[ext_resource type="Texture2D" uid="uid://cy6ro6wuapsbs" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_001.png" id="110_swim1"]
-[ext_resource type="Texture2D" uid="uid://b4blrvgnewaao" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_002.png" id="110_swim2"]
-[ext_resource type="Texture2D" uid="uid://dtfif6gcg3qe0" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_003.png" id="110_swim3"]
-[ext_resource type="Texture2D" uid="uid://bf8oumu71r73a" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_004.png" id="110_swim4"]
-[ext_resource type="Texture2D" uid="uid://c32qohqrx1cy7" path="res://assets/characters/hooshang/sprites/chubby/Swim/east/frame_005.png" id="110_swim5"]
-[ext_resource type="Texture2D" uid="uid://cft26br40a4jy" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_000.png" id="115_swimidle0"]
-[ext_resource type="Texture2D" uid="uid://bdt4sj7tv7pb4" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_001.png" id="115_swimidle1"]
-[ext_resource type="Texture2D" uid="uid://32oltxooujqx" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_002.png" id="115_swimidle2"]
-[ext_resource type="Texture2D" uid="uid://cwsra1qrofmyt" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_003.png" id="115_swimidle3"]
-[ext_resource type="Texture2D" uid="uid://bmrs8q2sucw1q" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_004.png" id="115_swimidle4"]
-[ext_resource type="Texture2D" uid="uid://o22dfvt5kwhs" path="res://assets/characters/hooshang/sprites/chubby/Swim_Idle/east/frame_005.png" id="115_swimidle5"]
-[ext_resource type="Texture2D" uid="uid://yrb1rqimayie" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_000.png" id="120_exitwater0"]
-[ext_resource type="Texture2D" uid="uid://bi1ymt04tcpn8" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_001.png" id="120_exitwater1"]
-[ext_resource type="Texture2D" uid="uid://cqdfu4qxgrvf6" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_002.png" id="120_exitwater2"]
-[ext_resource type="Texture2D" uid="uid://cq3mehjjqyikm" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_003.png" id="120_exitwater3"]
-[ext_resource type="Texture2D" uid="uid://d185uun5w1778" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_004.png" id="120_exitwater4"]
-[ext_resource type="Texture2D" uid="uid://170b6n2hp21s" path="res://assets/characters/hooshang/sprites/chubby/Exit_Water/east/frame_005.png" id="120_exitwater5"]
+[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]
+
+[sub_resource type="AtlasTexture" id="frame_0"]
+atlas = ExtResource("sheet")
+region = Rect2(0, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_1"]
+atlas = ExtResource("sheet")
+region = Rect2(18, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_2"]
+atlas = ExtResource("sheet")
+region = Rect2(36, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_3"]
+atlas = ExtResource("sheet")
+region = Rect2(54, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_4"]
+atlas = ExtResource("sheet")
+region = Rect2(72, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_5"]
+atlas = ExtResource("sheet")
+region = Rect2(90, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_6"]
+atlas = ExtResource("sheet")
+region = Rect2(108, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_7"]
+atlas = ExtResource("sheet")
+region = Rect2(126, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_8"]
+atlas = ExtResource("sheet")
+region = Rect2(144, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_9"]
+atlas = ExtResource("sheet")
+region = Rect2(162, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_10"]
+atlas = ExtResource("sheet")
+region = Rect2(180, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_11"]
+atlas = ExtResource("sheet")
+region = Rect2(198, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_12"]
+atlas = ExtResource("sheet")
+region = Rect2(216, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_13"]
+atlas = ExtResource("sheet")
+region = Rect2(234, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_14"]
+atlas = ExtResource("sheet")
+region = Rect2(252, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_15"]
+atlas = ExtResource("sheet")
+region = Rect2(270, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_16"]
+atlas = ExtResource("sheet")
+region = Rect2(288, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_17"]
+atlas = ExtResource("sheet")
+region = Rect2(306, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_18"]
+atlas = ExtResource("sheet")
+region = Rect2(324, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_19"]
+atlas = ExtResource("sheet")
+region = Rect2(342, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_20"]
+atlas = ExtResource("sheet")
+region = Rect2(360, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_21"]
+atlas = ExtResource("sheet")
+region = Rect2(378, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_22"]
+atlas = ExtResource("sheet")
+region = Rect2(396, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_23"]
+atlas = ExtResource("sheet")
+region = Rect2(414, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_24"]
+atlas = ExtResource("sheet")
+region = Rect2(432, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_25"]
+atlas = ExtResource("sheet")
+region = Rect2(450, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_26"]
+atlas = ExtResource("sheet")
+region = Rect2(468, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_27"]
+atlas = ExtResource("sheet")
+region = Rect2(486, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_28"]
+atlas = ExtResource("sheet")
+region = Rect2(504, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_29"]
+atlas = ExtResource("sheet")
+region = Rect2(522, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_30"]
+atlas = ExtResource("sheet")
+region = Rect2(540, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_31"]
+atlas = ExtResource("sheet")
+region = Rect2(558, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_32"]
+atlas = ExtResource("sheet")
+region = Rect2(576, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_33"]
+atlas = ExtResource("sheet")
+region = Rect2(594, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_34"]
+atlas = ExtResource("sheet")
+region = Rect2(612, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_35"]
+atlas = ExtResource("sheet")
+region = Rect2(630, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_36"]
+atlas = ExtResource("sheet")
+region = Rect2(648, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_37"]
+atlas = ExtResource("sheet")
+region = Rect2(666, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_38"]
+atlas = ExtResource("sheet")
+region = Rect2(684, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_39"]
+atlas = ExtResource("sheet")
+region = Rect2(702, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_40"]
+atlas = ExtResource("sheet")
+region = Rect2(720, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_41"]
+atlas = ExtResource("sheet")
+region = Rect2(738, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_42"]
+atlas = ExtResource("sheet")
+region = Rect2(756, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_43"]
+atlas = ExtResource("sheet")
+region = Rect2(774, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_44"]
+atlas = ExtResource("sheet")
+region = Rect2(792, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_45"]
+atlas = ExtResource("sheet")
+region = Rect2(810, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_46"]
+atlas = ExtResource("sheet")
+region = Rect2(828, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_47"]
+atlas = ExtResource("sheet")
+region = Rect2(846, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_48"]
+atlas = ExtResource("sheet")
+region = Rect2(864, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_49"]
+atlas = ExtResource("sheet")
+region = Rect2(882, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_50"]
+atlas = ExtResource("sheet")
+region = Rect2(900, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_51"]
+atlas = ExtResource("sheet")
+region = Rect2(918, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_52"]
+atlas = ExtResource("sheet")
+region = Rect2(936, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_53"]
+atlas = ExtResource("sheet")
+region = Rect2(954, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_54"]
+atlas = ExtResource("sheet")
+region = Rect2(972, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_55"]
+atlas = ExtResource("sheet")
+region = Rect2(990, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_56"]
+atlas = ExtResource("sheet")
+region = Rect2(1008, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_57"]
+atlas = ExtResource("sheet")
+region = Rect2(1026, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_58"]
+atlas = ExtResource("sheet")
+region = Rect2(1044, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_59"]
+atlas = ExtResource("sheet")
+region = Rect2(1062, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_60"]
+atlas = ExtResource("sheet")
+region = Rect2(1080, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_61"]
+atlas = ExtResource("sheet")
+region = Rect2(1098, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_62"]
+atlas = ExtResource("sheet")
+region = Rect2(1116, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_63"]
+atlas = ExtResource("sheet")
+region = Rect2(1134, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_64"]
+atlas = ExtResource("sheet")
+region = Rect2(1152, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_65"]
+atlas = ExtResource("sheet")
+region = Rect2(1170, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_66"]
+atlas = ExtResource("sheet")
+region = Rect2(1188, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_67"]
+atlas = ExtResource("sheet")
+region = Rect2(1206, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_68"]
+atlas = ExtResource("sheet")
+region = Rect2(1224, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_69"]
+atlas = ExtResource("sheet")
+region = Rect2(1242, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_70"]
+atlas = ExtResource("sheet")
+region = Rect2(1260, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_71"]
+atlas = ExtResource("sheet")
+region = Rect2(1278, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_72"]
+atlas = ExtResource("sheet")
+region = Rect2(1296, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_73"]
+atlas = ExtResource("sheet")
+region = Rect2(1314, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_74"]
+atlas = ExtResource("sheet")
+region = Rect2(1332, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_75"]
+atlas = ExtResource("sheet")
+region = Rect2(1350, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_76"]
+atlas = ExtResource("sheet")
+region = Rect2(1368, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_77"]
+atlas = ExtResource("sheet")
+region = Rect2(1386, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_78"]
+atlas = ExtResource("sheet")
+region = Rect2(1404, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_79"]
+atlas = ExtResource("sheet")
+region = Rect2(1422, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_80"]
+atlas = ExtResource("sheet")
+region = Rect2(1440, 0, 18, 18)
+filter_clip = true
 
 [resource]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("100_climb0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb7")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("100_climb1")
-}],
-"loop": true,
-"name": &"climb",
-"speed": 14.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("130_dash0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("131_dash1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("132_dash2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("133_dash3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("134_dash4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("135_dash5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("136_dash6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("137_dash7")
-}],
-"loop": false,
-"name": &"dash",
-"speed": 30.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("120_exitwater0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("120_exitwater1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("120_exitwater2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("120_exitwater3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("120_exitwater4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("120_exitwater5")
-}],
-"loop": false,
-"name": &"exit_water",
-"speed": 12.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("60_fall0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_fall1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("62_fall2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("63_fall3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("62_fall2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_fall1")
-}],
-"loop": true,
-"name": &"fall",
-"speed": 10.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("30_idle0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("31_idle1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("32_idle2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("33_idle3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("34_idle4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("35_idle5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("36_idle6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("37_idle7")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("50_jump0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_jump1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_jump2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_jump3")
-}],
-"loop": true,
-"name": &"jump",
-"speed": 11.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("40_run0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("41_run1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("42_run2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("43_run3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("44_run4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("45_run5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("46_run6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("47_run7")
-}],
-"loop": true,
-"name": &"run",
-"speed": 12.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("110_swim0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("110_swim1")
-}],
-"loop": true,
-"name": &"swim",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("115_swimidle0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("115_swimidle1")
-}],
-"loop": true,
-"name": &"swim_idle",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("80_wj0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("80_wj7")
-}],
-"loop": false,
-"name": &"wall_jump",
-"speed": 16.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("95_wl0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_wl7")
-}],
-"loop": false,
-"name": &"wall_land",
-"speed": 16.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("90_ws0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("91_ws1")
-}, {
-"duration": 1.0,
-"texture": ExtResource("92_ws2")
-}, {
-"duration": 1.0,
-"texture": ExtResource("93_ws3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("94_ws4")
-}, {
-"duration": 1.0,
-"texture": ExtResource("95_ws5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("96_ws6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("97_ws7")
-}],
-"loop": true,
-"name": &"wall_slide",
-"speed": 8.0
-}]
+animations = [{"frames": [{"duration": 180.0, "texture": SubResource("frame_0")}, {"duration": 180.0, "texture": SubResource("frame_1")}, {"duration": 180.0, "texture": SubResource("frame_2")}, {"duration": 180.0, "texture": SubResource("frame_3")}, {"duration": 180.0, "texture": SubResource("frame_4")}, {"duration": 180.0, "texture": SubResource("frame_5")}], "loop": true, "name": &"idle", "speed": 1000.0},
+{"frames": [{"duration": 90.0, "texture": SubResource("frame_6")}, {"duration": 90.0, "texture": SubResource("frame_7")}, {"duration": 90.0, "texture": SubResource("frame_8")}, {"duration": 90.0, "texture": SubResource("frame_9")}, {"duration": 90.0, "texture": SubResource("frame_10")}, {"duration": 90.0, "texture": SubResource("frame_11")}, {"duration": 90.0, "texture": SubResource("frame_12")}, {"duration": 90.0, "texture": SubResource("frame_13")}], "loop": true, "name": &"run", "speed": 1600.0},
+{"frames": [{"duration": 90.0, "texture": SubResource("frame_14")}, {"duration": 90.0, "texture": SubResource("frame_15")}, {"duration": 90.0, "texture": SubResource("frame_16")}, {"duration": 90.0, "texture": SubResource("frame_17")}, {"duration": 90.0, "texture": SubResource("frame_18")}, {"duration": 90.0, "texture": SubResource("frame_19")}, {"duration": 90.0, "texture": SubResource("frame_20")}], "loop": false, "name": &"jump", "speed": 1000.0},
+{"frames": [{"duration": 110.0, "texture": SubResource("frame_21")}, {"duration": 110.0, "texture": SubResource("frame_22")}, {"duration": 110.0, "texture": SubResource("frame_23")}, {"duration": 110.0, "texture": SubResource("frame_24")}, {"duration": 110.0, "texture": SubResource("frame_25")}, {"duration": 110.0, "texture": SubResource("frame_26")}, {"duration": 110.0, "texture": SubResource("frame_27")}, {"duration": 110.0, "texture": SubResource("frame_28")}], "loop": true, "name": &"climb", "speed": 1000.0},
+{"frames": [{"duration": 130.0, "texture": SubResource("frame_29")}, {"duration": 130.0, "texture": SubResource("frame_30")}, {"duration": 130.0, "texture": SubResource("frame_31")}, {"duration": 130.0, "texture": SubResource("frame_32")}, {"duration": 130.0, "texture": SubResource("frame_33")}, {"duration": 130.0, "texture": SubResource("frame_34")}, {"duration": 130.0, "texture": SubResource("frame_35")}, {"duration": 130.0, "texture": SubResource("frame_36")}], "loop": true, "name": &"climb_down", "speed": 1000.0},
+{"frames": [{"duration": 200.0, "texture": SubResource("frame_37")}], "loop": true, "name": &"climb_idle", "speed": 1000.0},
+{"frames": [{"duration": 45.0, "texture": SubResource("frame_38")}, {"duration": 45.0, "texture": SubResource("frame_39")}, {"duration": 45.0, "texture": SubResource("frame_40")}, {"duration": 45.0, "texture": SubResource("frame_41")}, {"duration": 45.0, "texture": SubResource("frame_42")}, {"duration": 45.0, "texture": SubResource("frame_43")}], "loop": false, "name": &"dash", "speed": 1000.0},
+{"frames": [{"duration": 150.0, "texture": SubResource("frame_44")}, {"duration": 150.0, "texture": SubResource("frame_45")}, {"duration": 150.0, "texture": SubResource("frame_46")}, {"duration": 150.0, "texture": SubResource("frame_47")}], "loop": true, "name": &"wall_slide", "speed": 1000.0},
+{"frames": [{"duration": 70.0, "texture": SubResource("frame_48")}, {"duration": 70.0, "texture": SubResource("frame_49")}, {"duration": 70.0, "texture": SubResource("frame_50")}, {"duration": 70.0, "texture": SubResource("frame_51")}, {"duration": 70.0, "texture": SubResource("frame_52")}], "loop": false, "name": &"wall_jump", "speed": 1000.0},
+{"frames": [{"duration": 130.0, "texture": SubResource("frame_53")}, {"duration": 130.0, "texture": SubResource("frame_54")}, {"duration": 130.0, "texture": SubResource("frame_55")}, {"duration": 130.0, "texture": SubResource("frame_56")}], "loop": true, "name": &"fall", "speed": 1000.0},
+{"frames": [{"duration": 180.0, "texture": SubResource("frame_57")}], "loop": false, "name": &"wall_land", "speed": 1000.0},
+{"frames": [{"duration": 180.0, "texture": SubResource("frame_58")}], "loop": false, "name": &"crouch", "speed": 1000.0},
+{"frames": [{"duration": 110.0, "texture": SubResource("frame_59")}, {"duration": 110.0, "texture": SubResource("frame_60")}, {"duration": 110.0, "texture": SubResource("frame_61")}, {"duration": 110.0, "texture": SubResource("frame_62")}, {"duration": 110.0, "texture": SubResource("frame_63")}, {"duration": 110.0, "texture": SubResource("frame_64")}], "loop": true, "name": &"swim", "speed": 1000.0},
+{"frames": [{"duration": 220.0, "texture": SubResource("frame_65")}, {"duration": 220.0, "texture": SubResource("frame_66")}, {"duration": 220.0, "texture": SubResource("frame_67")}, {"duration": 220.0, "texture": SubResource("frame_68")}], "loop": true, "name": &"swim_idle", "speed": 1000.0},
+{"frames": [{"duration": 100.0, "texture": SubResource("frame_69")}, {"duration": 100.0, "texture": SubResource("frame_70")}, {"duration": 100.0, "texture": SubResource("frame_71")}, {"duration": 100.0, "texture": SubResource("frame_72")}, {"duration": 100.0, "texture": SubResource("frame_73")}, {"duration": 100.0, "texture": SubResource("frame_74")}], "loop": false, "name": &"exit_water", "speed": 1000.0},
+{"frames": [{"duration": 40.0, "texture": SubResource("frame_75")}, {"duration": 40.0, "texture": SubResource("frame_76")}, {"duration": 40.0, "texture": SubResource("frame_77")}, {"duration": 40.0, "texture": SubResource("frame_78")}, {"duration": 40.0, "texture": SubResource("frame_79")}, {"duration": 40.0, "texture": SubResource("frame_80")}], "loop": false, "name": &"ledge_climb", "speed": 1000.0}]
+metadata/visual_scale = 1.0
+metadata/visual_offset = Vector2(0, -3)
+metadata/native_pixel_size = 18

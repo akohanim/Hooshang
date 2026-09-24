@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/props/darkness/darkness_room.gd" id="1"]
+[sub_resource type="CanvasItemMaterial" id="Ink"]
+light_mode = 1
+[node name="DarknessRoom" type="Node2D"]
+material = SubResource("Ink")
+script = ExtResource("1")

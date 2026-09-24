@@ -61,28 +61,18 @@ const MEETING_EMOTES: Array[String] = ["!", "...", "..."]
 ## something the code can infer, so it is pinned here. Rumi's lines are "" —
 ## he has no portrait art yet, only the tinted stand-in.
 ##
-## The second line names "confused", which reads back as HESITANT: the painted
-## portrait set has a `shocked` where the old pixel-art sheet had a `confused`,
-## so that state is now aliased. Same rule as the meeting's three, below.
-const WAKING_FACES: Array[String] = ["dazed", "hesitant"]
-## Three of these are read back as a state the beat did not name. The meeting
-## asks for "wary", "unconvinced" and "deflecting", and Act1Beats.FACES currently
-## points all three at drawings that already exist — the first two at skeptical,
-## the third at hesitant — because they have no art of their own yet. What is
-## observable here is the TEXTURE, so that is what is pinned: the test cannot
-## tell two states apart while they share a picture, and pretending otherwise
-## would be an assertion that passes on a lie. Give them their own faces and
-## these three entries change with the art, not with the script.
+## The cardigan portrait set gives each named acting state its own drawing.
+const WAKING_FACES: Array[String] = ["dazed", "confused"]
 const MEETING_FACES: Array[String] = [
 	"hesitant", "skeptical", "annoyed", "vulnerable",
 	"",
 	"skeptical",
 	"",
-	"skeptical",   # "wary"
+	"wary",
 	"", "",
-	"skeptical",   # "unconvinced"
+	"unconvinced",
 	"", "", "", "",
-	"hesitant",    # "deflecting"
+	"deflecting",
 	"", "",
 ]
 
@@ -104,14 +94,15 @@ const GIFT_HAS_DASH: Array[bool] = []
 const TILES: Array[String] = [
 	"I can't see a thing.",
 	"You show up right before the parts I'm going to hate, don't you?",
-	"Something waits ahead of you, in the dark. You think you've lost your rhythm. You haven't. It's only sleeping — here, in these tiles.",
-	"Wake the notes in their order, one after the next, until they join into a melody. Complete it, and its light will gather on you — enough to carry you through the dark ahead.",
+	"The dark awaits you, you think you've lost your rhythm. You haven't.",
+	"It's only sleeping, here, in these tiles.",
+	"Wake the notes in their order, one after the next, until they join into a melody. Complete",
+	"it, and its light will gather on you. The exit will open, and light will enter through it.",
 	"So I play the tune, I get a light. ...Fine.",
 ]
-const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi", "Hooshang"]
-## The first entry is "confused" in the beat and the last is "flat" — both read
-## back as the drawing their state points at. Same aliasing as MEETING_FACES.
-const TILES_FACES: Array[String] = ["hesitant", "annoyed", "", "", "skeptical"]
+const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi", "Rumi", "Rumi", "Hooshang"]
+## Confused and flat now have their own drawings, like the meeting states.
+const TILES_FACES: Array[String] = ["confused", "annoyed", "", "", "", "", "flat"]
 
 var failures: Array[String] = []
 var world: LdtkWorld

@@ -3,7 +3,7 @@ extends Node
 ##
 ## Level_14 is walked into from the left and the reveal turns Hooshang round, so
 ## the way out is the doorway he came in through. That doorway is the generic
-## return door, which leads to the room behind — and the room behind is Level_V14,
+## return door, which leads to the room behind — and the room behind is Level_13,
 ## a room he has already cleared. The escape actually continues into Level_15,
 ## which hangs below the row and is authored right to left (PlayerStart at its
 ## right end, Exit at its left).
@@ -35,15 +35,15 @@ var next_room: Node2D
 
 
 func _ready() -> void:
-	# Open in Level_V14 rather than at the start of the Act: the opening cutscene
+	# Open in Level_13 rather than at the start of the Act: the opening cutscene
 	# locks input and waits on a button press that headless will never send.
-	LdtkWorld.debug_start_room = "Level_V14"
+	LdtkWorld.debug_start_room = "Level_13"
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	add_child(world)
 	await _frames(10)
 	LdtkWorld.debug_start_room = ""
 
-	from_room = _room("Level_V14")
+	from_room = _room("Level_13")
 	chase_room = _room("Level_14")
 	next_room = _room("Level_15")
 	_check(from_room != null and chase_room != null and next_room != null,
@@ -51,7 +51,7 @@ func _ready() -> void:
 	if from_room == null or chase_room == null or next_room == null:
 		return _finish()
 	_check(world.current_room == from_room,
-		"opened in Level_V14  [%s]" % world.current_room.name)
+		"opened in Level_13  [%s]" % world.current_room.name)
 
 	# The wiring itself, before any of the behaviour: Act I claims the encounter.
 	# Checked separately because if this connection is missing every assertion
@@ -70,7 +70,7 @@ func _ready() -> void:
 		"walked into Level_14  [%s]" % world.current_room.name)
 	await _go_back()
 	_check(world.current_room == from_room,
-		"untriggered, backing out of Level_14 still leads to Level_V14  [%s]"
+		"untriggered, backing out of Level_14 still leads to Level_13  [%s]"
 			% world.current_room.name)
 
 	# --- 2. after it, the same doorway continues the escape -------------------
@@ -174,11 +174,11 @@ func _ready() -> void:
 		"and leaving Level_14 a second time still goes to Level_15  [%s]"
 			% world.current_room.name)
 
-	# Level_V14 is behind him for good, which is the point: the room he cleared on
+	# Level_13 is behind him for good, which is the point: the room he cleared on
 	# the way in is not somewhere the chase can spill back into.
 	await _go_back()
 	_check(world._return_room == next_room,
-		"the boss room's doorway no longer points at Level_V14  [%s]"
+		"the boss room's doorway no longer points at Level_13  [%s]"
 			% world._return_room.name)
 	# Only the one doorway moved, and its mirror. Every other room is left to
 	# layout order, which is what backtrack_test walks end to end.
@@ -210,6 +210,12 @@ func _ready() -> void:
 ## Leave the current room by tripping its Exit.
 func _go_forward() -> void:
 	var from: Node2D = world.current_room
+	# Routing starts after the security circuit is cleared; puzzle completion
+	# and locked-exit rejection are exercised by security_gate_test.
+	if from.get_meta("exit_locked",false):
+		if from.has_node("DarknessRoom"):from.get_node("DarknessRoom")._solve()
+		else:world.get_node("NoteSequence")._complete()
+		await _frames(3)
 	var ex := world._exit_in(from)
 	if ex == null:
 		_check(false, "%s has no Exit to walk out of" % from.name)

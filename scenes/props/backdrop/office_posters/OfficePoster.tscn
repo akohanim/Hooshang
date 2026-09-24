@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scenes/props/backdrop/office_posters/office_poster.gd" id="1"]
+[node name="OfficePoster" type="Node2D" groups=["office_poster"]]
+texture_filter = 1
+script = ExtResource("1")

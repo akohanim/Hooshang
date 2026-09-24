@@ -1,119 +1,1628 @@
 [
   {
     "name": "Level_V10",
-    "title": "The Switchyard",
-    "theme": "copper",
+    "title": "The Other Shift",
+    "theme": "darkness",
     "width": 640,
     "height": 224,
     "direction": 1,
     "route": [
       [
         0,
-        192,
-        96
+        200,
+        80
       ],
       [
+        112,
+        88,
+        64
+      ],
+      [
+        224,
+        152,
+        64
+      ],
+      [
+        336,
+        64,
+        64
+      ],
+      [
+        448,
         120,
-        176,
-        48
-      ],
-      [
-        192,
-        160,
         64
-      ],
-      [
-        288,
-        160,
-        64
-      ],
-      [
-        384,
-        144,
-        64
-      ],
-      [
-        480,
-        160,
-        48
       ],
       [
         560,
-        176,
+        88,
         80
       ]
     ],
+    "scaffolding": true,
     "checkpoints": [
-      3
+      2
     ],
-    "belts": [
-      0,
-      2,
-      4
+    "lemons": [],
+    "thought_patterns": [
+      {
+        "x": 100,
+        "y": 132.0,
+        "motion": "Horizontal",
+        "amplitude": 24,
+        "speed": 0.16,
+        "phase": 0.0,
+        "tone": "DarkThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 232,
+        "y": 120,
+        "motion": "Vertical",
+        "amplitude": 20,
+        "speed": 0.185,
+        "phase": 0.23,
+        "tone": "LightThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 324,
+        "y": 120.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.21,
+        "phase": 0.46,
+        "tone": "GreyThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 436,
+        "y": 148.0,
+        "motion": "Circle",
+        "amplitude": 18,
+        "speed": 0.235,
+        "phase": 0.69,
+        "tone": "DarkThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 548,
+        "y": 132.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.16,
+        "phase": 0.92,
+        "tone": "LightThought",
+        "angle": 45,
+        "clockwise": 0
+      }
     ],
-    "lemons": [
+    "recovery": true,
+    "encounter": {
+      "form": 1,
+      "gate_x": 600,
+      "anchor": [
+        544,
+        168
+      ],
+      "present": 8.0,
+      "absent": 5.0,
+      "mode": "chase",
+      "terminals": [
+        [
+          144.0,
+          88
+        ],
+        [
+          368.0,
+          64
+        ],
+        [
+          480.0,
+          120
+        ]
+      ],
+      "charge_seconds": 0.8
+    },
+    "appearance_variant": 0,
+    "ladders": [
       [
-        320,
-        128
+        100,
+        64,
+        200
       ],
       [
-        504,
-        128
+        212,
+        128,
+        200
+      ],
+      [
+        324,
+        40,
+        200
+      ],
+      [
+        436,
+        96,
+        200
+      ],
+      [
+        548,
+        64,
+        200
       ]
     ]
   },
   {
     "name": "Level_V11",
-    "title": "Paper Bridges",
-    "theme": "archive",
+    "title": "Trace the Circuit",
+    "theme": "darkness",
     "width": 640,
     "height": 224,
     "direction": 1,
     "route": [
       [
         0,
-        184,
-        88
+        200,
+        80
       ],
       [
         112,
-        176,
-        32
-      ],
-      [
-        168,
-        160,
-        32
+        72,
+        64
       ],
       [
         224,
+        128,
+        64
+      ],
+      [
+        336,
+        56,
+        64
+      ],
+      [
+        448,
         144,
         64
       ],
       [
-        312,
+        560,
+        88,
+        80
+      ]
+    ],
+    "scaffolding": true,
+    "checkpoints": [
+      2
+    ],
+    "lemons": [],
+    "thought_patterns": [
+      {
+        "x": 120,
+        "y": 40,
+        "motion": "Vertical",
+        "amplitude": 20,
+        "speed": 0.185,
+        "phase": 0.11,
+        "tone": "DarkThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 212,
+        "y": 152.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.21,
+        "phase": 0.34,
+        "tone": "LightThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 324,
+        "y": 116.0,
+        "motion": "Circle",
+        "amplitude": 18,
+        "speed": 0.235,
+        "phase": 0.57,
+        "tone": "GreyThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 436,
+        "y": 160.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.16,
+        "phase": 0.8,
+        "tone": "DarkThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 548,
+        "y": 132.0,
+        "motion": "Horizontal",
+        "amplitude": 24,
+        "speed": 0.185,
+        "phase": 0.03,
+        "tone": "LightThought",
+        "angle": -45,
+        "clockwise": 1
+      }
+    ],
+    "recovery": true,
+    "encounter": {
+      "form": 0,
+      "gate_x": 600,
+      "anchor": [
+        544,
+        168
+      ],
+      "present": 8.0,
+      "absent": 8.0,
+      "mode": "security",
+      "terminals": [
+        [
+          144.0,
+          72
+        ],
+        [
+          368.0,
+          56
+        ],
+        [
+          256.0,
+          128
+        ]
+      ],
+      "charge_seconds": 0.8
+    },
+    "appearance_variant": 1,
+    "ladders": [
+      [
+        100,
+        48,
+        200
+      ],
+      [
+        212,
+        104,
+        200
+      ],
+      [
+        324,
+        32,
+        200
+      ],
+      [
+        436,
+        120,
+        200
+      ],
+      [
+        548,
+        64,
+        200
+      ]
+    ]
+  },
+  {
+    "name": "Level_V12",
+    "title": "Negative Space",
+    "theme": "darkness",
+    "width": 320,
+    "height": 256,
+    "direction": 1,
+    "route": [
+      [
+        0,
+        232,
+        72
+      ],
+      [
+        104,
+        128,
+        64
+      ],
+      [
+        216,
+        184,
+        104
+      ],
+      [
+        104,
+        56,
+        72
+      ],
+      [
+        216,
+        64,
+        104
+      ]
+    ],
+    "scaffolding": true,
+    "checkpoints": [
+      1
+    ],
+    "lemons": [],
+    "thought_patterns": [
+      {
+        "x": 92,
+        "y": 168.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.21,
+        "phase": 0.22,
+        "tone": "DarkThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 204,
+        "y": 196.0,
+        "motion": "Circle",
+        "amplitude": 18,
+        "speed": 0.235,
+        "phase": 0.45,
+        "tone": "LightThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 92,
+        "y": 76.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.16,
+        "phase": 0.68,
+        "tone": "GreyThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 204,
+        "y": 100.0,
+        "motion": "Horizontal",
+        "amplitude": 24,
+        "speed": 0.185,
+        "phase": 0.91,
+        "tone": "DarkThought",
+        "angle": -45,
+        "clockwise": 1
+      }
+    ],
+    "recovery": true,
+    "encounter": {
+      "form": 1,
+      "gate_x": 280,
+      "anchor": [
+        224,
+        200
+      ],
+      "present": 8.0,
+      "absent": 5.0,
+      "mode": "security",
+      "terminals": [
+        [
+          136.0,
+          128
+        ],
+        [
+          140.0,
+          56
+        ],
+        [
+          268.0,
+          184
+        ]
+      ],
+      "charge_seconds": 0.8
+    },
+    "appearance_variant": 2,
+    "ladders": [
+      [
+        92,
+        104,
+        232
+      ],
+      [
+        204,
+        160,
+        232
+      ],
+      [
+        92,
+        32,
+        120
+      ],
+      [
+        204,
+        40,
+        176
+      ]
+    ]
+  },
+  {
+    "name": "Level_V13",
+    "title": "Between the Hands",
+    "theme": "darkness",
+    "width": 640,
+    "height": 224,
+    "direction": 1,
+    "route": [
+      [
+        0,
+        200,
+        80
+      ],
+      [
+        112,
+        64,
+        64
+      ],
+      [
+        224,
+        136,
+        64
+      ],
+      [
+        336,
+        88,
+        64
+      ],
+      [
+        448,
+        56,
+        64
+      ],
+      [
+        560,
+        112,
+        80
+      ]
+    ],
+    "scaffolding": true,
+    "checkpoints": [
+      2
+    ],
+    "lemons": [],
+    "thought_patterns": [
+      {
+        "x": 100,
+        "y": 120.0,
+        "motion": "Circle",
+        "amplitude": 18,
+        "speed": 0.235,
+        "phase": 0.33,
+        "tone": "DarkThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 212,
+        "y": 156.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.16,
+        "phase": 0.56,
+        "tone": "LightThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 324,
+        "y": 132.0,
+        "motion": "Horizontal",
+        "amplitude": 24,
+        "speed": 0.185,
+        "phase": 0.79,
+        "tone": "GreyThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 456,
+        "y": 24,
+        "motion": "Vertical",
+        "amplitude": 20,
+        "speed": 0.21,
+        "phase": 0.02,
+        "tone": "DarkThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 548,
+        "y": 144.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.235,
+        "phase": 0.25,
+        "tone": "LightThought",
+        "angle": -45,
+        "clockwise": 1
+      }
+    ],
+    "recovery": true,
+    "encounter": {
+      "form": 0,
+      "gate_x": 600,
+      "anchor": [
+        544,
+        168
+      ],
+      "present": 8.0,
+      "absent": 8.0,
+      "mode": "security",
+      "terminals": [
+        [
+          144.0,
+          64
+        ],
+        [
+          368.0,
+          88
+        ],
+        [
+          256.0,
+          136
+        ],
+        [
+          480.0,
+          56
+        ]
+      ],
+      "charge_seconds": 0.8
+    },
+    "appearance_variant": 0,
+    "ladders": [
+      [
+        100,
+        40,
+        200
+      ],
+      [
+        212,
+        112,
+        200
+      ],
+      [
+        324,
+        64,
+        200
+      ],
+      [
+        436,
+        32,
+        200
+      ],
+      [
+        548,
+        88,
+        200
+      ]
+    ]
+  },
+  {
+    "name": "Level_V14",
+    "title": "Do Not Follow",
+    "theme": "darkness",
+    "width": 480,
+    "height": 192,
+    "direction": 1,
+    "route": [
+      [
+        0,
+        168,
+        72
+      ],
+      [
+        104,
+        56,
+        64
+      ],
+      [
+        216,
+        112,
+        64
+      ],
+      [
+        336,
+        48,
+        64
+      ],
+      [
+        424,
+        88,
+        56
+      ]
+    ],
+    "scaffolding": true,
+    "checkpoints": [
+      2
+    ],
+    "lemons": [],
+    "thought_patterns": [
+      {
+        "x": 92,
+        "y": 100.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.16,
+        "phase": 0.44,
+        "tone": "DarkThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 204,
+        "y": 128.0,
+        "motion": "Horizontal",
+        "amplitude": 24,
+        "speed": 0.185,
+        "phase": 0.67,
+        "tone": "LightThought",
+        "angle": -45,
+        "clockwise": 1
+      },
+      {
+        "x": 344,
+        "y": 16,
+        "motion": "Vertical",
+        "amplitude": 20,
+        "speed": 0.21,
+        "phase": 0.9,
+        "tone": "GreyThought",
+        "angle": 45,
+        "clockwise": 0
+      },
+      {
+        "x": 412,
+        "y": 116.0,
+        "motion": "Linear",
+        "amplitude": 24,
+        "speed": 0.235,
+        "phase": 0.13,
+        "tone": "DarkThought",
+        "angle": -45,
+        "clockwise": 1
+      }
+    ],
+    "recovery": true,
+    "encounter": {
+      "form": 1,
+      "gate_x": 440,
+      "anchor": [
+        384,
+        136
+      ],
+      "present": 8.0,
+      "absent": 5.0,
+      "mode": "security",
+      "terminals": [
+        [
+          136.0,
+          56
+        ],
+        [
+          248.0,
+          112
+        ],
+        [
+          368.0,
+          48
+        ]
+      ],
+      "charge_seconds": 0.8
+    },
+    "appearance_variant": 1,
+    "ladders": [
+      [
+        92,
+        32,
+        168
+      ],
+      [
+        204,
+        88,
+        168
+      ],
+      [
+        324,
+        24,
+        168
+      ],
+      [
+        412,
+        64,
+        168
+      ]
+    ]
+  },
+  {
+    "name": "Level_15",
+    "title": "Cut the Corner",
+    "theme": "darkness",
+    "width": 640,
+    "height": 240,
+    "direction": -1,
+    "world_position": [
+      16000,
+      -2048
+    ],
+    "route": [
+      [
+        560,
+        192,
+        80
+      ],
+      [
+        464,
+        192,
+        40
+      ],
+      [
+        384,
         144,
         32
       ],
       [
-        368,
-        160,
+        312,
+        176,
         32
       ],
       [
-        424,
+        232,
+        144,
+        56
+      ],
+      [
+        168,
+        112,
+        24
+      ],
+      [
+        96,
+        152,
+        32
+      ],
+      [
+        0,
+        176,
+        64
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      4
+    ],
+    "lemons": [
+      [
+        180,
+        80
+      ]
+    ],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [
+      [
+        440,
+        112,
+        104,
+        32
+      ]
+    ],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        600,
+        192
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "design": "Low headroom flat dash, rising diagonal, drop and reverse height. Safe midpoint before the sharper second half.",
+    "spikes": [
+      [
+        "ConeSpikes",
+        492.0,
+        108,
+        104,
+        8
+      ]
+    ]
+  },
+  {
+    "name": "Level_16",
+    "title": "Switchback Well",
+    "theme": "darkness",
+    "width": 400,
+    "height": 384,
+    "direction": -1,
+    "world_position": [
+      18816,
+      -2048
+    ],
+    "route": [
+      [
+        304,
+        328,
+        96
+      ],
+      [
+        240,
+        296,
+        32
+      ],
+      [
+        176,
+        264,
+        32
+      ],
+      [
+        104,
+        232,
+        48
+      ],
+      [
+        184,
+        200,
+        24
+      ],
+      [
+        248,
+        168,
+        32
+      ],
+      [
+        184,
+        136,
+        24
+      ],
+      [
+        112,
+        104,
+        32
+      ],
+      [
+        48,
+        72,
+        32
+      ],
+      [
+        0,
+        72,
+        32
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      3,
+      6
+    ],
+    "lemons": [
+      [
+        264,
+        136
+      ]
+    ],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [],
+    "bulkheads": [
+      [
+        392,
+        8,
+        8,
+        312
+      ],
+      [
+        8,
+        112,
+        16,
+        272
+      ]
+    ],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        360,
+        328
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "deck_depth": {
+      "0": 56,
+      "9": 8
+    },
+    "design": "Climb a folded route with two direction reversals. Brake on the small upper shelves before changing dash direction."
+  },
+  {
+    "name": "Level_17",
+    "title": "No Second Step",
+    "theme": "darkness",
+    "width": 640,
+    "height": 256,
+    "direction": -1,
+    "world_position": [
+      21632,
+      -2048
+    ],
+    "route": [
+      [
+        544,
+        208,
+        96
+      ],
+      [
+        472,
+        184,
+        24
+      ],
+      [
+        400,
+        160,
+        24
+      ],
+      [
+        328,
+        160,
+        24
+      ],
+      [
+        248,
+        192,
+        56
+      ],
+      [
+        176,
+        152,
+        24
+      ],
+      [
+        104,
+        120,
+        24
+      ],
+      [
+        0,
+        160,
+        64
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      4
+    ],
+    "lemons": [
+      [
+        116,
+        88
+      ]
+    ],
+    "crumbles": [
+      1,
+      2,
+      3,
+      5,
+      6
+    ],
+    "belts": [],
+    "ceilings": [],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "chase",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 1,
+      "gate_x": 0,
+      "anchor": [
+        600,
+        208
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "design": "Two collapsing chains. Land to recharge, jump immediately, then dash to the next panel. Permanent island splits the attempts. Darkshang follows without projectile attacks; the terrain supplies the execution challenge."
+  },
+  {
+    "name": "Level_18",
+    "title": "Five Notes Home",
+    "theme": "darkness",
+    "width": 480,
+    "height": 240,
+    "direction": -1,
+    "world_position": [
+      24448,
+      -2048
+    ],
+    "route": [
+      [
+        400,
+        192,
+        80
+      ],
+      [
+        344,
+        168,
+        16
+      ],
+      [
+        280,
+        144,
+        16
+      ],
+      [
+        216,
+        168,
+        16
+      ],
+      [
+        152,
+        136,
+        16
+      ],
+      [
+        88,
+        160,
+        16
+      ],
+      [
+        0,
+        192,
+        64
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [],
+    "lemons": [],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": true,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "chase",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        440,
+        192
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.6,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "note_landings": {
+      "1": 1,
+      "2": 2,
+      "3": 3,
+      "4": 4,
+      "5": 5
+    },
+    "deck_depth": {
+      "0": 48,
+      "6": 48
+    },
+    "design": "Five numbered musical blocks ARE the landings. Play 1\u20135 to retract the exit shutter. Safe lower floor permits recovery and a fresh sequence; no chase and no mid-melody checkpoint."
+  },
+  {
+    "name": "Level_19",
+    "title": "The Long Way Down",
+    "theme": "darkness",
+    "width": 480,
+    "height": 384,
+    "direction": -1,
+    "world_position": [
+      27264,
+      -2048
+    ],
+    "route": [
+      [
+        384,
+        64,
+        96
+      ],
+      [
+        296,
+        120,
+        32
+      ],
+      [
+        352,
+        176,
+        32
+      ],
+      [
+        248,
+        224,
+        48
+      ],
+      [
+        168,
+        272,
+        32
+      ],
+      [
+        88,
+        216,
+        32
+      ],
+      [
+        0,
+        264,
+        56
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      3
+    ],
+    "lemons": [
+      [
+        368,
+        144
+      ]
+    ],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [],
+    "bulkheads": [
+      [
+        240,
+        8,
+        16,
+        176
+      ]
+    ],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        440,
+        64
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "deck_depth": {
+      "0": 8,
+      "6": 120
+    },
+    "design": "Drop right, brake left, reverse through the well, then recover height with an up-diagonal dash. The hanging wall prevents cutting straight to the exit."
+  },
+  {
+    "name": "Level_20",
+    "title": "Needle Thread",
+    "theme": "darkness",
+    "width": 704,
+    "height": 256,
+    "direction": -1,
+    "world_position": [
+      30080,
+      -2048
+    ],
+    "route": [
+      [
+        608,
+        200,
+        96
+      ],
+      [
+        512,
+        160,
+        24
+      ],
+      [
+        416,
+        120,
+        24
+      ],
+      [
+        328,
+        160,
+        56
+      ],
+      [
+        248,
+        160,
+        24
+      ],
+      [
+        168,
+        112,
+        24
+      ],
+      [
+        88,
+        152,
+        24
+      ],
+      [
+        0,
+        184,
+        56
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      3
+    ],
+    "lemons": [
+      [
+        180,
+        80
+      ]
+    ],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [
+      [
+        264,
+        96,
+        48,
+        32
+      ]
+    ],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        664,
+        200
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "design": "CRUX: two long rising diagonal dashes onto 24px shelves, then a low-ceiling transfer followed immediately by another rising dash. Checkpoint separates the two sequences.",
+    "spikes": [
+      [
+        "ConeSpikes",
+        288,
+        92,
+        48,
+        8
+      ]
+    ]
+  },
+  {
+    "name": "Level_21",
+    "title": "Against the Belt",
+    "theme": "darkness",
+    "width": 560,
+    "height": 240,
+    "direction": -1,
+    "world_position": [
+      32896,
+      -2048
+    ],
+    "route": [
+      [
+        464,
+        192,
+        96
+      ],
+      [
+        344,
+        192,
+        80
+      ],
+      [
+        264,
+        152,
+        32
+      ],
+      [
+        160,
         176,
         64
       ],
       [
+        80,
+        144,
+        32
+      ],
+      [
+        0,
+        176,
+        48
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      2
+    ],
+    "lemons": [
+      [
+        96,
+        112
+      ]
+    ],
+    "crumbles": [],
+    "belts": [
+      1,
+      3
+    ],
+    "ceilings": [],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "chase",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 1,
+      "gate_x": 0,
+      "anchor": [
         520,
-        160,
+        192
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "design": "Conveyors change the takeoff rhythm; leave the belt with a jump, climb to a stable perch, then carry momentum into the second crossing. Darkshang follows without projectile attacks; the terrain supplies the execution challenge."
+  },
+  {
+    "name": "Level_22",
+    "title": "Folded Stair",
+    "theme": "darkness",
+    "width": 480,
+    "height": 384,
+    "direction": -1,
+    "world_position": [
+      35712,
+      -2048
+    ],
+    "route": [
+      [
+        384,
+        328,
+        96
+      ],
+      [
+        296,
+        288,
+        32
+      ],
+      [
+        216,
+        248,
         40
       ],
       [
-        584,
-        144,
+        280,
+        208,
+        24
+      ],
+      [
+        344,
+        168,
+        32
+      ],
+      [
+        248,
+        128,
+        32
+      ],
+      [
+        160,
+        168,
+        40
+      ],
+      [
+        80,
+        128,
+        24
+      ],
+      [
+        0,
+        88,
+        48
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      2,
+      6
+    ],
+    "lemons": [
+      [
+        360,
+        136
+      ]
+    ],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [],
+    "bulkheads": [
+      [
+        200,
+        272,
+        16,
+        112
+      ],
+      [
+        312,
+        304,
+        16,
+        80
+      ]
+    ],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        440,
+        328
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "deck_depth": {
+      "0": 56,
+      "8": 8
+    },
+    "design": "A figure-of-eight ascent: rise left, reverse right, cross over the route you came from, and reverse left again. Diagonal dashes need controlled landings, not held direction."
+  },
+  {
+    "name": "Level_23",
+    "title": "Last Shift",
+    "theme": "darkness",
+    "width": 800,
+    "height": 320,
+    "direction": -1,
+    "world_position": [
+      38528,
+      -2048
+    ],
+    "route": [
+      [
+        704,
+        264,
+        96
+      ],
+      [
+        616,
+        224,
+        24
+      ],
+      [
+        528,
+        184,
+        24
+      ],
+      [
+        448,
+        216,
         56
+      ],
+      [
+        368,
+        216,
+        24
+      ],
+      [
+        288,
+        168,
+        24
+      ],
+      [
+        352,
+        120,
+        24
+      ],
+      [
+        264,
+        80,
+        40
+      ],
+      [
+        176,
+        128,
+        24
+      ],
+      [
+        96,
+        168,
+        24
+      ],
+      [
+        0,
+        216,
+        64
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      3,
+      7
+    ],
+    "lemons": [
+      [
+        364,
+        88
       ]
     ],
     "crumbles": [
@@ -121,679 +1630,128 @@
       2,
       4,
       5,
-      7
+      8,
+      9
     ],
-    "checkpoints": [
-      3,
-      6
-    ],
-    "lemons": [
-      [
-        256,
-        112
-      ],
-      [
-        384,
-        128
-      ]
-    ]
-  },
-  {
-    "name": "Level_V12",
-    "title": "The Ventilation Stack",
-    "theme": "vent",
-    "width": 320,
-    "height": 384,
-    "direction": 1,
-    "route": [
-      [
-        0,
-        352,
-        88
-      ],
-      [
-        112,
-        328,
-        40
-      ],
-      [
-        184,
-        304,
-        64
-      ],
-      [
-        112,
-        280,
-        32
-      ],
-      [
-        56,
-        256,
-        32
-      ],
-      [
-        0,
-        232,
-        32
-      ],
-      [
-        64,
-        208,
-        40
-      ],
-      [
-        128,
-        184,
-        48
-      ],
-      [
-        208,
-        160,
-        48
-      ],
-      [
-        128,
-        136,
-        32
-      ],
-      [
-        72,
-        112,
-        32
-      ],
-      [
-        136,
-        88,
-        40
-      ],
-      [
-        208,
-        64,
-        40
-      ],
-      [
-        272,
-        40,
-        48
-      ]
-    ],
-    "checkpoints": [
-      2,
-      6,
-      10
-    ],
-    "lemons": [
-      [
-        16,
-        200
-      ],
-      [
-        224,
-        128
-      ]
-    ]
-  },
-  {
-    "name": "Level_V13",
-    "title": "Pendulum Gallery",
-    "theme": "glass",
-    "width": 640,
-    "height": 224,
-    "direction": 1,
-    "route": [
-      [
-        0,
-        184,
-        96
-      ],
-      [
-        120,
-        168,
-        48
-      ],
-      [
-        192,
-        152,
-        64
-      ],
-      [
-        288,
-        152,
-        72
-      ],
-      [
-        392,
-        168,
-        48
-      ],
-      [
-        472,
-        152,
-        56
-      ],
-      [
-        560,
-        168,
-        80
-      ]
-    ],
-    "checkpoints": [
-      3
-    ],
-    "thoughts": [
-      [
-        272,
-        112,
-        16,
-        0.18
-      ],
-      [
-        448,
-        112,
-        20,
-        0.16
-      ]
-    ],
-    "lemons": [
-      [
-        224,
-        120
-      ],
-      [
-        500,
-        120
-      ]
-    ]
-  },
-  {
-    "name": "Level_V14",
-    "title": "The Last Light",
-    "theme": "threshold",
-    "width": 480,
-    "height": 192,
-    "direction": 1,
-    "route": [
-      [
-        0,
-        160,
-        96
-      ],
-      [
-        120,
-        144,
-        48
-      ],
-      [
-        192,
-        128,
-        48
-      ],
-      [
-        272,
-        144,
-        64
-      ],
-      [
-        360,
-        160,
-        120
-      ]
-    ],
-    "checkpoints": [
-      2
-    ],
-    "crumbles": [
-      1
-    ],
-    "lemons": [
-      [
-        216,
-        96
-      ]
-    ]
-  },
-  {
-    "name": "Level_15",
-    "title": "Run",
-    "theme": "copper",
-    "width": 608,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        512,
-        160,
-        96
-      ],
-      [
-        432,
-        152,
-        48
-      ],
-      [
-        344,
-        136,
-        56
-      ],
-      [
-        248,
-        152,
-        64
-      ],
-      [
-        152,
-        160,
-        64
-      ],
-      [
-        64,
-        144,
-        56
-      ],
-      [
-        0,
-        160,
-        40
-      ]
-    ],
-    "belts": [
-      0,
-      2,
-      4
-    ],
-    "lemons": [
-      [
-        280,
-        124
-      ]
-    ]
-  },
-  {
-    "name": "Level_16",
-    "title": "The Paper Avalanche",
-    "theme": "archive",
-    "width": 608,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        520,
-        160,
-        88
-      ],
-      [
-        456,
-        144,
-        32
-      ],
-      [
-        392,
-        144,
-        32
-      ],
-      [
-        304,
-        152,
-        56
-      ],
-      [
-        240,
-        136,
-        32
-      ],
-      [
-        176,
-        136,
-        32
-      ],
-      [
-        88,
-        152,
-        56
-      ],
-      [
-        0,
-        160,
-        56
-      ]
-    ],
-    "crumbles": [
-      1,
-      2,
-      4,
-      5
-    ],
-    "checkpoints": [
-      3
-    ],
-    "lemons": [
-      [
-        332,
-        120
-      ]
-    ]
-  },
-  {
-    "name": "Level_17",
-    "title": "Down the Service Spine",
-    "theme": "vent",
-    "width": 608,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        520,
-        72,
-        88
-      ],
-      [
-        440,
-        96,
-        48
-      ],
-      [
-        360,
-        120,
-        48
-      ],
-      [
-        280,
-        144,
-        48
-      ],
-      [
-        192,
-        160,
-        56
-      ],
-      [
-        104,
-        144,
-        56
-      ],
-      [
-        0,
-        160,
-        72
-      ]
-    ],
-    "belts": [
-      4
-    ],
-    "lemons": [
-      [
-        464,
-        64
-      ]
-    ]
-  },
-  {
-    "name": "Level_18",
-    "title": "The Broken Span",
-    "theme": "glass",
-    "width": 320,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        248,
-        160,
-        72
-      ],
-      [
-        160,
-        160,
-        40
-      ],
-      [
-        72,
-        144,
-        40
-      ],
-      [
-        0,
-        160,
-        40
-      ]
-    ],
-    "crumbles": [
-      1
-    ],
-    "lemons": [
-      [
-        180,
-        128
-      ]
-    ]
-  },
-  {
-    "name": "Level_19",
-    "title": "Emergency Power",
-    "theme": "copper",
-    "width": 320,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        240,
-        160,
-        80
-      ],
-      [
-        152,
-        144,
-        56
-      ],
-      [
-        72,
-        128,
-        48
-      ],
-      [
-        0,
-        144,
-        40
-      ]
-    ],
-    "belts": [
-      0
-    ],
-    "lemons": [
-      [
-        96,
-        96
-      ]
-    ]
-  },
-  {
-    "name": "Level_20",
-    "title": "The Rising Alarm",
-    "theme": "archive",
-    "width": 320,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        240,
-        168,
-        80
-      ],
-      [
-        160,
-        144,
-        48
-      ],
-      [
-        80,
-        120,
-        48
-      ],
-      [
-        0,
-        96,
-        48
-      ]
-    ],
-    "crumbles": [
-      1
-    ],
-    "lemons": [
-      [
-        104,
-        88
-      ]
-    ]
-  },
-  {
-    "name": "Level_21",
-    "title": "Under the Ducts",
-    "theme": "vent",
-    "width": 320,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        240,
-        128,
-        80
-      ],
-      [
-        152,
-        144,
-        56
-      ],
-      [
-        64,
-        160,
-        56
-      ],
-      [
-        0,
-        160,
-        40
-      ]
-    ],
+    "belts": [],
     "ceilings": [
       [
+        352,
         144,
-        80,
-        176,
+        72,
+        32
+      ]
+    ],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        760,
+        264
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "deck_depth": {
+      "0": 56,
+      "10": 104
+    },
+    "design": "FINAL CRUX: collapsing ascent, dash beneath the lintel, reverse upward out of the chute, then a descending crumble finish. Two permanent checkpoint balconies isolate three demanding phrases.",
+    "spikes": [
+      [
+        "ConeSpikes",
+        388.0,
+        140,
+        72,
         8
-      ]
-    ],
-    "belts": [
-      1
-    ],
-    "lemons": [
-      [
-        180,
-        112
-      ]
-    ]
-  },
-  {
-    "name": "Level_22",
-    "title": "One Last Leap",
-    "theme": "glass",
-    "width": 320,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        240,
-        160,
-        80
-      ],
-      [
-        144,
-        144,
-        48
-      ],
-      [
-        48,
-        160,
-        48
-      ],
-      [
-        0,
-        160,
-        24
-      ]
-    ],
-    "crumbles": [
-      1
-    ],
-    "lemons": [
-      [
-        168,
-        112
-      ]
-    ]
-  },
-  {
-    "name": "Level_23",
-    "title": "Daybreak",
-    "theme": "dawn",
-    "width": 320,
-    "height": 192,
-    "direction": -1,
-    "route": [
-      [
-        232,
-        144,
-        88
-      ],
-      [
-        144,
-        160,
-        56
-      ],
-      [
-        64,
-        144,
-        48
-      ],
-      [
-        0,
-        128,
-        40
-      ]
-    ],
-    "lemons": [
-      [
-        88,
-        112
       ]
     ]
   },
   {
     "name": "Level_24",
-    "title": "The Familiar Corridor",
-    "theme": "home",
-    "width": 320,
-    "height": 192,
+    "title": "One Last Breath",
+    "theme": "darkness",
+    "width": 480,
+    "height": 240,
     "direction": -1,
+    "world_position": [
+      41344,
+      -2048
+    ],
     "route": [
       [
-        240,
-        160,
-        80
+        384,
+        184,
+        96
       ],
       [
-        160,
-        136,
-        48
+        304,
+        152,
+        40
+      ],
+      [
+        232,
+        120,
+        32
+      ],
+      [
+        152,
+        152,
+        40
       ],
       [
         80,
-        112,
-        48
+        120,
+        32
       ],
       [
         0,
-        96,
+        152,
         48
       ]
-    ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [],
+    "lemons": [
+      [
+        248,
+        88
+      ]
+    ],
+    "crumbles": [],
+    "belts": [],
+    "ceilings": [],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        440,
+        184
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.2,
+      "surge_speed": 170,
+      "surge_interval": 999.0
+    },
+    "design": "Short release after the final crux. Broad stable landings and a last alternating-height phrase lead home without another chase or lock."
   }
 ]

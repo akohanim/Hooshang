@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scenes/characters/hooshang/juice.gd" id="1_juice"]
+[ext_resource type="AudioStream" path="res://assets/sfx/mixkit-arrow-whoosh-1491.wav" id="2_dash"]
 
 [node name="Juice" type="Node"]
 script = ExtResource("1_juice")
+
+[node name="DashSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_dash")
+volume_db = -8.0

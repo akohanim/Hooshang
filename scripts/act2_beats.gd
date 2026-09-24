@@ -15,7 +15,7 @@ extends Node
 ## is driven from here too, the same way Act1Beats drives the office's collapse
 ## and blood moon.
 ##
-## Dialogue holds are player-paced; the nine ellipsis reactions and three
+## Dialogue holds are player-paced; the six brief ellipsis reactions and three
 ## night transitions advance automatically. All cutscene motion stays on the native
 ## game viewport, with nearest filtering and pixel-snapped transforms.
 
@@ -60,7 +60,20 @@ const DAWN := Color(0.82, 0.72, 0.72, 1.0)
 ## How high above a character's origin a reaction bubble floats.
 @export var emote_height := -18.0
 
+## Seconds per overnight stage; reactions play during each sky transition.
+@export_range(2.0, 5.0) var night_stage_time := 2.0
+## Readable hold for each automatic overnight reaction.
+@export_range(0.1, 0.6) var night_emote_hold := 0.35
+
+## Seconds for the sun to settle toward the horizon during the campfire dialogue.
+@export var sunset_descent_time := 16.0
+## Seconds for the final sunset-to-night transition.
+@export var nightfall_time := 5.0
+
+var _ambience: Node
 var _world: LdtkWorld
+var _sun_descent := 0.0
+var _sun_tween: Tween
 var _canvas_mod: CanvasModulate
 var _stars: StarField
 var _fade: ColorRect
@@ -70,6 +83,10 @@ var _rod: Node2D
 var _line: Line2D
 var _caught := false
 var _speaker: JamshidNpc
+var _encounter_origin := Vector2.ZERO
+var _encounter_fire: Campfire
+var _departure_carpet: Sprite2D
+var _stars_tween: Tween
 
 
 func _ready() -> void:
@@ -134,103 +151,240 @@ func _on_jamshid_reached(_player: Player, jamshid: JamshidNpc) -> void:
 
 func _play_encounter(jamshid: JamshidNpc) -> void:
 	var player := _world.player
-	player.input_locked = true
+	_ambience = preload("res://scenes/props/ambience/EncounterAmbience.tscn").instantiate()
+	add_child(_ambience)
+	_ambience.blend(0.0, 0.0, 0.8)
+	_encounter_origin = jamshid.global_position
+	Dialogue.begin_conversation(self, player)
 	var actor: Jamshid = jamshid.actor
 	# He is fishing: sitting on the bank, facing the water (Hooshang's side).
 	actor.play_pose("sit")
 	actor.face_left(true)
 	var rod := _rod
 
-	player.freeze()
 	await _jamshid(jamshid, "Cousin joon!", "excited")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Jamshid! It’s so good to see you!", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "You saw me yesterday.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("It feels like so much longer.", "vulnerable")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Well, get out of the water. You’re frightening dinner.", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _tween_arc(player, jamshid.global_position + Vector2(-20, -24),
 		jamshid.global_position + Vector2(-12, -6), 0.9)
 	player.cutscene_rest(false, 1)
 	await _hooshang("Are the fish biting today?", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "They were. Then my cousin swam through their house.", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
 	_splash(rod.global_position + Vector2(-36, -2))
 	await _jamshid(jamshid, "Hold that thought!", "excited")
+	if _finish_encounter_skip(jamshid):
+		return
 	var fish := await _hook_fish(jamshid, rod)
 	await _reel_in(fish, jamshid)
 	var fire := await _cut_to_campfire(jamshid, fish, rod)
 	await _hooshang("Does my mother know we’re here?", "neutral")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Yes. She sent bread and cheese.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Where is it?", "neutral")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "You were late.", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Jamshid.", "annoyed")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Fishing is hungry work. She also said to be home before dark.", "joyful")
-	_fade_stars(1.0, 2.0)
-	await _tween_sky(NIGHT, 2.0).finished
+	if _finish_encounter_skip(jamshid):
+		return
+	_ambience.blend(1.0, 0.0, nightfall_time)
+	_fade_stars(1.0, nightfall_time)
+	await _tween_sky(NIGHT, nightfall_time).finished
 	await _hold(0.7)
 	await _jamshid(jamshid, "You’re quiet today.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("I had a strange dream.", "vulnerable")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Tell me.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("I was old.", "neutral")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Did you have a moustache?", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Yes.", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Good. Go on.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("I worked in an office. I didn’t like it, but I stayed for years. Then I lost the job… and I felt lost, too.", "sad")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "What happened?", "worried")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Rumi appeared.", "neutral")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Rumi from school?", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Yes. He taught me how to stay equanimous with my thoughts.", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "You’d better start from the beginning.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _night_timelapse(player, actor, fish, fire)
 	await _hooshang("…and then I woke up here.", "vulnerable")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "What a dream.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Do you remember yours?", "neutral")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Almost never. By the time I wake up, they’re gone.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("This one felt like I’d lived it.", "vulnerable")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "No wonder you looked so tired.", "worried")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hold(0.7)
 	await _hooshang("I’m glad you’re here.", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "I’m glad you came down.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hold(0.7)
 	await _jamshid(jamshid, "Next time you’re old, come looking for me.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Here?", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Here. Or at home. You don’t have to wait for a reason.", "friendly")
-	_sound(true)
+	if _finish_encounter_skip(jamshid):
+		return
+	_school_bell()
 	actor.play_pose("idle")
 	await _jamshid(jamshid, "That can’t be school.", "worried")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("We talked all night.", "surprised")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "Your mother is going to kill me.", "worried")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("I’ll tell her it was my fault.", "happy")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _jamshid(jamshid, "She’ll say I should’ve known better.", "worried")
-	_sound(true)
+	if _finish_encounter_skip(jamshid):
+		return
+	_school_bell()
 	await _jamshid(jamshid, "Come over after school. We can finish talking.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
 	await _exit_jamshid(jamshid)
+	if _finish_encounter_skip(jamshid):
+		return
 	player.cutscene_rest(false, 1)
-	player.unfreeze()
-	player.input_locked = false
+	Dialogue.end_conversation()
+	_ambience.finish()
+
+
+## Apply the same morning endpoint from any spoken beat, without playing the
+## fishing, sunset, overnight montage or carpet departure on the way there.
+func _finish_encounter_skip(jamshid: JamshidNpc) -> bool:
+	if not Dialogue.scene_skip_requested(self):
+		return false
+	for tween in [_sun_tween, _stars_tween]:
+		if tween != null and tween.is_valid():
+			tween.kill()
+	_set_sun_descent(0.0)
+	if _canvas_mod != null:
+		_canvas_mod.color = DAWN
+	_stars.amount = 0.0
+	_fade.color.a = 0.0
+	if not is_instance_valid(_encounter_fire):
+		_encounter_fire = _build_fire_at(_encounter_origin + Vector2(24.0, 0.0))
+	_encounter_fire.set_strength(0.0)
+	if is_instance_valid(_pond_fish):
+		_pond_fish.hook()
+		_pond_fish.hide()
+	for prop in [_rod, _departure_carpet]:
+		if is_instance_valid(prop):
+			prop.hide()
+			prop.queue_free()
+	_caught = true
+	for child in get_children():
+		if child is AudioStreamPlayer:
+			child.stop()
+			child.queue_free()
+	jamshid.global_position = _encounter_origin + Vector2(400.0, -280.0)
+	jamshid.hide()
+	if is_instance_valid(_ambience):
+		_ambience.queue_free()
+	var player := _world.player
+	player.global_position = _encounter_origin + Vector2(48.0, -6.0)
+	player.velocity = Vector2.ZERO
+	player.cutscene_rest(false, 1)
+	Dialogue.end_conversation()
+	return true
 
 
 func _night_timelapse(player: Player, actor: Jamshid, fish: Fish, fire: Campfire) -> void:
 	var speakers := [player, actor]
 	for stage in 3:
 		_stars.shoot(stage)
-		for line in 3:
-			await _emote(speakers[(stage * 3 + line) % 2], EmoteBubble.Kind.ELLIPSIS)
 		# Keep both cousins visible as the sky, dinner and fire change together.
 		var transition := create_tween().set_parallel()
 		transition.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		var shifted := [0.0]
 		transition.tween_method(func(value: float) -> void:
 			_stars.shift_sky(value - shifted[0])
-			shifted[0] = value, 0.0, 7.0, 2.0)
+			shifted[0] = value, 0.0, 7.0, night_stage_time)
 		if stage == 0 and is_instance_valid(fish):
-			transition.tween_property(fish, "modulate:a", 0.0, 2.0)
+			transition.tween_property(fish, "modulate:a", 0.0, night_stage_time)
 		elif stage == 1:
-			transition.tween_method(fire.set_strength, 1.0, 0.45, 2.0)
+			transition.tween_method(fire.set_strength, 1.0, 0.45, night_stage_time)
 		elif stage == 2:
-			transition.tween_method(fire.set_strength, 0.45, 0.0, 3.0)
+			_ambience.blend(0.0, 1.0, night_stage_time)
+			transition.tween_method(fire.set_strength, 0.45, 0.0, night_stage_time)
 			if _canvas_mod != null:
-				transition.tween_property(_canvas_mod, "color", DAWN, 3.0)
-			transition.tween_property(_stars, "amount", 0.0, 3.0)
-		await transition.finished
+				transition.tween_property(_canvas_mod, "color", DAWN, night_stage_time)
+			transition.tween_property(_stars, "amount", 0.0, night_stage_time)
+			_move_sun(0.0, night_stage_time)
+		for speaker in speakers:
+			await _emote(speaker, EmoteBubble.Kind.ELLIPSIS)
+		if transition.is_running():
+			await transition.finished
 		if stage == 0 and is_instance_valid(fish):
 			fish.hide()
 
@@ -253,6 +407,7 @@ func _cut_to_campfire(jamshid: JamshidNpc, fish: Fish, rod: Node2D) -> Campfire:
 	actor.play_pose("sit")
 	# The fire is between them; Hooshang has come round to sit on the far side.
 	var fire := _build_fire_at(base + Vector2(24.0, 0.0))
+	_encounter_fire = fire
 	fire.light()
 	var player := _world.player
 	player.global_position = base + Vector2(48.0, -6.0)
@@ -269,6 +424,7 @@ func _cut_to_campfire(jamshid: JamshidNpc, fish: Fish, rod: Node2D) -> Campfire:
 		_cook(fish)
 	# Long enough for the fire's own catch-fade to finish under the black.
 	await _hold(1.0)
+	_move_sun(0.70, sunset_descent_time)
 	await _fade_to(0.0, 0.9)
 	return fire
 
@@ -303,6 +459,7 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 	await _tween_node_x(jamshid, jump_x, 0.7)
 
 	var carpet := Sprite2D.new()
+	_departure_carpet = carpet
 	carpet.texture = CARPET_TEXTURE
 	carpet.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	carpet.scale = Vector2.ONE
@@ -312,9 +469,15 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 	actor.play_pose("jump")
 	var apex := Vector2(jump_x + 12, ground_y - 76)
 	await _tween_arc(jamshid, apex, carpet_from, 0.8)
+	_play_cue(preload("res://assets/audio/traversal/carpet_board.wav"), -14.0)
 	actor.play_pose("idle")
 	await _hooshang("That’s how you get to school?", "surprised")
+	if Dialogue.scene_skip_requested(self):
+		return
 	await _jamshid(jamshid, "How do you think I keep arriving before you?", "joyful")
+	if Dialogue.scene_skip_requested(self):
+		return
+	_play_cue(preload("res://assets/sfx/dash_swoosh.wav"), -16.0)
 	var ride := create_tween().set_parallel()
 	ride.tween_property(jamshid, "global_position", carpet_to, 1.4) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
@@ -402,26 +565,32 @@ func _splash(at: Vector2) -> void:
 	splash.set_script(preload("res://scenes/props/fishing_splash.gd"))
 	_world.add_child(splash)
 	splash.global_position = at.round()
-	_sound(false)
 
 
-## Small deterministic PCM cues: a metallic school bell and a short water splash.
-func _sound(bell: bool) -> void:
+## Deterministic metallic school bell. Fishing splashes are visual only.
+func _school_bell() -> void:
 	var audio := AudioStreamPlayer.new()
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = 22050
-	var duration := 1.8 if bell else 0.3
+	var duration := 1.8
 	var data := PackedByteArray()
 	data.resize(int(22050 * duration) * 2)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 42
 	for i in data.size() / 2:
 		var t := float(i) / 22050.0
-		var sample := (sin(TAU * 880 * t) + 0.45 * sin(TAU * 2341 * t)) * exp(-3.5 * t) if bell else rng.randf_range(-1, 1) * exp(-16 * t)
+		var sample := (sin(TAU * 880 * t) + 0.45 * sin(TAU * 2341 * t)) * exp(-3.5 * t)
 		data.encode_s16(i * 2, int(sample * 7000 * minf(t * 100, 1.0)))
 	stream.data = data
 	audio.stream = stream
+	add_child(audio)
+	audio.finished.connect(audio.queue_free)
+	audio.play()
+
+
+func _play_cue(stream: AudioStream, volume: float) -> void:
+	var audio := AudioStreamPlayer.new()
+	audio.stream = stream
+	audio.volume_db = volume
 	add_child(audio)
 	audio.finished.connect(audio.queue_free)
 	audio.play()
@@ -465,6 +634,8 @@ func _build_stars() -> void:
 ## (`await _tween_sky(...).finished`) or hold it and let it run under other beats
 ## (the night-to-dawn tween runs while the two trade silent "..." reactions).
 func _tween_sky(to: Color, time: float) -> Tween:
+	if to == NIGHT:
+		_move_sun(1.0, time)
 	var t := create_tween()
 	if _canvas_mod != null:
 		t.tween_property(_canvas_mod, "color", to, time).set_trans(Tween.TRANS_SINE)
@@ -481,7 +652,8 @@ func _fade_stars(to: float, time: float) -> void:
 	if time <= 0.0:
 		_stars.amount = to
 		return
-	create_tween().tween_property(_stars, "amount", to, time)
+	_stars_tween = create_tween()
+	_stars_tween.tween_property(_stars, "amount", to, time)
 
 
 # --------------------------------------------------------------- dialogue -----
@@ -503,6 +675,7 @@ func _emote(over: Node2D, kind: EmoteBubble.Kind) -> void:
 	var bubble: EmoteBubble = EMOTE_SCENE.instantiate()
 	over.add_child(bubble)
 	bubble.position = Vector2(0.0, emote_height)
+	bubble.hold_time = night_emote_hold
 	await bubble.play(kind)
 	if is_instance_valid(bubble):
 		bubble.queue_free()
@@ -574,3 +747,17 @@ func _find_jamshid(node: Node) -> JamshidNpc:
 		if found != null:
 			return found
 	return null
+
+
+## Story time moves the sun within its painting, independently of the camera.
+func _move_sun(to: float, duration: float) -> void:
+	if _sun_tween != null and _sun_tween.is_valid():
+		_sun_tween.kill()
+	_sun_tween = create_tween()
+	_sun_tween.tween_method(_set_sun_descent, _sun_descent, to, duration) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+func _set_sun_descent(value: float) -> void:
+	_sun_descent = value
+	get_tree().call_group("act2_sky", "set_sun_descent", value)

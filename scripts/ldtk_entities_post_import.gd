@@ -60,6 +60,8 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 	var player_spawn_count := 0
 	for data: Dictionary in entity_layer.entities:
 		match data.identifier:
+			"DarkshangChargeTrigger", "ShadowEruptionTrigger", "ShadowEruption":
+				entity_layer.add_child(_build_darkshang_power(data))
 			"PlayerStart":
 				player_spawn_count += 1
 				var spawn_id := _field_str(data, "SpawnID")
@@ -105,7 +107,11 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			# Platform/CrumblingPlatform (SpringPlatform extends Platform), so
 			# it reuses the same builder — see spring_platform.gd.
 			"SpringPlatform":
-				entity_layer.add_child(_build_platform(data, SPRING_PLATFORM_SCENE))
+				var spring := _build_platform(data, SPRING_PLATFORM_SCENE)
+				match _field_enum(data, "Facing"):
+					"Right": spring.rotation_degrees = 90.0
+					"Left": spring.rotation_degrees = -90.0
+				entity_layer.add_child(spring)
 			"GlassSpikes":
 				entity_layer.add_child(_build_glass_spikes(data, GlassSpikes.Facing.UP))
 			"GlassSpikesCeiling":
@@ -307,6 +313,7 @@ func _light_fields(node: CeilingPanel, data: Dictionary) -> void:
 
 func _build_glass_spikes(data: Dictionary, facing: GlassSpikes.Facing) -> Area2D:
 	var spikes: Area2D = GLASS_SPIKES_SCENE.instantiate()
+	spikes.psychedelic_palette = _field_float(data, "PsychedelicPalette", 0.0) > 0.0
 	spikes.position = data.position
 	spikes.facing = facing
 	var drawn := Vector2(data.size)
@@ -326,6 +333,7 @@ func _build_glass_spikes(data: Dictionary, facing: GlassSpikes.Facing) -> Area2D
 ## dragged diagonally in LDtk still yields a strip rather than a block.
 func _build_cone_spikes(data: Dictionary, facing: ConeSpikes.Facing) -> Area2D:
 	var spikes: Area2D = CONE_SPIKES_SCENE.instantiate()
+	spikes.psychedelic_palette = _field_float(data, "PsychedelicPalette", 0.0) > 0.0
 	spikes.position = data.position
 	spikes.facing = facing
 	var drawn := Vector2(data.size)
@@ -400,6 +408,8 @@ func _build_thought(data: Dictionary) -> Area2D:
 	thought.palette = DarkThought.Palette.CHILDHOOD \
 		if _field_float(data, "ChildhoodPalette", 0.0) > 0.0 \
 		else DarkThought.Palette.OFFICE
+	if _field_float(data, "PsychedelicPalette", 0.0) > 0.0:
+		thought.palette = DarkThought.Palette.PSYCHEDELIC
 	# ABOVE THE ROOM'S OWN TILES, for the reason _build_ceiling_panel gives: the
 	# Entities layer is built before Collisions and both sit at z 0, so anything
 	# that passes in front of painted brick is drawn and then covered by the
@@ -470,17 +480,16 @@ func _build_magic_carpet(data: Dictionary) -> Area2D:
 	var carpet: Area2D = MAGIC_CARPET_SCENE.instantiate()
 	carpet.position = data.position
 	carpet.size = Vector2(Vector2(data.size).x, MagicCarpet.TILE.y)
-	# CarpetPattern crosses the boundary QUALIFIED, same reason _build_thought
-	# reads Motion with _field_enum and not _field_str — see that function's
-	# doc for what happens if this is gotten wrong.
-	match _field_enum(data, "CarpetPattern"):
-		"Bob": carpet.pattern = MagicCarpet.CarpetPattern.BOB
-		"Sweep": carpet.pattern = MagicCarpet.CarpetPattern.SWEEP
-		"Bounce": carpet.pattern = MagicCarpet.CarpetPattern.BOUNCE
-		_: carpet.pattern = MagicCarpet.CarpetPattern.RIDE
+	# Legacy enum values retain their artwork, but every carpet now rides.
+	var color := _field_enum(data, "CarpetColor")
+	if color.is_empty():
+		color = _field_enum(data, "CarpetPattern")
+	match color:
+		"Teal", "Bob": carpet.carpet_color = MagicCarpet.CarpetColor.TEAL
+		"Violet", "Sweep": carpet.carpet_color = MagicCarpet.CarpetColor.VIOLET
+		"Amber", "Bounce": carpet.carpet_color = MagicCarpet.CarpetColor.AMBER
+		_: carpet.carpet_color = MagicCarpet.CarpetColor.CRIMSON
 	carpet.speed = _field_float(data, "Speed", carpet.speed)
-	carpet.amplitude = absf(_field_float(data, "Amplitude", carpet.amplitude))
-	carpet.steer_range = absf(_field_float(data, "SteerRange", carpet.steer_range))
 	return carpet
 
 
@@ -666,6 +675,7 @@ func _build_jamshid_npc(data: Dictionary) -> JamshidNpc:
 ## box and rungs on that too.
 func _build_ladder(data: Dictionary) -> Ladder:
 	var ladder: Ladder = LADDER_SCENE.instantiate()
+	ladder.psychedelic_palette = _field_float(data, "PsychedelicPalette", 0.0) > 0.0
 	ladder.position = data.position
 	var drawn := Vector2(data.size)
 	ladder.height = drawn.y if drawn.y > 0.0 else ladder.height
@@ -763,3 +773,26 @@ func _build_rumi_trigger(data: Dictionary) -> Area2D:
 	trigger.add_child(rumi_light)
 
 	return trigger
+
+
+func _build_darkshang_power(data: Dictionary) -> Node2D:
+	var node: Node2D = load("res://scenes/props/chase/powers/%s.tscn" % data.identifier).instantiate()
+	node.position = data.position
+	node.size = Vector2(data.size).max(Vector2.ONE)
+	var fields := {"WarningTime":"warning_time", "RepeatDelay":"repeat_delay"}
+	if data.identifier == "DarkshangChargeTrigger":
+		fields.merge({"Angle":"angle", "Speed":"speed", "Distance":"distance", "RecoveryTime":"recovery_time"})
+		node.aim_at_player = _field_float(data,"AimAtPlayer",1) > 0
+		node.use_launch_offset = _field_float(data,"UseLaunchOffset",0) > 0
+		node.launch_offset = Vector2(_field_float(data,"LaunchOffsetX",0),_field_float(data,"LaunchOffsetY",0))
+	else:
+		var key := _field_str(data,"EncounterID")
+		node.encounter_id = key if not key.is_empty() else "A"
+		if data.identifier == "ShadowEruption":
+			fields = {"WarningTime":"warning_time", "ActiveTime":"active_time"}
+			node.sequence = maxi(0,_field_int(data,"Sequence",0))
+		else:
+			fields = {"RepeatDelay":"repeat_delay", "SequenceDelay":"sequence_delay"}
+	for key in fields:
+		node.set(fields[key],_field_float(data,key,float(node.get(fields[key]))))
+	return node

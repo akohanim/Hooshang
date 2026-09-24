@@ -255,13 +255,17 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _play_beat(player: Player) -> void:
-	player.input_locked = true
+	var beats := script_beats()
+	Dialogue.begin_conversation(self, player)
 	await appear()
-	for beat: Dictionary in script_beats():
+	for beat: Dictionary in beats:
 		await Dialogue.say("Rumi", beat["text"], RUMI_GOLD,
 			Act1Beats.RUMI_FACES.get(beat["face"]), portrait_side(player))
-	await vanish()
-	player.input_locked = false
+	if Dialogue.scene_skip_requested(self):
+		vanish_immediately()
+	else:
+		await vanish()
+	Dialogue.end_conversation()
 	arm_room_door()
 
 
@@ -368,6 +372,14 @@ func _feet_row(tex: Texture2D) -> float:
 				_feet_row_cache = float(y + 1)
 				return _feet_row_cache
 	return _feet_row_cache
+
+
+## Scene-skip endpoint: no departing animation remains after control returns.
+func vanish_immediately() -> void:
+	breathe(false)
+	_rumi.modulate.a = 0.0
+	_rumi_light.energy = 0.0
+	_glow.energy = 0.0
 
 
 func vanish() -> void:

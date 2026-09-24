@@ -30,6 +30,8 @@ extends Node2D
 @export var flickers := false
 @export var flicker_amount := 0.18
 @export var flicker_speed := 14.0
+## Dim the visible bulb along with its light pool when requested.
+@export var flicker_body := false
 
 @onready var cable: ColorRect = $Cable
 @onready var bulb: ColorRect = $Bulb
@@ -66,4 +68,7 @@ func _process(delta: float) -> void:
 	_t += delta * flicker_speed
 	# Two-frequency wobble so the buzz doesn't read as a clean sine.
 	var n := sin(_t) * 0.6 + sin(_t * 2.3 + 1.0) * 0.4
-	glow.energy = light_energy * (1.0 - flicker_amount * (0.5 + 0.5 * n))
+	var brightness := 1.0 - flicker_amount * (0.5 + 0.5 * n)
+	glow.energy = light_energy * brightness
+	if flicker_body:
+		bulb.self_modulate = Color(brightness, brightness, brightness, 1.0)

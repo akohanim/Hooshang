@@ -1,3 +1,7 @@
+> **Hanging fixtures:** standalone cord-and-bulb lamps are retained only in Act I’s opening and finale cubicles. The former `TileLampRoom6` and `LedgeLampRoom2` fixtures have been removed. Window lighting and ceiling panels remain.
+
+> **Finale dawn:** `Level_25` keeps the opening cubicle architecture but replaces its moon/stars with `office_dawn.gd` sky and a low sun, clipped to `OfficeWindowPanes`. The dawn is a sibling of the wall, so wall reflectance cannot dim its unshaded sky. `DawnGlowRoom25`, both `DawnSpillRoom25` fixtures and `SunShaftRoom25` illuminate the room only while it is active. `Level_0` stays at night. Regression: `tests/finale_dawn_test.tscn`; run windowed to also capture `/tmp/hooshang-finale-dawn.png`.
+
 > **Full Act I office art:** all 34 rooms now have native-resolution back walls. Existing eclipse and dawn fixtures are unchanged. New V-room windows remain cold; added windows in 22–23 continue the warm pre-dawn ramp. `room_backdrop_tints` adjusts only wall reflectance in the brightest office rooms, preserving the light settings. See `assets/background/act1_office/README.md`.
 
 > **Office background update:** Level_0–Level_9 now use unique shaded pixel-art backgrounds. Their old MoonWindow/MoonGlow/WallPattern placements are removed; moon views in rooms 0–6 now carry OfficeMoon emission (unshaded core/halo plus a small PointLight2D), and music rooms 7–9 remain windowless with black CanvasModulate. Later rooms retain the lighting recipes below. See `assets/background/act1_office/README.md`.

@@ -37,7 +37,7 @@ class Author:
   self.layers['Entities']['entityInstances'].append(e)
  def bake(self):
   ld=next(d for d in self.p['defs']['layers'] if d['identifier']=='Collisions')
-  rules=[r for g in ld['autoRuleGroups'] if g['active'] and g['name'].startswith(('brick_new /','stone /')) for r in g['rules'] if r['active']]
+  rules=[r for g in ld['autoRuleGroups'] if g['active'] and g['name'].startswith(('brick_new /','stone /','scaffolding /')) for r in g['rules'] if r['active']]
   groups={v['value']:v['groupUid'] for v in ld['intGridValues']};a=self.layers['Collisions']
   for i,v in enumerate(a['intGridCsv']):
    if not v:continue
@@ -53,40 +53,78 @@ def new_room(p,name,w,h,index):
  p['levels'].append(level);p['nextUid']=max(p['nextUid'],level['uid']+1)
  return level
 
-def build(p):
+def build(p, only=None):
  configs=json.loads(CONFIG.read_text());changed=[]
  for i,c in enumerate(configs):
+  if only is not None and c['name'] not in only:continue
   level=next((l for l in p['levels'] if l['identifier']==c['name']),None)
   if level is None:level=new_room(p,c['name'],c['width'],c['height'],i)
-  assert (level['pxWid'],level['pxHei'])==(c['width'],c['height'])
+  level['pxWid']=c['width'];level['pxHei']=c['height']
+  if 'world_position' in c:level['worldX'],level['worldY']=c['world_position']
   a=Author(p,level);route=c['route'];crumble=c.get('crumbles',[])
   for n,(x,y,w) in enumerate(route):
-   if n in crumble:a.entity('CrumblingPlatform',x+w/2,y+4,width=w)
-   else:a.rect(x,y,w,16 if n not in (0,len(route)-1) and n not in c.get('belts',[]) else c['height']-y,8 if n in c.get('checkpoints',[]) else 7)
+   note=c.get('note_landings',{}).get(str(n))
+   if note is not None:
+    assert w==16, 'A musical landing uses the actual 16px NoteTile collider'
+    a.entity('MusicNote'+str(note),x+w/2,y+8)
+   elif n in crumble:a.entity('CrumblingPlatform',x+w/2,y+4,width=w)
+   else:
+    suspended=n not in (0,len(route)-1) and n not in c.get('belts',[])
+    shallow=suspended or c.get('ladders') or c['name']=='Level_V12' and n==len(route)-1
+    depth=c.get('deck_depth',{}).get(str(n),8 if shallow else c['height']-y)
+    a.rect(x,y,w,depth,8 if n in c.get('checkpoints',[]) else 7)
   a.rect(0,0,c['width'],8,8);a.rect(0,c['height']-8,c['width'],8,8)
-  a.entity('ConeSpikes',c['width']/2,c['height']-12,width=c['width'])
+  if not c.get('recovery',False):a.entity('ConeSpikes',c['width']/2,c['height']-12,width=c['width'])
+  else:a.rect(0,c['height']-24,c['width'],24,7)
   for r in c.get('ceilings',[]):a.rect(*r,8)
+  for r in c.get('bulkheads',[]):a.rect(*r,8)
+  for name,x,y,w,h in c.get('spikes',[]):a.entity(name,x,y,width=w,height=h)
   direction=c['direction'];sx,sy,sw=route[0];ex,ey,ew=route[-1]
   a.entity('PlayerStart',sx+24 if direction>0 else sx+sw-24,sy-8,SpawnID=c['name']+'_entrance')
   a.entity('Exit',c['width']-24 if direction>0 else 0,ey-32)
   for n in c.get('checkpoints',[]):
    x,y,w=route[n];a.entity('Checkpoint',x+w/2,y-8,CheckpointID=c['name']+'_landing_'+str(n))
   for x,y in c.get('lemons',[]):a.entity('Lemon',x,y)
+  # Musical locks are ordinary room entities.  NoteSequence finds them at
+  # runtime, owns their ordering, and replaces the exit with its shared gate.
+  # Keeping the coordinates in the route recipe makes a chase lock part of the
+  # course instead of a separate hand-maintained LDtk pass.
+  for index,x,y in c.get('music_notes',c.get('encounter',{}).get('music_notes',[])):
+   a.entity('MusicNote'+str(index),x,y)
   for n in c.get('belts',[]):
    x,y,w=route[n]
-   # The solid belt fits exactly over a recessed stretch of this landing.
-   # It is supported, so RoomCollapse leaves it in place on the escape.
-   for yy in range(y//8,min(a.h,y//8+2)):
+   # Leave an 8px service gap below the 16px belt. RoomCollapse probes
+   # just below its collider; the gap keeps that ray outside the support
+   # tiles and within its settled tolerance, so mounted belts stay put.
+   for yy in range(y//8,min(a.h,y//8+3)):
     for xx in range(x//8,(x+w)//8):a.layers['Collisions']['intGridCsv'][yy*a.w+xx]=0
    a.entity('ConveyorBelt_Right' if direction>0 else 'ConveyorBelt_Left',x+w/2,y+8,width=w,height=16,speed=28.0 if direction>0 else 36.0)
-  for x,y,amp,speed in c.get('thoughts',[]):
-   a.entity('DarkThought',x,y,Motion='Vertical',Amplitude=amp,Speed=speed,Phase=0.0,Glow=1.0)
+  if 'mystery_box' in c:
+   a.entity('MysteryBox',*c['mystery_box'],MushroomType='BlackWhite')
+  for t in c.get('thought_patterns',[]):
+   a.entity(t['tone'],t['x'],t['y'],Motion=t['motion'],Amplitude=t['amplitude'],Speed=t['speed'],Phase=t['phase'],Clockwise=float(t.get('clockwise',1)),Glow=1.0,Angle=float(t['angle']))
+  for x,top,bottom in c.get('ladders',[]):
+   a.entity('Ladder',x,(top+bottom)/2,height=bottom-top)
+  # Connected steel decks with masonry sockets. Keep exactly the same collider
+  # geometry: this is a material/topology change, not invisible decoration.
+  if c.get('scaffolding',False):
+   cells=a.layers['Collisions']['intGridCsv']
+   for n,(x,y,w) in enumerate(route):
+    if n in crumble or n in c.get('belts',[]) or str(n) in c.get('note_landings',{}):continue
+    for yy in range(y//8,min(a.h,y//8+1)):
+     for xx in range(x//8,(x+w)//8):
+      if cells[yy*a.w+xx]:cells[yy*a.w+xx]=5
+    # Masonry sockets sit OUTSIDE the beam, not as a second scaffold row.
+    if n not in (0,len(route)-1) and not c.get("ladders") and c.get("scaffold_sockets",True):
+     if x>=8:cells[(y//8)*a.w+x//8-1]=8
+     if x+w<c['width']:cells[(y//8)*a.w+(x+w)//8]=7
   # Only five fixtures in a long room; pools never exhaust the 16-light cap.
-  for x in range(56,c['width'],128):
+  for x in range(56,c['width'],max(128,((c['width']//5+7)//8)*8)):
    nearest=min(route,key=lambda r:abs(r[0]+r[2]/2-x))
    y=max(24,nearest[1]-56)
    a.entity('CeilingLight',x,y,PoolEnergy=1.0,PoolScale=1.7,PoolDrop=32.0,PanelEnergy=0.75,FlickerAmount=0.04 if direction<0 else 0.0,MotionRange=0.0)
   a.bake();changed.append(level['identifier'])
+ if only is not None:return changed
  # Darkshang: deliberate approach, uninterrupted reveal dais, then a return
  # sprint through two short gaps. No checkpoint can respawn past the reveal.
  level=next(l for l in p['levels'] if l['identifier']=='Level_14')
@@ -97,8 +135,7 @@ def build(p):
  for x,w in [(160,32),(296,32)]:a.entity('ConeSpikes',x+w/2,180,width=w)
  a.entity('PlayerStart',24,160)
  a.layers['Entities']['entityInstances'].extend(preserved)
- # A single clearly telegraphed surge on broad floor AFTER the first escape jump.
- a.entity('SurgePoint',104,128,width=48,height=96,surge_duration=0.7,surge_intensity=0.35)
+ # The first meeting creates unease; environmental attacks begin in Level_15.
  for x in [80,240,384,528]:a.entity('CeilingLight',x,32,PoolEnergy=0.8,PoolScale=1.8,PoolDrop=100.0,PanelEnergy=0.5,FlickerAmount=0.15,MotionRange=0.0)
  a.bake();changed.append('Level_14')
  # Home is the ORIGINAL cubicle's geometry and background, with only a return
@@ -115,8 +152,8 @@ def build(p):
  return changed
 
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--install',action='store_true');args=ap.parse_args()
- text=P.read_text();p=json.loads(text);before=copy.deepcopy(p);changed=build(p)
+ ap=argparse.ArgumentParser();ap.add_argument('--install',action='store_true');ap.add_argument('--rooms',nargs='+');args=ap.parse_args()
+ text=P.read_text();p=json.loads(text);before=copy.deepcopy(p);changed=build(p,args.rooms)
  # Preserve non-target objects byte-for-byte. Appended new rooms land immediately
  # before the levels array's closing bracket, without reformatting the project.
  edits=[]
@@ -136,5 +173,17 @@ def main():
  for old in before['levels']:
   if old['identifier'] not in changed:assert old==next(l for l in p['levels'] if l['identifier']==old['identifier'])
  dest=P if args.install else ROOT/'output/act1_expansion/candidate.ldtk';dest.write_text(text)
+ # The post-import hook embeds the room recipe. A pacing-only recipe edit
+ # leaves LDtk geometry byte-identical, so Godot's content hash otherwise
+ # skips it and silently retains the previous encounter. Invalidate only
+ # this world's generated cache; the next import rebuilds it from source.
+ if args.install:
+  metadata=P.with_suffix('.ldtk.import')
+  if metadata.exists():
+   cached_path=re.search(r'^path="res://([^"]+)"',metadata.read_text(),re.M)
+   if cached_path and cached_path[1].startswith('.godot/imported/'):
+    cached=ROOT/cached_path[1]
+    cached.unlink(missing_ok=True)
+    cached.with_suffix('.md5').unlink(missing_ok=True)
  print('Built',', '.join(changed));print(dest)
 if __name__=='__main__':main()

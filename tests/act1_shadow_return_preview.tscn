@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/act1_shadow_return_preview.gd" id="1"]
+[node name="ShadowReturnPreview" type="Node"]
+script = ExtResource("1")
