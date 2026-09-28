@@ -17,39 +17,30 @@ extends Node
 ## that names the new type.
 const LADDER_SCENE := preload("res://scenes/props/zones/Ladder.tscn")
 
-## A rail hung in open air over room 0. slide_test confirms x~100, y 180..230 is
-## empty floor-less space in this room, so a ladder there tops out into clear air
-## for the jump. TOP is the rail's top edge; BOTTOM its foot.
+## An isolated rail in open air. A partial floor is added later to reproduce
+## the top-edge dismount bug without depending on changing story-room geometry.
 const RAIL_X := 100.0
 const RAIL_HEIGHT := 40.0
 const TOP_Y := 190.0
 
 var failures: Array[String] = []
-var world: LdtkWorld
+var world: Node2D
 var player: Player
 var ladder: Area2D
 
 
 func _ready() -> void:
-	world = load("res://ldtk/Act1World.tscn").instantiate()
-	Screen.set_scene(world)
-	for i in 30:
-		if not world.rooms.is_empty():
-			break
-		await get_tree().process_frame
-	await _frames(30)
-	# The opening cutscene owns room 0 (locks input, fades, waits on presses).
-	# Nothing here is about the story, so the beats go — same as slide_test.
-	var beats := world.get_node_or_null("Act1Beats")
-	if beats != null:
-		beats.free()
-	player = world.player
+	# Isolated geometry: room 0 now has a cutscene and floor in the old test site.
+	world = Node2D.new()
+	add_child(world)
+	player = preload("res://scenes/characters/hooshang/Hooshang.tscn").instantiate()
+	world.add_child(player)
 	player.input_locked = false
 	player.has_dash = true
 
 	ladder = LADDER_SCENE.instantiate()
 	ladder.height = RAIL_HEIGHT
-	world.rooms[0].add_child(ladder)
+	world.add_child(ladder)
 	# Area2D origin is the shape's CENTRE, so top edge = centre.y - height/2.
 	ladder.global_position = Vector2(RAIL_X, TOP_Y + RAIL_HEIGHT * 0.5)
 	await _frames(5)
@@ -70,6 +61,15 @@ func _ready() -> void:
 		"holding up never carries him off the top  [rose %.1fpx over the edge]" % (top_y - player.global_position.y))
 	Input.action_release("move_up")
 
+	for action in ["move_left", "move_right"]:
+		Input.action_press(action)
+		await _frames(12)
+		Input.action_release(action)
+		_check(player.climbing() and absf(player.global_position.x - RAIL_X) < 1.0,
+			"horizontal input keeps a secure top grip: " + action)
+
+	# Up must remain held THROUGH the jump, reproducing the reported re-grab.
+	Input.action_press("move_up")
 	# --- a jump from the top is a FULL jump ---
 	# Captured as launch speed, not apex height, so a ceiling over the rail could
 	# never make a full jump read as a hop. Full ≈ -jump_speed; the mid-rail hop
@@ -77,6 +77,8 @@ func _ready() -> void:
 	var top_launch := await _jump_launch_speed()
 	_check(top_launch < -(player.jump_speed * 0.9),
 		"jumping from the top launches at full jump_speed  [%.0f of -%.0f]" % [top_launch, player.jump_speed])
+
+	Input.action_release("move_up")
 
 	# --- a mid-rail jump is still the reduced hop ---
 	await _grip_from(Vector2(RAIL_X, top_y + RAIL_HEIGHT - 4.0))
@@ -102,6 +104,29 @@ func _ready() -> void:
 	_check(player.climbing() and player.global_position.y > at_top + 8.0,
 		"pressing down from the top climbs back down the rail  [%.1f -> %.1f]" % [at_top, player.global_position.y])
 
+	# A real floor brushing one half of the top used to release the grip or
+	# trigger ledge-slip. Keep support under just one edge of the player.
+	var shelf := StaticBody2D.new()
+	var shape := CollisionShape2D.new()
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = Vector2(16, 8)
+	shape.shape = rectangle
+	shelf.add_child(shape)
+	world.add_child(shelf)
+	shelf.global_position = Vector2(RAIL_X + 10, top_y + 10)
+	await _grip_from(Vector2(RAIL_X, top_y - 1))
+	Input.action_press("move_down")
+	await _frames(5)
+	Input.action_release("move_down")
+	_check(player.is_on_floor(), "top-edge fixture really touches floor")
+	for action in ["move_left", "move_right"]:
+		Input.action_press(action)
+		await _frames(15)
+		Input.action_release(action)
+		_check(player.state == Player.State.CLIMB and player.at_ladder_top(),
+			"brushing floor then steering keeps top grip: " + action)
+	_release_all()
+
 	if failures.is_empty():
 		print("LADDER TOP TEST: ALL PASS")
 	else:
@@ -118,8 +143,7 @@ func _grip_from(where: Vector2) -> void:
 	_release_all()
 	if player.climbing():
 		player.exit_ladder(ladder)
-	player.global_position = where
-	player.velocity = Vector2.ZERO
+	player.respawn(where)
 	await _frames(4)
 	Input.action_press("move_up")
 	await _frames(3)
@@ -135,6 +159,9 @@ func _jump_launch_speed() -> float:
 	for i in 4:
 		await _frames(1)
 		vmin = minf(vmin, player.velocity.y)
+	if Input.is_action_pressed("move_up"):
+		_check(not player.climbing() and player.global_position.y < TOP_Y - 4.0,
+			"holding Up through jump clears the rail without re-grabbing")
 	Input.action_release("jump")
 	await _frames(20)   # land / settle before the next measurement
 	return vmin

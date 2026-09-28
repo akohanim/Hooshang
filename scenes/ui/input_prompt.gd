@@ -26,6 +26,10 @@ const ART := preload("res://assets/ui/prompt_dash.png")
 @export var bob := 1.5
 @export var bob_time := 1.4
 
+## Touch wording replaces key art while keeping the same bubble footprint.
+@export var touch_text := "SWIPE\nUP + RIGHT"
+
+var _touch_panel: PanelContainer
 var _sprite: Sprite2D
 var _bob: Tween
 
@@ -41,6 +45,10 @@ func _ready() -> void:
 	_sprite.offset = Vector2(-ART.get_width() * 0.5, -ART.get_height())
 	_sprite.modulate.a = 0.0
 	add_child(_sprite)
+	_touch_panel = $TouchPanel
+	_touch_panel.reparent(_sprite, false)
+	InputDevice.changed.connect(_device_changed)
+	_device_changed(InputDevice.current)
 
 
 ## Float it in over `at` (a world position — the spot he is standing on).
@@ -83,3 +91,11 @@ func dismiss() -> void:
 	t.tween_property(_sprite, "position:y", -6.0, fade_time) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	t.chain().tween_callback(queue_free)
+
+
+func _device_changed(_device: int) -> void:
+	if _sprite == null or _touch_panel == null:
+		return
+	_touch_panel.visible = InputDevice.is_touch()
+	_touch_panel.get_node("Text").text = touch_text
+	_sprite.self_modulate.a = 0.0 if InputDevice.is_touch() else 1.0

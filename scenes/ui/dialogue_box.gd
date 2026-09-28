@@ -262,6 +262,8 @@ var _blink_left := 0.0
 ## How far into a blink we are, or -1 when the eyes are simply open.
 var _blink_t := -1.0
 
+var _touch_gesture = preload("res://scenes/ui/touch/touch_menu_gesture.gd").new()
+var _touch_skip_finger := -1
 var _active := false
 var _revealing := false
 var _reveal_accum := 0.0
@@ -1214,6 +1216,8 @@ func begin_conversation(owner: Node, player: Player = null) -> void:
 
 
 func end_conversation() -> void:
+	_touch_skip_finger = -1
+	_touch_gesture.reset()
 	_release_conversation_player()
 	_conversation_owner = null
 	_conversation_skippable = false
@@ -1254,6 +1258,8 @@ func _release_conversation_player() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_touch_skip_finger = -1
+		_touch_gesture.reset()
 		_skip_held_time = 0.0
 		_skip_needs_release = true
 
@@ -1261,7 +1267,7 @@ func _notification(what: int) -> void:
 func _tick_skip_hold(delta: float) -> void:
 	if _conversation_owner != null and not is_instance_valid(_conversation_owner):
 		end_conversation()
-	if not Input.is_action_pressed("skip_dialogue"):
+	if not (Input.is_action_pressed("skip_dialogue") or _touch_skip_finger >= 0):
 		_skip_held_time = 0.0
 		_skip_needs_release = false
 	elif _active and _conversation_skippable and not _skip_needs_release and not _skip_requested:
@@ -1295,6 +1301,10 @@ func _tick_skip_hint(delta: float) -> void:
 
 
 func _update_control_hints() -> void:
+	if InputDevice.is_touch():
+		skip_hint.text = "Hold here to skip scene"
+		arrow.text = "Tap to continue"
+		return
 	var key := "X"
 	var confirm := "Space / Enter"
 	if InputDevice.is_controller():
@@ -1356,6 +1366,22 @@ func _voice_new_chars(new_count: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _active:
 		return
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		InputDevice.note_touch()
+		get_viewport().set_input_as_handled()
+		if event is InputEventScreenTouch:
+			if event.index == _touch_skip_finger:
+				if not event.pressed or event.canceled:
+					_touch_skip_finger = -1
+				return
+			var point: Vector2 = skip_hint.get_global_transform_with_canvas().affine_inverse() * event.position
+			if event.pressed and not event.canceled and skip_hint.visible 					and Rect2(Vector2.ZERO, skip_hint.size).has_point(point):
+				_touch_skip_finger = event.index
+				return
+		var gesture: Dictionary = _touch_gesture.read(event)
+		if gesture.has("tap"):
+			_touch_confirm()
+		return
 	if event.is_action("skip_dialogue"):
 		get_viewport().set_input_as_handled()
 		return
@@ -1368,3 +1394,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			# Second press: dismiss.
 			line_finished.emit()
+
+
+func _touch_confirm() -> void:
+	if _revealing:
+		_finish_reveal_instantly()
+	else:
+		line_finished.emit()
+
+
+func is_active() -> bool:
+	return _active

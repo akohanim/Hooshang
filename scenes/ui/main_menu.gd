@@ -87,6 +87,8 @@ var page := 0
 var _rows: Array[Dictionary] = []
 var _top := 0
 var _slot_mode := 0
+var _touch_gesture = preload("res://scenes/ui/touch/touch_menu_gesture.gd").new()
+
 var _fade: Tween
 var _font: FontVariation
 ## Which way the cursor is being held right now (-1 up, 0 neutral, 1 down), and
@@ -181,8 +183,9 @@ func show_root() -> void:
 		func() -> void: _start(func() -> void:
 			LdtkWorld.debug_start_room = ""
 			get_tree().change_scene_to_file(PICKER))))
-	built.append(_row("QUIT", "leave the office the other way",
-		func() -> void: get_tree().quit()))
+	if not OS.has_feature("web"):
+		built.append(_row("QUIT", "leave the office the other way",
+			func() -> void: get_tree().quit()))
 	_populate(built)
 
 
@@ -391,6 +394,21 @@ func _place_caret() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		InputDevice.note_touch()
+		get_viewport().set_input_as_handled()
+		var gesture: Dictionary = _touch_gesture.read(event, true)
+		if gesture.has("scroll"):
+			_move(gesture.scroll)
+		elif gesture.has("tap"):
+			var click := InputEventMouseButton.new()
+			click.button_index = MOUSE_BUTTON_LEFT
+			click.pressed = true
+			click.position = gesture.tap
+			_mouse_input(click)
+		return
+	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
+		return
 	if event is InputEventMouse:
 		_mouse_input(event)
 		return
@@ -472,6 +490,7 @@ func _is_nav(event: InputEvent) -> bool:
 ## held direction repeats. Holding an arrow key now repeats too, which it did not
 ## before — a menu that ignores a held key feels broken in the other direction.
 func _process(delta: float) -> void:
+	hint.text = "TAP TO SELECT    SWIPE TO SCROLL" if InputDevice.is_touch() else "W/S / STICK  MOVE    C / A / CLICK  SELECT    ESC / B  BACK"
 	if _rows.is_empty():
 		return
 	var axis := Input.get_action_strength("move_down") - Input.get_action_strength("move_up")

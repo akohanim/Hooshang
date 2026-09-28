@@ -17,6 +17,7 @@ var _tick_elapsed := 0.0
 var _was_paused := false
 var _leaving := false
 var _preview := false
+var _touch_gesture = preload("res://scenes/ui/touch/touch_menu_gesture.gd").new()
 var _pop: Tween
 
 func _ready() -> void:
@@ -47,6 +48,8 @@ func _ready() -> void:
 	_draw_value(0, 0)
 
 func _process(delta: float) -> void:
+	if InputDevice.is_touch():
+		$Root/Hint.text = "TAP TO CONTINUE" if complete else "TAP TO SKIP TALLY"
 	if complete or _leaving:
 		return
 	_elapsed += delta
@@ -89,7 +92,7 @@ func _reveal_final() -> void:
 func _finish() -> void:
 	complete = true
 	$Tick.stop()
-	$Root/Hint.text = "JUMP / CONFIRM TO CONTINUE"
+	$Root/Hint.text = "TAP TO CONTINUE" if InputDevice.is_touch() else "JUMP / CONFIRM TO CONTINUE"
 
 func skip_tally() -> void:
 	if complete:
@@ -103,16 +106,25 @@ func skip_tally() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_echo() or _leaving:
 		return
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		InputDevice.note_touch()
+		get_viewport().set_input_as_handled()
+		if _touch_gesture.read(event).has("tap"):
+			_confirm()
+		return
 	if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
 		get_viewport().set_input_as_handled()
-		if not complete:
-			skip_tally()
-		else:
-			_leaving = true
-			get_tree().paused = _was_paused
-			continued.emit()
-			if _preview:
-				get_tree().quit()
+		_confirm()
+
+func _confirm() -> void:
+	if not complete:
+		skip_tally()
+	else:
+		_leaving = true
+		get_tree().paused = _was_paused
+		continued.emit()
+		if _preview:
+			get_tree().quit()
 
 func _exit_tree() -> void:
 	get_tree().paused = _was_paused

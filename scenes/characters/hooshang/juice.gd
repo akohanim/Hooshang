@@ -280,10 +280,12 @@ func _play_squash_sequence(keys: Array, ease_mode: Tween.EaseType, trans_mode: T
 # --------------------------------------------------------------- dashing ----
 
 ## Call once, the moment a dash successfully starts.
-func on_dash_start(dash_dir: Vector2) -> void:
+func on_dash_start(dash_dir: Vector2, freeze_world := true) -> void:
 	$DashSound.play()
 	_trail_timer = 0.0  # spawn the first afterimage immediately
-	hitstop(hitstop_time)
+	# Input collection can already have supplied the startup hitstop.
+	if freeze_world:
+		hitstop(hitstop_time)
 	_play_squash_sequence([
 		[_along(dash_dir, dash_stretch), 0.04],
 		[Vector2.ONE, squash_ease_time * 1.4],

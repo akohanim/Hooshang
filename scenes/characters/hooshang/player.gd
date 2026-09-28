@@ -210,6 +210,8 @@ const HALF_HEIGHT := 6.0
 @export var dash_cooldown := 0.2
 ## Freeze-frame on dash start (~3 frames at 60fps). Sells the impact.
 @export var dash_freeze_time := 0.05
+## Time to collect direction keys after dash is pressed; overlaps dash hitstop.
+@export var dash_input_time := 0.05
 
 @export_group("Glow")
 ## Ability gate, same pattern as has_dash: OFF until earned. The musical-tile
@@ -283,6 +285,8 @@ const HALF_HEIGHT := 6.0
 @export var wall_jump_anim_time := 0.36
 
 @export_group("Climb")
+## Minimum time before a jump can re-grip the same rail.
+@export var ladder_regrab_time := 0.2
 ## Vertical speed while gripping a ladder, px/s — both directions use this,
 ## since nothing here asks for climbing up and down at different rates.
 @export var climb_speed := 60.0
@@ -506,6 +510,8 @@ var _lemon_glow_timer := 0.0    # seconds left on a lemon-bought glow; 0 = not r
 var mushroom_power_type: Mushroom.MushroomType = Mushroom.MushroomType.BLACK_WHITE
 var _mushroom_power_timer := 0.0
 
+var _dash_input_timer := 0.0
+var _dash_input_dir := Vector2.ZERO
 var dash_dir := Vector2.RIGHT
 
 ## His own collision box, and the width it goes back to. Duplicated in _ready so
@@ -532,6 +538,8 @@ var slide_speed := 0.0          # px/s it has built to so far
 # and when (touching it and reaching up or down — see ladder.gd), and hands
 # over to enter_ladder()/exit_ladder(); everything that actually moves him
 # while he climbs lives here, in one frame order.
+var _ladder_regrab_timer := 0.0
+var _ladder_jump_zone: Node = null
 var ladder_zone: Node = null    # which ladder, so a second one leaving can't clear it
 var ladder_x := 0.0             # the rail's x his box is held to while climbing
 var ladder_top := -INF          # the rail's top edge (world y); he stands on it as a platform, see _state_climb
@@ -654,12 +662,23 @@ func _physics_process(delta: float) -> void:
 		return
 	if invulnerable_timer > 0.0:
 		invulnerable_timer = maxf(invulnerable_timer - delta, 0.0)
-	# Dash hitstop: freeze everything for a few frames, then resume.
-	# Engine.time_scale (see juice.hitstop()) does NOT shrink this `delta` —
-	# it changes how often fixed-delta physics ticks happen in real time, not
-	# the delta value itself. So this counts down in exactly the same number
-	# of physics FRAMES either way; hitstop just stretches out how much real
-	# wall-clock time those frames take, which is the whole point of it.
+	if _dash_input_timer > 0.0:
+		if input_locked or not _can_dash():
+			_dash_input_timer = 0.0
+		else:
+			var direction := _movement_input()
+			if direction != Vector2.ZERO:
+				_dash_input_dir = direction
+			# Key forgiveness is real time, even while startup hitstop slows the world.
+			var input_delta := delta / maxf(Engine.time_scale, 0.001)
+			_dash_input_timer = maxf(0.0, _dash_input_timer - input_delta)
+			if _dash_input_timer <= 0.000001:
+				_dash_input_timer = 0.0
+				if _try_dash(_dash_input_dir, true):
+					freeze_timer = maxf(0.0, dash_freeze_time - dash_input_time)
+			return
+	# Direct/scripted dashes still use the normal startup freeze. Input-driven
+	# dashes have already spent their collection window frozen.
 	if freeze_timer > 0.0:
 		freeze_timer -= delta
 		return
@@ -677,11 +696,22 @@ func _physics_process(delta: float) -> void:
 	if input_x != 0.0 and state != State.LEDGE_MANTLE:
 		facing = 1 if input_x > 0.0 else -1
 	if not input_locked:
-		if Input.is_action_just_pressed("jump"):
+		var touch_jump: bool = TouchControls.consume_jump()
+		if Input.is_action_just_pressed("jump") or touch_jump:
 			jump_buffer_timer = jump_buffer_time
-		if Input.is_action_just_pressed("dash") and _try_dash():
-			return  # dash starts next frame, after the freeze-frames
-		if Input.is_action_just_pressed("glow"):
+		var swipe: Vector2 = TouchControls.consume_dash()
+		if swipe != Vector2.ZERO and _try_dash(swipe):
+			return
+		if Input.is_action_just_pressed("dash") and _can_dash():
+			_dash_input_dir = _movement_input()
+			_dash_input_timer = dash_input_time
+			if dash_input_time <= 0.0:
+				_try_dash()
+			else:
+				juice.hitstop(juice.hitstop_time)
+			return
+		var touch_glow: bool = TouchControls.consume_glow()
+		if Input.is_action_just_pressed("glow") or touch_glow:
 			_try_lemon_glow()
 
 	_tick_squeeze()
@@ -718,6 +748,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _tick_timers(delta: float) -> void:
+	_ladder_regrab_timer = maxf(0.0, _ladder_regrab_timer - delta)
 	_ledge_cooldown = maxf(0.0, _ledge_cooldown - delta)
 	coyote_timer = maxf(coyote_timer - delta, 0.0)
 	_exit_swim_grace_timer = maxf(_exit_swim_grace_timer - delta, 0.0)
@@ -810,14 +841,7 @@ func _state_wall_slide(delta: float) -> void:
 ## grip the same way it started: the ladder notices the overlap is gone and
 ## calls exit_ladder (see ladder.gd), not this function.
 func _state_climb(delta: float, input_x: float) -> void:
-	# How close his box centre must be to the rail's top edge to count as
-	# standing on the top rung (a few px of slack over the exact clamp point).
-	const LADDER_TOP_BAND := 3.0
-	# Standing on the very top rung: the ladder reads as a platform there — a
-	# full-power jump instead of the reduced hop-off, and he cannot climb clear
-	# off the top (see the rise clamp below), only stand or climb back down.
-	var at_top := is_finite(ladder_top) \
-		and global_position.y <= ladder_top + LADDER_TOP_BAND
+	var at_top := at_ladder_top()
 	if jump_buffer_timer > 0.0:
 		jump_buffer_timer = 0.0
 		if at_top:
@@ -833,11 +857,14 @@ func _state_climb(delta: float, input_x: float) -> void:
 		# point like landing, so a jump off it always has a dash even when he
 		# grabbed the ladder mid-air with the dash already spent.
 		dash_available = true
+		_ladder_jump_zone = ladder_zone
+		_ladder_regrab_timer = ladder_regrab_time
 		_clear_ladder()
 		state = State.JUMP
 		juice.on_jump()
 		return
-	if is_on_floor() and input_x != 0.0:
+	# At the top, sideways input aims the jump; only Down descends.
+	if not at_top and is_on_floor() and input_x != 0.0:
 		_clear_ladder()
 		state = State.RUN
 		return
@@ -1308,12 +1335,12 @@ func _apply_jump_hold() -> void:
 	if not use_jump_hold:
 		# The old model, kept switchable: cutting the jump early kills most of
 		# the upward speed rather than ending a thrust.
-		if state == State.JUMP and velocity.y < 0.0 and Input.is_action_just_released("jump"):
+		if state == State.JUMP and velocity.y < 0.0 and Input.is_action_just_released("jump") and not TouchControls.jump_held():
 			velocity.y *= jump_cut_multiplier
 		return
 	if jump_hold_timer <= 0.0:
 		return
-	if input_locked or not Input.is_action_pressed("jump"):
+	if input_locked or not (Input.is_action_pressed("jump") or TouchControls.jump_held()):
 		jump_hold_timer = 0.0
 		return
 	velocity.y = minf(velocity.y, -jump_speed)
@@ -1386,11 +1413,17 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 ## A circular deadzone plus angular sectors gives a light diagonal tilt the
 ## same aim as a full tilt. Keep analog speed, but allow full horizontal speed
 ## while aiming diagonally (keyboard and d-pad retain their existing vectors).
+func movement_input() -> Vector2:
+	return _movement_input()
+
+
 func _movement_input() -> Vector2:
 	var raw := Vector2(
 		Input.get_action_raw_strength("move_right") - Input.get_action_raw_strength("move_left"),
 		Input.get_action_raw_strength("move_down") - Input.get_action_raw_strength("move_up")
 	)
+	if TouchControls.move_finger >= 0:
+		raw = TouchControls.movement
 	var strength := raw.length()
 	if strength <= stick_deadzone:
 		return Vector2.ZERO
@@ -1403,7 +1436,7 @@ func _movement_input() -> Vector2:
 	return direction * clampf((strength - stick_deadzone) / (1.0 - stick_deadzone), 0.0, 1.0)
 
 
-func _try_dash() -> bool:
+func _can_dash() -> bool:
 	if not has_dash:
 		return false  # ability not unlocked yet (see Level 1's Rumi scene)
 	if sliding():
@@ -1416,7 +1449,13 @@ func _try_dash() -> bool:
 		return false  # committed to climbing out; see _state_exit_water's own doc
 	if not dash_available or dash_cooldown_timer > 0.0:
 		return false
-	var dir := _movement_input()
+	return true
+
+
+func _try_dash(direction := Vector2.ZERO, startup_already_frozen := false) -> bool:
+	if not _can_dash():
+		return false
+	var dir := direction if direction != Vector2.ZERO else _movement_input()
 	if dir == Vector2.ZERO:
 		dir = Vector2(facing, 0)
 	dash_dir = dir.normalized()
@@ -1434,7 +1473,7 @@ func _try_dash() -> bool:
 	dash_cooldown_timer = dash_time + dash_cooldown
 	freeze_timer = dash_freeze_time
 	state = State.DASH
-	juice.on_dash_start(dash_dir)
+	juice.on_dash_start(dash_dir, not startup_already_frozen)
 	return true
 
 
@@ -1463,7 +1502,9 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 	# times a second, and he slid down the side of a full pool as though the
 	# water were not there. Even with the flicker gone this stays: a swimmer
 	# pressed against a wall is swimming, not sliding down it.
-	if state == State.SWIM:
+	# A ladder also owns support: touching a floor edge must not slip him
+	# sideways or turn a secure grip into FALL while ladder_zone is still set.
+	if state in [State.SWIM, State.CLIMB]:
 		return
 	# A bank is not always a FLOOR he lands on — swimming straight into a
 	# wall of brick at the water's own edge (no ledge, just a vertical face
@@ -1600,6 +1641,8 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 ## full width by TRYING it — every frame, with the wide box, against the world —
 ## so nothing has to remember where the slot ended or notice him leaving it.
 func _tick_squeeze() -> void:
+	if climbing():
+		return
 	if squeezing:
 		_try_stand_up()
 		return
@@ -1914,6 +1957,7 @@ func _update_visual() -> void:
 func die() -> void:
 	if state == State.DEAD or invulnerable_timer > 0.0:
 		return
+	TouchControls.reset()
 	state = State.DEAD
 	velocity = Vector2.ZERO
 	visible = false
@@ -1936,6 +1980,7 @@ func die() -> void:
 
 
 func respawn(at: Vector2) -> void:
+	TouchControls.reset()
 	global_position = at
 	velocity = Vector2.ZERO
 	dash_available = true
@@ -1943,6 +1988,9 @@ func respawn(at: Vector2) -> void:
 	jump_buffer_timer = 0.0
 	wall_coyote_timer = 0.0
 	dash_cooldown_timer = 0.0
+	_dash_input_timer = 0.0
+	_ladder_regrab_timer = 0.0
+	_ladder_jump_zone = null
 	freeze_timer = 0.0
 	wall_lock_timer = 0.0
 	wall_jump_timer = 0.0
@@ -2090,6 +2138,10 @@ func _clear_slide() -> void:
 # ladder decides who is gripping it and when; this node is the only thing
 # that moves him while he climbs.
 
+func at_ladder_top() -> bool:
+	return climbing() and is_finite(ladder_top) and global_position.y <= ladder_top + 3.0
+
+
 func climbing() -> bool:
 	return ladder_zone != null
 
@@ -2099,7 +2151,11 @@ func climbing() -> bool:
 ## ladder calls this — touching it and reaching up or down — the same split
 ## enter_slide uses; this node only does the moving.
 func enter_ladder(zone: Node, center_x: float, top_y := -INF) -> void:
-	if state in [State.DEAD, State.LEDGE_MANTLE] or climbing():
+	if input_locked or _dash_input_timer > 0.0:
+		return
+	if zone == _ladder_jump_zone and (_ladder_regrab_timer > 0.0 or velocity.y < 0.0):
+		return
+	if state in [State.DEAD, State.DASH, State.LEDGE_MANTLE] or climbing():
 		return
 	ladder_zone = zone
 	ladder_x = center_x

@@ -339,10 +339,6 @@ func seal_at()->Vector2:
 func _draw()->void:
 	if recipe.is_empty():return
 	var w:float=recipe.width;var h:float=recipe.height
-	# Cables visibly attach every suspended deck to the architecture.
-	for r:Array in recipe.route:
-		for x in [r[0]+4,r[0]+r[2]-5]:
-			draw_line(Vector2(x,maxf(8,r[1]-48)),Vector2(x,r[1]),Color(.2,.25,.3,.55),1)
 	for b:Array in e.get("bridges",[]):
 		var rect:=Rect2(b[0],b[1],b[2],8)
 		var on:=phase==Phase.PRESENT if int(b[3])==1 else phase==Phase.ABSENT

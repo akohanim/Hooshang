@@ -208,7 +208,7 @@ func _move_flight(delta: float) -> void:
 	for body in riders:
 		if body is Player and carrying(body):
 			riding_bodies.append(body)
-			steer = Input.get_axis("move_up", "move_down")
+			steer = body.movement_input().y
 	var footprint := Rect2(global_position - size * 0.5, size)
 	for body in riding_bodies:
 		footprint = footprint.merge(body.hitbox_rect())

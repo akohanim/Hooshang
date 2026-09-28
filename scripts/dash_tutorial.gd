@@ -86,7 +86,7 @@ var ledge_top_y := 0.0
 ## The lesson itself. One line, because a tutorial that talks longer than the
 ## move takes is a tutorial nobody reads twice.
 @export var lines: Array[String] = [
-	"Hold the way you want to go: up and onward, and dash!",
+	"Dash up and onward!",
 ]
 
 var _world: LdtkWorld

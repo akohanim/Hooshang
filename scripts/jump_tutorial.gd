@@ -112,6 +112,7 @@ func _physics_process(_delta: float) -> void:
 func _show_prompt() -> void:
 	_armed = false
 	_prompt = load("res://scenes/ui/InputPrompt.tscn").instantiate()
+	_prompt.touch_text = "TAP TO JUMP"
 	_world.add_child(_prompt)
 	_prompt.show_at(_player.global_position + lift_offset, _art_for_device())
 

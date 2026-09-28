@@ -91,7 +91,7 @@ func _physics_process(_delta: float) -> void:
 			_held = inside
 		else:
 			var reaching := not inside.input_locked \
-				and Input.get_axis("move_up", "move_down") != 0.0
+				and inside.movement_input().y != 0.0
 			if reaching:
 				inside.enter_ladder(self, global_position.x, global_position.y - height * 0.5)
 				_held = inside

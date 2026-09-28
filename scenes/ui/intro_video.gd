@@ -22,6 +22,8 @@ extends CanvasLayer
 @onready var skip_prompt: Control = $SkipPrompt
 @onready var skip_label: Label = $SkipPrompt/Label
 @onready var skip_fill: ColorRect = $SkipPrompt/Track/Fill
+var _touch_finger := -1
+var _touch_gesture = preload("res://scenes/ui/touch/touch_menu_gesture.gd").new()
 var _skip_held := 0.0
 var _skip_needs_release := false
 
@@ -93,7 +95,7 @@ func _process(delta: float) -> void:
 	if _over or _waiting:
 		return
 	_update_skip_prompt()
-	if not Input.is_action_pressed("skip_dialogue"):
+	if not (Input.is_action_pressed("skip_dialogue") or _touch_finger >= 0):
 		_skip_needs_release = false
 		_skip_held = 0.0
 	elif not _skip_needs_release:
@@ -105,11 +107,16 @@ func _process(delta: float) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_touch_finger = -1
+		_touch_gesture.reset()
 		_skip_held = 0.0
 		_skip_needs_release = true
 
 
 func _update_skip_prompt() -> void:
+	if InputDevice.is_touch():
+		skip_label.text = "Hold here to skip intro"
+		return
 	var button := "X / □" if InputDevice.is_controller() else "X"
 	if not InputDevice.is_controller():
 		for event in InputMap.action_get_events("skip_dialogue"):
@@ -122,6 +129,21 @@ func _update_skip_prompt() -> void:
 ## Consume input throughout playback and the exit fade so it cannot reach the
 ## menu underneath. Ordinary taps only dismiss the completed film's title card.
 func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		InputDevice.note_touch()
+		get_viewport().set_input_as_handled()
+		if _waiting:
+			if _touch_gesture.read(event).has("tap") and not _over:
+				_finish()
+		elif event is InputEventScreenTouch:
+			var point: Vector2 = skip_prompt.get_global_transform_with_canvas().affine_inverse() * event.position
+			if event.pressed and not event.canceled and _touch_finger < 0 					and Rect2(Vector2.ZERO, skip_prompt.size).has_point(point):
+				_touch_finger = event.index
+			elif event.index == _touch_finger and (not event.pressed or event.canceled):
+				_touch_finger = -1
+		return
+	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
+		return
 	# Typed, not inferred: `event.pressed` on an untyped InputEvent is a Variant,
 	# and `:=` refuses to guess a bool from it.
 	var pressed: bool = (event is InputEventKey and event.pressed and not event.echo) \

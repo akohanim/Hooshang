@@ -10,7 +10,7 @@ extends Node
 ## an axis event fires continuously at rest with tiny centering noise, and
 ## reacting to that would flap the icon between the two on every idle frame.
 
-enum Device { KEYBOARD, CONTROLLER }
+enum Device { KEYBOARD, CONTROLLER, TOUCH }
 
 signal changed(device: Device)
 
@@ -22,7 +22,11 @@ const AXIS_DEADZONE := 0.5
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey or event is InputEventMouseButton \
+	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
+		return
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		note_touch()
+	elif event is InputEventKey or event is InputEventMouseButton \
 			or event is InputEventMouseMotion:
 		_note(Device.KEYBOARD)
 	elif event is InputEventJoypadButton:
@@ -43,3 +47,11 @@ func _note(device: Device) -> void:
 
 func is_controller() -> bool:
 	return current == Device.CONTROLLER
+
+
+func note_touch() -> void:
+	_note(Device.TOUCH)
+
+
+func is_touch() -> bool:
+	return current == Device.TOUCH
