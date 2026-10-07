@@ -12,10 +12,8 @@ extends Node
 ##   1. BEFORE the encounter the doorway is ordinary backtracking and must stay
 ##      ordinary — the re-route is the encounter's doing, not the room's.
 ##   2. AFTER it, the same doorway lands him at Level_15's ENTRANCE.
-##   3. It holds. The return door is rebuilt every time it is used, so a
-##      re-route written once into _return_room would survive exactly until the
-##      player walked back INTO the boss room and then quietly revert to layout
-##      order — which reads in play as "it worked the first time".
+##   3. The drop is one-way. Neither arrival, rebuilding the return door, nor
+##      returning from Level_16 may send the player back to Level_14.
 ##
 ## And a fourth, which is about the same threshold rather than the same feature:
 ## the doorway and the MOON hang off two different signals on purpose. The
@@ -165,27 +163,19 @@ func _ready() -> void:
 		"landing at Level_15's PlayerStart  [%s vs %s]"
 			% [world._checkpoint, world.spawn_point_for(next_room)])
 
-	# --- 3. and it holds, however many times the doorway is used --------------
-	await _go_back()
-	_check(world.current_room == chase_room,
-		"Level_15 still backs out into Level_14  [%s]" % world.current_room.name)
-	await _go_back()
-	_check(world.current_room == next_room,
-		"and leaving Level_14 a second time still goes to Level_15  [%s]"
-			% world.current_room.name)
-
-	# Level_13 is behind him for good, which is the point: the room he cleared on
-	# the way in is not somewhere the chase can spill back into.
-	await _go_back()
-	_check(world._return_room == next_room,
-		"the boss room's doorway no longer points at Level_13  [%s]"
-			% world._return_room.name)
-	# Only the one doorway moved, and its mirror. Every other room is left to
-	# layout order, which is what backtrack_test walks end to end.
-	_check(world._way_back.size() == 2
-			and world._way_back.get(chase_room.name) == next_room.name
-			and world._way_back.get(next_room.name) == chase_room.name,
-		"and the re-route is the two halves of one door  [%s]" % world._way_back)
+	# --- 3. the maintenance-hatch drop is one-way ----------------------------
+	_check(world._return_room == null, "Level_15 has no return through the hatch")
+	world._on_return_entered(world.player)
+	await _frames(4)
+	_check(world.current_room == next_room, "a stale overlap cannot return to Level_14")
+	# Rebuilding on a later visit must still reject the reciprocal route, even
+	# when it came from an older save containing the former two-way doorway.
+	world._arm_return(chase_room)
+	await _frames(4)
+	_check(world._return_room == null and not world._return_zone.monitoring,
+		"re-arming cannot reopen the one-way hatch")
+	_check(world._way_back.get(chase_room.name) == next_room.name,
+		"Level_14 still feeds Level_15")
 
 	# --- 4. the chase carries on past Level_15 -------------------------------
 	# Level_16 sits to the LEFT of Level_15 on the bottom row, so world-sort order
@@ -195,14 +185,13 @@ func _ready() -> void:
 	var last_room := _room("Level_16")
 	_check(last_room != null, "Level_16 exists")
 	if last_room != null:
-		await _go_back()             # back into Level_15, facing its Exit
-		_check(world.current_room == next_room, "back in Level_15")
 		await _go_forward()
 		_check(world.current_room == last_room,
 			"Level_15's Exit reaches Level_16  [%s]" % world.current_room.name)
 		await _go_back()
 		_check(world.current_room == next_room,
 			"and Level_16 backs out into Level_15  [%s]" % world.current_room.name)
+		_check(world._return_room == null, "returning from Level_16 does not reopen Level_14")
 
 	_finish()
 

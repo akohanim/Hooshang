@@ -29,7 +29,10 @@ var walk_velocity := 0.0  # his run speed at the end of the last _walk(), key st
 
 func _ready() -> void:
 	tick = float(Engine.physics_ticks_per_second)
+	SaveGame.slot = -1
 	world = load("res://ldtk/Act1World.tscn").instantiate()
+	# Movement measurements must not compete with the opening cutscene.
+	world.get_node("Act1Beats").free()
 	Screen.set_scene(world)
 	for i in 30:
 		if not world.rooms.is_empty():
@@ -167,6 +170,8 @@ func _ready() -> void:
 	player.die()
 	await _frames(2)
 	_check(not belt.carrying(player), "a dead player is not carried, even standing on it")
+	# Let the world finish its pending death callback before another measurement.
+	await get_tree().create_timer(maxf(world.respawn_delay, player.death_time) + 0.1).timeout
 	player.respawn(FLOOR)
 	await _frames(8)
 
@@ -243,8 +248,8 @@ func _ready() -> void:
 	# And it is a transition, not a state: a jump ACROSS a belt he never stood on
 	# must not be topped up frame after frame while he passes over it.
 	await _settle(FLOOR)
-	player.global_position = belt.global_position + Vector2(-64.0, -40.0)
-	player.velocity = Vector2.ZERO
+	# Enter from the air as a fresh placement, not a fake departure from the belt.
+	player.respawn(belt.global_position + Vector2(-64.0, -40.0))
 	await _frames(2)
 	var aloft: float = player.velocity.x
 	await _frames(6)

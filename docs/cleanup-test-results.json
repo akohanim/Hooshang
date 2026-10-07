@@ -1,0 +1,772 @@
+{
+  "broad_mode": "headless --fixed-fps 60, 25-second timeout per test; triage only",
+  "broad": [
+    {
+      "test": "act1_all_backgrounds_test",
+      "status": "failed",
+      "seconds": 1.2
+    },
+    {
+      "test": "act1_chase_pacing_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "act1_chase_playtest",
+      "status": "failed",
+      "seconds": 4.0
+    },
+    {
+      "test": "act1_expansion_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "act1_finale_test",
+      "status": "failed",
+      "seconds": 3.71
+    },
+    {
+      "test": "act1_thought_puzzle_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "act2_expansion_test",
+      "status": "failed",
+      "seconds": 2.34
+    },
+    {
+      "test": "act2_hazards_test",
+      "status": "passed",
+      "seconds": 1.26
+    },
+    {
+      "test": "act2_jamshid_encounter_test",
+      "status": "passed",
+      "seconds": 1.58
+    },
+    {
+      "test": "act2_landmark_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "act2_materials_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "act2_parallax_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "act2_progression_test",
+      "status": "passed",
+      "seconds": 1.65
+    },
+    {
+      "test": "act2_quest_test",
+      "status": "passed",
+      "seconds": 1.27
+    },
+    {
+      "test": "act2_routes_test",
+      "status": "failed",
+      "seconds": 6.55
+    },
+    {
+      "test": "act3_art_test",
+      "status": "passed",
+      "seconds": 1.0
+    },
+    {
+      "test": "act3_showcase_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "act_results_test",
+      "status": "passed",
+      "seconds": 1.59
+    },
+    {
+      "test": "backtrack_clearance_test",
+      "status": "failed",
+      "seconds": 1.05
+    },
+    {
+      "test": "backtrack_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "castle_tileset_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "chase_entry_test",
+      "status": "passed",
+      "seconds": 1.17
+    },
+    {
+      "test": "chase_route_test",
+      "status": "passed",
+      "seconds": 2.24
+    },
+    {
+      "test": "chase_test",
+      "status": "failed",
+      "seconds": 3.96
+    },
+    {
+      "test": "child_animation_test",
+      "status": "passed",
+      "seconds": 1.28
+    },
+    {
+      "test": "chimney_test",
+      "status": "failed",
+      "seconds": 3.78
+    },
+    {
+      "test": "collapse_test",
+      "status": "passed",
+      "seconds": 0.68
+    },
+    {
+      "test": "cone_spikes_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "controller_aim_test",
+      "status": "passed",
+      "seconds": 0.68
+    },
+    {
+      "test": "conveyor_test",
+      "status": "failed",
+      "seconds": 2.61
+    },
+    {
+      "test": "crouch_test",
+      "status": "failed",
+      "seconds": 0.67
+    },
+    {
+      "test": "crumble_cycle_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "crumble_persistence_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "dark_thought_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "darkness_contract_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "darkness_geometry_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "darkness_playthrough_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "darkshang_15_18_test",
+      "status": "passed",
+      "seconds": 1.06
+    },
+    {
+      "test": "darkshang_20_24_test",
+      "status": "passed",
+      "seconds": 1.05
+    },
+    {
+      "test": "darkshang_baseline_test",
+      "status": "passed",
+      "seconds": 1.75
+    },
+    {
+      "test": "darkshang_chase_test",
+      "status": "failed",
+      "seconds": 2.46
+    },
+    {
+      "test": "darkshang_cloud_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "darkshang_dynamic_charge_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "darkshang_eruption_dodge_test",
+      "status": "passed",
+      "seconds": 2.07
+    },
+    {
+      "test": "darkshang_level19_test",
+      "status": "passed",
+      "seconds": 1.01
+    },
+    {
+      "test": "darkshang_power_entry_test",
+      "status": "passed",
+      "seconds": 1.85
+    },
+    {
+      "test": "darkshang_powers_test",
+      "status": "passed",
+      "seconds": 1.0
+    },
+    {
+      "test": "darkshang_smooth_charge_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "darkshang_targeted_eruption_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "dash_input_test",
+      "status": "passed",
+      "seconds": 0.68
+    },
+    {
+      "test": "dash_tutorial_test",
+      "status": "passed",
+      "seconds": 1.64
+    },
+    {
+      "test": "death_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "dialogue_idle_test",
+      "status": "passed",
+      "seconds": 0.72
+    },
+    {
+      "test": "dialogue_placement_test",
+      "status": "passed",
+      "seconds": 0.71
+    },
+    {
+      "test": "dialogue_scene_controls_test",
+      "status": "passed",
+      "seconds": 3.11
+    },
+    {
+      "test": "dialogue_skip_story_test",
+      "status": "passed",
+      "seconds": 1.49
+    },
+    {
+      "test": "dialogue_skip_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "escape_test",
+      "status": "failed",
+      "seconds": 3.8
+    },
+    {
+      "test": "finale_dawn_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "forward_entry_test",
+      "status": "passed",
+      "seconds": 2.11
+    },
+    {
+      "test": "hooshang_animator_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "hooshang_cardigan_test",
+      "status": "passed",
+      "seconds": 4.01
+    },
+    {
+      "test": "hooshang_native24_test",
+      "status": "passed",
+      "seconds": 0.68
+    },
+    {
+      "test": "hooshang_pixel_test",
+      "status": "passed",
+      "seconds": 3.9
+    },
+    {
+      "test": "intro_test",
+      "status": "failed",
+      "seconds": 9.42
+    },
+    {
+      "test": "intro_video_test",
+      "status": "passed",
+      "seconds": 1.37
+    },
+    {
+      "test": "jamshid_npc_test",
+      "status": "failed",
+      "seconds": 0.99
+    },
+    {
+      "test": "jamshid_test",
+      "status": "passed",
+      "seconds": 0.89
+    },
+    {
+      "test": "jump_tutorial_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "ladder_overhaul_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "ladder_top_test",
+      "status": "passed",
+      "seconds": 0.82
+    },
+    {
+      "test": "ledge_mantle_test",
+      "status": "passed",
+      "seconds": 0.77
+    },
+    {
+      "test": "lemon_glow_test",
+      "status": "passed",
+      "seconds": 0.77
+    },
+    {
+      "test": "lemon_test",
+      "status": "failed",
+      "seconds": 3.69
+    },
+    {
+      "test": "level_v10_lighting_test",
+      "status": "passed",
+      "seconds": 1.05
+    },
+    {
+      "test": "level_v6_return_race_test",
+      "status": "passed",
+      "seconds": 1.25
+    },
+    {
+      "test": "level_v9_test",
+      "status": "failed",
+      "seconds": 14.47
+    },
+    {
+      "test": "magic_carpet_return_test",
+      "status": "passed",
+      "seconds": 0.77
+    },
+    {
+      "test": "magic_carpet_test",
+      "status": "passed",
+      "seconds": 1.09
+    },
+    {
+      "test": "masonry_tiles_test",
+      "status": "passed",
+      "seconds": 0.87
+    },
+    {
+      "test": "material_lab_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "menu_nav_test",
+      "status": "passed",
+      "seconds": 0.7
+    },
+    {
+      "test": "mobile_input_test",
+      "status": "passed",
+      "seconds": 0.72
+    },
+    {
+      "test": "mobile_ui_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "moon_entry_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "moon_occlusion_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "music_exit_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "music_test",
+      "status": "passed",
+      "seconds": 23.27
+    },
+    {
+      "test": "mystery_box_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "office_background_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "office_moon_render_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "pause_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "platform_test",
+      "status": "passed",
+      "seconds": 0.78
+    },
+    {
+      "test": "pond_test",
+      "status": "passed",
+      "seconds": 1.09
+    },
+    {
+      "test": "portrait_anim_test",
+      "status": "passed",
+      "seconds": 0.66
+    },
+    {
+      "test": "precision_escape_contract_test",
+      "status": "failed",
+      "seconds": 2.43
+    },
+    {
+      "test": "precision_escape_test",
+      "status": "failed",
+      "seconds": 3.78
+    },
+    {
+      "test": "route_order_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "rumi_animation_test",
+      "status": "passed",
+      "seconds": 0.71
+    },
+    {
+      "test": "rumi_script_test",
+      "status": "passed",
+      "seconds": 0.67
+    },
+    {
+      "test": "rumi_speech_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "save_test",
+      "status": "passed",
+      "seconds": 3.29
+    },
+    {
+      "test": "scaffolding_tiles_test",
+      "status": "passed",
+      "seconds": 0.71
+    },
+    {
+      "test": "scaffolding_variation_test",
+      "status": "passed",
+      "seconds": 0.71
+    },
+    {
+      "test": "scene_skip_endpoints_test",
+      "status": "passed",
+      "seconds": 3.78
+    },
+    {
+      "test": "screen_test",
+      "status": "passed",
+      "seconds": 1.24
+    },
+    {
+      "test": "security_gate_test",
+      "status": "timeout",
+      "seconds": 25.01
+    },
+    {
+      "test": "side_spring_carpet_test",
+      "status": "passed",
+      "seconds": 1.4
+    },
+    {
+      "test": "single_moon_test",
+      "status": "passed",
+      "seconds": 5.26
+    },
+    {
+      "test": "slide_test",
+      "status": "failed",
+      "seconds": 1.96
+    },
+    {
+      "test": "smoke_test",
+      "status": "passed",
+      "seconds": 0.77
+    },
+    {
+      "test": "sock_visibility_test",
+      "status": "requires_rendering"
+    },
+    {
+      "test": "spring_platform_test",
+      "status": "passed",
+      "seconds": 0.99
+    },
+    {
+      "test": "thought_tiles_test",
+      "status": "passed",
+      "seconds": 0.98
+    },
+    {
+      "test": "v1_dialogue_freeze_test",
+      "status": "passed",
+      "seconds": 1.36
+    },
+    {
+      "test": "voice_blip_test",
+      "status": "passed",
+      "seconds": 0.78
+    },
+    {
+      "test": "wall_slide_test",
+      "status": "passed",
+      "seconds": 0.76
+    },
+    {
+      "test": "water_tile_test",
+      "status": "passed",
+      "seconds": 1.26
+    },
+    {
+      "test": "window_stars_test",
+      "status": "passed",
+      "seconds": 0.73
+    },
+    {
+      "test": "world_bounds_test",
+      "status": "failed",
+      "seconds": 6.7
+    }
+  ],
+  "focused_mode": "ordinary speed, 70-second timeout",
+  "focused": [
+    {
+      "test": "dash_input_test",
+      "status": "passed",
+      "seconds": 1.56
+    },
+    {
+      "test": "hooshang_animator_test",
+      "status": "passed",
+      "seconds": 0.82
+    },
+    {
+      "test": "intro_video_test",
+      "status": "passed",
+      "seconds": 5.77
+    },
+    {
+      "test": "ladder_top_test",
+      "status": "passed",
+      "seconds": 6.02
+    },
+    {
+      "test": "menu_nav_test",
+      "status": "passed",
+      "seconds": 3.95
+    },
+    {
+      "test": "mobile_input_test",
+      "status": "passed",
+      "seconds": 6.61
+    },
+    {
+      "test": "mobile_ui_test",
+      "status": "passed",
+      "seconds": 2.85
+    },
+    {
+      "test": "portrait_anim_test",
+      "status": "passed",
+      "seconds": 2.13
+    },
+    {
+      "test": "save_test",
+      "status": "passed",
+      "seconds": 20.48
+    },
+    {
+      "test": "screen_test",
+      "status": "passed",
+      "seconds": 3.94
+    },
+    {
+      "test": "smoke_test",
+      "status": "passed",
+      "seconds": 11.4
+    },
+    {
+      "test": "spring_platform_test",
+      "status": "passed",
+      "seconds": 4.78
+    },
+    {
+      "test": "voice_blip_test",
+      "status": "passed",
+      "seconds": 3.97
+    }
+  ],
+  "followup_mode": "ordinary speed, 50-second timeout",
+  "followup": [
+    {
+      "test": "chimney_test",
+      "status": "failed",
+      "seconds": 34.82
+    },
+    {
+      "test": "conveyor_test",
+      "status": "failed",
+      "seconds": 17.57
+    },
+    {
+      "test": "crouch_test",
+      "status": "failed",
+      "seconds": 4.1
+    },
+    {
+      "test": "darkshang_chase_test",
+      "status": "failed",
+      "seconds": 17.74
+    },
+    {
+      "test": "intro_test",
+      "status": "timeout",
+      "seconds": 50.01
+    }
+  ],
+  "last_commit_comparison": [
+    {
+      "test": "conveyor_test",
+      "head_failure_count": 11,
+      "cleanup_failure_count": 11,
+      "head_failure_messages": [
+        "FAIL  twice the speed carries him twice as far  [+17.5px, want +60.0]",
+        "FAIL  walking against the belt he still makes ground  [+24.0px]",
+        "FAIL  because his own run is untouched by it  [0 of -72 px/s]",
+        "FAIL  and going with it he is faster than going against it  [+24.0 vs +24.0]",
+        "FAIL  jumping, he is airborne and still inside the belt",
+        "FAIL  so the belt is not carrying him",
+        "FAIL  the belt's speed is handed over on takeoff  [+0 vs +0 px/s]",
+        "FAIL  jumping WITH the belt pays 20% over its speed  [+0, want +72 px/s]",
+        "FAIL  a Left belt throws him the other way  [-30.0px vs -880.0px]",
+        "FAIL  nothing holds him at the test spot to begin with  [-24px]",
+        "FAIL  and drops through one told it is not floor  [-24px]"
+      ],
+      "cleanup_failure_messages": [
+        "FAIL  twice the speed carries him twice as far  [+17.5px, want +60.0]",
+        "FAIL  walking against the belt he still makes ground  [+24.0px]",
+        "FAIL  because his own run is untouched by it  [0 of -72 px/s]",
+        "FAIL  and going with it he is faster than going against it  [+24.0 vs +24.0]",
+        "FAIL  jumping, he is airborne and still inside the belt",
+        "FAIL  so the belt is not carrying him",
+        "FAIL  the belt's speed is handed over on takeoff  [+0 vs +0 px/s]",
+        "FAIL  jumping WITH the belt pays 20% over its speed  [+0, want +72 px/s]",
+        "FAIL  a Left belt throws him the other way  [-30.0px vs -880.0px]",
+        "FAIL  nothing holds him at the test spot to begin with  [-24px]",
+        "FAIL  and drops through one told it is not floor  [-24px]"
+      ]
+    },
+    {
+      "test": "crouch_test",
+      "head_failure_count": 1,
+      "cleanup_failure_count": 1,
+      "head_failure_messages": [
+        "FAIL dash can start from crouch"
+      ],
+      "cleanup_failure_messages": [
+        "FAIL dash can start from crouch"
+      ]
+    },
+    {
+      "test": "darkshang_chase_test",
+      "head_failure_count": 2,
+      "cleanup_failure_count": 2,
+      "head_failure_messages": [
+        "FAIL Level_20 crux requires upward diagonal dash: [14, 22, 0, 8]",
+        "FAIL Level_23 crux requires upward diagonal dash: [14, 18, 0, 8]"
+      ],
+      "cleanup_failure_messages": [
+        "FAIL Level_20 crux requires upward diagonal dash: [14, 22, 0, 8]",
+        "FAIL Level_23 crux requires upward diagonal dash: [14, 18, 0, 8]"
+      ]
+    },
+    {
+      "test": "chimney_test",
+      "head_failure_count": 7,
+      "cleanup_failure_count": 7,
+      "head_failure_messages": [
+        "FAIL  standing over the mouth takes him in  [0 of 9 offsets]",
+        "FAIL  ...and down to the bottom of it  [y -1991, shaft floor -1832]",
+        "FAIL  and running over it drops him in rather than across  [fell -1px]",
+        "FAIL  he is squeezed while in the shaft",
+        "FAIL  and slides down it with nothing held  [0 frames]",
+        "FAIL  ...and he was actually moving  [peak vy 0.0]",
+        "FAIL  he drops through every prop gap from anywhere across it  [worst 0 of 5 at Level_21 x33016]"
+      ],
+      "cleanup_failure_messages": [
+        "FAIL  standing over the mouth takes him in  [0 of 9 offsets]",
+        "FAIL  ...and down to the bottom of it  [y -1991, shaft floor -1832]",
+        "FAIL  and running over it drops him in rather than across  [fell -1px]",
+        "FAIL  he is squeezed while in the shaft",
+        "FAIL  and slides down it with nothing held  [0 frames]",
+        "FAIL  ...and he was actually moving  [peak vy 0.0]",
+        "FAIL  he drops through every prop gap from anywhere across it  [worst 0 of 5 at Level_21 x33016]"
+      ]
+    }
+  ],
+  "intro_last_commit": "Timed out at 60 seconds; cleanup follow-up timed out at 50 seconds."
+}

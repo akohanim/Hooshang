@@ -202,7 +202,7 @@ def main():
         json.dump(doc, f, indent="\t")
     os.replace(tmp, LDTK)
     print("APPLIED. Re-import in Godot:")
-    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn")
     print("  Godot --headless --path . --import")
 
 

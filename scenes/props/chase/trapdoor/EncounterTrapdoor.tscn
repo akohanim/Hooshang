@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/chase/trapdoor/encounter_trapdoor.gd" id="1"]
+
+[node name="EncounterTrapdoor" type="Node2D"]
+script = ExtResource("1")
+z_index = 5
+
+[node name="Metal" type="AudioStreamPlayer" parent="."]
+volume_db = -9.0
+
+[node name="Landing" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
+
+[node name="FadeLayer" type="CanvasLayer" parent="."]
+layer = 90
+
+[node name="Fade" type="ColorRect" parent="FadeLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.015, 0.02, 0.025, 0)

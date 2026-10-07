@@ -1,3 +1,5 @@
+> Route insertion (2026-10-01): old rooms 19–25 are now 20–26; the finale dawn and its fixture labels use **26**. New Level_19 shares Level_18’s office wall. Earlier notes below retain historical numbering.
+
 > **Hanging fixtures:** standalone cord-and-bulb lamps are retained only in Act I’s opening and finale cubicles. The former `TileLampRoom6` and `LedgeLampRoom2` fixtures have been removed. Window lighting and ceiling panels remain.
 
 > **Finale dawn:** `Level_25` keeps the opening cubicle architecture but replaces its moon/stars with `office_dawn.gd` sky and a low sun, clipped to `OfficeWindowPanes`. The dawn is a sibling of the wall, so wall reflectance cannot dim its unshaded sky. `DawnGlowRoom25`, both `DawnSpillRoom25` fixtures and `SunShaftRoom25` illuminate the room only while it is active. `Level_0` stays at night. Regression: `tests/finale_dawn_test.tscn`; run windowed to also capture `/tmp/hooshang-finale-dawn.png`.
@@ -874,3 +876,13 @@ Run `tests/moon_occlusion_test.tscn` with the graphical renderer to check
 actual pixels through glass, behind a mullion and outside the window, for
 both normal and blood moons. The headless camera sweep remains
 `tests/single_moon_test.tscn`.
+
+Office windows are placed at runtime by `scripts/office_window_placement.gd`
+after importing room geometry. The whole frame needs 4px clearance from tiles
+and props, including furniture under the world’s `Props`. Musical tile rooms
+omit all windows. Prefab light pools move with their window; baked windows
+are extracted into `WindowCutout` instances with their moon/dawn children.
+If a baked window cannot fit, it tries 75% and 50% size, then is omitted.
+Room names establish ownership when LDtk world coordinates change.
+Validate with `window_placement_test.tscn`; `window_placement_preview.tscn`
+captures opening, music, encounter and dawn rooms using the real renderer.

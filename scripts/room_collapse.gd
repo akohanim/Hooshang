@@ -140,7 +140,7 @@ static func _airborne_in(room: Node2D) -> Array[Node2D]:
 	# ConveyorBelt carries a walkable floor on layer 1, and a NoteTile is a solid
 	# body outright, so a prop hanging above one measures its landing as "resting
 	# on that" — and then the thing under it falls too, leaving it stranded in
-	# mid-air with the collapse already finished. Level_17 and Level_21 each ended
+	# mid-air with the collapse already finished. Level_17 and Level_22 each ended
 	# a collapse with four props still hanging, for exactly this.
 	#
 	# Nothing that is itself coming down counts as ground. Only the room does.

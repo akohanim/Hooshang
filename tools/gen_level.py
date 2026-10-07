@@ -9,7 +9,7 @@ import os
 import struct
 import zlib
 
-ROOT = "/Users/ari/Hooshang_claude"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TILE = 8
 
 # ---------------------------------------------------------------- tiles.png

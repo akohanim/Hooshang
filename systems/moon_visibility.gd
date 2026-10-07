@@ -8,6 +8,8 @@ func refresh() -> void:
 	var chosen: Dictionary = {}
 	for moon in get_tree().get_nodes_in_group("moon_candidates"):
 		moon.set_moon_selected(false)
+		if not moon.is_visible_in_tree() or moon.get_meta("window_excluded", false):
+			continue
 		var world: Node = moon.get_parent()
 		while world != null and not world is LdtkWorld:
 			world = world.get_parent()
@@ -23,6 +25,8 @@ func refresh() -> void:
 			if world.room_rect(room).has_point(world.to_local(moon.global_position)):
 				owner_room = room
 				break
+		if owner_room != null and world._room_has_music_puzzle(owner_room):
+			continue
 		if owner_room == null:
 			continue
 		var key := owner_room.get_instance_id()

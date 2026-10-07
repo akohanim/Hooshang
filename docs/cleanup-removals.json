@@ -1,0 +1,956 @@
+[
+  {
+    "path": "sprites/hooshang/angry_matrix_08.png",
+    "bytes": 235046,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_08.png",
+    "sha256": "0de1879076afd4b9b811b9d436dfd5280957e41cf9ad9522bdebf1d17921257a"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_03.png",
+    "bytes": 232885,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_03.png",
+    "sha256": "20339400d899380772150e8242e366fd2ee2c013b99a23b7cfd9f3403dc925ca"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_talk_eyes_closed.png",
+    "bytes": 220404,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_09.png",
+    "sha256": "026ccb029ff5e53f166a126c12c1e4ec1c68b70125eb2508ef9350ae7766fb85"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_mid_talk_eyes_closed.png",
+    "bytes": 234267,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_06.png",
+    "sha256": "88580eb79d45c7e03a772226144aa7b4ea43cfd1625e053330dd36a0b7f93f1c"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_02.png",
+    "bytes": 235958,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_02.png",
+    "sha256": "df1bf96d87e524c4104c574186125527b758e716865c7fa4428c4a3d6c7630dd"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_09.png",
+    "bytes": 232915,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_09.png",
+    "sha256": "393569284fd371b85e0aef230dc3a0ab5a672562971997a422083f979548f145"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_closed_eyes_mid_blink.png",
+    "bytes": 237930,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_02.png",
+    "sha256": "9f9e1847b6e390b0f554d6140988aa57936422c7f532c743226c58d53b63b186"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_closed_eyes_mid_blink.png",
+    "bytes": 235958,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_02.png",
+    "sha256": "df1bf96d87e524c4104c574186125527b758e716865c7fa4428c4a3d6c7630dd"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_mid_talk_eyes_open.png",
+    "bytes": 221456,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_04.png",
+    "sha256": "87c35216c67088b3de42de893cb399df614d00f9cb0a63daba76afbce3ac3fef"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_01.png",
+    "bytes": 241330,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/character_surprised.png",
+    "sha256": "b2abaab38f31bdf3d0fdfb3ef6f73790644e414832855db0b48fef351f5c8d96"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_mid_talk_eyes_closed.png",
+    "bytes": 206205,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_06.png",
+    "sha256": "a9a9357b1d05019b6a99b3b82cdabf4b66688522b18622135eab127970f5fb04"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_talk_eyes_open.png",
+    "bytes": 211055,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_07.png",
+    "sha256": "8ebf323554f633d226e727dd0452c47f290ee43509fd646a824e082170a970ef"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_05.png",
+    "bytes": 234968,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_05.png",
+    "sha256": "78bbefa660ceba7a5d23a1a83b245397095bf3263064d566bc71faeec6fb3ea6"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_04.png",
+    "bytes": 240359,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_04.png",
+    "sha256": "f665cf6d5feb478555ac9a1a78bc465155fc26f6c916ad97f27128b7f957952f"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_closed_eyes_open.png",
+    "bytes": 229331,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_01.png",
+    "sha256": "b5b9c41e82f1949ac6792454bf67aa590c2004a8ca0aac185345b3ef54a220b2"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_06.png",
+    "bytes": 231908,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_06.png",
+    "sha256": "bc046952291399ee1c70db367459b96d731fdf31bff857464c0febc5db6d6d1c"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_07.png",
+    "bytes": 239039,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_07.png",
+    "sha256": "15e3c1b721c0af9defe09f9a4fbf14ef34e0ae6a925d8155d7f2b2b665432447"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_closed_eyes_open.png",
+    "bytes": 242314,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_01.png",
+    "sha256": "67cf40ef5880a209d7e68d791537779e3636c49e74757c38f00a0fcc6f6b8e8f"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_mid_talk_eyes_open.png",
+    "bytes": 240767,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_04.png",
+    "sha256": "652490e037426b3b4f3b17c39346233401a4cc8473229edf2ca1449453b08f25"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_mid_talk_eyes_open.png",
+    "bytes": 240359,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_04.png",
+    "sha256": "f665cf6d5feb478555ac9a1a78bc465155fc26f6c916ad97f27128b7f957952f"
+  },
+  {
+    "path": "sprites/hooshang/neutral_sub_matrix.png",
+    "bytes": 768332,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_sub_matrix.png",
+    "sha256": "a3cec937cda58c071df4022dc399c4446b2abf2aca178c79099eb5673ea7b74d"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_talk_eyes_closed.png",
+    "bytes": 230600,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_09.png",
+    "sha256": "d7358b3f45cd9d04ab2cdebca48d29f82ae23805cdf88b0f3592ea5132af10fd"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_mid_talk_eyes_open.png",
+    "bytes": 228366,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_04.png",
+    "sha256": "a8b81f1f8ba9212257f2db17f7ff46ae42e8193ef138d9a955645b58531f6acc"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_09.png",
+    "bytes": 214037,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_09.png",
+    "sha256": "fa1af5ea44aea9a81c0c8defce481b449fab26e2ec60cb530aea28452ef35d27"
+  },
+  {
+    "path": "sprites/hooshang/happy_sub_matrix.png",
+    "bytes": 741742,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_sub_matrix.png",
+    "sha256": "ba9a57cdecb88bcf2d8291cb66ba2fc258c65660d6c581653e5ac3d41b010956"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_08.png",
+    "bytes": 222558,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_08.png",
+    "sha256": "5f189606fb4badd4c6698c977a218e2f98e8e7c656dd45feca93c236ef67b2fc"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_09.png",
+    "bytes": 220404,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_09.png",
+    "sha256": "026ccb029ff5e53f166a126c12c1e4ec1c68b70125eb2508ef9350ae7766fb85"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_08.png",
+    "bytes": 216238,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_08.png",
+    "sha256": "3ad613bcca9e34b5e9fd249893dbc7fce09d8dd7d245607d876b00c24742efaf"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_talk_eyes_open.png",
+    "bytes": 239039,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_07.png",
+    "sha256": "15e3c1b721c0af9defe09f9a4fbf14ef34e0ae6a925d8155d7f2b2b665432447"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_talk_eyes_closed.png",
+    "bytes": 205418,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_09.png",
+    "sha256": "b15cc675e754d0b20a1b6c1ded662301c52e6397eb7263ffaae8e2d1274dad08"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_closed_eyes_closed.png",
+    "bytes": 207852,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_03.png",
+    "sha256": "ae8aef8361fb8ad26b79711e5b6f4fe24e9c1c9e2e685b5d6a246c8838208207"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_closed_eyes_open.png",
+    "bytes": 241330,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/character_surprised.png",
+    "sha256": "b2abaab38f31bdf3d0fdfb3ef6f73790644e414832855db0b48fef351f5c8d96"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_09.png",
+    "bytes": 205418,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_09.png",
+    "sha256": "b15cc675e754d0b20a1b6c1ded662301c52e6397eb7263ffaae8e2d1274dad08"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_08.png",
+    "bytes": 207129,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_08.png",
+    "sha256": "ae14e1c2f19eaa0618122826d0b51476a56ab5a61bd5af512dd3f943666f8675"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_closed_eyes_open.png",
+    "bytes": 213479,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_01.png",
+    "sha256": "7e2931bdcc2abc2da792e02322b3f79704317701e8809013a21c536b470eb031"
+  },
+  {
+    "path": "sprites/hooshang/angry_sub_matrix.png",
+    "bytes": 833501,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_sub_matrix.png",
+    "sha256": "22df8bc4808fcb5451423a34c3601be2265a17a8c881a0de9d6891e794e09e22"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_closed_eyes_mid_blink.png",
+    "bytes": 224545,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_02.png",
+    "sha256": "d708d9d0648bc35ae53599d613dfbdd8ae7ac1ba4d5ee16d565b00e998dbf587"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_talk_eyes_closed.png",
+    "bytes": 232915,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_09.png",
+    "sha256": "393569284fd371b85e0aef230dc3a0ab5a672562971997a422083f979548f145"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_mid_talk_eyes_mid_blink.png",
+    "bytes": 207925,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_05.png",
+    "sha256": "5f1b80da6d5013fff3182ca283e831faaa1d21b860b999792345a28ca51622ec"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_talk_eyes_mid_blink.png",
+    "bytes": 207129,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_08.png",
+    "sha256": "ae14e1c2f19eaa0618122826d0b51476a56ab5a61bd5af512dd3f943666f8675"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_mid_talk_eyes_mid_blink.png",
+    "bytes": 217116,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_05.png",
+    "sha256": "9f3035308b9573be2cbd5d2cfb3e027821412c37a4826d3fbaff1b2ba645c1ae"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_closed_eyes_closed.png",
+    "bytes": 232885,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_03.png",
+    "sha256": "20339400d899380772150e8242e366fd2ee2c013b99a23b7cfd9f3403dc925ca"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_03.png",
+    "bytes": 215658,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_03.png",
+    "sha256": "25e59f8265d6cf73b43e0579dea00a90bea32749bbdce8a6ebb1fe4f09e7c934"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_02.png",
+    "bytes": 224545,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_02.png",
+    "sha256": "d708d9d0648bc35ae53599d613dfbdd8ae7ac1ba4d5ee16d565b00e998dbf587"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_06.png",
+    "bytes": 206205,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_06.png",
+    "sha256": "a9a9357b1d05019b6a99b3b82cdabf4b66688522b18622135eab127970f5fb04"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_07.png",
+    "bytes": 211055,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_07.png",
+    "sha256": "8ebf323554f633d226e727dd0452c47f290ee43509fd646a824e082170a970ef"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_03.png",
+    "bytes": 222400,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_03.png",
+    "sha256": "5403fea61ad7cfccdbd40d2c4e0714a5fbdbbf214976461d9b9a29e1472a97a4"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_02.png",
+    "bytes": 217934,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_02.png",
+    "sha256": "3c8c9733c89b8efae0187b7eadb00bc96e3feca54b3c480051d9e2ac87282a47"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_closed_eyes_closed.png",
+    "bytes": 235824,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_03.png",
+    "sha256": "2727fe9da84ad91b28b85401fb7cb17bd4782f1e7b89fb25bf0302487a5aaad3"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_mid_talk_eyes_mid_blink.png",
+    "bytes": 236379,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_05.png",
+    "sha256": "c4ebf4b3ad885af32c4150260732637d0b93f237481b183b105d1785baa190d3"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_mid_talk_eyes_closed.png",
+    "bytes": 214874,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_06.png",
+    "sha256": "4d89c95c403ba9c71e4cfce72c527387cf7a271af419d5bd2aa59c24e9e7be28"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_01.png",
+    "bytes": 229331,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_01.png",
+    "sha256": "b5b9c41e82f1949ac6792454bf67aa590c2004a8ca0aac185345b3ef54a220b2"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_05.png",
+    "bytes": 207925,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_05.png",
+    "sha256": "5f1b80da6d5013fff3182ca283e831faaa1d21b860b999792345a28ca51622ec"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_04.png",
+    "bytes": 211842,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_04.png",
+    "sha256": "a0207212cb39da85774789a5f6956bb05132c770aa6916372d69aa609104d528"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_closed_eyes_closed.png",
+    "bytes": 222400,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_03.png",
+    "sha256": "5403fea61ad7cfccdbd40d2c4e0714a5fbdbbf214976461d9b9a29e1472a97a4"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_talk_eyes_mid_blink.png",
+    "bytes": 235046,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_08.png",
+    "sha256": "0de1879076afd4b9b811b9d436dfd5280957e41cf9ad9522bdebf1d17921257a"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_01.png",
+    "bytes": 222253,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_01.png",
+    "sha256": "e6fd3c356c517c91b3eae812a3bc2010349d9326c6043bc74da548df2d6dcf23"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_05.png",
+    "bytes": 217116,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_05.png",
+    "sha256": "9f3035308b9573be2cbd5d2cfb3e027821412c37a4826d3fbaff1b2ba645c1ae"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_04.png",
+    "bytes": 228366,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_04.png",
+    "sha256": "a8b81f1f8ba9212257f2db17f7ff46ae42e8193ef138d9a955645b58531f6acc"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_mid_talk_eyes_mid_blink.png",
+    "bytes": 234968,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_05.png",
+    "sha256": "78bbefa660ceba7a5d23a1a83b245397095bf3263064d566bc71faeec6fb3ea6"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_05.png",
+    "bytes": 223561,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_05.png",
+    "sha256": "03de4668146286df649744a367291544b989af9bd440a4fdb1a39afb854ff9cb"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_01.png",
+    "bytes": 213479,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_01.png",
+    "sha256": "7e2931bdcc2abc2da792e02322b3f79704317701e8809013a21c536b470eb031"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_04.png",
+    "bytes": 221456,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_04.png",
+    "sha256": "87c35216c67088b3de42de893cb399df614d00f9cb0a63daba76afbce3ac3fef"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_mid_talk_eyes_open.png",
+    "bytes": 211842,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_04.png",
+    "sha256": "a0207212cb39da85774789a5f6956bb05132c770aa6916372d69aa609104d528"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_06.png",
+    "bytes": 214874,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_06.png",
+    "sha256": "4d89c95c403ba9c71e4cfce72c527387cf7a271af419d5bd2aa59c24e9e7be28"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_talk_eyes_mid_blink.png",
+    "bytes": 233657,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_08.png",
+    "sha256": "b9d6228b251293b5f1e55944f4983f883491591c0aea4975c40e00e34bb490f8"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_03.png",
+    "bytes": 207852,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_03.png",
+    "sha256": "ae8aef8361fb8ad26b79711e5b6f4fe24e9c1c9e2e685b5d6a246c8838208207"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_07.png",
+    "bytes": 227390,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_07.png",
+    "sha256": "c5a5fbe4d82811ca413c9904685490f795226fb09c59b2a0e65eaa1853a5962a"
+  },
+  {
+    "path": "sprites/hooshang/sad_matrix_06.png",
+    "bytes": 221407,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_06.png",
+    "sha256": "7a3440815e3abc0e19f9a964c96ac47ae3fe98889a4cabb623f6ff474285e535"
+  },
+  {
+    "path": "sprites/hooshang/happy_matrix_02.png",
+    "bytes": 209550,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_02.png",
+    "sha256": "7ebd18e5cd9561e551e488e7aa5118272d6eebafef5e4f7f77e3172c02139127"
+  },
+  {
+    "path": "sprites/hooshang/happy_mouth_closed_eyes_mid_blink.png",
+    "bytes": 209550,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/happy_matrix_02.png",
+    "sha256": "7ebd18e5cd9561e551e488e7aa5118272d6eebafef5e4f7f77e3172c02139127"
+  },
+  {
+    "path": "sprites/hooshang/neutral_matrix_07.png",
+    "bytes": 220609,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_07.png",
+    "sha256": "f2d7735482ba629715591c0d673eb04158128c7f190f909c8b5b4ae8bb873b3b"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_talk_eyes_open.png",
+    "bytes": 220609,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_07.png",
+    "sha256": "f2d7735482ba629715591c0d673eb04158128c7f190f909c8b5b4ae8bb873b3b"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_01.png",
+    "bytes": 242314,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_01.png",
+    "sha256": "67cf40ef5880a209d7e68d791537779e3636c49e74757c38f00a0fcc6f6b8e8f"
+  },
+  {
+    "path": "sprites/hooshang/angry_mouth_talk_eyes_open.png",
+    "bytes": 239422,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_07.png",
+    "sha256": "f0beaf35c31826c00eb2b40ebf4830c19bb11f7a997eebe4f7f36e38228252e1"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_mid_talk_eyes_closed.png",
+    "bytes": 221407,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_06.png",
+    "sha256": "7a3440815e3abc0e19f9a964c96ac47ae3fe98889a4cabb623f6ff474285e535"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_talk_eyes_mid_blink.png",
+    "bytes": 222558,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_08.png",
+    "sha256": "5f189606fb4badd4c6698c977a218e2f98e8e7c656dd45feca93c236ef67b2fc"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_talk_eyes_mid_blink.png",
+    "bytes": 216238,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_08.png",
+    "sha256": "3ad613bcca9e34b5e9fd249893dbc7fce09d8dd7d245607d876b00c24742efaf"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_02.png",
+    "bytes": 237930,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_02.png",
+    "sha256": "9f9e1847b6e390b0f554d6140988aa57936422c7f532c743226c58d53b63b186"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_09.png",
+    "bytes": 230600,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_09.png",
+    "sha256": "d7358b3f45cd9d04ab2cdebca48d29f82ae23805cdf88b0f3592ea5132af10fd"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_closed_eyes_closed.png",
+    "bytes": 215658,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_03.png",
+    "sha256": "25e59f8265d6cf73b43e0579dea00a90bea32749bbdce8a6ebb1fe4f09e7c934"
+  },
+  {
+    "path": "sprites/hooshang/surprised_matrix_08.png",
+    "bytes": 233657,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_08.png",
+    "sha256": "b9d6228b251293b5f1e55944f4983f883491591c0aea4975c40e00e34bb490f8"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_talk_eyes_open.png",
+    "bytes": 227390,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_07.png",
+    "sha256": "c5a5fbe4d82811ca413c9904685490f795226fb09c59b2a0e65eaa1853a5962a"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_03.png",
+    "bytes": 235824,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_03.png",
+    "sha256": "2727fe9da84ad91b28b85401fb7cb17bd4782f1e7b89fb25bf0302487a5aaad3"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_closed_eyes_open.png",
+    "bytes": 222253,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_01.png",
+    "sha256": "e6fd3c356c517c91b3eae812a3bc2010349d9326c6043bc74da548df2d6dcf23"
+  },
+  {
+    "path": "sprites/hooshang/sad_mouth_mid_talk_eyes_mid_blink.png",
+    "bytes": 223561,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_matrix_05.png",
+    "sha256": "03de4668146286df649744a367291544b989af9bd440a4fdb1a39afb854ff9cb"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_07.png",
+    "bytes": 239422,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_07.png",
+    "sha256": "f0beaf35c31826c00eb2b40ebf4830c19bb11f7a997eebe4f7f36e38228252e1"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_closed_eyes_mid_blink.png",
+    "bytes": 217934,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_02.png",
+    "sha256": "3c8c9733c89b8efae0187b7eadb00bc96e3feca54b3c480051d9e2ac87282a47"
+  },
+  {
+    "path": "sprites/hooshang/surprised_sub_matrix.png",
+    "bytes": 832377,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_sub_matrix.png",
+    "sha256": "9391f0549f4dff7e828b6f7a82e9598954b61cd380ea41bd90d7610ddebfa4b7"
+  },
+  {
+    "path": "sprites/hooshang/neutral_mouth_talk_eyes_closed.png",
+    "bytes": 214037,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/neutral_matrix_09.png",
+    "sha256": "fa1af5ea44aea9a81c0c8defce481b449fab26e2ec60cb530aea28452ef35d27"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_06.png",
+    "bytes": 234267,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_06.png",
+    "sha256": "88580eb79d45c7e03a772226144aa7b4ea43cfd1625e053330dd36a0b7f93f1c"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_04.png",
+    "bytes": 240767,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_04.png",
+    "sha256": "652490e037426b3b4f3b17c39346233401a4cc8473229edf2ca1449453b08f25"
+  },
+  {
+    "path": "sprites/hooshang/hooshang_emotional_submatrix_summary.png",
+    "bytes": 3452148,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/hooshang_emotional_submatrix_summary.png",
+    "sha256": "f4fe46a92768dce385465256dc32e6c0f552d82b59cfcf3b733fbd047af78afd"
+  },
+  {
+    "path": "sprites/hooshang/sad_sub_matrix.png",
+    "bytes": 789652,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/sad_sub_matrix.png",
+    "sha256": "12649d30c9bcb31bd3833b18015407641db3546171318e9eb00ab13c0ebe92ed"
+  },
+  {
+    "path": "sprites/hooshang/surprised_mouth_mid_talk_eyes_closed.png",
+    "bytes": 231908,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/surprised_matrix_06.png",
+    "sha256": "bc046952291399ee1c70db367459b96d731fdf31bff857464c0febc5db6d6d1c"
+  },
+  {
+    "path": "sprites/hooshang/angry_matrix_05.png",
+    "bytes": 236379,
+    "reason": "Identical canonical art",
+    "canonical": "assets/characters/hooshang/emotion_matrix/angry_matrix_05.png",
+    "sha256": "c4ebf4b3ad885af32c4150260732637d0b93f237481b183b105d1785baa190d3"
+  },
+  {
+    "path": "ldtk/levels/Level_4.scn",
+    "bytes": 9271,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "b6c7864ee4406b5f6c1e7083b2c416f3d7767b25204e65a2f46a429ef724adc1"
+  },
+  {
+    "path": "ldtk/levels/Level_5.scn",
+    "bytes": 8721,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "9fabd0ed84e78aff85cc2fb98b8a5ad8c692d58c72a63aa78e16a4a119eae425"
+  },
+  {
+    "path": "ldtk/levels/Level_24.scn",
+    "bytes": 27417,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "caeb22e86eac7df1814d1145248f0502bc7fde423e952dbba4806cc154094d16"
+  },
+  {
+    "path": "ldtk/levels/Level_7.scn",
+    "bytes": 17808,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "b9c80830db730c99fa7b3bbb2cce440ae41ae954f4eaeeb7ffd1ffa98ed9ed6a"
+  },
+  {
+    "path": "ldtk/levels/Level_18.scn",
+    "bytes": 21906,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "ec09bb1fc634ad61eb2bc95a33fcb2484d84aae8a97259ec1cc708f24e142291"
+  },
+  {
+    "path": "ldtk/levels/Level1_ManagerCorridor_ExitShaft.scn",
+    "bytes": 7833,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "c6fc369ce65caba6b800b709d00af015de8083cd945cb8082c196797b5190b49"
+  },
+  {
+    "path": "ldtk/levels/Level_19.scn",
+    "bytes": 23672,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "a4bd788503dc3751aed865ff3022320dd783ab2a0b246d5b625e2e53ce371612"
+  },
+  {
+    "path": "ldtk/levels/Level_6.scn",
+    "bytes": 24122,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "bd220dad2a46d5c362b95add42c3d9f77a4d3f32b647b0866d0e9416393a7def"
+  },
+  {
+    "path": "ldtk/levels/Level_25.scn",
+    "bytes": 10836,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "52bf262cb9abbfe617efca098d4a13848340fa65b17116aabd252132a5d1665d"
+  },
+  {
+    "path": "ldtk/levels/Level_2.scn",
+    "bytes": 13648,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "51c03e0f5faa6ad0884dd3aa75af140fa5cfac32dd575d801ef8e2005c1b4f9a"
+  },
+  {
+    "path": "ldtk/levels/Level_21.scn",
+    "bytes": 31548,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "f466973188d19c446b577fd04c47cd99bb777de42d17f0321a365b5a0004191e"
+  },
+  {
+    "path": "ldtk/levels/Level_20.scn",
+    "bytes": 30560,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "7668d19456728515f8532402dca22d5dc9940e2a549d4fa007ab8b6c88e6fc3e"
+  },
+  {
+    "path": "ldtk/levels/Level_3.scn",
+    "bytes": 8827,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "9709de0132605d5dfb3400ac9165bad01fb5834dfd56c8cf108112f4373c478d"
+  },
+  {
+    "path": "ldtk/levels/Level_1.scn",
+    "bytes": 7965,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "93a849487de0c5924c60bf19d1d76e7940b5e00be6ebc9f8fb5f9378dc24339d"
+  },
+  {
+    "path": "ldtk/levels/Level_22.scn",
+    "bytes": 29219,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "b632eb3c7f23e84bedcb5b6b19f2bb21972f6a26f8dabd277f67c3ffc60a3bbe"
+  },
+  {
+    "path": "ldtk/levels/Level_23.scn",
+    "bytes": 36275,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "7f57734d6bba85de15f4f51529c5bbe004f8d3b2319b9944aec13e256d1c466e"
+  },
+  {
+    "path": "ldtk/levels/Level_0.scn",
+    "bytes": 14406,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "ab71539e8950ebfebb702163fe8793cb48d6c3c54b863aa84c9e2b8a2fa58a0e"
+  },
+  {
+    "path": "ldtk/levels/Level_V6.scn",
+    "bytes": 8488,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "9ef125acfb2ffe60227b47557268c722597f886bc5b67c8546f277466b9ef658"
+  },
+  {
+    "path": "ldtk/levels/Level_V7.scn",
+    "bytes": 18508,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "f049ffa3003614bce5ac2c090e2537a74c73ec88ff096c6c32bf23c8eae80643"
+  },
+  {
+    "path": "ldtk/levels/Level_V5.scn",
+    "bytes": 21259,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "922545c2a88c00f27000ea83633191d03831697c81b16ce8a553886ee02b66fc"
+  },
+  {
+    "path": "ldtk/levels/Level_V4.scn",
+    "bytes": 24567,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "dcafd851e55575c9efde2243bc105fc143cdd546593d48a08b997271ebfd5a2b"
+  },
+  {
+    "path": "ldtk/levels/Level_V_test.scn",
+    "bytes": 12431,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "8652fd45ab5817f41b228a12107f88c600678aaea1aa64ae8c79cc7b13aaf12a"
+  },
+  {
+    "path": "ldtk/levels/Act3_Level_0.scn",
+    "bytes": 5399,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "78e5eb1b9798c79893359dc9989e56f17475cc1aa32b7bc31228e30599ad5183"
+  },
+  {
+    "path": "ldtk/levels/Level_V1.scn",
+    "bytes": 34975,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "91be28263ab07c507b113ab0ae3c383ed589a353376c08e6e304c58ab20d4476"
+  },
+  {
+    "path": "ldtk/levels/Level_V3.scn",
+    "bytes": 38038,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "f4902198fd299e7a34e793a66ab55e17a544c6d905ac7db373df0ae124ce7c01"
+  },
+  {
+    "path": "ldtk/levels/Level_V2.scn",
+    "bytes": 30312,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "e01a372ea1eaecfd3a7a13ddbbb143504e7681ad6f831d90443b86192d355a00"
+  },
+  {
+    "path": "ldtk/levels/Act_2_Level_2.scn",
+    "bytes": 13642,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "64762b1b3cce0e64b9603c18a29e113218da78a525dce28434d97cd3883a23ad"
+  },
+  {
+    "path": "ldtk/levels/Act_2_Level_0.scn",
+    "bytes": 23931,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "e51f5b9308a80ff1c4b8ff2a0824acc91fc52d59c85e3a297247260e3c6f887f"
+  },
+  {
+    "path": "ldtk/levels/Act_2_Level_1.scn",
+    "bytes": 15540,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "4235a97d4d038d846f82c27fd468761835bbeb51ea5ade0d3df743618c3059dc"
+  },
+  {
+    "path": "ldtk/levels/Level_V9.scn",
+    "bytes": 25412,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "719cfcb3f46542273c375e5ced259187997ac5cad4becb38c2e763913e141a87"
+  },
+  {
+    "path": "ldtk/levels/Level_V8.scn",
+    "bytes": 19066,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "b4a200d5fed54b5b1a20bf9b6af01d53cf17111c3a08ed722e1779671a063940"
+  },
+  {
+    "path": "ldtk/levels/TEST.scn",
+    "bytes": 22438,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "e943279e026178e43db3bdec93621e8e44a0229cded2903427ced4fee64948d0"
+  },
+  {
+    "path": "ldtk/levels/Level_12.scn",
+    "bytes": 17232,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "e11c05a32609132672a07c580b7f80a46069609189b6dc03609a76b1fed01d80"
+  },
+  {
+    "path": "ldtk/levels/Level_V10.scn",
+    "bytes": 26007,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "d98ecf1025ecbc6d97fbd91e4c2c0c647dcd6bf60c22da3384192c2365032aed"
+  },
+  {
+    "path": "ldtk/levels/Level_V11.scn",
+    "bytes": 31229,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "a3ace09309aafd5802e7f9bae97b0009fe4b185bbb51056f45a0b1ed961b8f1a"
+  },
+  {
+    "path": "ldtk/levels/Level_13.scn",
+    "bytes": 21650,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "77c37982dc598be246ac10715c7a1e8a36e893726f32dc5dae52a4b2eaf39eba"
+  },
+  {
+    "path": "ldtk/levels/Level_11.scn",
+    "bytes": 17048,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "5a4806f632bbc4d0b760452ae9ff7454ec1839deb84a76a3d14722a52d494e96"
+  },
+  {
+    "path": "ldtk/levels/Level_V13.scn",
+    "bytes": 31241,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "7516fce212ced186b5a7f8789393c71865f3447efcd6b82b710405b05788cf11"
+  },
+  {
+    "path": "ldtk/levels/Level_V12.scn",
+    "bytes": 23934,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "c5dba7c393a2b4a7fac7b5c469420e6c088bbb4253ae345f4f74cfbdf3d7858f"
+  },
+  {
+    "path": "ldtk/levels/Level_10.scn",
+    "bytes": 9767,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "b8636aaeee5bf35b88c184938100055574ac1739d163a9f850ad230439b459d3"
+  },
+  {
+    "path": "ldtk/levels/Level_14.scn",
+    "bytes": 16672,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "c6b9dffc8c25b3002a26345159e0d762f76cce27133534cb32868277c29695c2"
+  },
+  {
+    "path": "ldtk/levels/Level_15.scn",
+    "bytes": 21115,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "6d49e75460cb90e168d41f770bd8444692c6120f03d9cc9c43832cadb160be07"
+  },
+  {
+    "path": "ldtk/levels/Level_17.scn",
+    "bytes": 23872,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "6b3296a008885ca730fed414ae878f9df19846c0618a8d5e03d2e485e0ecfde3"
+  },
+  {
+    "path": "ldtk/levels/Level_8.scn",
+    "bytes": 21341,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "a0088a367f6e39e1a8e7ae6bec57387e17587e79d7aac640b7bb7ee4f4b59e6c"
+  },
+  {
+    "path": "ldtk/levels/Level_V14.scn",
+    "bytes": 26322,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "e916a7f8166f9ab37e3901b44108d317b690c7a08039bc5ed4e2c1c5e88ed0c9"
+  },
+  {
+    "path": "ldtk/levels/Level_9.scn",
+    "bytes": 14608,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "ecd334d67f7210a2510f27e30d82fc45b1f4a02fbbe1ff325569a2c36202538f"
+  },
+  {
+    "path": "ldtk/levels/Level_16.scn",
+    "bytes": 18550,
+    "reason": "Legacy flat import; active imports are namespaced",
+    "sha256": "fcfdf962d3f64f638548e28dc4bab7ec56f5102015cf8ebb46ca16c33a4f574d"
+  }
+]

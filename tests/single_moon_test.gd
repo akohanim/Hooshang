@@ -18,7 +18,7 @@ func _ready() -> void:
 		var room_selection: Node = null
 		var has_source := false
 		for moon in get_tree().get_nodes_in_group("moon_candidates"):
-			if r.has_point(world.to_local(moon.global_position)):
+			if moon.is_visible_in_tree() and not world._room_has_music_puzzle(room) and r.has_point(world.to_local(moon.global_position)):
 				has_source = true
 		for x in range(int(r.position.x + 16), int(r.end.x), 48):
 			for y in range(int(r.position.y + 16), int(r.end.y), 64):

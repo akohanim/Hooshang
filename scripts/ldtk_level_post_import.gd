@@ -98,6 +98,8 @@ const CASTLE_SCENERY := ["CastleBackground", "CastleDecor"]
 
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
+	if str(level.name).begins_with("Prison_"):
+		return preload("res://scripts/prison/prison_import.gd").apply(level)
 	if str(level.name) == "Level_V9":
 		var atrium := preload("res://scenes/props/backdrop/maintenance_atrium/MaintenanceAtrium.tscn").instantiate()
 		level.add_child(atrium)
@@ -125,12 +127,18 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 		if layer.name.ends_with(VALUES_LAYER_SUFFIX):
 			layer.visible = false
 			layer.collision_enabled = false
-		elif layer.name == THOUGHT_LAYER:
+		elif layer.name == THOUGHT_LAYER or layer.name == "InkThoughtHazards":
 			layer.collision_enabled = false
 			var mat := CanvasItemMaterial.new()
 			mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 			layer.material = mat
 			layer.set_script(THOUGHT_LAYER_SCRIPT)
+			# Only the office sheet gets dust motion; other Acts keep their art.
+			for source_index in layer.tile_set.get_source_count():
+				var source := layer.tile_set.get_source(layer.tile_set.get_source_id(source_index))
+				if source is TileSetAtlasSource and source.texture.resource_path == "res://ldtk/art/thought_tiles.png":
+					layer.set_script(preload("res://scripts/ldtk_dust_hazard_layer.gd"))
+					break
 		elif layer.name == WATER_LAYER:
 			layer.collision_enabled = false
 			layer.set_script(WATER_LAYER_SCRIPT)
@@ -139,6 +147,7 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 		if str(layer.name) in CASTLE_SCENERY:
 			layer.collision_enabled = false
 		if layer.name == GEOMETRY_LAYER:
+			preload("res://scripts/terrain_variation.gd").apply(layer)
 			_light_panels(level, layer)
 	return level
 

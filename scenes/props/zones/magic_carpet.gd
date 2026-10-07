@@ -74,6 +74,10 @@ var _floor: ZoneFloor
 ## ConveyorBelt.riders documents (a test needs to tell "not touching it" apart
 ## from "touching it but not being carried").
 var riders: Array[Node2D] = []
+## Seconds of launch forgiveness after the surface stops; zero disables storage.
+@export_range(0.0, 0.25) var momentum_grace_time := 0.1
+var _momentum := preload("res://scenes/props/zones/platform_momentum.gd").new()
+
 ## Who was being carried last frame, by instance id — same departure-detection
 ## trick as ConveyorBelt._riding.
 var _riding := {}
@@ -112,12 +116,22 @@ func carrying(body: Node2D) -> bool:
 		return false
 	if body is Player:
 		var who := body as Player
-		if who.state == Player.State.DEAD or who.state == Player.State.DASH:
+		if who.state == Player.State.DEAD or who.state == Player.State.DASH \
+			or not who.is_physics_processing() or who.invulnerable_timer > 0.0:
 			return false
+		if who.childhood_momentum and not who.is_on_floor() and who.velocity.y >= 0.0:
+			# A rising rug can leave the floor-contact cache one tick behind.
+			# Keep geometric contact through that tiny gap; lighter gravity must
+			# not make a rider fall off just because vertical steering stopped.
+			var feet := who.hitbox_rect().end.y
+			var top := global_position.y - size.y * 0.5
+			if absf(feet - top) <= 1.25 and absf(who.global_position.x - global_position.x) <= size.x * 0.5 - who.footing_width:
+				return true
 	return body is CharacterBody2D and (body as CharacterBody2D).is_on_floor()
 
 
 func _physics_process(delta: float) -> void:
+	_momentum.tick(delta)
 	if not activated:
 		# A reset/respawn can leave a body inside the same sensor, so no new
 		# body_entered signal follows. Reacquire before testing its feet.
@@ -125,6 +139,10 @@ func _physics_process(delta: float) -> void:
 			_on_body_entered(body)
 		for body in riders:
 			if carrying(body) and body is Player:
+				# Childhood's slower approach must establish central footing before
+				# the parked rug moves away from a first, edge-only contact.
+				if body.childhood_momentum and absf(body.global_position.x - global_position.x) > size.x * 0.5 - body.footing_width:
+					continue
 				var feet: float = (body as Player).hitbox_rect().end.y
 				var top := global_position.y - size.y * 0.5
 				if absf(feet-top) <= 3.0 and (body as Player).velocity.y >= 0.0:
@@ -154,9 +172,11 @@ func _physics_process(delta: float) -> void:
 	var carry := position - old_pos
 	for body in riders:
 		var riding := carrying(body)
+		if riding:
+			_momentum.remember(body, carry.x / maxf(delta, 0.000001), momentum_grace_time)
 		if riding and not carry.is_zero_approx():
 			_carry_body(body as CharacterBody2D, carry)
-		_settle_launch(body, riding)
+		_settle_launch(body, riding, carry.x / maxf(delta, 0.000001))
 
 
 ## Drag `body` along by `carry` — the exact displacement the carpet (and its
@@ -254,15 +274,24 @@ func _clear_fraction(box: Rect2, motion: Vector2) -> float:
 	return get_world_2d().direct_space_state.cast_motion(query)[0]
 
 
-## Hand the carpet's current horizontal drift over as real velocity the frame
+## Hand the carpet's measured horizontal drift (or its recent stopped sample)
+## over as real velocity the frame
 ## a rider LEAVES it in mid-air — same reasoning and same shape as
 ## ConveyorBelt._settle_launch, simplified: no "jumping with it" bonus, and
 ## Only horizontal drift is inherited when jumping off.
-func _settle_launch(body: Node2D, riding: bool) -> void:
+func _settle_launch(body: Node2D, riding: bool, surface_speed: float) -> void:
 	var was: bool = _riding.get(body.get_instance_id(), false)
 	_riding[body.get_instance_id()] = riding
+	if riding and not was and body is Player and (body as Player).childhood_momentum:
+		# World 2 preserves airborne momentum. On boarding, the carpet starts
+		# carrying him separately; absorb matching forward speed so that old
+		# launch momentum isn't counted twice and throws him off the small rug.
+		var who := body as Player
+		if who.velocity.x * surface_speed > 0.0:
+			who.velocity.x -= signf(surface_speed) * minf(absf(who.velocity.x), absf(surface_speed))
 	if riding or not was:
 		return
+	var stored_speed := _momentum.take(body, surface_speed)
 	if not is_instance_valid(body) or body is not CharacterBody2D:
 		return
 	var mover := body as CharacterBody2D
@@ -270,12 +299,13 @@ func _settle_launch(body: Node2D, riding: bool) -> void:
 		return
 	if body is Player:
 		var who := body as Player
-		if who.state == Player.State.DEAD or who.state == Player.State.DASH:
+		if who.state == Player.State.DEAD or who.state == Player.State.DASH \
+			or not who.is_physics_processing() or who.invulnerable_timer > 0.0:
 			return
 	if mover.has_method("add_momentum"):
-		mover.add_momentum(speed)
+		mover.add_momentum(stored_speed)
 	else:
-		mover.velocity.x += speed
+		mover.velocity.x += stored_speed
 
 
 func _on_body_entered(body: Node2D) -> void:
@@ -285,6 +315,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 func _on_body_exited(body: Node2D) -> void:
 	riders.erase(body)
+	_momentum.forget(body)
 	_riding.erase(body.get_instance_id())
 
 
@@ -300,6 +331,7 @@ func reset() -> void:
 	position = _origin
 	riders.clear()
 	_riding.clear()
+	_momentum.clear()
 
 
 ## Reset every magic carpet in the tree — same static-helper pattern

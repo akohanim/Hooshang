@@ -93,7 +93,8 @@ when a conversation grows or recurs.
 ## 7. Greybox levels are generated
 
 `scenes/levels/**/…tscn` for the greybox levels are written by the Python
-generators in `tools/` (`gen_level1.py`, `gen_level.py`) — tilemap bytes + node
+active generator `tools/gen_level.py` (TestLevel; retired office generators are
+in `tools/archive/`) — tilemap bytes + node
 layout. **Re-running a generator overwrites hand-edits to that `.tscn`**, so
 change the generator, not the scene, for generated levels. Prefab instances,
 exports, and paths are emitted from the generator too.

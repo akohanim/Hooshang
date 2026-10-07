@@ -68,7 +68,7 @@ func _ready() -> void:
 		expected.append("Level_%d" % n)
 	for v in range(1, 11):
 		expected.append("Level_V%d" % v)
-	for n in range(7, 26):
+	for n in range(7, 27):
 		expected.append("Level_%d" % n)
 
 	var have_names: Array[String] = []
@@ -101,7 +101,7 @@ func _ready() -> void:
 
 	# 4. Scratch rooms (no recorded place in the chain) sort AFTER it, not into
 	#    the middle of it.
-	var last_curated := have_names.find("Level_25")
+	var last_curated := have_names.find("Level_26")
 	for name in ["Level_V_test", "TEST"]:
 		if have_names.has(name):
 			_check(have_names.find(name) > last_curated,

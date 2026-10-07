@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/background/dawn_sky.png" id="1_sky"]
 [ext_resource type="Texture2D" path="res://assets/background/window_frame.png" id="2_frame"]
+[ext_resource type="Shader" path="res://scenes/props/backdrop/office_moon/frame.gdshader" id="3_frame"]
+
+[sub_resource type="ShaderMaterial" id="RecessedFrame"]
+shader = ExtResource("3_frame")
 
 [node name="DawnWindow" type="Node2D"]
 
@@ -9,4 +13,5 @@
 texture = ExtResource("1_sky")
 
 [node name="Frame" type="Sprite2D" parent="."]
+material = SubResource("RecessedFrame")
 texture = ExtResource("2_frame")

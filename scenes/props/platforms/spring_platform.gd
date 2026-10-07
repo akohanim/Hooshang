@@ -268,14 +268,6 @@ func _process(_delta: float) -> void:
 		_try_launch(who)
 
 
-## Play the coil's compress/expand/settle animation on demand, with no launch —
-## for a scripted cutscene (Act2Beats' Jamshid exit) where a visual actor, not
-## the player, is bouncing off it. The real bounce path (_try_launch) calls
-## _play_bounce directly; this is just a public door onto the same beat.
-func bounce_visual() -> void:
-	_play_bounce()
-
-
 ## Compress, expand, settle — the visual half of the bounce, played once per
 ## launch. Three beats now, matching the reference
 ## (mario.fandom.com/wiki/Spring_Jump) with a real frame each rather than a

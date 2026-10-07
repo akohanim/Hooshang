@@ -3,7 +3,7 @@ extends RefCounted
 ## Native-pixel transparent glass; wall, sash, blinds and dividers stay opaque.
 ## New baked backgrounds fail closed until their glass is authored here.
 static func for_room(room: String) -> Array:
-	if room == "Level_25":
+	if room == "Level_26":
 		room = "Level_0"  # Homecoming uses the opening cubicle artwork.
 	var openings := {
 		"Level_0": [Rect2(146,47,27,71), Rect2(177,47,81,71), Rect2(263,47,27,71)],

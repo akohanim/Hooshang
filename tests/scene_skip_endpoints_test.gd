@@ -58,7 +58,7 @@ func _check_act2_skip(marker: String) -> void:
 	await frames(3)
 
 func _check_finale_skip() -> void:
-	LdtkWorld.debug_start_room = "Level_25"
+	LdtkWorld.debug_start_room = "Level_26"
 	var world: LdtkWorld = load("res://ldtk/Act1World.tscn").instantiate()
 	Screen.set_scene(world)
 	await frames(15)

@@ -19,11 +19,21 @@ var current := Device.KEYBOARD
 ## Below this, a resting stick's own jitter must not count as "picked up the
 ## pad" — see the class comment.
 const AXIS_DEADZONE := 0.5
+const TOUCH_MOUSE_GRACE_MS := 500
+var _last_touch_ms := -TOUCH_MOUSE_GRACE_MS
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
-		return
+	if event is InputEventMouse:
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			return
+		# Web touch drags can arrive with a companion MouseMotion whose device
+		# is 0, so the emulation ID alone is insufficient. Switching devices
+		# here resets TouchControls BEFORE its ScreenDrag can move either thumb.
+		# Keep ownership through a held gesture and its trailing mouse events.
+		if is_touch() and (TouchControls.has_active_gesture() \
+				or Time.get_ticks_msec() - _last_touch_ms < TOUCH_MOUSE_GRACE_MS):
+			return
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		note_touch()
 	elif event is InputEventKey or event is InputEventMouseButton \
@@ -50,6 +60,7 @@ func is_controller() -> bool:
 
 
 func note_touch() -> void:
+	_last_touch_ms = Time.get_ticks_msec()
 	_note(Device.TOUCH)
 
 

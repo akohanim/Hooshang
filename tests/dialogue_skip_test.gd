@@ -75,6 +75,49 @@ func _ready() -> void:
 		_tick(box, 0.02)
 		await _close(box)
 		box.end_conversation()
+	# A release/repress can both arrive before _process. Polling alone never
+	# observes the release, leaving the next deliberate hold blocked forever.
+	Input.action_press("skip_dialogue")
+	box.begin_conversation(self)
+	await _say_line(box, "Rumi", "A fresh press must re-arm after a pre-held key.")
+	_skip_key(false)
+	_skip_key(true)
+	_tick(box, box.skip_hold_time + 0.1)
+	_check(box._skip_armed(), "release and fresh X press between frames re-arms skipping")
+	_skip_key(false)
+	await _close(box)
+	box.end_conversation()
+	box.begin_conversation(self)
+	await _say_line(box, "Rumi", "Refocusing the game must allow a fresh X hold.")
+	box._notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
+	_skip_key(true)
+	_tick(box, box.skip_hold_time + 0.1)
+	_check(box._skip_armed(), "fresh X press after focus loss re-arms skipping")
+	_skip_key(false)
+	await _close(box)
+	box.end_conversation()
+	# A hold belongs to the entire scoped scene, including banner transitions.
+	box.begin_conversation(self)
+	await _say_line(box, "Rumi", "Skip can cross the end of this spoken line.")
+	Input.action_press("skip_dialogue")
+	_tick(box, 0.6)
+	box.line_finished.emit()
+	_tick(box, 0.45)
+	_check(box._skip_armed(), "hold progress survives the line closing")
+	Input.action_release("skip_dialogue")
+	await _close(box)
+	await box.say("Rumi", "This later line must not reopen.")
+	_check(not box.visible, "transition skip skips later speech too")
+	box.end_conversation()
+	box.begin_conversation(self)
+	box.say("Rumi", "A skip during the opening animation must not be lost.")
+	Input.action_press("skip_dialogue")
+	_tick(box, box.skip_hold_time + 0.1)
+	_check(box._skip_armed(), "skip accepted while the banner is opening")
+	Input.action_release("skip_dialogue")
+	await _close(box)
+	_check(not box.visible and not box._active, "opening skip never waits for an unread page")
+	box.end_conversation()
 	await _say_line(box, "", "Standalone speech also supports skipping.")
 	Input.action_press("skip_dialogue")
 	_tick(box, 2.0)
@@ -137,3 +180,12 @@ func _check(cond: bool, name: String) -> void:
 	print(("  PASS  " if cond else "  FAIL  ") + name)
 	if not cond:
 		failures.append(name)
+
+
+func _skip_key(pressed: bool) -> void:
+	var event := InputEventKey.new()
+	event.physical_keycode = KEY_X
+	event.keycode = KEY_X
+	event.pressed = pressed
+	Input.parse_input_event(event)
+	Input.flush_buffered_events()

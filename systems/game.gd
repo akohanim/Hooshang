@@ -4,12 +4,12 @@ extends Node
 ## Levels are chained in LEVELS order. Reaching a level's exit fades out, loads
 ## the next level, and fades back in. The currently-loaded level IS the running
 ## checkpoint: death respawns at its start (see LevelBase), and completed levels
-## are never replayed — so passing an exit sign permanently banks progress.
+## are never repla	yed — so passing an exit sign permanently banks progress.
 ##
 ## Empty now that the pre-LDtk hand-built levels (Level1Office, Level2) are
-## gone — nothing left extends LevelBase, so advance()/set_current() are dead
-## code paths kept only because SaveGame still persists current_index/completed
-## as part of a save's schema (see save_game.gd).
+## gone. TestLevel still uses LevelBase, so its integration remains available.
+## SaveGame persists current_index/completed for schema compatibility; real
+## Act progression is owned by LdtkWorld and the Act beat scripts.
 
 signal level_changed(index: int)
 

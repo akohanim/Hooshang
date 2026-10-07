@@ -32,6 +32,9 @@ var _world: LdtkWorld
 var _room: Node2D
 var _room_tiles: Array[NoteTile] = []
 var _exits: Dictionary = {}
+## Door access is earned for this world run; glow/progress remain per life/visit.
+## Keeping these separate prevents a return landing inside a reclosed shutter.
+var _opened_rooms: Dictionary = {}
 var _light_tween: Tween
 
 var progress := 0          # how many correct steps so far (0..total)
@@ -65,7 +68,7 @@ func _ready() -> void:
 			t.stepped.connect(_on_tile_stepped)
 
 	# The reward is scoped to THIS room and THIS life: dying or leaving the
-	# room takes the glow back and re-arms the puzzle, so it has to be earned
+	# room takes the glow back and re-arms the notes, so light has to be earned
 	# again. Both events are watched here rather than in the player, because
 	# the puzzle owns its own reward's lifetime.
 	_player = get_tree().get_first_node_in_group("player") as Player
@@ -113,6 +116,7 @@ func _on_tile_stepped(tile: NoteTile) -> void:
 
 func _complete() -> void:
 	_solved = true
+	if _room != null: _opened_rooms[_room] = true
 	completed.emit()
 	if play_feedback:
 		_play("res://assets/notes/success.wav")
@@ -145,7 +149,7 @@ func reset() -> void:
 	if _light_tween and _light_tween.is_valid():_light_tween.kill()
 	_update_exit()
 	if _world != null and _room != null and not _room_tiles.is_empty():
-		_world.get_node("CanvasModulate").color = _world.music_room_color
+		_world.get_node("CanvasModulate").color = _world._ambient_color if _opened_rooms.has(_room) else _world.music_room_color
 
 
 ## Take the glow back and re-arm the tiles. Fires on death and on leaving the
@@ -211,5 +215,6 @@ func _room_changed(room: Node2D) -> void:
 
 func _update_exit() -> void:
 	if _room == null or not _exits.has(_room):return
-	_room.set_meta("exit_locked",not _solved)
-	_exits[_room].set_state(progress,total,_solved)
+	var opened := _solved or _opened_rooms.has(_room)
+	_room.set_meta("exit_locked",not opened)
+	_exits[_room].set_state(total if opened else progress,total,opened)

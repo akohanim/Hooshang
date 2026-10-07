@@ -2,7 +2,7 @@ extends Node
 var failures: Array[String] = []
 func _ready() -> void:
 	SaveGame.slot = -1
-	LdtkWorld.debug_start_room = "Level_25"
+	LdtkWorld.debug_start_room = "Level_26"
 	var world: LdtkWorld = load("res://ldtk/Act1World.tscn").instantiate()
 	Screen.set_scene(world)
 	for i in 30:
@@ -10,7 +10,7 @@ func _ready() -> void:
 	var room := world.current_room
 	_check(room.find_child("OfficeDawn", true, false) != null, "finale uses dawn in its existing window panes")
 	_check(room.find_children("*", "OfficeMoon", true, false).is_empty(), "finale has no moon or stars")
-	for name in ["DawnGlowRoom25", "DawnSpillRoom25a", "DawnSpillRoom25b", "SunShaftRoom25"]:
+	for name in ["DawnGlowRoom26", "DawnSpillRoom26a", "DawnSpillRoom26b", "SunShaftRoom26"]:
 		_check(world.get_node("Lights/" + name).is_visible_in_tree(), name + " is enabled")
 	var opening: Node2D
 	for r in world.rooms:
@@ -28,7 +28,7 @@ func _ready() -> void:
 		img.resize(1280, 720, Image.INTERPOLATE_NEAREST)
 		img.save_png("/tmp/hooshang-finale-dawn.png")
 	world._enter_room(opening, true)
-	_check(not world.get_node("Lights/SunShaftRoom25").visible, "dawn light turns off outside the finale")
+	_check(not world.get_node("Lights/SunShaftRoom26").visible, "dawn light turns off outside the finale")
 	print("FINALE DAWN TEST: %s" % ("ALL PASS" if failures.is_empty() else str(failures)))
 	get_tree().quit(0 if failures.is_empty() else 1)
 func _check(ok: bool, message: String) -> void:

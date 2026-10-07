@@ -1,4 +1,37 @@
+> October 2026 insertion: **Level_19 — Against the Current** is a 2,696px
+> leftward course with sixteen 120px right-running conveyor platforms (36px/s), five
+> horizontal charge triggers, and two checkpoints. Darkshang rests as a large,
+> floating, blinking storm cloud here and condenses into his existing humanoid form
+> during charges and absorption. The supplied eight-frame transformation sheet
+> plays during the final 0.55 seconds of the warning. After a missed charge he vanishes for the
+> recovery interval, then reappears as a cloud at that charge’s launch position.
+> While waiting and warning, the cloud stays fully visible at camera right.
+> A brief inhale leads into smoothly blended, eye-aligned transformation poses.
+> Independent rolling currents reshape its silhouette and shading while leaving
+> its eyes readable. Waiting in this camera-anchored form cannot contact-kill.
+> The same cloud/morph/return performance now applies to every charge room.
+> Charge contact uses a swept 24×38px body at offset (0,−17), including legacy
+> surges. Death/respawn and absorption timing remain unchanged.
+> Crossing a charge trigger now starts a repeating sequence until death or room
+> exit; later triggers take over its tuning. Recovery is multiplied by 0.5 at
+> runtime: Level 18 = 0.55/0.50/0.475s; Level 19 = 0.6s; Levels 21–25 = 0.5s.
+> The additional post-return pause is 0.175s (previously 0.35s); warning and
+> approach durations remain unchanged. An upward dash clears the larger body.
+> Levels 14–25 use the somber Shur Requiem reprise with continuous playback.
+> Regression: `darkshang_shared_charge_art`, `darkshang_charge_balance`, and
+> `darkshang_music` in addition to the original room tests.
+> The previous Levels 19–25 are now **20–26**, including the finale. Older room
+> numbers below describe the pre-insertion route. Existing room/entity IIDs and
+> checkpoint IDs are preserved; schema-1 Act I saves migrate their room names.
+> Play without saving: `res://tests/conveyor_charge_preview.tscn`.
+> Regression: `res://tests/conveyor_charge_room_test.tscn`.
+> The LDtk source holds the current authored geometry; do not rebuild older
+> hand-edited rooms from the historical expansion recipes.
+
 # Manually authored Darkshang powers
+
+Historical implementation notes follow; the October 2026 summary above is the
+current behavior where later revisions supersede these notes.
 
 Open `ldtk/hooshang_act1.ldtk`. Three new entities are in the entity list.
 They add no attacks until placed. Existing room layouts and attack recipes remain in place.

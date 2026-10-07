@@ -46,6 +46,18 @@ const HALF_HEIGHT := 6.0
 ## Degrees either side of a cardinal; smaller values make diagonals easier.
 @export_range(10.0, 30.0) var stick_cardinal_angle := 20.0
 
+@export_group("Animation Timing")
+## Brief launch poses; movement starts immediately and never waits for this clip.
+@export_range(0.0, 0.2) var takeoff_anim_time := 0.06
+## Compression after landing; jump/dash input can interrupt it immediately.
+@export_range(0.0, 0.2) var landing_anim_time := 0.055
+## Standing recovery after compression, before returning to the idle cycle.
+@export_range(0.0, 0.2) var recovery_anim_time := 0.065
+## Minimum downward impact speed that deserves a landing pose, in px/s.
+@export var landing_anim_min_speed := 60.0
+## Vertical speed band for the held apex pose, in px/s; does not alter gravity.
+@export var apex_anim_speed := 25.0
+
 @export_group("Run")
 ## Top horizontal speed.
 ##
@@ -85,6 +97,16 @@ const HALF_HEIGHT := 6.0
 ## Air deceleration fraction (letting go of the stick mid-air).
 @export_range(0.0, 1.0) var air_decel_mult := 0.6
 
+@export_group("World 2 momentum")
+## Only Act2Beats enables this; adult worlds keep the original controller.
+@export var childhood_momentum := false
+@export var childhood_held_gravity := 337.5
+@export var childhood_released_gravity := 675.0
+@export var childhood_turn_accel := 562.5
+@export var childhood_running_jump_bonus := 18.75
+@export var childhood_terminal_speed := 120.0
+var _spring_arc := false
+
 @export_group("Jump")
 ## Initial upward speed, and while the button is held this is the rise rate
 ## exactly — so read it together with jump_hold_time, not on its own.
@@ -105,6 +127,8 @@ const HALF_HEIGHT := 6.0
 ## hold ladder, the airtime, the horizontal reach and the jump+dash sweep, which
 ## is how a retune proves what it moved. Run it before and after.
 @export var jump_speed := 135.0
+## Matches externally supplied spring impulses to a world-specific gravity profile.
+@export var spring_impulse_scale := 1.0
 ## Variable jump height, Celeste-style: HOLDING jump sustains the launch speed
 ## for up to this long, and letting go hands him straight to gravity.
 ##
@@ -491,6 +515,8 @@ var wall_dir := 0               # which side the wall is on while wall sliding
 var squeezing := false
 
 # Feel timers, all count down to 0 in seconds.
+var takeoff_anim_timer := 0.0
+var landing_anim_timer := 0.0
 var coyote_timer := 0.0
 var jump_buffer_timer := 0.0
 var wall_coyote_timer := 0.0    # counts down after last wall contact in the air
@@ -748,6 +774,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _tick_timers(delta: float) -> void:
+	takeoff_anim_timer = maxf(0.0, takeoff_anim_timer - delta)
+	landing_anim_timer = maxf(0.0, landing_anim_timer - delta)
 	_ladder_regrab_timer = maxf(0.0, _ladder_regrab_timer - delta)
 	_ledge_cooldown = maxf(0.0, _ledge_cooldown - delta)
 	coyote_timer = maxf(coyote_timer - delta, 0.0)
@@ -1189,6 +1217,14 @@ func _swim_surface_y() -> float:
 ## nothing about which way the character is already very nearly facing at
 ## that exact moment.
 func _tick_swim_orientation(delta: float, input_x: float, input_y: float) -> void:
+	# SMW-style child frames already draw the side-on stroke. Keep the head
+	# upright even while travelling vertically; only horizontal intent mirrors it.
+	if visual.sprite_frames.get_meta("child_hooshang", false):
+		_swim_visual_angle = 0.0
+		_swim_visual_flip = facing < 0.0
+		if not is_zero_approx(input_x):
+			_swim_visual_flip = input_x < 0.0
+		return
 	var target_angle := 0.0  # idle float: level
 	if _swim_paddling:
 		var dir := Vector2(input_x, input_y).normalized()
@@ -1271,6 +1307,8 @@ func _apply_run(delta: float, input_x: float, control_mult: float) -> void:
 		# three or four of them.
 		if target != 0.0 and is_on_floor():
 			juice.on_turn(absf(velocity.x))
+	if childhood_momentum and target != 0.0 and velocity.x * target < 0.0:
+		rate = childhood_turn_accel
 	if not is_on_floor():
 		rate *= air_accel_mult if target != 0.0 else air_decel_mult
 	# slide_control is 1.0 unless he is in a slide zone. Applied to the RATE, the
@@ -1310,6 +1348,13 @@ func _apply_slide(delta: float) -> void:
 
 
 func _apply_gravity(delta: float) -> void:
+	if childhood_momentum and not _spring_arc:
+		# SMW's held-button gravity applies throughout the arc, not a rising
+		# velocity clamp. Release doubles gravity without an abrupt speed cut.
+		var held: bool = not input_locked and (Input.is_action_pressed("jump") or TouchControls.jump_held())
+		var gravity := childhood_held_gravity if held else childhood_released_gravity
+		velocity.y = minf(velocity.y + gravity * delta, childhood_terminal_speed)
+		return
 	var g := rise_gravity if velocity.y < 0.0 else fall_gravity
 	# Anti-gravity apex: floatier right at the top of the jump for control.
 	if absf(velocity.y) < apex_threshold:
@@ -1350,7 +1395,11 @@ func _try_buffered_jump() -> bool:
 	if jump_buffer_timer > 0.0 and (is_on_floor() or coyote_timer > 0.0):
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
-		velocity.y = -jump_speed
+		_spring_arc = false
+		var running_bonus := childhood_running_jump_bonus * clampf(absf(velocity.x) / max_run_speed, 0.0, 1.0) if childhood_momentum else 0.0
+		velocity.y = -(jump_speed + running_bonus)
+		takeoff_anim_timer = takeoff_anim_time
+		landing_anim_timer = 0.0
 		jump_hold_timer = jump_hold_time
 		state = State.JUMP
 		juice.on_jump()
@@ -1399,6 +1448,7 @@ func _walled_both_sides() -> bool:
 
 
 func _do_wall_jump(from_wall_dir: int) -> void:
+	_spring_arc = false
 	jump_buffer_timer = 0.0
 	wall_coyote_timer = 0.0
 	velocity = Vector2(-from_wall_dir * wall_jump_speed_x, -jump_speed)
@@ -1458,6 +1508,9 @@ func _try_dash(direction := Vector2.ZERO, startup_already_frozen := false) -> bo
 	var dir := direction if direction != Vector2.ZERO else _movement_input()
 	if dir == Vector2.ZERO:
 		dir = Vector2(facing, 0)
+	takeoff_anim_timer = 0.0
+	landing_anim_timer = 0.0
+	_spring_arc = false
 	dash_dir = dir.normalized()
 	velocity = dash_dir * dash_speed
 	# A dash starts from a clean slate, so nothing it was handed earlier trails
@@ -1528,8 +1581,11 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		return
 	if is_on_floor():
 		dash_available = true  # dash refreshes on landing
+		_spring_arc = false
 		_bounce_gravity_scale = 1.0  # a spring arc ends where he touches down
 		if state == State.FALL or state == State.JUMP or state == State.WALL_SLIDE:
+			if not was_on_floor and incoming_vel_y >= landing_anim_min_speed:
+				landing_anim_timer = landing_anim_time + recovery_anim_time
 			juice.on_land(incoming_vel_y)
 			state = State.RUN if input_x != 0.0 else State.IDLE
 		_keep_footing()
@@ -1870,17 +1926,19 @@ func _update_visual() -> void:
 	visual.rotation = 0.0
 	match state:
 		State.IDLE:
-			visual.play("crouch" if crouching() else "idle")
+			_play_ground_animation("idle")
 		State.RUN:
-			visual.play("crouch" if crouching() else "run")
+			_play_ground_animation("run")
+			if childhood_momentum:
+				visual.speed_scale = clampf(absf(velocity.x) / max_run_speed, 0.4, 1.0)
 		State.JUMP:
 			# A wall jump is an ordinary JUMP state — the dedicated kick is
 			# selected by how the jump STARTED, which only this timer records.
-			visual.play("wall_jump" if wall_jump_timer > 0.0 else "jump")
+			_play_air_animation()
 		State.FALL:
 			# Keep the kick through the arc if it is still running: a short hop
 			# off a wall can reach FALL before the clip has played out.
-			visual.play("wall_jump" if wall_jump_timer > 0.0 else "fall")
+			_play_air_animation()
 		State.DASH:
 			visual.play("dash")  # forward lunge burst, one-shot
 		State.WALL_SLIDE:
@@ -1907,8 +1965,8 @@ func _update_visual() -> void:
 			# reads as pointing down, not the last horizontal key pressed on
 			# land) — see _swim_visual_flip's own doc.
 			visual.flip_h = _swim_visual_flip
-			# Both libraries author the stroke head-up; orient it along input.
-			visual.rotation = _swim_visual_angle
+			# Child art stays in its authored side view; adult freestyle follows input.
+			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
 		State.LEDGE_MANTLE:
 			var clip := "ledge_climb" if visual.sprite_frames.has_animation("ledge_climb") else "exit_water"
 			visual.play(clip)
@@ -1931,6 +1989,55 @@ func _update_visual() -> void:
 	# normal colors = dash ready, cool blue tint = dash spent.
 	if state != State.DASH:
 		visual.modulate = Color.WHITE if dash_available else Color(0.6, 0.75, 1.0)
+
+
+## Animation phases follow physical motion, including an upward dash ending in FALL.
+func _play_air_animation() -> void:
+	landing_anim_timer = 0.0
+	if wall_jump_timer > 0.0:
+		visual.play("wall_jump")
+		return
+	var clip := "fall"
+	if takeoff_anim_timer > 0.0 and velocity.y < 0.0:
+		clip = "takeoff"
+	elif absf(velocity.y) <= apex_anim_speed:
+		clip = "apex"
+	elif velocity.y < 0.0:
+		clip = "rise"
+	if not visual.sprite_frames.has_animation(clip):
+		clip = "jump" if velocity.y < 0.0 else "fall"
+	visual.play(clip)
+
+
+func _play_ground_animation(normal: String) -> void:
+	takeoff_anim_timer = 0.0
+	# Child-only presentation: these clips never change velocity or collision.
+	if visual.sprite_frames.get_meta("child_hooshang", false):
+		var intent := _movement_input()
+		if normal == "idle" and intent.y > 0.0 and visual.sprite_frames.has_animation("crouch"):
+			visual.play("crouch")
+			return
+		if normal == "run":
+			if intent.x * velocity.x < 0.0 and absf(velocity.x) > 8.0 and visual.sprite_frames.has_animation("skid"):
+				visual.flip_h = velocity.x < 0.0
+				visual.play("skid")
+				return
+			if absf(velocity.x) >= max_run_speed * 0.90 and visual.sprite_frames.has_animation("sprint"):
+				landing_anim_timer = 0.0
+				visual.play("sprint")
+				return
+	if crouching():
+		landing_anim_timer = 0.0
+		visual.play("crouch")
+	elif landing_anim_timer > 0.0 and visual.sprite_frames.has_animation("land"):
+		# Running interrupts recovery so the planted pose cannot skate across the floor.
+		if normal == "run":
+			landing_anim_timer = 0.0
+			visual.play(normal)
+		else:
+			visual.play("land" if landing_anim_timer > recovery_anim_time else "recover")
+	else:
+		visual.play(normal)
 
 
 # -------------------------------------------------------- death/respawn ----
@@ -1980,6 +2087,10 @@ func die() -> void:
 
 
 func respawn(at: Vector2) -> void:
+	_spring_arc = false
+	takeoff_anim_timer = 0.0
+	landing_anim_timer = 0.0
+	boost_timer = 0.0
 	TouchControls.reset()
 	global_position = at
 	velocity = Vector2.ZERO
@@ -2086,7 +2197,8 @@ func add_momentum(dx: float) -> void:
 func bounce(vy: float, gravity_scale := 1.0) -> void:
 	if state == State.DEAD:
 		return
-	velocity.y = -absf(vy)
+	_spring_arc = true
+	velocity.y = -absf(vy) * spring_impulse_scale
 	_bounce_gravity_scale = maxf(gravity_scale, 0.01)
 	jump_hold_timer = 0.0
 	jump_buffer_timer = 0.0
@@ -2099,7 +2211,8 @@ func bounce(vy: float, gravity_scale := 1.0) -> void:
 func bounce_horizontal(speed: float, gravity_scale := 1.0) -> void:
 	if state == State.DEAD:
 		return
-	velocity = Vector2(speed, 0.0)
+	_spring_arc = true
+	velocity = Vector2(speed * spring_impulse_scale, 0.0)
 	boost_timer = boost_time
 	_bounce_gravity_scale = maxf(gravity_scale, 0.01)
 	jump_hold_timer = 0.0
@@ -2325,6 +2438,35 @@ func freeze() -> void:
 	set_physics_process(false)
 
 
+## Dialogue owns physics while staging, so it explicitly advances a controlled
+## fall on physics ticks. Use body collision, never a position tween through props.
+func cancel_dialogue_motion() -> void:
+	takeoff_anim_timer = 0.0
+	landing_anim_timer = 0.0
+	dash_timer = 0.0
+	freeze_timer = 0.0
+	_dash_input_timer = 0.0
+	_dash_input_dir = Vector2.ZERO
+	jump_buffer_timer = 0.0
+	state = State.IDLE if is_on_floor() else State.FALL
+
+
+func dialogue_land_step(delta: float) -> bool:
+	cancel_dialogue_motion()
+	state = State.FALL
+	velocity.x = 0.0
+	velocity.y = minf(maxf(velocity.y, 0.0) + fall_gravity * delta, max_fall_speed)
+	move_and_slide()
+	if is_on_floor():
+		state = State.IDLE
+		velocity = Vector2.ZERO
+		dash_available = true
+		cutscene_rest(false, facing)
+		return true
+	_update_visual()
+	return false
+
+
 func unfreeze() -> void:
 	if not _frozen:
 		return
@@ -2472,9 +2614,43 @@ func set_camera_limits(bounds: Rect2i) -> void:
 	camera.limit_bottom = bounds.end.y
 
 
-## Held campfire pose, using the settled landing crouch from the existing pack.
-## Only the cutscene calls this while physics is frozen; normal play restores
-## the animation on the first tick after unfreeze().
+## The transition already owns physics and invulnerability. Reuse the upright
+## arm-stroke poses at panic speed: arms windmill while his world position holds.
+func play_trapdoor_flail(duration: float) -> void:
+	var held_position := global_position
+	visual.rotation = 0.0
+	visual.play("swim", 2.0)
+	visual.set_frame_and_progress(0, 0.0)
+	var elapsed := 0.0
+	while elapsed < duration - 0.00001:
+		await get_tree().physics_frame
+		elapsed += get_physics_process_delta_time()
+		global_position = held_position
+		velocity = Vector2.ZERO
+	visual.play("fall")
+
+
+## Brief prone-to-standing pose sequence while a room transition owns physics.
+## Reuses the approved pixel poses; the AnimationPlayer authors their recovery.
+func play_fall_recovery() -> void:
+	var recovery := preload("res://scenes/characters/hooshang/FallRecovery.tscn").instantiate()
+	recovery.scale.x = float(facing)
+	(recovery.get_node("Pose") as AnimatedSprite2D).sprite_frames = visual.sprite_frames
+	add_child(recovery)
+	visual.hide()
+	var animation := recovery.get_node("AnimationPlayer") as AnimationPlayer
+	animation.play("get_up")
+	animation.advance(0.0)
+	await animation.animation_finished
+	recovery.queue_free()
+	visual.show()
+	state = State.IDLE
+	velocity = Vector2.ZERO
+	dash_available = true
+	_update_visual()
+
+
+## Held campfire pose; normal play restores animation after unfreeze().
 func cutscene_rest(seated: bool, direction: int) -> void:
 	look(direction)
 	visual.rotation = 0.0

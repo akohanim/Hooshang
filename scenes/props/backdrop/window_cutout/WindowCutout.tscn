@@ -1,0 +1,5 @@
+[gd_scene format=3]
+[node name="WindowCutout" type="Node2D"]
+texture_filter = 1
+[node name="Art" type="Sprite2D" parent="."]
+region_enabled = true

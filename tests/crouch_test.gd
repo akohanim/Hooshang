@@ -28,7 +28,7 @@ func _ready() -> void:
 	Input.action_press("jump")
 	await _frames(3)
 	Input.action_release("jump")
-	_check(not player.crouching() and player.visual.animation == "jump", "jump leaves crouch even while Down stays held")
+	_check(not player.crouching() and player.visual.animation in ["takeoff", "rise"], "jump leaves crouch even while Down stays held")
 	await _frames(65)
 	_check(player.crouching(), "landing with Down held restores crouch")
 	# The same controller drives the child: Down must keep its prior behavior.
@@ -47,6 +47,8 @@ func _ready() -> void:
 	Input.action_press("dash")
 	await _frames(2)
 	Input.action_release("dash")
+	# Dash starts after the configured direction-collection window, even on a tap.
+	await _frames(ceili(player.dash_input_time * Engine.physics_ticks_per_second) + 1)
 	_check(player.state == Player.State.DASH and not player.crouching(), "dash can start from crouch")
 	_down(false)
 	await _frames(30)

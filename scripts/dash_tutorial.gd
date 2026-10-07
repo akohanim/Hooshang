@@ -280,7 +280,7 @@ func _on_player_died() -> void:
 
 func _begin() -> void:
 	_armed = false          # so the catch stops re-entering while this runs
-	Dialogue.begin_conversation(self, _player)
+	Dialogue.begin_conversation(self, _player, true)
 	await _call_rumi()
 	Dialogue.end_conversation()
 	if _done or not is_instance_valid(_player):

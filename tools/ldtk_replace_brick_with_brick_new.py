@@ -188,7 +188,7 @@ def main():
     print("rebuilds every repainted room's auto-tiles from its own rule engine")
     print("(the same step that already produced Level_0-6's brick_new/stone art).")
     print("Then, with LDtk closed again:")
-    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn")
     print("  Godot --headless --path . --import")
 
 

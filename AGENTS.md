@@ -425,7 +425,7 @@ Lighting a room by hand (fixtures, the moon window, seam spill): `LIGHTING.md`.
   `tools/build_child_ledge_climb.lua`), preserving its outline and sock layers.
   `tests/ledge_mantle_preview.tscn` captures native gameplay for visual review.
 
-## Art direction## Art direction
+## Art direction
 
 **Modern detailed pixel art** — the fidelity of Celeste / Hollow Knight / Super Mario. Soft gradient shading, dithering, and dynamic 2D lighting are all wanted;
 **explicitly NOT 8-bit/NES flat-palette retro.** This replaces the earlier
@@ -1211,7 +1211,7 @@ organized per-character before this pass and needed no change.
   authored so only a near-perfect apex jump+dash cleared it — measured by
   bisection, `max_run_speed` 86 still cleared it and 82 did not, so roughly 5%
   was all the slowing that level tolerated. **This was all about the pre-LDtk
-  greybox `Level2.tscn` (built by `tools/gen_level2.py`), which is now
+  greybox `Level2.tscn` (built by `tools/archive/gen_level2.py`), which is now
   deleted** — the level and its `level2_test` regression check are both gone.
   Whether the LDtk world's own `Level_2` room (the current dash-teaching room,
   covered by `dash_tutorial_test`) carries an equally tight constraint on
@@ -1444,7 +1444,7 @@ organized per-character before this pass and needed no change.
 - `tools/gen_eclipse_moon.py` — two white alpha masks (umbra + halo) sized to
   `moon.png`'s own disc, which is how `MoonWindow` runs the escape row's blood
   moon as a per-instance ramp instead of ten drawn moons (`LIGHTING.md`).
-- `tools/gen_level.py`, `tools/gen_level1.py` — regenerate the greybox levels
+- `tools/gen_level.py`, `tools/archive/gen_level1.py` — regenerate the greybox levels
   (tilemap bytes + node layout, incl. prefab instances). Re-running OVERWRITES
   hand-edits to the generated `.tscn`. Levels are dark (CanvasModulate ~0.09) +
   `LampFixture` instances.
@@ -1598,3 +1598,156 @@ test rather than being noticed months later in play.
   and a future grid change should not either — level geometry is built against
   the pixels, and the cell count is just how it reads on the current grid.
 - Checkpoints are silent Area2Ds; death is instant respawn, no penalty.
+
+## Maintenance audit (2026-09-28)
+
+Flat `ldtk/levels/*.scn` imports and the redundant top-level `sprites/hooshang/`
+images were removed after checking Godot dependencies and byte-identical art.
+Use `ldtk/levels/<source-project>/` and `assets/characters/hooshang/emotion_matrix/`.
+The old office generators now live in `tools/archive/`. `LevelBase` is NOT dead:
+`TestLevel.tscn` still uses it. `tools/run_tests.py` runs regression scenes and
+reports rendering-only scenes separately; `--fast` is an initial sweep, not a
+substitute for ordinary-speed timing tests. See `docs/cleanup-audit.md`.
+
+## Conveyor chase insertion (2026-10-01)
+
+New `Level_19` is a continuous leftward course of sixteen opposing conveyor
+platforms and five charges. Previous `Level_19`–`Level_25` became 20–26; the
+homecoming is now `Level_26`. Stable entity IDs remain unchanged. Save schema 2
+migrates old Act I room names. The cloud/humanoid visual change is scoped to this
+room. `tests/conveyor_charge_room_test.tscn` checks its imported platforms,
+leftward transfers, attack setup, blink/forms and save-name migration;
+`tests/conveyor_charge_preview.tscn` is a save-free playable preview.
+
+## Musical-door backtracking (2026-10-02)
+
+`NoteSequence` banks opened room doors separately from temporary glow and note
+progress. Room changes, death, and wrong notes revoke/reset the temporary reward
+without relocking an earned shutter during the world run. `music_exit_test`
+discovers actual musical rooms and exercises their forward/return handlers,
+physical shutters, exit metadata, and death/reset behavior. Do not couple
+per-visit note resets back to earned doorway access.
+
+## Level 14 maintenance-hatch escape
+
+`ChasePacing` binds `scenes/props/chase/trapdoor/EncounterTrapdoor.tscn` at runtime.
+The hatch opens ONLY on reaching the exit; pursuit duration never opens it.
+Level 14's re-routed return strip and any forward Exit targeting Level 15 use the same hatch through
+`LdtkWorld.exit_overrides`. Before the reveal, normal backtracking to 13 remains.
+The hatch is ONE WAY: `block_return_route` forbids Level 15 -> Level 14 on every
+boot and return-door rebuild, including old saves and returns from Level 16.
+Ordinary Level 16 -> Level 15 backtracking remains available.
+At the exit, the hatch centre sits 16px inward from the room edge (`exit_inset`).
+After the actual encounter dialogue finishes, `Act1Beats` banks the grounded
+player position with `set_story_checkpoint`; deaths restart in front of Darkshang
+without replaying the dialogue. `chase_checkpoint_test.tscn` covers repeated
+deaths and the separate Level 15 checkpoint.
+The opening sound is one 100 ms latch/hinge tick. After a 50 ms release,
+the leaves swing for 100 ms while Hooshang falls with his normal fall gravity
+and terminal speed; never stretch the fall with a fixed-duration tween.
+The hatch temporarily cuts the loaded floor tiles, freezes the player/camera
+for the drop, then restores those cells; no LDtk source/import changes are
+needed. `transition_with_sequence` owns the transition lock, checkpoint, camera
+and return door without calling `die()`. Level 15 starts at PlayerStart, settles
+onto its real floor, and plays `FallRecovery.tscn`'s 0.48s prone-to-standing
+AnimationPlayer sequence using the approved character poses. Physics resumes
+with dash motion cleared. The two native audio resources can be rebuilt with
+`python3 tools/gen_trapdoor_sfx.py`. Covered by `encounter_trapdoor_test.tscn`;
+its windowed `-- --capture` option saves hatch/landing previews.
+
+## World 2 momentum model
+
+Only `Act2Beats._apply_child_movement()` enables `Player.childhood_momentum`.
+Worlds 1 and 3 keep the shared prefab defaults. The profile is based on actual
+US SNES Super Mario World frame traces, not the earlier global-tempo approximation.
+See `docs/world2-movement-reference.md`, `tools/measure_smw_movement.py` and
+`tests/fixtures/smw_movement_reference.json` for evidence and reproduction.
+
+World 2 uses gradual acceleration, stronger countersteer than coast friction,
+no neutral-input air braking, and held/released gravity instead of a fixed-speed
+jump hold. Running gives a modest launch-height bonus. Existing controls auto-run;
+there is no new run button, twirl or collectible rule. Spring arcs keep their
+previous authored reach through `_spring_arc` and `spring_impulse_scale`; ordinary
+jump, wall jump, dash, landing and respawn clear that spring state as appropriate.
+MagicCarpet absorbs matching forward velocity on World 2 boarding so its explicit
+carry does not double-count retained airborne momentum. Childhood boarding waits
+for central footing; a tight feet-to-rug check bridges floor-cache lag when upward
+steering stops. Adult riders are unchanged.
+
+`childhood_tempo_test` measures jump arcs against the scaled ROM traces and checks
+acceleration, air momentum and reversal. `world_movement_isolation_test` loads
+Worlds 1/3, then 2, then 1/3 again and compares the full movement/juice profiles.
+Real Act 2 route validation uses anticipatory braking and verifies actual carpet
+support at boarding. Level 3's first jump uses a full hold; the raised landings in
+Levels 9 and 11 use up-forward dash recipes.
+
+### Childhood sprite authoring
+
+The user explicitly replaced the earlier loose eight-frame interpretation with
+Small Mario's actual facial/body structure and animation language. The editable
+source is `assets/characters/hooshang_child/aseprite/young_hooshang_movement.aseprite`:
+63 authored frames, 24 tags, five layers (gameplay-visible black outline, interior black
+details, clothing/shoes, face/hair/hands, sock marks). The ordinary walk uses the measured two-pose 0/1 cycle at 0.1s per
+pose; run speed modulation still follows velocity. Jump/fall use distinct
+reference poses 11/36, and swimming follows 22/26/26/24. Hooshang-only actions
+adapt those poses; movement physics and the hitbox are unchanged.
+
+Each native art pixel is a 2x2 source cluster: the 88px source now renders at
+`0.375` with offset `(0,-3)`, giving a 15px standing silhouette that fits
+a 16px opening, as requested by the user. Ground strides fit between -10px
+and +6px from the player origin. Preserve the gameplay-visible contour (three source pixels around the body at
+0.375 scale, the existing thin edge around dark hair, and an inward sole stroke
+to retain the grounded footprint), full nose and skin in place of the moustache; do not revive rejected redraws.
+Only the child SpriteFrames library carries this metadata (World 2 only).
+The cap emblem is recoloured into dark hair, the clothes into brown/blue/plum,
+and the face/limb geometry is retained. `tools/build_child_small_mario.lua` is
+the one-time authoring recipe, using captured pose data in `output/child_small_mario`.
+Ordinary hand edits should be exported with `python3 tools/build_child_hooshang_frames.py`.
+`child_animation_test` covers all exported silhouettes, two-pose stride, resting
+float, seated playback, room selection and swim orientation.
+
+The completed child pack includes idle blink, two-pose run and sprint, skid,
+takeoff/rise/apex/fall, landing/recovery, dash, wall slide/jump, climb/up/down/hold,
+swim/rest, exit water, ledge climb, sit/crouch and wall land. Child-only ground
+visual selection handles sprint and braking without changing physics. Standing
+Down displays crouch only; the child movement model is preserved. All non-looping
+actions hold their last frame. The exporter uses explicit loop names, and
+`wall_land` is now authored instead of an alias. Preserve the saved 63-frame
+source; older one-time authoring scripts and their snapshots are not exporters.
+
+Child swim presentation is now explicitly SMW-style: keep `visual.rotation=0`
+in every swim direction and mirror only horizontal facing. Do not reinstate
+head-axis rotation for the child; the old adult freestyle rule is adult-only.
+`_tick_swim_orientation` returns early for the child library. Verified SNES
+stroke is 24 (4 ticks), 26 (8 ticks), 22 (glide); neutral input holds 22 rather
+than the previous carrying pose 28. `child_animation_test` guards this exception;
+`pond_test` continues to guard the adult's full directional rotation.
+
+World 2 scene skip must remain available between spoken lines: fishing, the
+night montage and Jamshid's departure belong to the same conversation scope.
+`Dialogue` accumulates the X hold while a scoped owner exists, including banner
+opening/closing, and `say()` checks the committed skip before opening a page.
+Act2Beats tracks scene-owned tweens and uses interruptible staging waits, then
+applies its single morning endpoint. Do not await an uncancellable staging tween
+and let later dialogue resume after skip. `act2_skip_staging_test.tscn` covers
+fish/night/departure gaps; `dialogue_skip_test` covers holds across banner
+transitions and during entrance, including release protection for the next scene.
+Fresh skip presses/releases are also handled as input events: polling alone can
+miss a release/repress between frames or leave a fresh press blocked after focus
+returns. `act2_keyboard_skip_test` checks physical X through Screen to the next
+playable endpoint. `child_outline_render_test` checks all 63 poses in both
+facings at their real gameplay scale; use a graphical Godot run for that test.
+`tools/outline_child_gameplay.lua` edits the outline in Aseprite without changing
+the body layers or timing; the ordinary exporter still exports the saved source.
+
+## Act One spike replacement / thought dust
+
+All 15 Act One spike strips (including TEST) are now 712 painted ThoughtHazards
+cells. `tools/act1_spikes_to_thoughts.py` is the idempotent migration; keep editing
+these through the ThoughtHazards paint brush. The office sheet alone imports with
+`ldtk_dust_hazard_layer.gd`, which renders `ThoughtDust.tscn` using an occupancy
+mask, counter-rotating lobes, rotating center and independent eyes/blinks. Other
+Acts keep their atlas presentation. Collider authority remains the painted cells.
+See scripts/README.md for the measured Celeste behavior and adaptation details.
+Run `act1_dust_test.tscn` headless and `thought_dust_preview.tscn` windowed; the
+latter catches shader compile failures and holes in connected patches.

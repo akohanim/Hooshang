@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
+[ext_resource type="Script" path="res://scripts/prison/prison_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://daejyl8ovusga" path="res://ldtk/hooshang_act2.ldtk" id="2_ldtk"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/Act2Backdrop.tscn" id="3_sky"]
 [ext_resource type="Script" path="res://scripts/act2_beats.gd" id="4_beats"]

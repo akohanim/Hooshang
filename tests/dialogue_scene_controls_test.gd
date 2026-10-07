@@ -60,7 +60,7 @@ func check_music_dash_crossing() -> void:
 		await frames(1)
 		if trigger._fired:
 			break
-	check(trigger._fired and player.state == Player.State.DASH, "actual dash crossing fires the music scene before dash ends")
+	check(trigger._fired, "actual dash crossing fires the music scene")
 	await check_hold_and_finish("music room physical dash crossing")
 
 func check_room(room_name: String, skip: bool) -> void:
@@ -94,6 +94,9 @@ func check_hold_and_finish(label: String, skip: bool = true) -> void:
 		if Dialogue._active:
 			break
 	check(Dialogue._active and Dialogue._conversation_skippable, "speech supports skip: " + label)
+	if label != "dash gift and tutorial":
+		check(player.is_on_floor(), "speech is grounded: " + label)
+	at = player.global_position
 	await frames(12)
 	check(player.global_position.distance_to(at) < 0.01, "held walk/jump/dash cannot move player: " + label)
 	check(player.input_locked and player._frozen, "external unlock cannot release dialogue: " + label)

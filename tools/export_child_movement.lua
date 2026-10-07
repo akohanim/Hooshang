@@ -19,7 +19,7 @@ for n=1,#s.frames do
  assert(#marks==2,'Expected exactly two Aseprite sock pixels on frame '..n)
  socks[n]=marks
 end
-local metadata={}; local sock_manifest={}; local preview=Sprite(8*36,#s.tags*36); local full=Sprite(8*88,#s.tags*88)
+local metadata={}; local sock_manifest={}; local preview=Sprite(8*44,#s.tags*44); local full=Sprite(8*88,#s.tags*88)
 for row,t in ipairs(s.tags) do
  app.fs.makeAllDirectories(base..'act2/packed/'..t.name)
  local entry={name=t.name,frames={}}
@@ -38,9 +38,9 @@ for row,t in ipairs(s.tags) do
   local marks=socks[n]
   table.insert(entry.frames,{duration=s.frames[n].duration,socks={{marks[1][1],marks[1][2]},{marks[2][1],marks[2][2]}}})
   if i<8 then full.cels[1].image:drawImage(im,Point(i*88,(row-1)*88)) end
-  -- 88 source pixels become 34.32 pixels at runtime: sample exactly .39 nearest.
-  local small=Image(35,35,ColorMode.RGB); for y=0,34 do for x=0,34 do local sx=math.min(87,math.floor(x/.39)); local sy=math.min(87,math.floor(y/.39)); small:putPixel(x,y,im:getPixel(sx,sy)) end end
-  if i<8 then preview.cels[1].image:drawImage(small,Point(i*36,(row-1)*36)) end
+  -- Each authored 2x2 source cluster becomes exactly one native gameplay pixel.
+  local small=Image(44,44,ColorMode.RGB); for y=0,43 do for x=0,43 do local sx=math.min(87,x*2); local sy=math.min(87,y*2); small:putPixel(x,y,im:getPixel(sx,sy)) end end
+  if i<8 then preview.cels[1].image:drawImage(small,Point(i*44,(row-1)*44)) end
  end
  table.insert(metadata,entry)
 end

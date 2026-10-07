@@ -50,7 +50,10 @@ const BOOT_RIGHT := 1.95
 
 
 func _ready() -> void:
+	SaveGame.slot = -1
 	world = load("res://ldtk/Act1World.tscn").instantiate()
+	# Geometry probes must not be frozen by the opening story sequence.
+	world.get_node("Act1Beats").free()
 	add_child(world)
 	await _frames(10)
 	# This sweep deliberately places the player on the highest ledge, which

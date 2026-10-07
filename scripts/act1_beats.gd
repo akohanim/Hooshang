@@ -108,7 +108,7 @@ const EMOTE_LINES := {
 ## entire way home, not just once. Set them equal to collapse a single room, or
 ## first > last to turn the beat off.
 @export var collapse_first_room := 16
-@export var collapse_last_room := 25
+@export var collapse_last_room := 26
 ## Beat of stillness before anything moves. He walks in, and for a moment nothing
 ## happens — the drop lands harder for having been waited for.
 @export var collapse_lead_in := 0.6
@@ -128,7 +128,7 @@ const EMOTE_LINES := {
 ## the glow back on every room change and on every death (it owns that reward's
 ## lifetime, scoped to one room and one life). Fighting that would break the
 ## tiles puzzle; re-granting on arrival costs one line and leaves it intact.
-@export var glow_rooms: Array[int] = [15, 19, 20, 21]
+@export var glow_rooms: Array[int] = [15, 20, 21, 22]
 
 @export_group("The collapsing building")
 ## Ambient shudder and falling debris across the escape, ramping from the first
@@ -138,7 +138,7 @@ const EMOTE_LINES := {
 ## Rooms outside first..last get nothing at all, so the outbound half of the Act
 ## is untouched.
 @export var ambience_first_room := 15
-@export var ambience_last_room := 24
+@export var ambience_last_room := 25
 ## Strength in the first room and in the last, 0..1 (see CollapseAmbience).
 ## Starts gentle rather than at zero: room 12 is where he has just met Darkshang
 ## and the building should already feel wrong. Not lower than this — at 320x180
@@ -207,7 +207,7 @@ const EMOTE_LINES := {
 ## Hooshang is past it the shadow stops dead where it stands — still there, still
 ## visible in the doorway, no longer coming — and nothing can restart it.
 ##
-## The line is the cubicle bulb's world x (`CubicleBulbRoom25`, x = 100). He
+## The line is the cubicle bulb's world x (`CubicleBulbRoom26`, x = 100). He
 ## arrives at the right of room 25 at x = 200 and walks LEFT toward his desk, so
 ## "past" is a smaller x: he crosses under the dead office light and that is the
 ## moment it is over. Deliberately a NUMBER and not a lookup of the lamp — this
@@ -217,7 +217,7 @@ const EMOTE_LINES := {
 ## Set HERE rather than as a SafeZone entity in LDtk only because room 22 has no
 ## entities to spare and this is a fact about Act I's ending. A SafeZone dragged
 ## across the same line would do the identical job; see safe_zone_trigger.gd.
-@export var chase_ends_room := "Level_25"
+@export var chase_ends_room := "Level_26"
 @export var chase_ends_past_x := 100.0
 ## How long the shadow takes to thin out to nothing, in seconds.
 @export var dissolve_time := 1.6
@@ -251,7 +251,7 @@ const EMOTE_LINES := {
 ## a story fact about Act I rather than a fact about that room — moving it into
 ## LDtk would work identically, and this writes the same metadata the importer
 ## would have. "" leaves the Exit to the normal play order.
-@export var loop_room_name := "Level_25"
+@export var loop_room_name := "Level_26"
 @export var loop_to_room_name := "Level_0"
 
 @export_group("Waking")
@@ -806,7 +806,12 @@ func _wire_chase() -> void:
 	# beat that never finishes leaves a save whose resume snaps the moon red
 	# anyway (`_turn_the_moon(false)`), so the worst an interruption costs here is
 	# the animation, not the state.
-	_chase.chase_begun.connect(func() -> void: _turn_the_moon(true))
+	_chase.chase_begun.connect(func() -> void:
+		# Dialogue has grounded and released him here, in front of Darkshang.
+		# Bank this spot only AFTER speech, so retries skip the long approach
+		# while retaining the shadow's usual respawn gap and entrance grace.
+		_world.set_story_checkpoint(room, _world.player.global_position)
+		_turn_the_moon(true))
 
 	if chase_way_back == "":
 		return

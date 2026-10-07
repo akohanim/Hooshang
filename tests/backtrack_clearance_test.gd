@@ -3,7 +3,10 @@ extends Node
 var failures := 0
 
 func _ready() -> void:
+	SaveGame.slot = -1
 	var world: LdtkWorld = load("res://ldtk/Act1World.tscn").instantiate()
+	# Geometry probes must not be frozen by the opening story sequence.
+	world.get_node("Act1Beats").free()
 	add_child(world)
 	for i in 10:
 		await get_tree().physics_frame

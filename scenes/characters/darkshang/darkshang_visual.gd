@@ -114,6 +114,80 @@ const FPS := {&"idle": 6.0, &"move": 10.0, &"surge": 14.0}
 ## into a glowing blue balloon — the flare belongs on the rim, not the mass.
 @export var ingest_flash_tint := Color(1.2, 1.28, 1.45, 1.0)
 
+## Charge encounters rest as a larger cloud, condensing into the charge body.
+@export var cloud_form := false
+## Seconds to play all eight transformation frames before the charge.
+@export var form_transition_time := 0.55
+var _cloud_weight := 0.0
+var _humanoid := false
+var cloud_transition_left := 0.0
+var _cloud_transition_duration := 1.25
+
+## Play the supplied morph backwards, with an initial silhouette hold.
+func begin_cloud_transition(duration: float = 1.25) -> void:
+	cloud_form = true
+	_humanoid = false
+	_cloud_weight = 0.0
+	_cloud_transition_duration = maxf(duration, 0.1)
+	cloud_transition_left = _cloud_transition_duration
+	_process(0.0)
+
+
+## Hide the whole figure during recovery and prepare the cloud before reveal.
+func set_recovery_hidden(hidden: bool) -> void:
+	visible = not hidden
+	if hidden and cloud_form:
+		cloud_transition_left = 0.0
+		_humanoid = false
+		_cloud_weight = 1.0
+		_process(0.0)
+
+## Keep the resting cloud and its morph inside the vertical camera bounds.
+## Only the art is offset; the warning lane and charge hitbox still target the player.
+func set_precharge_bounds(bounds: Rect2) -> void:
+	if not _find_nodes(): return
+	var offset_y := 0.0
+	if bounds.has_area():
+		var local_view: Rect2 = _body.global_transform.affine_inverse() * bounds
+		offset_y = clampf(0.0, local_view.position.y + 64.0, local_view.end.y - 14.0)
+	$Body/Cloud.position.y = offset_y
+	$Body/ChargeMorph.position.y = offset_y
+
+func set_humanoid(active: bool) -> void:
+	if active: cloud_transition_left = 0.0
+	if active != _humanoid and cloud_form:
+		if not active:
+			begin_cloud_transition(0.65)
+			return
+		_cloud_weight = 1.0
+	_humanoid = active
+
+func _process(delta: float) -> void:
+	if not _find_nodes(): return
+	var cloud := get_node_or_null("Body/Cloud") as Node2D
+	if cloud == null: return
+	var morph := get_node_or_null("Body/ChargeMorph") as Node2D
+	if morph == null: return
+	var dissolving := cloud_form and cloud_transition_left > 0.0
+	if dissolving:
+		cloud_transition_left = maxf(0.0, cloud_transition_left - delta)
+		var elapsed := 1.0 - cloud_transition_left / _cloud_transition_duration
+		_cloud_weight = smoothstep(0.18, 1.0, elapsed)
+	elif cloud_form and _humanoid:
+		_cloud_weight = move_toward(_cloud_weight, 0.0, delta / maxf(form_transition_time, 0.01))
+	else:
+		_cloud_weight = 1.0 if cloud_form else 0.0
+	morph.visible = cloud_form and _cloud_weight > 0.0 and (_humanoid or (dissolving and _cloud_weight < 1.0))
+	var progress := 1.0 - _cloud_weight
+	morph.progress = progress
+	var gather := smoothstep(0.0, 0.18, progress)
+	var release := smoothstep(0.78, 1.0, progress)
+	morph.modulate.a = gather * (1.0 - release)
+	cloud.visible = cloud_form and ((not _humanoid and not dissolving) or progress < 0.18)
+	cloud.modulate.a = 1.0 - gather if _humanoid or dissolving else 1.0
+	cloud.scale = Vector2.ONE
+	_sprite.modulate.a = release if morph.visible else (0.0 if cloud.visible else 1.0)
+
 var _body: Node2D
 var _sprite: AnimatedSprite2D
 var _void: PointLight2D

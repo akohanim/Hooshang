@@ -13,6 +13,7 @@ func _ready() -> void:
 	boss.set_physics_process(false)
 	boss.buffer.set_physics_process(false)
 	boss._player = player
+	boss._visual.cloud_form = true
 	boss.start_chase()
 	for height in [60.0,180.0]:
 		boss.position = Vector2(400,100)
@@ -34,7 +35,7 @@ func _ready() -> void:
 		boss._physics_process(1)
 		check(boss._locked_charge.phase == 3,"miss reaches recovery")
 		boss._physics_process(.41)
-		check(boss.position.is_equal_approx(player.position+Vector2(boss.respawn_gap,0)),"recovery uses player's current position")
+		check(boss.position.is_equal_approx(origin),"cloud recovery returns to charge launch position")
 		var returned := boss.position
 		boss._physics_process(.016)
 		check(boss.position.distance_to(returned)<.1,"pursuit resumes without snapping")

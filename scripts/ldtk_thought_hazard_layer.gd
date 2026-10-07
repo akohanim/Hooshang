@@ -43,7 +43,7 @@ const SPEED_SPREAD := 0.30
 class _Cell:
 	var coord: Vector2i
 	var source_id: int
-	var col: int          ## tile type: 0 fill, 1 top, 2 left, 3 corner
+	var col: int          ## atlas column: original four types or ink neighbor mask
 	var clock := 0.0        ## this cell's OWN elapsed time
 	var speed := 1.0         ## this cell's OWN playback rate
 	var phase := 0.0          ## this cell's OWN start offset, in seconds

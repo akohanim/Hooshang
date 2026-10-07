@@ -1,0 +1,12 @@
+{
+  "id": "./?touch_test=1",
+  "name": "Hooshang Touch Test",
+  "short_name": "Touch Test",
+  "start_url": "./index.html?touch_test=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#14121c",
+  "theme_color": "#14121c",
+  "icons": [{"src": "index.apple-touch-icon.png", "sizes": "180x180", "type": "image/png"}]
+}

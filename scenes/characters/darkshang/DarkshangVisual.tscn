@@ -1,7 +1,22 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scenes/characters/darkshang/darkshang_visual.gd" id="1_visual"]
 [ext_resource type="Texture2D" path="res://assets/light_radial.png" id="2_light"]
+
+[ext_resource type="Script" path="res://scenes/characters/darkshang/cloud_form.gd" id="3_cloud"]
+
+[ext_resource type="Script" path="res://scenes/characters/darkshang/charge_morph.gd" id="4_morph"]
+
+[ext_resource type="Shader" path="res://scenes/characters/darkshang/storm_cloud.gdshader" id="5_storm"]
+
+[ext_resource type="Script" path="res://scenes/characters/darkshang/idle_eyes.gd" id="6_eyes"]
+
+[sub_resource type="CanvasItemMaterial" id="EyesUnshaded"]
+light_mode = 1
+
+[sub_resource type="ShaderMaterial" id="Storm"]
+resource_local_to_scene = true
+shader = ExtResource("5_storm")
 
 [node name="DarkshangVisual" type="Node2D"]
 z_index = 60
@@ -13,6 +28,19 @@ script = ExtResource("1_visual")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="Body"]
 offset = Vector2(0, -22)
+
+[node name="IdleEyes" type="Node2D" parent="Body/Sprite"]
+material = SubResource("EyesUnshaded")
+script = ExtResource("6_eyes")
+
+[node name="Cloud" type="Node2D" parent="Body"]
+visible = false
+script = ExtResource("3_cloud")
+material = SubResource("Storm")
+
+[node name="ChargeMorph" type="Node2D" parent="Body"]
+visible = false
+script = ExtResource("4_morph")
 
 [node name="Void" type="PointLight2D" parent="."]
 position = Vector2(0, -22)

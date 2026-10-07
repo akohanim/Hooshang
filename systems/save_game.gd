@@ -55,7 +55,7 @@ const SLOTS := 3
 ## schema this build does not know reads as EMPTY rather than as something to
 ## guess at — a save from a version you have since rolled back from is not worth
 ## half-restoring into a broken world.
-const SCHEMA := 1
+const SCHEMA := 2
 
 ## The world a new run starts in. One entry today because Act I is one LDtk
 ## world; Act II gets a second and the saved `world` field is what picks between
@@ -131,6 +131,9 @@ func read(i: int) -> Dictionary:
 		return {}
 	if str(payload.get("world", "")) == "":
 		return {}
+	if schema < 2 and str(payload.get("world", "")) == FIRST_WORLD:
+		payload = _shift_conveyor_room_names(payload)
+		payload["schema"] = SCHEMA
 	return payload
 
 
@@ -195,10 +198,6 @@ func unlocked_rooms(i: int) -> Array[String]:
 	rooms.sort_custom(func(a: String, b: String) -> bool:
 		return LdtkWorld.index_in_name(a) < LdtkWorld.index_in_name(b))
 	return rooms
-
-
-func world_of(i: int) -> String:
-	return str(read(i).get("world", FIRST_WORLD))
 
 
 # ------------------------------------------------------------- starting it ---
@@ -484,3 +483,22 @@ func _names(raw: Variant) -> Array[String]:
 	for v in raw as Array:
 		out.append(str(v))
 	return out
+
+
+## Schema 2 inserts Act I Level_19. Change only exact room names, including
+## route dictionary keys; stable collectible/checkpoint IDs stay untouched.
+func _shift_conveyor_room_names(value: Variant) -> Variant:
+	if value is String or value is StringName:
+		for number in range(19, 26):
+			if str(value) == "Level_%d" % number:
+				return "Level_%d" % (number + 1)
+	elif value is Array:
+		var result: Array = []
+		for item in value: result.append(_shift_conveyor_room_names(item))
+		return result
+	elif value is Dictionary:
+		var result: Dictionary = {}
+		for key in value:
+			result[_shift_conveyor_room_names(key)] = _shift_conveyor_room_names(value[key])
+		return result
+	return value

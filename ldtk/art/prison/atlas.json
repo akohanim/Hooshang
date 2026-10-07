@@ -1,0 +1,40 @@
+{
+  "tile_size": 8,
+  "tiles": {
+    "fill": 0,
+    "top": 1,
+    "left": 2,
+    "right": 3,
+    "bottom": 4,
+    "one_way": 5,
+    "hazard": 6,
+    "water": 7,
+    "surface": 8
+  },
+  "props": {
+    "locker": [
+      0,
+      32,
+      16,
+      24
+    ],
+    "shelf": [
+      16,
+      32,
+      24,
+      24
+    ],
+    "board": [
+      40,
+      32,
+      32,
+      16
+    ],
+    "desk": [
+      72,
+      32,
+      24,
+      16
+    ]
+  }
+}

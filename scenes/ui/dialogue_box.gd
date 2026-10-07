@@ -273,6 +273,8 @@ var _skip_requested := false
 var _conversation_skippable := false
 var _conversation_player: Player
 var _owns_player_freeze := false
+var _conversation_serial := 0
+var _conversation_allow_airborne := false
 var _skip_needs_release := false
 var _conversation_owner: Node
 var _hint_elapsed := 0.0
@@ -504,6 +506,10 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 		_conversation_skippable = true
 		_skip_held_time = 0.0
 		_skip_needs_release = Input.is_action_pressed("skip_dialogue")
+	if not await ground_conversation_player():
+		return
+	if _skip_armed():
+		return
 	# banner/trim/portrait/name/text are ONE set of nodes shared by every
 	# call to say(), not fresh per line — so a call that starts while the
 	# PREVIOUS line's close animation is still mid-flight used to leave that
@@ -614,6 +620,8 @@ func say(speaker: String, text: String, portrait_tint := Color(0, 0, 0, 0),
 	_hint_elapsed = 0.0
 	skip_hint.visible = false
 	for page in pages:
+		if _skip_armed():
+			break
 		_begin_page(page)
 		await line_finished
 		if my_gen != _generation:
@@ -1203,8 +1211,9 @@ func _process(delta: float) -> void:
 ## Callers still execute rewards and scene transitions after skipped speech.
 ## Every conversation is skippable, including openings, tutorials and greetings.
 ## No length threshold or caller opt-out: the same hold works everywhere.
-func begin_conversation(owner: Node, player: Player = null) -> void:
+func begin_conversation(owner: Node, player: Player = null, allow_airborne := false) -> void:
 	_release_conversation_player()
+	_conversation_allow_airborne = allow_airborne
 	_conversation_owner = owner
 	_hold_conversation_player(player)
 	_conversation_skippable = true
@@ -1216,6 +1225,7 @@ func begin_conversation(owner: Node, player: Player = null) -> void:
 
 
 func end_conversation() -> void:
+	_conversation_allow_airborne = false
 	_touch_skip_finger = -1
 	_touch_gesture.reset()
 	_release_conversation_player()
@@ -1247,6 +1257,7 @@ func _hold_conversation_player(player: Player = null) -> void:
 
 
 func _release_conversation_player() -> void:
+	_conversation_serial += 1
 	if is_instance_valid(_conversation_player) and _owns_player_freeze:
 		_conversation_player.unfreeze()
 		# A room slide can have owned input on arrival and completed during the
@@ -1254,6 +1265,37 @@ func _release_conversation_player() -> void:
 		_conversation_player.input_locked = false
 	_conversation_player = null
 	_owns_player_freeze = false
+
+
+## Do not display speech until the held body actually contacts a floor. A
+## generation/identity check prevents an old landing coroutine owning a new scene.
+func ground_conversation_player() -> bool:
+	_conversation_serial += 1
+	# The authored dash tutorial deliberately catches him above the gap.
+	if _conversation_allow_airborne:
+		return true
+	var player := _conversation_player
+	var serial := _conversation_serial
+	if not is_instance_valid(player):
+		return true
+	if player.state == Player.State.DEAD:
+		end_conversation()
+		return false
+	player.cancel_dialogue_motion()
+	if player.is_on_floor():
+		return true
+	for frame in 240:
+		await get_tree().physics_frame
+		if not is_instance_valid(player) or _conversation_player != player or serial != _conversation_serial:
+			return false
+		if player.state == Player.State.DEAD:
+			end_conversation()
+			return false
+		if player.dialogue_land_step(1.0 / Engine.physics_ticks_per_second):
+			return true
+	# No floor (or a disappearing scene) must never leave a permanent input lock.
+	end_conversation()
+	return false
 
 
 func _notification(what: int) -> void:
@@ -1264,24 +1306,37 @@ func _notification(what: int) -> void:
 		_skip_needs_release = true
 
 
+func _input(event: InputEvent) -> void:
+	# Polling misses release/press pairs between rendered frames, and the first
+	# fresh press after focus returns. Listen before GUI handling so either
+	# event re-arms a deliberate hold; echo events must never do so.
+	if event.is_action("skip_dialogue") and not event.is_echo():
+		_skip_needs_release = false
+		if not event.is_pressed():
+			_skip_held_time = 0.0
+
+
 func _tick_skip_hold(delta: float) -> void:
 	if _conversation_owner != null and not is_instance_valid(_conversation_owner):
 		end_conversation()
 	if not (Input.is_action_pressed("skip_dialogue") or _touch_skip_finger >= 0):
 		_skip_held_time = 0.0
 		_skip_needs_release = false
-	elif _active and _conversation_skippable and not _skip_needs_release and not _skip_requested:
+	elif (_active or is_instance_valid(_conversation_owner)) and _conversation_skippable and not _skip_needs_release and not _skip_requested:
 		_skip_held_time = minf(_skip_held_time + delta, skip_hold_time)
 	else:
 		_skip_held_time = 0.0
 	skip_progress.value = _skip_held_time / maxf(skip_hold_time, 0.01)
-	if not _active or _skip_held_time < skip_hold_time:
+	if _skip_held_time < skip_hold_time:
 		return
 	_skip_requested = true
 	_revealing = false
 	_pause_left = 0.0
-	# Do not reveal the unread page or play an ending syllable on scene skip.
-	line_finished.emit()
+	# Scoped scenes also accept the hold during staging or banner transitions.
+	# Only an active page is waiting for this signal; say() checks the latched
+	# request again after its entrance so an early hold cannot be lost.
+	if _active:
+		line_finished.emit()
 
 
 func scene_skip_requested(owner: Node) -> bool:

@@ -31,6 +31,11 @@ signal room_changed(room: Node2D)
 ## doors, checkpoint) may move to this earlier edge.
 signal transition_started(target: Node2D)
 
+## Optional room-owned departure beats. Return true to consume an exit request.
+var exit_overrides: Dictionary[Node2D, Callable] = {}
+## Authored one-way drops override both inferred and saved reciprocal routes.
+var _blocked_return_routes: Dictionary[String, String] = {}
+
 ## The imported .ldtk world (its children are the rooms).
 @export var world_scene: PackedScene
 @export var player_scene: PackedScene = preload("res://scenes/characters/hooshang/Hooshang.tscn")
@@ -177,6 +182,7 @@ var _return_armed := false
 # The current room's paintable thought-hazard TileMapLayer (null if the room has
 # none painted). Cached on room entry so the per-frame overlap check is cheap.
 var _thought_layer: TileMapLayer
+var _ink_thought_layer: TileMapLayer
 
 # The current room's paintable Water TileMapLayer (null if the room has none
 # painted) — same caching reason as _thought_layer above. This is the
@@ -211,6 +217,7 @@ func _ready() -> void:
 			var background := room.get_node_or_null(background_name) as CanvasItem
 			if background != null:
 				background.modulate *= Color(background_brightness, background_brightness, background_brightness, 1.0)
+	preload("res://scripts/office_window_placement.gd").apply(self)
 	if seal_room_ceilings:
 		for room in rooms:
 			_add_ceiling(room)
@@ -280,6 +287,7 @@ func _scatter_moss() -> void:
 		if layer != null and layer.tile_set != null:
 			_scatter_moss_layer(layer)
 			preload("res://scripts/scaffolding_variation.gd").apply(layer)
+			preload("res://scripts/terrain_variation.gd").apply(layer)
 
 
 func _scatter_moss_layer(layer: TileMapLayer) -> void:
@@ -464,7 +472,7 @@ static func rooms_in(world: Node) -> Array[Node2D]:
 ##
 ## `Level_V1`..`Level_V10` all land between Level_6 and Level_7 as one block —
 ## the spine of the game is `Level_0`..`Level_6` then this V block then
-## `Level_7`..`Level_25`, with nothing shelved (see SHELVED_ROOMS below). THIS
+## `Level_7`..`Level_26`, with nothing shelved (see SHELVED_ROOMS below). THIS
 ## TABLE IS THE ONLY PLACE THAT SAYS SO — the .ldtk's
 ## own Exit entities carry no NextRoom override for any of this (checked: every
 ## one is empty), so index_in_name() below is not just how the debug picker
@@ -484,7 +492,7 @@ const INSERTED_ROOMS := {
 }
 
 ## The spine runs `Level_0`..`Level_6` -> the `Level_V1`..`Level_V10` block ->
-## `Level_7`..`Level_25` with no gaps. (`Level_10`..`Level_12` used to sit out
+## `Level_7`..`Level_26` with no gaps. (`Level_10`..`Level_12` used to sit out
 ## here awaiting a design pass; they are back in the route now.)
 ##
 ## `Level_V11`..`Level_V14` are shelved because they are STALE ORPHANS: the
@@ -528,6 +536,8 @@ static func play_index(room: Node) -> int:
 ## for Act 1's escape row, just triggered by an Act-prefixed name rather than a
 ## right-to-left grid.
 static func index_in_name(name: String) -> int:
+	if name.begins_with("Prison_"):
+		return 100000 if name == "Prison_Hub" else 100100 + name.unicode_at(7) * 100 + int(name.right(2))
 	if INSERTED_ROOMS.has(name):
 		var after: Array = INSERTED_ROOMS[name]
 		return int(after[0]) * 100 + 10 + int(after[1])
@@ -619,7 +629,7 @@ func _add_backdrop(room: Node2D) -> void:
 		regions.resize(64)
 		wall_material.set_shader_parameter("moon_regions", regions)
 		panel.material = wall_material
-		if str(room.name) == "Level_25":
+		if str(room.name) == "Level_26":
 			var dawn := Node2D.new()
 			dawn.name = "OfficeDawn"
 			dawn.set_script(preload("res://scenes/props/backdrop/office_dawn/office_dawn.gd"))
@@ -630,7 +640,7 @@ func _add_backdrop(room: Node2D) -> void:
 			var moon := OFFICE_MOON.instantiate()
 			panel.add_child(moon)
 			moon.configure(panel.texture, region)
-			var left_positions := {"Level_0": 184.0, "Level_25": 184.0, "Level_1": 91.0, "Level_2": 64.0, "Level_3": 250.0, "Level_4": 190.0, "Level_5": 244.0, "Level_6": 85.0}
+			var left_positions := {"Level_0": 184.0, "Level_26": 184.0, "Level_1": 91.0, "Level_2": 64.0, "Level_3": 250.0, "Level_4": 190.0, "Level_5": 244.0, "Level_6": 85.0}
 			moon.position.x = left_positions.get(str(room.name), moon.position.x - 8.0) - 4.0 * float(rooms.find(room)) / maxf(rooms.size() - 1, 1)
 			moon.set_window_openings(OfficeWindowPanes.for_room(str(room.name)))
 			moon.set_pool_enabled(false)
@@ -813,6 +823,7 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 	MysteryBox.reset_all(get_tree())
 	MagicCarpet.reset_all(get_tree())
 	_thought_layer = room.get_node_or_null("ThoughtHazards") as TileMapLayer
+	_ink_thought_layer = room.get_node_or_null("InkThoughtHazards") as TileMapLayer
 	_water_layer = room.get_node_or_null("Water") as TileMapLayer
 	room_changed.emit(room)
 
@@ -843,6 +854,16 @@ func _physics_process(_delta: float) -> void:
 
 
 func _in_thought_tile() -> bool:
+	# Ink tiles replace spike volumes: a foot/head overlap must count, not
+	# only the centre. Preserve the original ThoughtHazards centre contract.
+	if _ink_thought_layer != null:
+		var box := player.hitbox_rect().grow(-0.01)
+		var first := _ink_thought_layer.local_to_map(_ink_thought_layer.to_local(box.position))
+		var last := _ink_thought_layer.local_to_map(_ink_thought_layer.to_local(box.end))
+		for y in range(first.y, last.y + 1):
+			for x in range(first.x, last.x + 1):
+				if _ink_thought_layer.get_cell_source_id(Vector2i(x, y)) != -1:
+					return true
 	if _thought_layer == null:
 		return false
 	var cell := _thought_layer.local_to_map(_thought_layer.to_local(player.global_position))
@@ -904,6 +925,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("respawn") and player.state != Player.State.DEAD \
 			and not player.input_locked and not _transitioning:
 		player.die()
+
+
+## Bank a completed room beat without moving PlayerStart or other rooms' spawns.
+func set_story_checkpoint(room: Node2D, at: Vector2) -> void:
+	if room == current_room:
+		_checkpoint = at
 
 
 func _on_checkpoint_activated(cp: Checkpoint) -> void:
@@ -1008,6 +1035,8 @@ func _on_exit_reached(body: Node2D, exit: Node2D) -> void:
 	var target := _next_room(exit)
 	if target == null:
 		return  # last room of the Act — Game.advance() territory, not ours
+	if _custom_departure(target):
+		return
 	var came_from := current_room
 	await _slide_to_room(target)
 	_arm_return(came_from)
@@ -1035,6 +1064,12 @@ func _build_return_zone() -> void:
 ## on the arrival spot it works whether you leave and come back or turn round
 ## on the spot. The strip covers the room's full height so falling out that
 ## side counts too.
+func block_return_route(room: Node2D, previous: Node2D) -> void:
+	_blocked_return_routes[str(room.name)] = str(previous.name)
+	if current_room == room and _return_room == previous:
+		_clear_return()
+
+
 func _arm_return(from_room: Node2D) -> void:
 	_return_room = from_room
 	if from_room != null:
@@ -1042,7 +1077,7 @@ func _arm_return(from_room: Node2D) -> void:
 	_apply_way_back()
 	# Nothing behind the first room and no re-route either — leave no door rather
 	# than a dangling one.
-	if _return_room == null:
+	if _return_room == null or _blocked_return_routes.get(str(current_room.name), "") == str(_return_room.name):
 		_clear_return()
 		return
 
@@ -1294,6 +1329,8 @@ func _on_return_entered(body: Node2D) -> void:
 	if body != player or not _return_armed or _transitioning or _return_room == null:
 		return
 	var room := _return_room
+	if _custom_departure(room):
+		return
 	# Platforms/props may have moved since this door was armed.
 	var pos := _return_pos
 	if str(_way_back.get(current_room.name, "")) == "":
@@ -1345,12 +1382,42 @@ func _view_centre_for(rect: Rect2, focus: Vector2) -> Vector2:
 	return c
 
 
+func _custom_departure(target: Node2D) -> bool:
+	if not exit_overrides.has(current_room):
+		return false
+	return bool(exit_overrides[current_room].call(target))
+
+
+## A room-owned fall/fade replaces the camera pan, but keeps the usual spawn,
+## room notifications, save checkpoint and return-door bookkeeping. No death.
+func transition_with_sequence(target: Node2D, departure: Callable, arrival: Callable) -> void:
+	if _transitioning or target == null or player.state == Player.State.DEAD:
+		return
+	var came_from := current_room
+	var previous_immunity := player.invulnerable_timer
+	_transitioning = true
+	transition_target = target
+	_clear_return()
+	player.freeze()
+	player.cancel_dialogue_motion()
+	player.invulnerable_timer = 3600.0
+	transition_started.emit(target)
+	await departure.call()
+	player.respawn(spawn_point_for(target))
+	player.invulnerable_timer = 3600.0
+	transition_target = null
+	_enter_room(target, true)
+	player.camera.reset_smoothing()
+	await arrival.call()
+	player.invulnerable_timer = maxf(previous_immunity, 0.4)
+	player.unfreeze()
+	_transitioning = false
+	_arm_return(came_from)
+
+
 ## The seamless bit: no load, no fade. The player is placed in the next room
-## immediately, but the VIEW is detached (set_as_top_level) and eased across
-## from the old room to the new one, so it reads as the camera travelling.
-## `arrive_at` overrides where the player lands; Vector2.INF (the default)
-## means "use the target room's PlayerStart", which is the forward case.
-## Going backwards passes an explicit point beside the previous room's Exit.
+## immediately, but the VIEW is detached (set_as_top_level) and eased across.
+## `arrive_at` overrides the landing; Vector2.INF uses the target's PlayerStart.
 func _slide_to_room(target: Node2D, arrive_at := Vector2.INF) -> void:
 	_transitioning = true
 	# The destination is live from here on — the player is placed in it below and

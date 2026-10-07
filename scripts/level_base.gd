@@ -1,7 +1,7 @@
 class_name LevelBase
 extends Node2D
 ## Base level controller: camera bounds, checkpoints, kill plane, fast respawn.
-## Real levels (see level1_office.gd) extend this and add their own scripting.
+## Used by the hand-built movement gym (TestLevel). Playable Acts use LdtkWorld.
 ##
 ## FUTURE HOOKS (do not implement yet):
 ## - Underworld palette shift: tween $CanvasModulate.color here. All level

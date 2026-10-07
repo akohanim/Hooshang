@@ -234,12 +234,3 @@ func _update_rendered_frame() -> void:
 
 	if texture_display != null and tex != null:
 		texture_display.texture = tex
-
-
-## Direct matrix frame query helper
-func get_current_frame_texture() -> Texture2D:
-	var frames: Array = _matrix_textures.get(current_emotion, [])
-	if frames.is_empty():
-		return null
-	var frame_idx: int = clampi(mouth_state * 3 + eye_state, 0, 8)
-	return frames[frame_idx]

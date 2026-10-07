@@ -7,7 +7,7 @@ func frames(n: int) -> void:
 	for i in n: await get_tree().physics_frame
 func _ready() -> void:
 	SaveGame.slot = -1
-	LdtkWorld.debug_start_room = "Level_19"
+	LdtkWorld.debug_start_room = "Level_20"
 	var world: LdtkWorld = load("res://ldtk/Act1World.tscn").instantiate()
 	add_child(world)
 	await frames(12)

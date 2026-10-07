@@ -46,6 +46,10 @@ func _ready() -> void:
 	if chase_trigger != null:
 		chase_trigger.triggered.emit(world.player)
 		await _frames(20)
+		# This route probe emits the encounter signals instead of playing speech.
+		# Release the opening conversation's retained freeze before claiming the
+		# chase began: the trapdoor correctly refuses to take dialogue's player.
+		Dialogue.end_conversation()
 		chase_trigger.chase_begun.emit()
 		await _frames(10)
 		_check(true, "triggered Darkshang encounter in %s" % world.current_room.name)

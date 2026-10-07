@@ -13,10 +13,12 @@ func _ready()->void:
 	world=load("res://ldtk/Act1World.tscn").instantiate();add_child(world)
 	await frames(12)
 	seq=world.get_node("NoteSequence")
-	for name in ["Level_7","Level_8","Level_9","Level_13","Level_18"]:
-		var room:Node2D
-		for r in world.rooms:
-			if r.name==name:room=r
+	var music_rooms: Array[Node2D] = []
+	for room in world.rooms:
+		if seq._exits.has(room): music_rooms.append(room)
+	check(music_rooms.size() >= 4, "covers all current musical rooms rather than stale level numbers")
+	for room in music_rooms:
+		var name := str(room.name)
 		check(room!=null,"%s is restored to the route" % name)
 		if room==null:continue
 		world._enter_room(room,true)
@@ -47,9 +49,24 @@ func _ready()->void:
 		check(portal.gate.authorized and portal.gate.barrier.disabled and not room.get_meta("exit_locked"),"%s full melody opens the exit" % name)
 		check(world.player.has_glow,"%s full melody grants player glow" % name)
 		check(world.get_node("CanvasModulate").color.is_equal_approx(world._ambient_color) and portal.spill.energy>1,"%s open door lights the room and spills light" % name)
+		# Take the real forward and return handlers: returning lands by the shutter.
+		world.player.input_locked=false
+		await world._on_exit_reached(world.player,world._exit_in(room))
+		world.player.set_physics_process(false)
+		check(world.current_room != room, "%s solved exit reaches the next room" % name)
+		world._return_armed=true
+		await world._on_return_entered(world.player)
+		world.player.set_physics_process(false)
+		await frames(3)
+		check(world.current_room == room, "%s backtracks through the actual return path" % name)
+		check(portal.gate.authorized and portal.gate.barrier.disabled and not room.get_meta("exit_locked"), "%s backtracking keeps both physical shutter and exit trigger open" % name)
+		check(not world.player.has_glow, "%s return does not make the temporary glow permanent" % name)
+		seq.reset()
+		seq._on_tile_stepped(pads[3])
+		check(portal.gate.authorized and not room.get_meta("exit_locked"), "%s reset or wrong note cannot relock a completed door" % name)
 		world.player.invulnerable_timer=0
 		world.player.die();await frames(2)
-		check(not world.player.has_glow and not portal.gate.authorized,"%s death rearms both rewards" % name)
+		check(not world.player.has_glow and portal.gate.authorized and not room.get_meta("exit_locked"),"%s death revokes glow without taking away earned door access" % name)
 		await frames(70)
 		world.player.input_locked=false
 	print("MUSIC EXIT: %d failures" % failures)

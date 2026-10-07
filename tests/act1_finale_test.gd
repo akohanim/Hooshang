@@ -32,7 +32,7 @@ func _ready()->void:
 		check(phrase in reveal,"reveal preserves: "+phrase)
 	var home:Node2D
 	for room in world.rooms:
-		if room.name=="Level_25":home=room
+		if room.name=="Level_26":home=room
 	world._enter_room(home,true)
 	await frames(5)
 	check(not world.player.input_locked,"homecoming arrival allows movement")

@@ -38,7 +38,7 @@ func _ready() -> void:
 		check(shadow.state==Darkshang.State.FOLLOWING and shadow._holding_entry,"%s retry keeps pursuit armed" % room.name)
 	check(visited==10,"all ten escape rooms tested")
 	for room in world.rooms:
-		if str(room.name)=="Level_25":
+		if str(room.name)=="Level_26":
 			world._enter_room(room,true)
 			await frames(2)
 			check(shadow.state==Darkshang.State.FOLLOWING and shadow._holding_entry,"final room retains pursuing actor and entrance grace")

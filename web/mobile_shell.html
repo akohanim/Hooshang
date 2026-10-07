@@ -4,109 +4,39 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 		<title>$GODOT_PROJECT_NAME</title>
-		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
-}
-
-body {
-	color: white;
-	background-color: black;
-	overflow: hidden;
-	touch-action: none;
-}
-
-#canvas {
-	display: block;
-}
-
-#canvas:focus {
-	outline: none;
-}
-
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
-
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
-
-#status {
-	background-color: $GODOT_SPLASH_COLOR;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	visibility: hidden;
-}
-
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
-
-#status-splash.show-image--false {
-	display: none;
-}
-
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
-
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
-	text-align: center;
-	z-index: 1;
-}
-
-html, body { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
-body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-#canvas { position: fixed; touch-action: none; }
-#safe-area { position: fixed; visibility: hidden; pointer-events: none;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-#rotate-phone { display: none; position: fixed; inset: 0; z-index: 10;
-  box-sizing: border-box; padding: 32px; background: #14121c; color: #ffe0a6;
-  font: 18px/1.5 system-ui, sans-serif; text-align: center; touch-action: none;
-  align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-#rotate-phone strong { font-size: 26px; }
-@media (pointer: coarse) and (orientation: portrait) {
-  #rotate-phone { display: flex; }
-}
-</style>
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="Hooshang">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="theme-color" content="#14121c">
+        <link rel="manifest" href="manifest.webmanifest">
+        <link rel="apple-touch-icon" href="index.apple-touch-icon.png">
+        <script>
+          if (new URLSearchParams(location.search).get('touch_test') === '1') {
+            document.querySelector('link[rel="manifest"]').href = 'touch-test.webmanifest';
+            document.querySelector('meta[name="apple-mobile-web-app-title"]').content = 'Touch Test';
+            document.title = 'Hooshang Touch Test';
+          }
+        </script>
+		<style>:root { --splash-color: $GODOT_SPLASH_COLOR; }</style>
+        <link rel="stylesheet" href="game_shell.css">
 		$GODOT_HEAD_INCLUDE
 	</head>
 	<body>
+        <button id="screen-toggle" type="button" aria-label="Enter fullscreen" title="Enter fullscreen">⛶</button>
+        <div id="screen-help" role="dialog" aria-modal="true" aria-labelledby="screen-help-title" hidden>
+          <h2 id="screen-help-title">Screen options</h2>
+          <p id="screen-help-message"></p>
+          <ol id="install-steps" hidden>
+            <li>Tap Safari’s <strong>Share</strong> button (square with an upward arrow).</li>
+            <li>Choose <strong>Add to Home Screen</strong>.</li>
+            <li>Keep <strong>Open as Web App</strong> on, if shown, then tap <strong>Add</strong>.</li>
+            <li>Open <strong>Hooshang</strong> from your Home Screen and rotate to landscape.</li>
+          </ol>
+          <a id="open-game" target="_blank" rel="noopener">Open game in a new tab</a>
+          <p id="open-game-note">Opening another tab restarts the run. Home Screen play may use a separate save from Safari. An internet connection is required.</p>
+          <button id="close-screen-help" type="button">Back to game</button>
+        </div>
         <div id="safe-area" aria-hidden="true"></div>
         <div id="rotate-phone" role="status"><strong>Turn your phone sideways</strong>
           <span>Hooshang plays in landscape.</span>
@@ -123,137 +53,17 @@ body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none
 		<div id="status">
 			<img id="status-splash" class="$GODOT_SPLASH_CLASSES" src="$GODOT_SPLASH" alt="">
 			<progress id="status-progress"></progress>
+            <div id="loading-detail" role="status">Downloading game…</div>
 			<div id="status-notice"></div>
 		</div>
 
 		<script src="$GODOT_URL"></script>
-		<script>
-// Resize within the browser's safe area, including iPhone notches/home indicator.
-// No Fullscreen API dependency: this also works inside itch.io's mobile iframe.
-const canvas = document.getElementById('canvas');
-function fitCanvas() {
-  const safe = getComputedStyle(document.getElementById('safe-area'));
-  const left = parseFloat(safe.paddingLeft) || 0, right = parseFloat(safe.paddingRight) || 0;
-  const top = parseFloat(safe.paddingTop) || 0, bottom = parseFloat(safe.paddingBottom) || 0;
-  const width = Math.max(1, window.innerWidth - left - right);
-  const height = Math.max(1, window.innerHeight - top - bottom);
-  canvas.style.left = left + 'px'; canvas.style.top = top + 'px';
-  canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
-  const ratio = window.devicePixelRatio || 1;
-  const pixelsWide = Math.round(width * ratio), pixelsHigh = Math.round(height * ratio);
-  if (canvas.width !== pixelsWide) canvas.width = pixelsWide;
-  if (canvas.height !== pixelsHigh) canvas.height = pixelsHigh;
-}
-fitCanvas();
-window.addEventListener('resize', fitCanvas);
-if (window.visualViewport) window.visualViewport.addEventListener('resize', fitCanvas);
-canvas.addEventListener('contextmenu', event => event.preventDefault());
-canvas.addEventListener('touchmove', event => event.preventDefault(), { passive: false });
-document.addEventListener('gesturestart', event => event.preventDefault(), { passive: false });
-
+        <script>
 const GODOT_CONFIG = $GODOT_CONFIG;
 const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
-const engine = new Engine(GODOT_CONFIG);
-
-(function () {
-	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
-	const statusNotice = document.getElementById('status-notice');
-
-	let initializing = true;
-	let statusMode = '';
-
-	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) {
-			return;
-		}
-		if (mode === 'hidden') {
-			statusOverlay.remove();
-			initializing = false;
-			return;
-		}
-		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
-		statusMode = mode;
-	}
-
-	function setStatusNotice(text) {
-		while (statusNotice.lastChild) {
-			statusNotice.removeChild(statusNotice.lastChild);
-		}
-		const lines = text.split('\n');
-		lines.forEach((line) => {
-			statusNotice.appendChild(document.createTextNode(line));
-			statusNotice.appendChild(document.createElement('br'));
-		});
-	}
-
-	function displayFailureNotice(err) {
-		console.error(err);
-		if (err instanceof Error) {
-			setStatusNotice(err.message);
-		} else if (typeof err === 'string') {
-			setStatusNotice(err);
-		} else {
-			setStatusNotice('An unknown error occurred.');
-		}
-		setStatusMode('notice');
-		initializing = false;
-	}
-
-	const missing = Engine.getMissingFeatures({
-		threads: GODOT_THREADS_ENABLED,
-	});
-
-	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-			let serviceWorkerRegistrationPromise;
-			try {
-				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
-			} catch (err) {
-				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
-			}
-			// There's a chance that installing the service worker would fix the issue
-			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
-					return registration;
-				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
-				new Promise((resolve) => {
-					setTimeout(() => resolve(), 2000);
-				}),
-			]).then(() => {
-				// Reload if there was no error.
-				window.location.reload();
-			}).catch((err) => {
-				console.error('Error while registering service worker:', err);
-			});
-		} else {
-			// Display the message as usual
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
-		}
-	} else {
-		setStatusMode('progress');
-		engine.startGame({
-			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
-				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
-				}
-			},
-		}).then(() => {
-			setStatusMode('hidden');
-		}, displayFailureNotice);
-	}
-}());
-		</script>
+        </script>
+        <script src="build_info.js"></script>
+        <script src="touch_diagnostics.js"></script>
+        <script src="game_shell.js"></script>
 	</body>
 </html>

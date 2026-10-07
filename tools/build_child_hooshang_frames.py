@@ -34,16 +34,14 @@ def main():
             points = frame['socks']
             assert len(points) == 2, (name, i)
             sock_frames.append('PackedVector2Array(' + ', '.join(str(v) for point in points for v in point) + ')')
-        loop = name not in ('jump', 'wall_jump', 'dash', 'exit_water', 'ledge_climb')
+        loop = name in ('idle', 'run', 'sprint', 'skid', 'climb', 'climb_down',
+                        'swim', 'swim_idle', 'sit', 'wall_slide')
         clips.append('{"frames": [%s], "loop": %s, "name": &"%s", "speed": 1.0}' %
                      (', '.join(frames), str(loop).lower(), name))
         sock_clips.append('"%s": [%s]' % (name, ', '.join(sock_frames)))
-    clips.append('{"frames": [{"duration": 1.0, "texture": ExtResource("sit_0")}], "loop": false, "name": &"wall_land", "speed": 1.0}')
-    sit = next(t for t in tags if t['name'] == 'sit')['frames'][0]['socks']
-    sock_clips.append('"wall_land": [PackedVector2Array(' + ', '.join(str(v) for point in sit for v in point) + ')]')
     (BASE / 'act2_frames.tres').write_text('[gd_resource type="SpriteFrames" format=3]\n\n' +
         '\n'.join(resources) + '\n\n[resource]\nmetadata/child_hooshang = true\n' +
-        'metadata/visual_scale = 0.39\nmetadata/visual_offset = Vector2(0, -7)\n' +
+        'metadata/visual_scale = 0.375\nmetadata/visual_offset = Vector2(0, -3)\n' +
         'metadata/aseprite_source = "res://assets/characters/hooshang_child/aseprite/young_hooshang_movement.aseprite"\n' +
         'metadata/sock_pixels = {' + ',\n'.join(sock_clips) + '}\n' +
         'animations = [' + ',\n'.join(clips) + ']\n')

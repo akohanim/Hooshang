@@ -27,13 +27,13 @@ func _ready()->void:
 	# These two rising transfers are the crux entrance moves. An ordinary jump
 	# and a flat dash both fail against real collision; up-diagonal input passes.
 	player.died.disconnect(world._on_player_died)
-	for name in ["Level_20","Level_23"]:
+	for name in ["Level_21","Level_24"]:
 		for c:Dictionary in configs:
 			if c.name==name:config=c
 		for r in world.rooms:
 			if r.name==name:room=r
 		world._enter_room(room,true);await frames(8)
-		var timing:=22 if name=="Level_20" else 18
+		var timing:=22 if name=="Level_21" else 18
 		for move:Array in [[14,-1,0,8],[14,timing,0,8],[14,timing,-1,8]]:
 			release();CrumblingPlatform.reset_all(get_tree())
 			var a:Array=config.route[0]

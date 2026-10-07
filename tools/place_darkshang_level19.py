@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Link the four hand-placed Level_19 strips to its ladder-bottom trigger."""
+"""Link the four hand-placed Level_20 strips to its ladder-bottom trigger."""
 import copy
 import json
 import re
@@ -13,7 +13,7 @@ KEY='L19_LadderBottom'
 def main(apply=False):
  path=ROOT/'ldtk/hooshang_act1.ldtk'
  raw=path.read_text();before=json.loads(raw);after=copy.deepcopy(before)
- room=next(r for r in after['levels'] if r['identifier']=='Level_19')
+ room=next(r for r in after['levels'] if r['identifier']=='Level_20')
  layer=next(l for l in room['layerInstances'] if l['__identifier']=='Entities')
  strips=sorted((e for e in layer['entityInstances'] if e['__identifier']=='ShadowEruption'),key=lambda e:-e['px'][0])
  assert [e['px'] for e in strips]==[[604,332],[532,356],[460,324],[116,324]],'Review changed manual placements before applying'
@@ -34,7 +34,7 @@ def main(apply=False):
  # plus the one new trigger remain exactly the user's current source.
  a=copy.deepcopy(before);b=copy.deepcopy(after)
  for doc in [a,b]:
-  r=next(r for r in doc['levels'] if r['identifier']=='Level_19')
+  r=next(r for r in doc['levels'] if r['identifier']=='Level_20')
   ent=next(l for l in r['layerInstances'] if l['__identifier']=='Entities')
   ent['entityInstances']=[e for e in ent['entityInstances'] if not(e['__identifier']=='ShadowEruptionTrigger' and any(f['__identifier']=='EncounterID' and f['__value']==KEY for f in e['fieldInstances']))]
   for e in ent['entityInstances']:

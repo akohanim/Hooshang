@@ -98,7 +98,7 @@ def build(p, only=None):
    # tiles and within its settled tolerance, so mounted belts stay put.
    for yy in range(y//8,min(a.h,y//8+3)):
     for xx in range(x//8,(x+w)//8):a.layers['Collisions']['intGridCsv'][yy*a.w+xx]=0
-   a.entity('ConveyorBelt_Right' if direction>0 else 'ConveyorBelt_Left',x+w/2,y+8,width=w,height=16,speed=28.0 if direction>0 else 36.0)
+   a.entity('ConveyorBelt_Right' if c.get('conveyor_direction',direction)>0 else 'ConveyorBelt_Left',x+w/2,y+8,width=w,height=16,speed=c.get('conveyor_speed',28.0 if direction>0 else 36.0))
   if 'mystery_box' in c:
    a.entity('MysteryBox',*c['mystery_box'],MushroomType='BlackWhite')
   for t in c.get('thought_patterns',[]):
@@ -141,14 +141,14 @@ def build(p, only=None):
  # Home is the ORIGINAL cubicle's geometry and background, with only a return
  # spawn. No opening Rumi trigger or exit can interrupt the existing finale.
  original=next(l for l in p['levels'] if l['identifier']=='Level_0')
- home=next(l for l in p['levels'] if l['identifier']=='Level_25')
+ home=next(l for l in p['levels'] if l['identifier']=='Level_26')
  a=Author(p,home)
  for name in ['Collisions','Foreground','Collision','Background','ThoughtHazards']:
   src=next(l for l in original['layerInstances'] if l['__identifier']==name)
   for key in ['intGridCsv','autoLayerTiles','gridTiles','__tilesetDefUid','__tilesetRelPath','overrideTilesetUid']:
    a.layers[name][key]=copy.deepcopy(src[key])
  a.entity('PlayerStart',248,88,SpawnID='homecoming')
- changed.append('Level_25')
+ changed.append('Level_26')
  return changed
 
 def main():

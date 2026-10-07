@@ -25,6 +25,7 @@ func _ready() -> void:
 	var start := boss.position
 	check(boss.locked_charge(.6,240,160,.8),"charge starts staged approach")
 	check(boss.position == start,"starting charge does not teleport")
+	check(boss._visual.cloud_form and boss._locked_charge.return_to_launch,"direct charges inherit the shared cloud performance")
 	boss._physics_process(.016)
 	check(absf(boss.position.x-start.x) < 3 and boss.position.y == player.position.y,"approach eases horizontally at player height")
 	for i in 28: boss._physics_process(.016)
@@ -54,11 +55,11 @@ func _ready() -> void:
 	check(boss._locked_charge.phase == 3,"miss begins recovery")
 	var far := boss.position
 	boss._physics_process(.016)
-	check(boss.position.distance_to(far)<5,"return begins smoothly without teleport")
+	check(boss.position == far and not boss._visual.visible,"miss vanishes without a visible return flight")
 	boss._physics_process(.784)
-	check(boss.position.is_equal_approx(boss.charge_return_position()),"return reaches position behind current player")
-	var returned := boss.position
+	check(boss.position.is_equal_approx(origin),"miss reappears at the saved launch point")
+	check(boss._visual.visible and boss._visual._cloud_weight == 1.0,"return restores the cloud form")
 	boss._physics_process(.016)
-	check(boss.position.distance_to(returned)<.1,"resumed pursuit does not snap to old trail")
+	check(boss.position.is_equal_approx(boss.charge_hover_position()),"returned cloud holds the right edge of the current camera")
 	print("SMOOTH CHARGE: %d failures" % failures)
 	get_tree().quit(1 if failures else 0)

@@ -39,6 +39,19 @@ def build(export=True):
             entries.append('{"duration": ' + str(float(frames[i]['duration'])) + ', "texture": SubResource("frame_' + str(i) + '")}')
         speed = 1000.0 * PLAYBACK_MULTIPLIERS.get(name, 1.0)
         animations.append('{"frames": [' + ', '.join(entries) + '], "loop": ' + str(name in LOOPS).lower() + ', "name": &"' + name + '", "speed": ' + str(speed) + '}')
+    # Gameplay phases reuse approved poses; source tags remain the editing contract.
+    tags = {tag['name']: tag for tag in data['meta']['frameTags']}
+    jump = tags['jump']['from']
+    phases = {
+        'takeoff': [(jump, 30), (jump + 1, 30)],
+        'rise': [(jump + i, 60) for i in range(2, 6)],
+        'apex': [(tags['jump']['to'], 100)],
+        'land': [(tags['crouch']['from'], 55)],
+        'recover': [(tags['idle']['from'], 65)],
+    }
+    for name, poses in phases.items():
+        entries = ['{"duration": ' + str(float(ms)) + ', "texture": SubResource("frame_' + str(i) + '")}' for i, ms in poses]
+        animations.append('{"frames": [' + ', '.join(entries) + '], "loop": false, "name": &"' + name + '", "speed": 1000.0}')
     text = f'[gd_resource type="SpriteFrames" load_steps={len(resources)+2} format=3]\n\n'
     text += '[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]\n\n'
     text += '\n\n'.join(resources) + '\n\n[resource]\nanimations = [' + ',\n'.join(animations) + ']\n'

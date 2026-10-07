@@ -14,14 +14,14 @@ func _ready() -> void:
 	var world := ancestor as LdtkWorld
 	if world != null:
 		var follow := func(_room: Node2D) -> void:
-			for light_name in ["DawnGlowRoom25", "DawnSpillRoom25a", "DawnSpillRoom25b", "SunShaftRoom25"]:
-				world.get_node("Lights/" + light_name).visible = world.is_room_active(room)
+			for light_name in ["DawnGlowRoom26", "DawnSpillRoom26a", "DawnSpillRoom26b", "SunShaftRoom26"]:
+				world.get_node("Lights/" + light_name).visible = world.is_room_active(room) and not get_meta("window_excluded", false)
 		world.room_changed.connect(follow)
 		world.transition_started.connect(follow)
 		follow.call(room)
 
 func _draw() -> void:
-	for pane: Rect2 in OfficeWindowPanes.for_room("Level_25"):
+	for pane: Rect2 in OfficeWindowPanes.for_room("Level_26"):
 		for y in range(int(pane.position.y), int(pane.end.y)):
 			var height := clampf((y - 47.0) / 48.0, 0.0, 1.0)
 			var sky := Color("777a9b").lerp(Color("f4b878"), height)

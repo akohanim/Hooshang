@@ -37,8 +37,8 @@ func _run() -> void:
 	await _frames(8)
 	Input.action_release("jump")
 	_check(player.global_position.y < y0 - 4.0, "jump gains height")
-	_check(player.visual.animation == "jump",
-		"a ground jump uses the normal jump pose (got '%s')" % player.visual.animation)
+	_check(player.visual.animation == "rise",
+		"a held ground jump reaches its ascent pose after takeoff (got '%s')" % player.visual.animation)
 	_check(player.state == Player.State.JUMP or player.state == Player.State.FALL,
 		"airborne state during jump")
 	await _frames(60)

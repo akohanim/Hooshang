@@ -10,5 +10,5 @@
 
 [node name="Landmarks" type="Node2D"]
 script = ExtResource("1")
-room_names = PackedStringArray("Act_2_Level_3", "Act_2_Level_4", "Act_2_Level_5", "Act_2_Level_6", "Act_2_Level_7", "Act_2_Level_8")
-paintings = Array[Texture2D]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7")])
+room_names = PackedStringArray("Act_2_Level_3", "Act_2_Level_4", "Act_2_Level_5", "Act_2_Level_6", "Act_2_Level_7", "Act_2_Level_8", "Act_2_Level_9", "Act_2_Level_10", "Act_2_Level_11", "Act_2_Level_12", "Act_2_Level_13")
+paintings = Array[Texture2D]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("3"), ExtResource("6"), ExtResource("2"), ExtResource("4"), ExtResource("5")])

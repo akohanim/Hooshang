@@ -126,6 +126,10 @@ const ZONE_FLOOR_SCENE := preload("res://scenes/props/zones/ZoneFloor.tscn")
 var _shape: CollisionShape2D
 var _visual: Node2D
 var _floor: ZoneFloor
+## Seconds of launch forgiveness after the surface stops; zero disables storage.
+@export_range(0.0, 0.25) var momentum_grace_time := 0.1
+var _momentum := preload("res://scenes/props/zones/platform_momentum.gd").new()
+
 ## Who was being carried last frame, by instance id. Keyed by id rather than by
 ## the node so a body freed mid-flight cannot keep this dictionary alive.
 var _riding := {}
@@ -169,20 +173,24 @@ func carrying(body: Node2D) -> bool:
 	# a 39px dash, which is the difference between clearing a gap and not.
 	if body is Player:
 		var who := body as Player
-		if who.state == Player.State.DEAD or who.state == Player.State.DASH:
+		if who.state == Player.State.DEAD or who.state == Player.State.DASH \
+			or not who.is_physics_processing() or who.invulnerable_timer > 0.0:
 			return false
 	return body is CharacterBody2D and (body as CharacterBody2D).is_on_floor()
 
 
 func _physics_process(delta: float) -> void:
+	_momentum.tick(delta)
 	var carry := drift() * delta
 	# move_and_collide, not a position write: the belt must not be able to push
 	# him through the wall at the end of it.
 	for body in riders:
 		var riding := carrying(body)
+		if riding:
+			_momentum.remember(body, drift(), momentum_grace_time)
 		if riding and not is_zero_approx(carry):
 			(body as CharacterBody2D).move_and_collide(Vector2(carry, 0.0))
-		_settle_launch(body, riding)
+		_settle_launch(body, riding, drift())
 
 
 ## Hand the belt's speed over as real velocity the frame a rider LEAVES it in
@@ -198,11 +206,12 @@ func _physics_process(delta: float) -> void:
 ## Applied once per departure, on the transition, so a long jump over a belt
 ## cannot be topped up frame after frame — `_riding` is what makes it a
 ## transition rather than a state.
-func _settle_launch(body: Node2D, riding: bool) -> void:
+func _settle_launch(body: Node2D, riding: bool, surface_speed: float) -> void:
 	var was: bool = _riding.get(body.get_instance_id(), false)
 	_riding[body.get_instance_id()] = riding
 	if riding or not was:
 		return
+	var stored_speed := _momentum.take(body, surface_speed)
 	# He was on it last frame and is not now. Airborne = he jumped or ran off
 	# the end, and the belt's speed goes with him. Still grounded = he simply
 	# walked off the side onto ordinary floor, and it does not.
@@ -215,14 +224,15 @@ func _settle_launch(body: Node2D, riding: bool) -> void:
 		var who := body as Player
 		# A dash is not a departure — it is the dash taking over, and it is the
 		# one move whose distance has to be the same everywhere.
-		if who.state == Player.State.DEAD or who.state == Player.State.DASH:
+		if who.state == Player.State.DEAD or who.state == Player.State.DASH \
+			or not who.is_physics_processing() or who.invulnerable_timer > 0.0:
 			return
 	# Leaving in the belt's own direction is the two of them agreeing, and that
 	# gets the bonus (see with_the_belt). Leaving against it is already being
 	# paid the belt's full speed as a tax on the jump.
-	var handover := drift() * launch_transfer
+	var handover := stored_speed * launch_transfer
 	if not is_zero_approx(mover.velocity.x) \
-			and signf(mover.velocity.x) == signf(drift()):
+			and signf(mover.velocity.x) == signf(stored_speed):
 		handover *= 1.0 + with_the_belt
 	# Asked for, not written: Player.add_momentum also marks the speed as GIVEN,
 	# which is what stops his own deceleration scrubbing it off in three frames.
@@ -240,6 +250,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 func _on_body_exited(body: Node2D) -> void:
 	riders.erase(body)
+	_momentum.forget(body)
 	# NOT a launch site, deliberately. Leaving the box looks like a departure, but
 	# it is also what a respawn, a room load and a debug teleport look like — and
 	# handing a belt's speed to a player who is now two hundred pixels away is the

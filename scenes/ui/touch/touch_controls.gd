@@ -31,9 +31,15 @@ var _glow_queued := false
 var _player: Player
 var _browser_callback: JavaScriptObject
 var _was_playing := false
+var _diagnostics: JavaScriptObject
+var _diagnostic_elapsed := 0.0
+var _diagnostic_events := {"press": 0, "drag": 0, "release": 0}
+var _diagnostic_last_event := "none"
+var _diagnostic_checks := {"Walk": false, "Climb": false, "Jump": false, "Dash": false}
 
 const PAUSE_RECT := Rect2(1128, 32, 112, 88)
 const GLOW_RECT := Rect2(980, 32, 128, 88)
+const STICK_HOME := Vector2(160, 548)
 
 @onready var overlay: Control = $Overlay
 
@@ -44,6 +50,7 @@ func _ready() -> void:
 	process_physics_priority = -100
 	enabled = DisplayServer.is_touchscreen_available() or "--touch-controls" in OS.get_cmdline_user_args()
 	if OS.has_feature("web"):
+		_diagnostics = JavaScriptBridge.get_interface("HooshangTouchTest")
 		enabled = enabled or bool(JavaScriptBridge.eval("navigator.maxTouchPoints > 0"))
 		_browser_callback = JavaScriptBridge.create_callback(_browser_suspend)
 		var window := JavaScriptBridge.get_interface("window")
@@ -75,7 +82,7 @@ func _scene_changed(_scene: Node) -> void:
 
 func _device_changed(_device: int) -> void:
 	if not InputDevice.is_touch():
-		reset()
+		reset("device changed")
 
 
 func _browser_suspend(_arguments: Array) -> void:
@@ -89,13 +96,13 @@ func _notification(what: int) -> void:
 
 
 func suspend() -> void:
-	reset()
+	reset("focus/background")
 	if is_instance_valid(Pause) and Pause.can_pause():
 		Pause.pause_game()
 
 
 func _resized() -> void:
-	reset()
+	reset("viewport resized")
 	if enabled and DisplayServer.window_get_size().x < DisplayServer.window_get_size().y:
 		suspend()
 
@@ -111,10 +118,22 @@ func gameplay_available() -> bool:
 
 func _physics_process(delta: float) -> void:
 	var playing := gameplay_available()
+	if _diagnostics != null:
+		# Latch outcomes each physics frame; a short tap-jump can start and end
+		# entirely between the slower browser report updates.
+		if playing:
+			_diagnostic_checks.Walk = _diagnostic_checks.Walk or (_player.state == Player.State.RUN and absf(_player.velocity.x) > 5 and absf(movement.x) > 0.1)
+			_diagnostic_checks.Climb = _diagnostic_checks.Climb or (_player.state == Player.State.CLIMB and absf(_player.velocity.y) > 1)
+			_diagnostic_checks.Jump = _diagnostic_checks.Jump or _player.state == Player.State.JUMP
+			_diagnostic_checks.Dash = _diagnostic_checks.Dash or _player.state == Player.State.DASH
+		_diagnostic_elapsed += delta / maxf(Engine.time_scale, 0.001)
+		if _diagnostic_elapsed >= 0.1:
+			_diagnostic_elapsed = 0.0
+			_publish_diagnostics(playing)
 	overlay.visible = playing
 	if not playing:
 		if _was_playing:
-			reset()
+			reset("gameplay unavailable")
 		_was_playing = false
 		return
 	_was_playing = true
@@ -132,6 +151,10 @@ func _physics_process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventScreenTouch or event is InputEventScreenDrag):
 		return
+	if _diagnostics != null:
+		var kind := "drag" if event is InputEventScreenDrag else ("press" if event.pressed else "release")
+		_diagnostic_events[kind] += 1
+		_diagnostic_last_event = "%s #%d %s" % [kind, event.index, event.position]
 	enabled = true
 	InputDevice.note_touch()
 	# Menus, dialogue and the film own their touches. No queued gameplay
@@ -141,17 +164,21 @@ func _input(event: InputEvent) -> void:
 		return
 	get_viewport().set_input_as_handled()
 	var point: Vector2 = overlay.get_global_transform_with_canvas().affine_inverse() * event.position
+	# Browser identifiers are opaque 32-bit values, not small finger ordinals.
+	# Preserve all bits in Godot's 64-bit int so a signed ID cannot collide
+	# with our -1 (unowned) sentinel or fail the player's >= 0 ownership check.
+	var finger: int = event.index & 0xffffffff
 	if event is InputEventScreenTouch:
 		if event.canceled:
-			_release_finger(event.index, true)
+			_release_finger(finger, true)
 		elif event.pressed:
-			_begin_finger(event.index, point)
+			_begin_finger(finger, point)
 		else:
 			# Some browsers coalesce the last motion into touchend.
-			_move_finger(event.index, point)
-			_release_finger(event.index, false)
+			_move_finger(finger, point)
+			_release_finger(finger, false)
 	else:
-		_move_finger(event.index, point)
+		_move_finger(finger, point)
 	overlay.queue_redraw()
 
 
@@ -163,9 +190,11 @@ func _begin_finger(index: int, point: Vector2) -> void:
 		_glow_queued = true
 	elif point.x < 600 and point.y > 260 and move_finger < 0:
 		move_finger = index
-		stick_origin = point
-		stick_position = point
-		movement = Vector2.ZERO
+		# A press on a drawn arrow must immediately steer. Recentring there
+		# made the visible directional pad behave like a dead button.
+		# Outside the visible pad, keep the floating-stick convenience.
+		stick_origin = STICK_HOME if point.distance_to(STICK_HOME) <= stick_radius + 20 else point
+		_move_finger(index, point)
 	elif point.x >= 600 and point.y > 160 and action_finger < 0:
 		action_finger = index
 		action_origin = point
@@ -210,7 +239,13 @@ func _release_finger(index: int, canceled: bool) -> void:
 		_action_jumping = false
 
 
-func reset() -> void:
+func has_active_gesture() -> bool:
+	return move_finger >= 0 or action_finger >= 0
+
+
+func reset(reason := "game state reset") -> void:
+	if _diagnostics != null and has_active_gesture():
+		_diagnostics.reset(reason)
 	move_finger = -1
 	action_finger = -1
 	movement = Vector2.ZERO
@@ -224,6 +259,29 @@ func reset() -> void:
 	_tap_hold = 0.0
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
+
+
+func _publish_diagnostics(playing: bool) -> void:
+	var data := {
+		"revision": "touch-test-v1", "available": playing,
+		"checks": _diagnostic_checks,
+		"device": InputDevice.current, "events": _diagnostic_events,
+		"lastEvent": _diagnostic_last_event,
+		"fingers": [move_finger, action_finger],
+		"movement": [movement.x, movement.y],
+		"origin": [stick_origin.x, stick_origin.y],
+		"thumb": [stick_position.x, stick_position.y],
+		"viewport": str(get_viewport().get_visible_rect()),
+		"overlayTransform": str(overlay.get_global_transform_with_canvas()),
+	}
+	if is_instance_valid(_player):
+		data["position"] = [_player.position.x, _player.position.y]
+		data["velocity"] = [_player.velocity.x, _player.velocity.y]
+		data["state"] = _player.state_name()
+		data["locked"] = _player.input_locked
+		data["frozen"] = _player._frozen
+		data["hasDash"] = _player.has_dash
+	_diagnostics.engine(JSON.stringify(data))
 
 
 func consume_jump() -> bool:

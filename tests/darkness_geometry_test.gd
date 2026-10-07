@@ -39,7 +39,7 @@ func _ready()->void:
 		for i in range(route.size()-1):
 			var solved:=false
 			var departure:Vector3=route[i]
-			if c.name=="Level_24" and i==route.size()-2:
+			if c.name=="Level_25" and i==route.size()-2:
 				departure.x+=24;departure.z-=24
 			for wait_time in [0,45,90]:
 				for timing in [-1,12,8,16,4,20,24]:

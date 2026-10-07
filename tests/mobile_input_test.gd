@@ -21,8 +21,25 @@ func _ready() -> void:
 	world.add_child(player)
 	TouchControls.enabled = true
 	await _reset_player()
+	for finger in [-1, -2147483648, 2147483647]:
+		_touch(finger, Vector2(222, 548), true)
+		await _frames(6)
+		_check(player.velocity.x > 30, "pressing the visible arrow moves immediately, ID %d" % finger)
+		_drag(finger, Vector2(98, 548))
+		await _frames(10)
+		_check(player.velocity.x < -30, "opaque finger ID keeps ownership across direction change")
+		_touch(finger, Vector2(98, 548), false)
+		_check(TouchControls.move_finger == -1 and TouchControls.movement == Vector2.ZERO,
+			"opaque finger releases without leaving movement stuck")
+		await _reset_player()
 
 	_touch(4, Vector2(160, 548), true)
+	# The Web export emits a device-0 companion mouse motion BEFORE the drag.
+	# Test beyond the grace interval too: a resting thumb still owns its stick.
+	InputDevice._last_touch_ms = Time.get_ticks_msec() - 1000
+	_browser_mouse_motion()
+	_check(InputDevice.is_touch() and TouchControls.move_finger == 4,
+		"browser companion mouse motion preserves a held movement finger")
 	_drag(4, Vector2(244, 550))
 	await _frames(6)
 	_check(player.velocity.x > 30, "left thumb moves the player")
@@ -43,6 +60,8 @@ func _ready() -> void:
 	_touch(8, Vector2(1000, 440), true)
 	await _frames(1)
 	_check(player.state != Player.State.JUMP, "swipe contact does not preemptively jump")
+	_browser_mouse_motion()
+	_check(TouchControls.action_finger == 8, "browser companion mouse motion preserves the dash finger")
 	_drag(8, Vector2(1080, 360))
 	await _frames(2)
 	_check(player.state == Player.State.DASH and player.dash_dir.is_equal_approx(Vector2(1, -1).normalized()),
@@ -130,6 +149,12 @@ func _ready() -> void:
 		"touch jump escapes the ladder while the thumb still holds Up")
 	TouchControls.reset()
 	_check(Screen.viewport.size == Vector2i(320, 180), "mobile UI never changes world resolution")
+	InputDevice.note_touch()
+	_browser_mouse_motion()
+	_check(InputDevice.is_touch(), "trailing browser mouse motion does not replace touch prompts")
+	InputDevice._last_touch_ms = Time.get_ticks_msec() - 1000
+	_browser_mouse_motion()
+	_check(not InputDevice.is_touch(), "real mouse resumes after touches and their grace interval")
 	print("MOBILE INPUT: %d failures" % failures.size())
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -157,6 +182,14 @@ func _drag(index: int, point: Vector2) -> void:
 	event.index = index
 	event.position = TouchControls.overlay.get_global_transform_with_canvas() * point
 	get_viewport().push_input(event, true)
+
+func _browser_mouse_motion() -> void:
+	var event := InputEventMouseMotion.new()
+	event.device = 0
+	event.button_mask = MOUSE_BUTTON_MASK_LEFT
+	event.relative = Vector2(20, 0)
+	get_viewport().push_input(event, true)
+
 
 func _frames(count: int) -> void:
 	for i in count:

@@ -199,7 +199,7 @@ func leg(next:int)->bool:
 				if chamber.phase==2 and chamber.phase_time<3:break
 				if died:return false
 	var inset:=8.0
-	if config.name=="Level_24" and next==config.route.size()-1:inset=32
+	if config.name=="Level_25" and next==config.route.size()-1:inset=32
 	var takeoff:float=a[0]+a[2]-inset if direction>0 else a[0]+inset
 	if not crumbling(index) and not await walk_x(takeoff):return false
 	if not crumbling(index):await frames(5)

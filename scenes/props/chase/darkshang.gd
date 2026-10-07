@@ -96,6 +96,12 @@ signal chase_reset(at: Vector2)
 ## there — used after a surge, to blend back onto the tape instead of snapping.
 ## In seconds to close the gap. 0.35 reads as him settling back into the walls.
 @export var reattach_time := 0.35
+## Gap in pixels that starts faster trail playback; 0 disables catch-up.
+@export var catch_up_distance := 160.0
+## Maximum extra seconds of recorded trail consumed per second while far away.
+@export var catch_up_rate := 0.8
+## Shortest trail delay allowed by catch-up (authored surges can go closer).
+@export var catch_up_min_delay := 0.45
 
 @export_group("Surge")
 ## Warning before a surge actually starts, in seconds. The player must have time
@@ -160,6 +166,22 @@ signal chase_reset(at: Vector2)
 	set(value):
 		catch_size = value
 		_fit(_shape, value)
+## Offset the catch box toward the visible body instead of leaving it at his feet.
+@export var catch_offset := Vector2.ZERO:
+	set(value):
+		catch_offset = value
+		if _shape != null: _shape.position = value
+## A revealed encounter can absorb contact even before pursuit begins.
+@export var absorb_on_reveal := false
+var _contact_ready := false
+var _last_contact_player := Vector2.ZERO
+var _contact_from_player := Vector2.ZERO
+var _contact_from_actor := Vector2.ZERO
+
+## Charging humanoid's body, above his feet; excludes the decorative smoke trail.
+## Pursuit keeps its smaller original catch box.
+@export var charge_catch_size := Vector2(24.0, 38.0)
+@export var charge_catch_offset := Vector2(0.0, -17.0)
 ## Size of the pass-through probe in px. Smaller than the kill box so the art
 ## only swells when he is genuinely INSIDE a wall, not when he brushes one.
 @export var probe_size := Vector2(8.0, 10.0):
@@ -171,7 +193,7 @@ signal chase_reset(at: Vector2)
 ## work from, and where he waits while DORMANT.
 var spawn_point := Vector2.ZERO
 var state: State = State.DORMANT
-## The delay he is CURRENTLY reading at — shrinks during a surge, recovers after.
+## Current replay delay — shrinks during surges or distant pursuit, recovers nearby.
 var read_delay := 0.0
 var buffer: PlayerPositionBuffer
 ## True while he is overlapping solid geometry (the probe's answer).
@@ -203,9 +225,14 @@ var entry_room_bounds := Rect2()
 @export var power_entry_delay := 0.35
 var _power_entry_time := 0.0
 var _locked_charge: Node2D
+var cloud_reveal_on_entry := false
+var _cloud_reveal_seen := false
 
 ## Every attack uses this gate, including authored eruptions and legacy surges.
 func powers_available() -> bool:
+	if _visual != null and _visual.cloud_transition_left > 0.0: return false
+	if _locked_charge != null and _locked_charge.return_to_launch and _locked_charge.phase == 3:
+		return false
 	return visible and not _holding_entry and state in [State.FOLLOWING, State.SURGING] and _player != null and not _player.input_locked and _player.state != Player.State.DEAD and _power_entry_time >= power_entry_delay
 
 func _tick_power_entry(delta: float) -> void:
@@ -226,6 +253,10 @@ func locked_charge(warning: float, speed: float, distance: float, recovery: floa
 	var reach := maxf(distance * 2.0, aim.length() + 160.0)
 	if not _locked_charge.begin(aim, warning, speed, reach, recovery):
 		return false
+	# The cloud-to-humanoid performance belongs to the attack, including
+	# charges started directly rather than through a room recipe.
+	if _visual != null: _visual.cloud_form = true
+	_locked_charge.return_to_launch = _visual != null and _visual.cloud_form
 	_locked_charge.track_player_height = true
 	if charge_view_rect().has_area():
 		_locked_charge.stage(self)
@@ -238,7 +269,8 @@ func charge_view_rect() -> Rect2:
 	if not entry_room_bounds.has_area(): return Rect2()
 	# Use the rendered camera transform, including smoothing, limits and zoom.
 	var view := get_viewport().get_canvas_transform().affine_inverse() * get_viewport_rect()
-	return view.grow(-24).intersection(entry_room_bounds.grow(-20))
+	var horizontal_margin := 48.0 if _visual != null and _visual.cloud_form else 24.0
+	return view.grow_individual(-horizontal_margin,-24,-horizontal_margin,-24).intersection(entry_room_bounds.grow(-20))
 
 func charge_hover_position() -> Vector2:
 	var view := charge_view_rect()
@@ -253,10 +285,10 @@ func charge_return_position() -> Vector2:
 	return target
 
 func _finish_locked_charge() -> void:
-	# The old tape leads back to where he was before attacking. Start a fresh
-	# trail behind where the player is NOW instead; never re-arm room triggers
-	# or the walking-entry threshold as a side effect of finishing an attack.
-	if _locked_charge.staged:
+	# Seed a fresh trail from the return position: the saved launch point for
+	# clouds, or the completed return flight for other encounters. Never re-arm
+	# room triggers or the walking-entry threshold after an attack.
+	if _locked_charge.staged or _locked_charge.return_to_launch:
 		var trail := global_position-_player.global_position
 		buffer.clear_and_seed(_player.global_position,trail.normalized(),trail.length()/maxf(follow_delay,.001))
 		read_delay = follow_delay
@@ -266,7 +298,8 @@ func _finish_locked_charge() -> void:
 		_fit_pursuit_to_room(_player.global_position)
 	_reattach = 0
 	_velocity = Vector2.ZERO
-	_power_entry_time = 0
+	# Half the old 0.35s post-return pause; genuine room-entry delay stays intact.
+	_power_entry_time = power_entry_delay * 0.5
 
 
 
@@ -284,6 +317,7 @@ func _ready() -> void:
 	_shape.shape = RectangleShape2D.new()
 	add_child(_shape)
 	_fit(_shape, catch_size)
+	_shape.position = catch_offset
 
 	_build_probe()
 	buffer = BUFFER_SCENE.instantiate()
@@ -310,7 +344,14 @@ func _physics_process(delta: float) -> void:
 	_tick_power_entry(delta)
 	if _player == null:
 		return
+	_contact_from_player = _last_contact_player if _contact_ready else _player.global_position
+	_last_contact_player = _player.global_position
+	_contact_from_actor = global_position
+	_contact_ready = true
 	if state == State.DORMANT:
+		if absorb_on_reveal and visible and not _player.input_locked:
+			_check_catch()
+			if state == State.CAUGHT: return
 		if auto_start and _player.global_position.distance_to(global_position) <= wake_distance:
 			start_chase()
 		return
@@ -382,6 +423,7 @@ func reveal() -> void:
 ## one thing that starts a chase is the one thing that makes him visible, and
 ## they cannot get out of step.
 func start_chase() -> void:
+	_contact_ready = false
 	_power_entry_time = 0
 	if state != State.DORMANT:
 		return
@@ -422,6 +464,7 @@ func hold(seconds: float) -> void:
 ## than being freed, so the narrative beat still has something on screen to talk
 ## to, and so restarting the chase is one call rather than a respawn.
 func stop_chase() -> void:
+	_contact_ready = false
 	_power_entry_time = 0
 	if _locked_charge != null: _locked_charge.cancel()
 	if state == State.DORMANT:
@@ -538,11 +581,30 @@ func _tick_surge(delta: float) -> void:
 			_reattach = reattach_time
 			surge_ended.emit()
 		return
-	# Not surging: the shrunken delay walks back up to the base one. move_toward
-	# rather than a lerp so the recovery rate is a number in px... seconds per
-	# second, readable in the inspector, instead of an exponent nobody can tune.
-	read_delay = move_toward(read_delay, follow_delay, delay_recovery * delta)
+	# Ordinary pursuit either consumes the trail faster to close a large gap,
+	# or restores the base delay once the player is back within reach.
+	_recover_or_catch_up(delta)
 	_reattach = maxf(_reattach - delta, 0.0)
+
+
+## Speed up along the player's recorded route, never cut across a turn toward
+## their live position. A small release band prevents alternating boost/recovery
+## ticks at the threshold. Attacks and the cloud's waiting pose keep their timing.
+func _recover_or_catch_up(delta: float) -> void:
+	var eligible := catch_up_distance > 0.0 and catch_up_rate > 0.0 \
+		and is_instance_valid(_player) and visible and not _holding_entry \
+		and not _player.input_locked and _player.state != Player.State.DEAD \
+		and not _cloud_waiting_in_view() and _reattach <= 0.0
+	if eligible:
+		var distance := gap()
+		if distance > catch_up_distance:
+			var floor_delay := clampf(catch_up_min_delay, 0.0, follow_delay)
+			var strength := clampf((distance - catch_up_distance) / catch_up_distance, 0.0, 1.0)
+			read_delay = move_toward(read_delay, minf(read_delay, floor_delay), catch_up_rate * strength * delta)
+			return
+		if distance > catch_up_distance * 0.8:
+			return
+	read_delay = move_toward(read_delay, follow_delay, delay_recovery * delta)
 
 
 func _begin_surge() -> void:
@@ -564,7 +626,15 @@ func _begin_surge() -> void:
 
 
 ## Following: stand where he stood. A straight write, no physics — see the header.
+## Cloud encounters wait at the visible right edge rather than replaying a
+## trail offscreen. Contact during this waiting pose is not an attack.
+func _cloud_waiting_in_view() -> bool:
+	return _visual != null and _visual.cloud_form and state == State.FOLLOWING and _locked_charge.phase == 0 and charge_view_rect().has_area()
+
 func _move_following(delta: float) -> void:
+	if _cloud_waiting_in_view():
+		global_position = charge_hover_position()
+		return
 	if buffer.samples() == 0:
 		return  # nothing recorded yet — stand still rather than snap to the origin
 	var target := buffer.get_position_at_delay(read_delay)
@@ -581,8 +651,9 @@ func _move_following(delta: float) -> void:
 ## This is the only time he does something the player has not already done, which
 ## is exactly why it has to be telegraphed.
 func _move_surging(delta: float) -> void:
-	global_position = global_position.move_toward(
-		_player.global_position, surge_speed * delta)
+	var finish := global_position.move_toward(_player.global_position, surge_speed * delta)
+	if _grace_timer <= 0 and _locked_charge.catch_along(self, _player, finish-global_position): return
+	global_position = finish
 
 
 func _find_player() -> void:
@@ -598,21 +669,25 @@ func _find_player() -> void:
 
 # ------------------------------------------------------------------ caught ---
 
-## Overlap is re-derived every frame rather than taken off body_entered.
-##
-## Same reasoning as slide_zone.gd: the signal only fires when the boundary is
-## CROSSED, and a respawn, a room load or a debug teleport can all put the two of
-## them inside each other without a crossing. Asking the question fresh cannot
-## get stuck on a stale answer.
+## Direct relative-motion sweep: Area2D overlap caches can miss a whole dash.
+## The expanded box tests the player's body, not only its centre, and the segment
+## avoids the false diagonal hits caused by merging start/end bounding boxes.
 func _check_catch() -> void:
-	if _grace_timer > 0.0 or _owed_death != null:
-		return
-	if _player.state == Player.State.DEAD:
-		return
-	for body in get_overlapping_bodies():
-		if body is Player:
-			_catch(body as Player)
-			return
+	if _player == null or _cloud_waiting_in_view() or _holding_entry: return
+	if _grace_timer > 0.0 or _owed_death != null or _player.state == Player.State.DEAD: return
+	var half := _player.hitbox_rect().size * 0.5
+	var target := Rect2(catch_offset - catch_size * 0.5 - half, catch_size + half * 2.0)
+	var finish := _player.global_position - global_position
+	var start := _contact_from_player - _contact_from_actor if _contact_ready else finish
+	if _segment_hits_catch(start, finish, target):
+		_catch(_player)
+
+static func _segment_hits_catch(start: Vector2, finish: Vector2, box: Rect2) -> bool:
+	if box.has_point(start) or box.has_point(finish): return true
+	var corners := [box.position, Vector2(box.end.x, box.position.y), box.end, Vector2(box.position.x, box.end.y)]
+	for i in 4:
+		if Geometry2D.segment_intersects_segment(start, finish, corners[i], corners[(i + 1) % 4]) != null: return true
+	return false
 
 
 func _catch(who: Player) -> void:
@@ -708,6 +783,7 @@ func _wait_for_respawn() -> void:
 ## frame, and a follower that replayed that jump would either walk the whole gap
 ## in a single step or spend the slide standing in the room he just left.
 func _on_player_teleported(to: Vector2) -> void:
+	_contact_ready = false
 	if state == State.DORMANT or state == State.CAUGHT:
 		return
 	reset_to_checkpoint(to)
@@ -720,6 +796,7 @@ func _on_player_teleported(to: Vector2) -> void:
 ## to where the player actually is, the delay is back at base, he is FOLLOWING
 ## (never mid-surge), and contact cannot register for respawn_grace seconds.
 func reset_to_checkpoint(at: Vector2) -> void:
+	_contact_ready = false
 	_power_entry_time = 0
 	if _locked_charge != null: _locked_charge.cancel()
 	_place_behind(at)
@@ -776,6 +853,11 @@ func _tick_entry_hold() -> void:
 	visible = true
 	_place_behind(_player.global_position)
 	_fit_pursuit_to_room(_player.global_position)
+	if _cloud_waiting_in_view(): global_position = charge_hover_position()
+	_push_visual()
+	if cloud_reveal_on_entry and _visual != null:
+		_visual.begin_cloud_transition(0.65 if _cloud_reveal_seen else 1.25)
+		_cloud_reveal_seen = true
 	_power_entry_time = 0
 
 func _fit_pursuit_to_room(at: Vector2) -> void:
@@ -867,6 +949,13 @@ func _on_probe_changed(_body: Node2D) -> void:
 func _push_visual() -> void:
 	if _visual == null or not _visual.has_method("set_motion"):
 		return
+	if _visual.has_method("set_recovery_hidden"):
+		_visual.set_recovery_hidden(_locked_charge != null and _locked_charge.return_to_launch and _locked_charge.phase == 3)
+	if _visual.has_method("set_precharge_bounds"):
+		var bounds := Rect2()
+		if _visual.cloud_form and state == State.FOLLOWING and _locked_charge.phase in [0,1,4] and entry_room_bounds.has_area():
+			bounds = (get_viewport().get_canvas_transform().affine_inverse() * get_viewport_rect()).grow(-8).intersection(entry_room_bounds.grow(-8))
+		_visual.set_precharge_bounds(bounds)
 	var motion := Motion.IDLE
 	match state:
 		State.FOLLOWING:
@@ -875,6 +964,10 @@ func _push_visual() -> void:
 			motion = Motion.SURGE
 	if _locked_charge != null and _locked_charge.phase != 0:
 		motion = Motion.SURGE if _locked_charge.phase == 2 else Motion.IDLE
+	if _visual.has_method("set_humanoid"):
+		var transforming: bool = _locked_charge != null and _locked_charge.return_to_launch and _locked_charge.phase == 1 and _locked_charge.remaining <= _visual.form_transition_time
+		transforming = transforming or (_warning_timer > 0.0 and _warning_timer <= _visual.form_transition_time)
+		_visual.set_humanoid(transforming or motion == Motion.SURGE or state == State.CAUGHT)
 	_visual.set_motion(int(motion), velocity())
 
 

@@ -595,7 +595,6 @@ func _build_safe_zone(data: Dictionary) -> Area2D:
 ## trigger in the "exit" group. LdtkWorld connects to that group and slides
 ## the camera to the next room — see scripts/ldtk_world.gd.
 func _build_exit(data: Dictionary) -> Area2D:
-	print("DEB IMP: Exit data fields for ", data.get("identifier"), ": ", data.fields)
 	var trigger := Area2D.new()
 	trigger.name = "Exit"
 	trigger.position = data.position

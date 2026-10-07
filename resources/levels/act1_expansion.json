@@ -1153,6 +1153,163 @@
   },
   {
     "name": "Level_19",
+    "title": "Against the Current",
+    "theme": "darkness",
+    "width": 2696,
+    "height": 240,
+    "direction": -1,
+    "world_position": [
+      46000,
+      -2048
+    ],
+    "route": [
+      [
+        2600,
+        192,
+        96
+      ],
+      [
+        2440,
+        176,
+        120
+      ],
+      [
+        2288,
+        160,
+        120
+      ],
+      [
+        2136,
+        176,
+        120
+      ],
+      [
+        1984,
+        152,
+        120
+      ],
+      [
+        1832,
+        176,
+        120
+      ],
+      [
+        1680,
+        160,
+        120
+      ],
+      [
+        1528,
+        176,
+        120
+      ],
+      [
+        1376,
+        152,
+        120
+      ],
+      [
+        1224,
+        176,
+        120
+      ],
+      [
+        1072,
+        160,
+        120
+      ],
+      [
+        920,
+        176,
+        120
+      ],
+      [
+        768,
+        152,
+        120
+      ],
+      [
+        616,
+        176,
+        120
+      ],
+      [
+        464,
+        160,
+        120
+      ],
+      [
+        312,
+        176,
+        120
+      ],
+      [
+        160,
+        152,
+        120
+      ],
+      [
+        0,
+        192,
+        120
+      ]
+    ],
+    "scaffolding": true,
+    "scaffold_sockets": false,
+    "checkpoints": [
+      6,
+      12
+    ],
+    "lemons": [],
+    "crumbles": [],
+    "belts": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "ceilings": [],
+    "bulkheads": [],
+    "thought_patterns": [],
+    "recovery": false,
+    "precision_escape": true,
+    "encounter": {
+      "mode": "traversal",
+      "boss": false,
+      "continuous_chase": true,
+      "form": 0,
+      "gate_x": 0,
+      "anchor": [
+        2672,
+        192
+      ],
+      "present": 8,
+      "absent": 6,
+      "follow_delay": 3.8,
+      "surge_speed": 170,
+      "surge_interval": 999.0,
+      "cloud_form": true
+    },
+    "note_landings": {},
+    "deck_depth": {},
+    "design": "Sixteen 120px right-running conveyor platforms in one uninterrupted leftward course, with 32px jumping gaps. Dodge telegraphed horizontal charges on the long belts.",
+    "conveyor_direction": 1,
+    "conveyor_speed": 36
+  },
+  {
+    "name": "Level_20",
     "title": "The Long Way Down",
     "theme": "darkness",
     "width": 480,
@@ -1247,7 +1404,7 @@
     "design": "Drop right, brake left, reverse through the well, then recover height with an up-diagonal dash. The hanging wall prevents cutting straight to the exit."
   },
   {
-    "name": "Level_20",
+    "name": "Level_21",
     "title": "Needle Thread",
     "theme": "darkness",
     "width": 704,
@@ -1352,7 +1509,7 @@
     ]
   },
   {
-    "name": "Level_21",
+    "name": "Level_22",
     "title": "Against the Belt",
     "theme": "darkness",
     "width": 560,
@@ -1434,7 +1591,7 @@
     "design": "Conveyors change the takeoff rhythm; leave the belt with a jump, climb to a stable perch, then carry momentum into the second crossing. Darkshang follows without projectile attacks; the terrain supplies the execution challenge."
   },
   {
-    "name": "Level_22",
+    "name": "Level_23",
     "title": "Folded Stair",
     "theme": "darkness",
     "width": 480,
@@ -1546,7 +1703,7 @@
     "design": "A figure-of-eight ascent: rise left, reverse right, cross over the route you came from, and reverse left again. Diagonal dashes need controlled landings, not held direction."
   },
   {
-    "name": "Level_23",
+    "name": "Level_24",
     "title": "Last Shift",
     "theme": "darkness",
     "width": 800,
@@ -1678,7 +1835,7 @@
     ]
   },
   {
-    "name": "Level_24",
+    "name": "Level_25",
     "title": "One Last Breath",
     "theme": "darkness",
     "width": 480,

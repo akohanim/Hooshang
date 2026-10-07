@@ -132,6 +132,11 @@ func _standing_on(who: Player) -> bool:
 func _process(delta: float) -> void:
 	if _falling:
 		return
+	# A cinematic owns the rider's movement; don't remove their support while
+	# they cannot respond. Resume the same countdown when control returns.
+	for who in _players_on_skin():
+		if who._frozen and _standing_on(who):
+			return
 	if not _spent:
 		var players := _players_on_skin()
 		if _needs_clear:

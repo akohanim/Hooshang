@@ -25,9 +25,9 @@ func _ready() -> void:
 
 	var failures := 0
 
-	# Two rooms that both own a moon (Level_0..Level_6 carry office moons).
-	var origin := _room_named(world, "Level_0")
-	var dest := _room_named(world, "Level_1")
+	# Two rooms with clear space for a moon; the crowded opening omits its window.
+	var origin := _room_named(world, "Level_1")
+	var dest := _room_named(world, "Level_2")
 	if origin == null or dest == null:
 		print("MOON ENTRY: could not find both moon rooms — cannot run")
 		get_tree().quit(1)
@@ -94,17 +94,17 @@ func _ready() -> void:
 	get_tree().quit(0 if failures == 0 else 1)
 
 
-func _room_named(world, n: String):
+func _room_named(world, n: String) -> Node2D:
 	for room in world.rooms:
 		if room.name == n:
 			return room
 	return null
 
 
-func _moon_in(world, room):
+func _moon_in(world, room) -> Node2D:
 	var r: Rect2 = world.room_rect(room)
 	for moon in get_tree().get_nodes_in_group("moon_candidates"):
-		if r.has_point(world.to_local(moon.global_position)):
+		if moon.is_visible_in_tree() and r.has_point(world.to_local(moon.global_position)):
 			return moon
 	return null
 

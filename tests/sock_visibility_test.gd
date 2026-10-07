@@ -45,8 +45,8 @@ func _ready() -> void:
 			visual.sprite_frames = LIBRARY
 			visual.animation = entry.action
 			visual.frame = entry.frame
-			visual.scale = Vector2.ONE * 0.39
-			visual.offset = Vector2(0, -7)
+			visual.scale = Vector2.ONE * float(LIBRARY.get_meta("visual_scale"))
+			visual.offset = LIBRARY.get_meta("visual_offset")
 			visual.flip_h = entry.variant[2]
 			visual.rotation = entry.variant[3]
 			# Some face highlights are pure white too. Tint the body slightly

@@ -11,5 +11,8 @@ func _dress() -> void:
 			if str(room.name) == recipe.name:
 				room.set_meta("return_at_spawn_edge", true)
 				var garden := GARDEN.instantiate()
-				garden.recipe = recipe
+				garden.recipe = recipe.duplicate(true)
+				# The garden now leads into the LDtk-authored prison mission.
+				if world.has_method("is_prison"):
+					garden.recipe["final"] = false
 				room.add_child(garden)

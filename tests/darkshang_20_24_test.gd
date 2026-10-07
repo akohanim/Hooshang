@@ -8,7 +8,7 @@ func frames(n: int) -> void:
 	for i in n: await get_tree().physics_frame
 func _ready() -> void:
 	SaveGame.slot = -1
-	LdtkWorld.debug_start_room = "Level_20"
+	LdtkWorld.debug_start_room = "Level_21"
 	world = load("res://ldtk/Act1World.tscn").instantiate()
 	add_child(world)
 	await frames(12)
@@ -19,7 +19,7 @@ func _ready() -> void:
 	shadow.buffer.set_physics_process(false)
 	for node in get_tree().get_nodes_in_group("darkshang_power_trigger") + get_tree().get_nodes_in_group("shadow_eruption"):
 		node.set_physics_process(false)
-	var counts := {"Level_20":2,"Level_21":4,"Level_22":3,"Level_23":2,"Level_24":3}
+	var counts := {"Level_21":2,"Level_22":4,"Level_23":3,"Level_24":2,"Level_25":3}
 	for room in world.rooms:
 		if not counts.has(str(room.name)): continue
 		world._enter_room(room,true)

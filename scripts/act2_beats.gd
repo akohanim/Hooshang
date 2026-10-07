@@ -87,6 +87,7 @@ var _encounter_origin := Vector2.ZERO
 var _encounter_fire: Campfire
 var _departure_carpet: Sprite2D
 var _stars_tween: Tween
+var _scene_tweens: Array[Tween] = []
 
 
 func _ready() -> void:
@@ -108,6 +109,7 @@ func _ready() -> void:
 	# sprites only after that setup has finished; doing it earlier finds no player
 	# and leaves the adult visuals in the first Act 2 room.
 	_apply_child_player_art()
+	_apply_child_movement()
 	var room := _find_room(room_name)
 	if room == null:
 		push_warning("Act2Beats: no room named '%s' — the encounter is disabled." % room_name)
@@ -138,6 +140,37 @@ func _apply_child_player_art() -> void:
 		return
 	visual.sprite_frames = CHILD_FRAMES
 	_world.player._update_visual()
+
+
+## Grounded in frame measurements of the US SNES reference at half tile scale.
+## Enable only on this world's player; never change the shared prefab defaults.
+func _apply_child_movement() -> void:
+	var player := _world.player
+	if player == null or player.has_meta("child_movement_applied"): return
+	player.set_meta("child_movement_applied", true)
+	player.childhood_momentum = true
+	# Existing directional controls use the reference's run cap automatically.
+	player.max_run_speed = 67.5
+	player.ground_accel = 168.75
+	# Keep 40% of the original stopping time/distance: deceleration = 112.5 / 0.4.
+	player.ground_decel = 281.25
+	# Retain 40% of the dash's carry-over momentum after its active burst.
+	player.dash_end_speed = 64.0
+	player.air_accel_mult = 1.0
+	player.air_decel_mult = 0.0
+	# First airborne frame: -77/16 SNES px/frame, scaled by 0.5 at 60 Hz.
+	player.jump_speed = 144.375
+	player.use_jump_hold = false
+	player.jump_cut_multiplier = 1.0
+	# Preserve the authored spring courses' height and slower spring cadence.
+	player.rise_gravity *= 0.92 * 0.92
+	player.fall_gravity *= 0.92 * 0.92
+	player.max_fall_speed *= 0.92
+	player.apex_threshold *= 0.92
+	player.spring_impulse_scale = 0.92
+	player.juice.jump_squash_scale = Vector2(0.72, 1.28)
+	player.juice.land_squash_scale = Vector2(1.34, 0.70)
+	player.juice.squash_ease_time = 0.17
 
 
 func _on_jamshid_reached(_player: Player, jamshid: JamshidNpc) -> void:
@@ -179,6 +212,8 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 		return
 	await _tween_arc(player, jamshid.global_position + Vector2(-20, -24),
 		jamshid.global_position + Vector2(-12, -6), 0.9)
+	if _finish_encounter_skip(jamshid):
+		return
 	player.cutscene_rest(false, 1)
 	await _hooshang("Are the fish biting today?", "happy")
 	if _finish_encounter_skip(jamshid):
@@ -191,8 +226,14 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	if _finish_encounter_skip(jamshid):
 		return
 	var fish := await _hook_fish(jamshid, rod)
+	if _finish_encounter_skip(jamshid):
+		return
 	await _reel_in(fish, jamshid)
+	if _finish_encounter_skip(jamshid):
+		return
 	var fire := await _cut_to_campfire(jamshid, fish, rod)
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("Does my mother know we’re here?", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
@@ -213,7 +254,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 		return
 	_ambience.blend(1.0, 0.0, nightfall_time)
 	_fade_stars(1.0, nightfall_time)
-	await _tween_sky(NIGHT, nightfall_time).finished
+	await _wait_scene_tween(_tween_sky(NIGHT, nightfall_time))
 	await _hold(0.7)
 	await _jamshid(jamshid, "You’re quiet today.", "friendly")
 	if _finish_encounter_skip(jamshid):
@@ -255,6 +296,8 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	if _finish_encounter_skip(jamshid):
 		return
 	await _night_timelapse(player, actor, fish, fire)
+	if _finish_encounter_skip(jamshid):
+		return
 	await _hooshang("…and then I woke up here.", "vulnerable")
 	if _finish_encounter_skip(jamshid):
 		return
@@ -324,9 +367,10 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 func _finish_encounter_skip(jamshid: JamshidNpc) -> bool:
 	if not Dialogue.scene_skip_requested(self):
 		return false
-	for tween in [_sun_tween, _stars_tween]:
+	for tween in _scene_tweens:
 		if tween != null and tween.is_valid():
 			tween.kill()
+	_scene_tweens.clear()
 	_set_sun_descent(0.0)
 	if _canvas_mod != null:
 		_canvas_mod.color = DAWN
@@ -364,7 +408,7 @@ func _night_timelapse(player: Player, actor: Jamshid, fish: Fish, fire: Campfire
 	for stage in 3:
 		_stars.shoot(stage)
 		# Keep both cousins visible as the sky, dinner and fire change together.
-		var transition := create_tween().set_parallel()
+		var transition := _scene_tween().set_parallel()
 		transition.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		var shifted := [0.0]
 		transition.tween_method(func(value: float) -> void:
@@ -383,8 +427,10 @@ func _night_timelapse(player: Player, actor: Jamshid, fish: Fish, fire: Campfire
 			_move_sun(0.0, night_stage_time)
 		for speaker in speakers:
 			await _emote(speaker, EmoteBubble.Kind.ELLIPSIS)
+			if Dialogue.scene_skip_requested(self):
+				return
 		if transition.is_running():
-			await transition.finished
+			await _wait_scene_tween(transition)
 		if stage == 0 and is_instance_valid(fish):
 			fish.hide()
 
@@ -397,6 +443,8 @@ func _night_timelapse(player: Player, actor: Jamshid, fish: Fish, fire: Campfire
 ## the campfire scene. Returns the fire so the caller can light the room by it.
 func _cut_to_campfire(jamshid: JamshidNpc, fish: Fish, rod: Node2D) -> Campfire:
 	await _fade_to(1.0, 0.6)
+	if Dialogue.scene_skip_requested(self):
+		return null
 	if is_instance_valid(rod):
 		rod.queue_free()
 
@@ -424,6 +472,8 @@ func _cut_to_campfire(jamshid: JamshidNpc, fish: Fish, rod: Node2D) -> Campfire:
 		_cook(fish)
 	# Long enough for the fire's own catch-fade to finish under the black.
 	await _hold(1.0)
+	if Dialogue.scene_skip_requested(self):
+		return fire
 	_move_sun(0.70, sunset_descent_time)
 	await _fade_to(0.0, 0.9)
 	return fire
@@ -434,9 +484,9 @@ func _reel_in(fish: Fish, jamshid: JamshidNpc) -> void:
 	if not is_instance_valid(fish):
 		return
 	var to := jamshid.global_position + Vector2(-6.0, -16.0)
-	var t := create_tween()
+	var t := _scene_tween()
 	t.tween_property(fish, "global_position", to, 0.5).set_trans(Tween.TRANS_SINE)
-	await t.finished
+	await _wait_scene_tween(t)
 
 
 # --------------------------------------------------------------- the exit ----
@@ -457,6 +507,8 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 	actor.face_left(false)
 	actor.play_pose("walk")
 	await _tween_node_x(jamshid, jump_x, 0.7)
+	if Dialogue.scene_skip_requested(self):
+		return
 
 	var carpet := Sprite2D.new()
 	_departure_carpet = carpet
@@ -465,10 +517,12 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 	carpet.scale = Vector2.ONE
 	_world.add_child(carpet)
 	carpet.global_position = Vector2(jump_x + 112, ground_y - 42)
-	create_tween().tween_property(carpet, "global_position", carpet_from + Vector2(0, 1), 0.8)
+	_scene_tween().tween_property(carpet, "global_position", carpet_from + Vector2(0, 1), 0.8)
 	actor.play_pose("jump")
 	var apex := Vector2(jump_x + 12, ground_y - 76)
 	await _tween_arc(jamshid, apex, carpet_from, 0.8)
+	if Dialogue.scene_skip_requested(self):
+		return
 	_play_cue(preload("res://assets/audio/traversal/carpet_board.wav"), -14.0)
 	actor.play_pose("idle")
 	await _hooshang("That’s how you get to school?", "surprised")
@@ -478,18 +532,20 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 	if Dialogue.scene_skip_requested(self):
 		return
 	_play_cue(preload("res://assets/sfx/dash_swoosh.wav"), -16.0)
-	var ride := create_tween().set_parallel()
+	var ride := _scene_tween().set_parallel()
 	ride.tween_property(jamshid, "global_position", carpet_to, 1.4) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 	ride.tween_property(carpet, "global_position", carpet_to + Vector2(0, 1), 1.4) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	await ride.finished
+	await _wait_scene_tween(ride)
+	if Dialogue.scene_skip_requested(self):
+		return
 	# Off the edge.
 	var off := carpet_to + Vector2(140.0, -90.0)
-	var gone := create_tween().set_parallel()
+	var gone := _scene_tween().set_parallel()
 	gone.tween_property(jamshid, "global_position", off, 1.0).set_ease(Tween.EASE_IN)
 	gone.tween_property(carpet, "global_position", off + Vector2(0, 1), 1.0).set_ease(Tween.EASE_IN)
-	await gone.finished
+	await _wait_scene_tween(gone)
 	jamshid.visible = false
 	carpet.queue_free()
 
@@ -536,9 +592,11 @@ func _hook_fish(jamshid: JamshidNpc, rod: Node2D) -> Fish:
 	var fish := _pond_fish
 	fish.hook()
 	var tip := rod.global_position + Vector2(-36, -2)
-	var approach := create_tween()
+	var approach := _scene_tween()
 	approach.tween_property(fish, "global_position", tip, 1.2).set_trans(Tween.TRANS_SINE)
-	await approach.finished
+	await _wait_scene_tween(approach)
+	if Dialogue.scene_skip_requested(self):
+		return fish
 	_caught = true
 	_splash(tip)
 	var bend: Line2D = rod.get_node("Rod")
@@ -636,7 +694,7 @@ func _build_stars() -> void:
 func _tween_sky(to: Color, time: float) -> Tween:
 	if to == NIGHT:
 		_move_sun(1.0, time)
-	var t := create_tween()
+	var t := _scene_tween()
 	if _canvas_mod != null:
 		t.tween_property(_canvas_mod, "color", to, time).set_trans(Tween.TRANS_SINE)
 	else:
@@ -652,7 +710,7 @@ func _fade_stars(to: float, time: float) -> void:
 	if time <= 0.0:
 		_stars.amount = to
 		return
-	_stars_tween = create_tween()
+	_stars_tween = _scene_tween()
 	_stars_tween.tween_property(_stars, "amount", to, time)
 
 
@@ -676,7 +734,11 @@ func _emote(over: Node2D, kind: EmoteBubble.Kind) -> void:
 	over.add_child(bubble)
 	bubble.position = Vector2(0.0, emote_height)
 	bubble.hold_time = night_emote_hold
-	await bubble.play(kind)
+	var done := [false]
+	bubble.finished.connect(func(): done[0] = true, CONNECT_ONE_SHOT)
+	bubble.play(kind)
+	while not done[0] and not Dialogue.scene_skip_requested(self):
+		await get_tree().physics_frame
 	if is_instance_valid(bubble):
 		bubble.queue_free()
 
@@ -697,30 +759,48 @@ func _build_fade() -> void:
 
 
 func _fade_to(alpha: float, time: float) -> void:
-	var t := create_tween()
+	var t := _scene_tween()
 	t.tween_property(_fade, "color:a", alpha, time)
-	await t.finished
+	await _wait_scene_tween(t)
 
 
 func _tween_node_x(node: Node2D, to_x: float, time: float) -> void:
-	var t := create_tween()
+	var t := _scene_tween()
 	t.tween_property(node, "global_position:x", to_x, time)
-	await t.finished
+	await _wait_scene_tween(t)
 
 
 ## An L-of-a-jump arc: up to `apex`, then down to `to`, via two eased tweens so
 ## it reads as a launch and a landing rather than a straight slide.
 func _tween_arc(node: Node2D, apex: Vector2, to: Vector2, time: float) -> void:
-	var t := create_tween()
+	var t := _scene_tween()
 	t.tween_property(node, "global_position", apex, time * 0.5) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	t.tween_property(node, "global_position", to, time * 0.5) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	await t.finished
+	await _wait_scene_tween(t)
+
+
+## All scene-owned motion can be cancelled, including parallel ambience staging.
+func _scene_tween() -> Tween:
+	_scene_tweens = _scene_tweens.filter(func(t: Tween): return t != null and t.is_valid())
+	var tween := create_tween()
+	_scene_tweens.append(tween)
+	return tween
+
+
+func _wait_scene_tween(tween: Tween) -> void:
+	while tween.is_valid() and tween.is_running():
+		if Dialogue.scene_skip_requested(self):
+			tween.kill()
+			return
+		await get_tree().physics_frame
 
 
 func _hold(seconds: float) -> void:
-	await get_tree().create_timer(seconds).timeout
+	var timer := get_tree().create_timer(seconds)
+	while timer.time_left > 0.0 and not Dialogue.scene_skip_requested(self):
+		await get_tree().physics_frame
 
 
 func _find_world() -> LdtkWorld:
@@ -753,7 +833,7 @@ func _find_jamshid(node: Node) -> JamshidNpc:
 func _move_sun(to: float, duration: float) -> void:
 	if _sun_tween != null and _sun_tween.is_valid():
 		_sun_tween.kill()
-	_sun_tween = create_tween()
+	_sun_tween = _scene_tween()
 	_sun_tween.tween_method(_set_sun_descent, _sun_descent, to, duration) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 

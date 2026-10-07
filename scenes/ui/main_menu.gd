@@ -119,6 +119,14 @@ func _ready() -> void:
 	show_root()
 	root.modulate.a = 0.0
 	_fade_to(1.0)
+	if OS.has_feature("web") and bool(JavaScriptBridge.eval("window.HooshangTouchTest != null")):
+		_open_touch_test.call_deferred()
+
+
+func _open_touch_test() -> void:
+	hide()
+	process_mode = Node.PROCESS_MODE_DISABLED
+	Screen.set_scene(preload("res://scenes/ui/touch/touch_test_room.gd").new())
 
 
 ## Bring the title screen back — the pause menu's QUIT, and anything else that

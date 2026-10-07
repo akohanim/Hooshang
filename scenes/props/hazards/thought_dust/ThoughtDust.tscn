@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/hazards/thought_dust/thought_dust.gd" id="1"]
+[ext_resource type="Shader" path="res://scenes/props/hazards/thought_dust/thought_dust.gdshader" id="2"]
+
+[sub_resource type="ShaderMaterial" id="DustMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+
+[node name="ThoughtDust" type="Node2D"]
+script = ExtResource("1")
+texture_filter = 1
+
+[node name="Body" type="Sprite2D" parent="."]
+show_behind_parent = true
+material = SubResource("DustMaterial")
+centered = false
+scale = Vector2(8, 8)

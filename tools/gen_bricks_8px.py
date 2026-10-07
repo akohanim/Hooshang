@@ -500,3 +500,7 @@ print("wrote %s  %dx%d  (%d tiles; moss variants at %d..%d; "
 # Keep the appended randomized masonry library when rebuilding legacy tiles.
 from gen_celeste_masonry import run as rebuild_celeste_masonry
 rebuild_celeste_masonry(False)
+
+# Keep seam-preserving legacy material variants synchronized with this palette.
+from gen_terrain_variants import build as rebuild_terrain_variants
+rebuild_terrain_variants()

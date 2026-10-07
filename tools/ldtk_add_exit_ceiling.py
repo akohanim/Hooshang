@@ -133,7 +133,7 @@ def main():
     print("\nAPPLIED. Re-import in Godot — and the hook that BUILDS this has")
     print("changed too, so the .ldtk needs touching or Godot will not re-read it:")
     print("  touch ldtk/hooshang_act1.ldtk")
-    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/Level_*.scn")
+    print("  rm .godot/imported/hooshang_act1.ldtk-* ldtk/levels/hooshang_act1/Level_*.scn")
     print("  Godot --headless --path . --import")
 
 
