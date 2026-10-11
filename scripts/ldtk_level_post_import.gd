@@ -99,6 +99,7 @@ const CASTLE_SCENERY := ["CastleBackground", "CastleDecor", "PrisonMasonry"]
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
 	_entities_to_front(level)
+	_hide_act2_background(level)
 	if str(level.name).begins_with("Prison_"):
 		return preload("res://scripts/prison/prison_import.gd").apply(level)
 	if str(level.name) == "Level_V9":
@@ -176,6 +177,21 @@ func _entities_to_front(level: LDTKLevel) -> void:
 	var entities := level.get_node_or_null("Entities")
 	if entities != null:
 		level.move_child(entities, level.get_child_count() - 1)
+
+
+## Act 2's backdrop art (the painted BG image and the Background / CastleBackground
+## / Decor tile layers) is switched off for now. Hidden rather than deleted, so
+## flipping this back to false and re-importing restores it.
+const HIDE_ACT2_BACKGROUND := true
+const ACT2_BACKGROUND_NODES := ["BG Image", "Background", "CastleBackground", "Decor"]
+
+func _hide_act2_background(level: LDTKLevel) -> void:
+	if not HIDE_ACT2_BACKGROUND or level.get_node_or_null("CastleTerrain") == null:
+		return
+	for node_name in ACT2_BACKGROUND_NODES:
+		var node := level.get_node_or_null(node_name) as CanvasItem
+		if node != null:
+			node.visible = false
 
 
 ## Hang a light on every painted ceiling panel in this level.
