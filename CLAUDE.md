@@ -350,6 +350,11 @@ so the two agree now. The tiles are still placeholder art.
     deferred to the cutscene, reaching him LOCKS the player, both speak, the sky
     reaches full NIGHT with the stars out, it ends at DAWN with the stars gone,
     Jamshid leaves and control returns
+- `Godot --headless --path . res://tests/act2_music_test.tscn` — Act 2's garden
+  score (`scripts/act2_music.gd`, cues from `tools/gen_act2_garden_music.py`,
+  see `assets/music/README.md`): which room plays which cue, the loops counting
+  whole bars at 100 BPM, the coda playing once per arrival, rest()/resume()
+  around the Jamshid night encounter, and the Music bus + dialogue duck hookup.
 - `Godot --headless --path . res://tests/forward_entry_test.tscn` — checks
   imported room identities against each Act's LDtk source, enters Level_2 via
   Level_1's actual Exit Area, idles on the entrance floor, and dies/respawns
@@ -1378,6 +1383,13 @@ organized per-character before this pass and needed no change.
   `max_run_speed`/`apex_gravity_mult` has NOT been re-measured — treat this
   whole note as historical until someone runs `feel_measure` against it and
   confirms one way or the other.
+- `tests/act2_feel_measure.tscn` — the same, for CHILD Hooshang (Act 2's
+  `Act2Beats._apply_child_movement` profile): jump, dash, spring, spring+dash
+  and side-spring reach. The sky gardens (`Act_2_Level_3`..`13`) are built
+  against these numbers by `tools/redesign_act2_gardens.py`, which also writes
+  every room's real-input routes (see `resources/levels/ACT2_SKY_GARDENS.md`):
+  `act2_routes_test` replays the main lines, `-- --rewards` the every-lemon
+  lines. Headless: `Godot --headless --path . res://tests/act2_feel_measure.tscn`
 - `tools/ldtk_to_8px.py` — the one-shot 16px -> 8px grid migration, kept for the
   record because it documents what the conversion had to get right. It
   REGENERATES the auto-layer tiles rather than leaving that to LDtk (they live

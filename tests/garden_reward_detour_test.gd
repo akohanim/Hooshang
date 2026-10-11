@@ -28,23 +28,14 @@ func _ready() -> void:
 	var recipe: Dictionary
 	for entry: Dictionary in recipes:
 		if entry.name == name_wanted: recipe = entry.duplicate(true)
-	match number:
-		4: recipe.routes[4].merge({"dash_up":true,"dash_frame":8},true)
-		6: recipe.routes[3].waypoints = [[480,98],[520,112]]
-		7:
-			recipe.routes[4].waypoints = [[552,122],[584,136]]
-			recipe.routes[4].jump_x = 608
-		8: recipe.routes[1].waypoints = [[304,138],[336,184]]
-		12: recipe.routes[7].merge({"dash_up":true,"dash_frame":8},true)
-		10: recipe.routes[1].reward_lanes = [[330,392,190],[536,616,190]]
-		13:
-			recipe.routes[1].merge({"dash_up":true,"dash_frame":8},true)
-			recipe.routes[3].reward_lanes = [[552,624,174]]
+	# Each room's recipe carries its own reward route: the main run with the
+	# dares taken (redesign_act2_gardens.py's R.reward), so no step indices
+	# live here to drift out of date when a room is re-authored.
+	recipe.routes = recipe.get("reward_routes", recipe.routes)
 	expected_next = "Act_2_Level_%d" % (number+1)
 	await connected_capture("entrance")
 	for i in recipe.routes.size():
 		final_transfer = i == recipe.routes.size()-1
-		if (number == 8 and i == 2) or (number == 7 and i == 5): await frames(180) # Let the abandoned rug clear the next landing.
 		await run_step(recipe.routes[i])
 		await connected_capture("step_%02d" % i)
 		if failures: break

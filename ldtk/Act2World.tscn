@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/prison/prison_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://daejyl8ovusga" path="res://ldtk/hooshang_act2.ldtk" id="2_ldtk"]
@@ -12,6 +12,12 @@
 
 [ext_resource type="PackedScene" path="res://scenes/props/act2_ending/Act2Ending.tscn" id="8_ending"]
 [ext_resource type="PackedScene" path="res://scenes/props/act2_audio/Act2Audio.tscn" id="9_audio"]
+[ext_resource type="Script" path="res://scripts/act2_music.gd" id="10_music"]
+[ext_resource type="AudioStream" path="res://assets/music/garden_intro.ogg" id="11_intro"]
+[ext_resource type="AudioStream" path="res://assets/music/garden_ponds.ogg" id="12_ponds"]
+[ext_resource type="AudioStream" path="res://assets/music/garden_wonder.ogg" id="13_wonder"]
+[ext_resource type="AudioStream" path="res://assets/music/garden_coda.ogg" id="14_coda"]
+[ext_resource type="AudioStream" path="res://assets/music/garden_rest.ogg" id="15_rest"]
 
 [node name="Act2World" type="Node2D"]
 script = ExtResource("1_world")
@@ -45,3 +51,13 @@ script = ExtResource("5_gardens")
 [node name="Act2Ending" parent="." instance=ExtResource("8_ending")]
 
 [node name="Act2Audio" parent="." instance=ExtResource("9_audio")]
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+script = ExtResource("10_music")
+intro = ExtResource("11_intro")
+ponds = ExtResource("12_ponds")
+wonder = ExtResource("13_wonder")
+coda = ExtResource("14_coda")
+rest_stream = ExtResource("15_rest")
+volume_db = -10.0
+bus = &"Music"

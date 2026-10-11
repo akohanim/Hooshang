@@ -10,8 +10,12 @@ var continuous:=false
 var deaths:=0
 var used_climb:=false
 var capture_weave:=false
+var _fruit: Array = []
 func _ready() -> void:
 	capture_weave="--capture-weave" in OS.get_cmdline_user_args()
+	# --rewards replays each room's REWARD route instead (the main run with
+	# every lemon dare taken) and checks the room's fruit all banked.
+	var rewards:="--rewards" in OS.get_cmdline_user_args()
 	SaveGame.slot=-1
 	LdtkWorld.debug_start_room="Act_2_Level_3"
 	Screen.load_scene("res://ldtk/Act2World.tscn")
@@ -26,7 +30,8 @@ func _ready() -> void:
 	continuous=true
 	for recipe: Dictionary in recipes:
 		var only:=OS.get_cmdline_user_args()
-		if "--capture-weave" in only:only.remove_at(only.find("--capture-weave"))
+		for flag in ["--capture-weave","--rewards"]:
+			if flag in only:only.remove_at(only.find(flag))
 		if not only.is_empty() and str(recipe.name) not in only:continue
 		await settle_retry()
 		select(int(str(recipe.name).get_slice("_",3)))
@@ -37,12 +42,18 @@ func _ready() -> void:
 		var starting_deaths:=deaths
 		used_climb=false
 		player._ledge_cooldown=3600.0
-		for step: Dictionary in recipe.routes:
+		var steps: Array=recipe.get("reward_routes",recipe.routes) if rewards else recipe.routes
+		for step: Dictionary in steps:
 			await run_step(step)
 			if failures>before:break
 		if failures==before:
 			await prepare(Vector2(float(recipe.exit[0])-12,float(recipe.exit[1])-6))
 		check(failures==before and deaths==starting_deaths,"%s continuous entrance-to-exit route" % recipe.name)
+		print("FRUIT ",recipe.name," reward" if rewards else " main"," route banked ",_room_fruit())
+		# The Orchard's two lemons sit on its two exclusive roads; the
+		# orchard_optional test walks each road and banks one apiece.
+		if rewards and not recipe.get("branch_fruit",false):
+			check(_room_fruit().left.is_empty(),"%s reward route banks every lemon" % recipe.name)
 		check(not used_climb,"route requires no climbing or land mantle")
 		if recipe.get("optional_routes",[]).size()>0:
 			select(int(str(recipe.name).get_slice("_",3)))
@@ -70,10 +81,12 @@ func settle_retry() -> void:
 
 func run_step(step: Dictionary) -> void:
 	match step.kind:
+		"settle": await frames(int(step.frames))
 		"spring": await spring_transfer(step.start+step.target)
 		"spring_dash": await spring_dash_transfer(step)
 		"weave": await weave_flight(step)
 		"side": await side_transfer(step)
+		"chain": await chain_transfer(step)
 		"jump", "dash": await jump_transfer(step)
 		_: await fly(step)
 
@@ -111,10 +124,132 @@ func jump_transfer(step: Dictionary) -> void:
 	release()
 	check(landed and (dashed or step.kind=="jump"),"%s %s %s -> %s actual %s" % [room.name,step.kind,step.start,step.target,player.global_position-offset])
 
+## One continuous airborne phrase made of SEGMENTS: the opening jump (or a walk
+## onto a spring when `walk` is set), then a new segment at every spring launch
+## (up or sideways) and every wall-jump. Each segment steers toward its own x and
+## may dash once at a frame counted from that segment's start, so a spring ->
+## dash -> spring -> dash relay is input the way a player would press it: no
+## velocity or position writes anywhere. `wait` holds the departure until a
+## drifting thought (found by its placed point) is inside a phase window — the
+## player watching the cloud and going on the gap, rather than a frame count that
+## only works when the room is entered at one exact moment.
+##   {kind:"chain", start:[x,top], target:[x,top], walk:false, jump_hold:60,
+##    wait:{thought:[x,y], window:[lo,hi]},
+##    segments:[{steer:x, dash:[frame,"ur"], steer_after:x, wall:true, jump:true}, ...]}
+## A `wall` segment steers into the wall and wall-jumps the moment he is in
+## reach of it; a `jump` segment presses jump the frame it starts (a side
+## spring's throw is flat until he jumps out of it).
+func chain_transfer(step: Dictionary) -> void:
+	await prepare(Vector2(step.start[0],step.start[1]-6))
+	if step.has("wait"):
+		await _wait_for_thought(step.wait)
+	var segments: Array = step.segments
+	var seg:=0
+	var seg_frames:=0
+	var airborne_in_seg:=false
+	var landed:=false
+	var dash_release:=-1
+	var prev:=player.velocity
+	var prev_state:=player.state
+	var launches:=0
+	var kick_release:=-1
+	var trail:=PackedStringArray()
+	if not step.get("walk",false):Input.action_press("jump")
+	for i in 420:
+		var s: Dictionary=segments[seg]
+		var aim=s.get("steer")
+		if s.has("dash") and s.has("steer_after") and seg_frames>int(s.dash[0])+6:aim=s.steer_after
+		if aim!=null:steer(float(aim))
+		if i==int(step.get("jump_hold",60)):Input.action_release("jump")
+		if s.has("dash") and seg_frames==int(s.dash[0]):
+			release_moves()
+			var dir:=str(s.dash[1])
+			if "r" in dir:Input.action_press("move_right")
+			if "l" in dir:Input.action_press("move_left")
+			if "u" in dir:Input.action_press("move_up")
+			if "d" in dir:Input.action_press("move_down")
+			Input.action_press("dash");dash_release=i+6
+		if i==dash_release:
+			Input.action_release("dash");Input.action_release("move_up");Input.action_release("move_down")
+		# A wall-jump kicks off whenever he is airborne within reach of a wall
+		# (player.gd's wall buffer), so press as soon as the wall is there:
+		# re-press, so the buffer sees a fresh press rather than a held button.
+		if s.get("wall",false) and seg_frames>int(s.get("min_frames",4)) and not player.is_on_floor() \
+				and player._near_wall_dir()!=0 and player.state!=Player.State.DASH:
+			Input.action_release("jump");Input.action_press("jump")
+			kick_release=i+int(s.get("hold",20))
+			seg=mini(seg+1,segments.size()-1);seg_frames=-1;airborne_in_seg=false
+		elif i==kick_release:
+			Input.action_release("jump")
+		await frames(1)
+		seg_frames+=1
+		if i%5==0:trail.append("%d:(%d,%d)%s" % [i,int(player.global_position.x-offset.x),int(player.global_position.y-offset.y),player.state_name().substr(0,2)])
+		if player.state==Player.State.DEAD:break
+		var v:=player.velocity
+		# A spring, not a dash: a dash also jumps velocity past these numbers.
+		var not_dash:=player.state!=Player.State.DASH and prev_state!=Player.State.DASH
+		var launched:=not_dash and ((prev.y>-150.0 and v.y<-250.0) or (absf(v.x)>=200.0 and absf(prev.x)<150.0))
+		prev=v;prev_state=player.state
+		if launched:
+			launches+=1
+			if seg<segments.size()-1:
+				seg+=1;seg_frames=0;airborne_in_seg=false
+				Input.action_release("jump")
+				# A side spring throws him flat along the ground; jumping as it
+				# fires is what turns the throw into an arc.
+				if segments[seg].get("jump",false):
+					Input.action_press("jump");kick_release=i+int(segments[seg].get("hold",20))
+		airborne_in_seg=airborne_in_seg or not player.is_on_floor()
+		if _route_exit_started():landed=true;break
+		if airborne_in_seg and seg==segments.size()-1 and player.is_on_floor() and player.state!=Player.State.LEDGE_MANTLE:
+			var at:=player.global_position-offset
+			landed=absf(at.x-float(step.target[0]))<20 and absf(at.y-(float(step.target[1])-6))<4
+			break
+	release()
+	if not landed or step.get("trace",false):print("  TRAIL ",", ".join(trail))
+	check(landed,"%s chain %s -> %s (segment %d/%d, launches %d) actual %s" % [room.name,step.start,step.target,seg+1,segments.size(),launches,player.global_position-offset])
+
+func _wait_for_thought(spec: Dictionary) -> void:
+	var thought: DarkThought
+	for node in room.get_node("Entities").get_children():
+		if node is DarkThought and node._origin.distance_to(Vector2(spec.thought[0],spec.thought[1]))<2:thought=node
+	check(thought!=null,"%s timing thought at %s exists" % [room.name,spec.thought])
+	if thought==null:return
+	for i in 600:
+		var p:=fposmod(thought._clock*thought.speed+thought.phase,1.0)
+		var lo:=float(spec.window[0]);var hi:=float(spec.window[1])
+		if (p>=lo and p<=hi) if lo<=hi else (p>=lo or p<=hi):return
+		await frames(1)
+
+## How far a moving thought gate at `gate_x` has drifted from its authored lane.
+## Every thought in one gate shares its motion, so any one of them reads it.
+func _gate_offset(gate_x: float) -> float:
+	for node in room.get_node("Entities").get_children():
+		if node is DarkThought and absf(node._origin.x-gate_x)<1:
+			return node.position.y-node._origin.y
+	return 0.0
+
+## Which of this room's lemons are banked, as "x,y" positions — a report, not
+## a check: the main route may leave a dare's fruit on purpose.
+func _room_fruit() -> Dictionary:
+	var taken: Array = Collectibles.save_state().taken
+	var out := {"taken":[], "left":[]}
+	for fruit: Array in _fruit:
+		out["taken" if taken.has(fruit[0]) else "left"].append(fruit[1])
+	return out
+
+func release_moves() -> void:
+	for a in ["move_left","move_right","move_up","move_down"]:Input.action_release(a)
+
 func select(n:int) -> void:
 	for candidate in world.rooms:
 		if str(candidate.name)=="Act_2_Level_%d" % n:room=candidate
 	world._enter_room(room,true);offset=room.global_position
+	_fruit.clear()
+	for node in get_tree().get_nodes_in_group("lemon"):
+		if node is Lemon and room.is_ancestor_of(node):
+			var at: Vector2 = node.global_position-offset
+			_fruit.append([node.collect_id(),"%d,%d" % [at.x,at.y]])
 func prepare(at:Vector2) -> void:
 	release()
 	if continuous:
@@ -282,6 +417,9 @@ func fly(recipe: Dictionary) -> void:
 		if gate<recipe.waypoints.size():
 			var g: Array=recipe.waypoints[gate]
 			target=float(g[1])
+			# [x, lane, gate_x]: the lane is a MOVING gap, so follow it live
+			# the way a rider tracks the drifting thoughts, not a fixed height.
+			if g.size()>2:target+=_gate_offset(float(g[2]))
 			if carpet.position.x>float(g[0])+24:gate+=1
 		Input.action_release("move_up");Input.action_release("move_down")
 		if absf(carpet.position.y-4-target)>1:

@@ -157,6 +157,9 @@ func _restore_morning_scenery() -> void:
 
 
 func _bank_morning() -> void:
+	var music := _world.get_node_or_null("Music")
+	if music != null and music.has_method("resume"):
+		music.resume()
 	var flags: Dictionary = _world.get("story_flags")
 	flags["pond_dawn"] = true
 	SaveGame.save_now()
@@ -221,6 +224,10 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	var player := _world.player
 	_ambience = preload("res://scenes/props/ambience/EncounterAmbience.tscn").instantiate()
 	add_child(_ambience)
+	# The garden score steps aside: crickets and the fire carry the night.
+	var music := _world.get_node_or_null("Music")
+	if music != null and music.has_method("rest"):
+		music.rest()
 	_ambience.blend(0.0, 0.0, 0.8)
 	_encounter_origin = jamshid.global_position
 	# The opening exchange is deliberately spoken while he floats in the pond.

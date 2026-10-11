@@ -15,3 +15,25 @@ looping streams, blended over two seconds when entering/leaving the chase.
 Crossing rooms or dying never resets either stream. Homecoming in Level 26
 restores the original arrangement. Dialogue ducking and the Music setting
 apply to the complete mix. Check with `tests/darkshang_music_test.tscn`.
+
+# Act II score
+
+`source/sunlit_garden_path.mp3` is the original 60-second "Sunlit Garden Path"
+(four 15s sections: A Garden Introduction, Exploring Neighborhood Ponds,
+Playful Wonder, Loop Coda), kept unchanged and hidden from Godot by `.gdignore`.
+`tools/gen_act2_garden_music.py` cuts it into five Ogg cues (`garden_*.ogg`).
+It measures 100.0 BPM in 4/4, so 15s is 25 beats — six bars and a beat — and a
+raw 15s section cannot loop without the bar lurching. Each loop is therefore cut
+on its own section's downbeat to whole bars (ponds 5 bars, wonder 6), with a
+one-beat equal-power crossfade at the seam; the intro is the head of the
+recording up to the ponds loop, so it runs into it with no seam at all.
+`garden_rest.ogg` is one silent bar.
+
+`Music` in `ldtk/Act2World.tscn` uses `scripts/act2_music.gd`: one
+AudioStreamInteractive, every change on the next bar with a one-bar crossfade.
+Intro then ponds in the opening rooms (0–2), Playful Wonder through the sky
+gardens (3–13) with ponds again in the breather room 8, the coda once on
+leaving the gardens (14), then silence for the castle, prison, chase and
+finale. The Jamshid night encounter rests the score and resumes it at dawn.
+Silence is a clip, not a volume fade, because LdtkWorld's dialogue duck owns
+the node's volume. Check with `tests/act2_music_test.tscn`.

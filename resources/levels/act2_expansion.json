@@ -1,43 +1,38 @@
 [
   {
     "name": "Act_2_Level_3",
-    "title": "Saffron Switchbacks",
+    "title": "Saffron Steps",
     "width": 640,
     "ledges": [
       [
-        128,
+        120,
         264,
         40
       ],
       [
-        208,
-        232,
-        40
-      ],
-      [
-        304,
-        264,
-        64
-      ],
-      [
-        392,
-        232,
-        40
-      ],
-      [
-        464,
-        200,
-        40
-      ],
-      [
-        552,
         216,
-        40
+        240,
+        24
       ],
       [
-        592,
+        288,
+        248,
+        88
+      ],
+      [
+        440,
+        232,
+        32
+      ],
+      [
+        512,
+        208,
+        24
+      ],
+      [
+        584,
         192,
-        48
+        56
       ]
     ],
     "springs": [],
@@ -56,8 +51,20 @@
           288
         ],
         "target": [
-          144,
+          136,
           264
+        ],
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          152,
+          264
+        ],
+        "target": [
+          228,
+          240
         ],
         "jump_hold": 60,
         "dash_up": true
@@ -65,38 +72,57 @@
       {
         "kind": "dash",
         "start": [
-          144,
-          264
+          232,
+          240
         ],
         "target": [
-          224,
-          232
-        ],
-        "jump_hold": 60,
-        "dash_up": true
-      },
-      {
-        "kind": "dash",
-        "start": [
-          224,
-          232
-        ],
-        "target": [
-          328,
-          264
+          304,
+          248
         ],
         "jump_hold": 60,
         "dash_up": false
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
-          328,
-          264
+          368,
+          248
         ],
         "target": [
-          408,
+          456,
           232
+        ],
+        "segments": [
+          {
+            "steer": 456,
+            "dash": [
+              12,
+              "ur"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            408,
+            216
+          ],
+          "window": [
+            0.05,
+            0.2
+          ]
+        }
+      },
+      {
+        "kind": "dash",
+        "start": [
+          456,
+          232
+        ],
+        "target": [
+          524,
+          208
         ],
         "jump_hold": 60,
         "dash_up": true
@@ -104,37 +130,11 @@
       {
         "kind": "dash",
         "start": [
-          408,
-          232
+          528,
+          208
         ],
         "target": [
-          480,
-          200
-        ],
-        "jump_hold": 60,
-        "dash_up": true
-      },
-      {
-        "kind": "dash",
-        "start": [
-          480,
-          200
-        ],
-        "target": [
-          568,
-          216
-        ],
-        "jump_hold": 60,
-        "dash_up": false
-      },
-      {
-        "kind": "dash",
-        "start": [
-          568,
-          216
-        ],
-        "target": [
-          608,
+          600,
           192
         ],
         "jump_hold": 60,
@@ -143,12 +143,111 @@
     ],
     "crumbles": [],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "jump",
+        "start": [
+          88,
+          288
+        ],
+        "target": [
+          136,
+          264
+        ],
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          152,
+          264
+        ],
+        "target": [
+          228,
+          240
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          232,
+          240
+        ],
+        "target": [
+          304,
+          248
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "chain",
+        "start": [
+          368,
+          248
+        ],
+        "target": [
+          456,
+          232
+        ],
+        "segments": [
+          {
+            "steer": 456,
+            "dash": [
+              16,
+              "ur"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            408,
+            216
+          ],
+          "window": [
+            0.05,
+            0.2
+          ]
+        }
+      },
+      {
+        "kind": "dash",
+        "start": [
+          456,
+          232
+        ],
+        "target": [
+          524,
+          208
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          528,
+          208
+        ],
+        "target": [
+          600,
+          192
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": false
   },
   {
     "name": "Act_2_Level_4",
-    "title": "Courtyard Arcs",
+    "title": "The Spring Relay",
     "width": 640,
     "ledges": [
       [
@@ -157,24 +256,24 @@
         56
       ],
       [
-        176,
-        184,
+        232,
+        216,
+        16
+      ],
+      [
+        296,
+        160,
         80
       ],
       [
-        256,
-        136,
-        80
-      ],
-      [
-        480,
-        128,
-        48
-      ],
-      [
-        568,
+        408,
         176,
-        72
+        40
+      ],
+      [
+        512,
+        160,
+        128
       ]
     ],
     "springs": [
@@ -188,14 +287,20 @@
       ],
       [
         240,
-        184
+        216
       ]
     ],
     "carpets": [],
-    "side_springs": [],
+    "side_springs": [
+      [
+        300,
+        160,
+        "Right"
+      ]
+    ],
     "exit": [
       616,
-      176
+      160
     ],
     "gates": [],
     "routes": [
@@ -211,111 +316,203 @@
         ]
       },
       {
-        "kind": "spring",
+        "kind": "chain",
         "start": [
-          152,
+          120,
           232
         ],
         "target": [
-          200,
-          184
-        ]
+          320,
+          160
+        ],
+        "segments": [
+          {
+            "steer": 170
+          },
+          {
+            "steer": 240,
+            "dash": [
+              22,
+              "r"
+            ]
+          },
+          {
+            "steer": 320,
+            "dash": [
+              16,
+              "r"
+            ]
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
       },
       {
-        "kind": "spring",
+        "kind": "chain",
         "start": [
-          240,
-          184
+          320,
+          160
         ],
         "target": [
-          280,
-          136
-        ]
-      },
-      {
-        "kind": "dash",
-        "start": [
-          328,
-          136
+          424,
+          176
         ],
-        "target": [
-          416,
-          152
-        ]
+        "segments": [
+          {
+            "steer": 290
+          },
+          {
+            "steer": 424
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
       },
       {
         "kind": "dash",
         "start": [
           432,
-          152
+          176
         ],
         "target": [
-          496,
-          128
+          528,
+          160
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "crumbles": [],
+    "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          128,
+          232
         ]
+      },
+      {
+        "kind": "chain",
+        "start": [
+          120,
+          232
+        ],
+        "target": [
+          320,
+          160
+        ],
+        "segments": [
+          {
+            "steer": 170
+          },
+          {
+            "steer": 240,
+            "dash": [
+              22,
+              "r"
+            ]
+          },
+          {
+            "steer": 240,
+            "dash": [
+              18,
+              "u"
+            ]
+          },
+          {
+            "steer": 320,
+            "dash": [
+              16,
+              "r"
+            ]
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          320,
+          160
+        ],
+        "target": [
+          424,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 290
+          },
+          {
+            "steer": 424
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
       },
       {
         "kind": "dash",
         "start": [
-          512,
-          128
+          432,
+          176
         ],
         "target": [
-          592,
-          176
-        ]
+          528,
+          160
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       }
     ],
-    "crumbles": [
-      [
-        392,
-        152,
-        56
-      ]
-    ],
-    "optional_routes": [],
+    "branch_fruit": false,
     "final": false,
     "advanced": false
   },
   {
     "name": "Act_2_Level_5",
-    "title": "Orchard of Commitments",
+    "title": "Orchard of Choices",
     "width": 640,
     "ledges": [
       [
-        112,
+        104,
         240,
         56
       ],
       [
-        424,
-        224,
-        56
+        176,
+        184,
+        48
       ],
       [
-        520,
-        200,
-        48
+        272,
+        152,
+        32
+      ],
+      [
+        344,
+        176,
+        40
+      ],
+      [
+        408,
+        232,
+        64
+      ],
+      [
+        512,
+        216,
+        32
       ],
       [
         584,
         200,
         56
-      ],
-      [
-        184,
-        192,
-        64
-      ],
-      [
-        280,
-        176,
-        48
-      ],
-      [
-        360,
-        192,
-        48
       ]
     ],
     "springs": [
@@ -354,81 +551,93 @@
           240
         ],
         "target": [
-          216,
-          264
-        ]
+          208,
+          256
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
         "start": [
-          216,
-          264
+          208,
+          256
         ],
         "target": [
-          296,
+          280,
           248
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
         "start": [
-          296,
+          280,
           248
         ],
         "target": [
-          376,
-          248
-        ]
+          352,
+          256
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
         "start": [
-          376,
-          248
+          352,
+          256
         ],
         "target": [
+          424,
+          232
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
           440,
-          224
-        ]
+          232
+        ],
+        "target": [
+          528,
+          216
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
         "start": [
-          464,
-          224
-        ],
-        "target": [
-          536,
-          200
-        ]
-      },
-      {
-        "kind": "jump",
-        "start": [
-          552,
-          200
+          528,
+          216
         ],
         "target": [
           600,
           200
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       }
     ],
     "crumbles": [
       [
-        196,
+        192,
+        256,
+        32
+      ],
+      [
         264,
-        40
+        248,
+        32
       ],
       [
-        276,
-        248,
-        40
-      ],
-      [
-        356,
-        248,
-        40
+        336,
+        256,
+        32
       ]
     ],
     "optional_routes": [
@@ -440,43 +649,159 @@
         ],
         "target": [
           200,
-          192
+          184
         ]
+      },
+      {
+        "kind": "chain",
+        "start": [
+          208,
+          184
+        ],
+        "target": [
+          288,
+          152
+        ],
+        "segments": [
+          {
+            "steer": 288,
+            "dash": [
+              10,
+              "ur"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            248,
+            148
+          ],
+          "window": [
+            0.1,
+            0.2
+          ]
+        }
       },
       {
         "kind": "dash",
         "start": [
-          232,
-          192
+          288,
+          152
         ],
         "target": [
-          296,
-          176
-        ]
-      },
-      {
-        "kind": "dash",
-        "start": [
-          312,
+          360,
           176
         ],
-        "target": [
-          376,
-          192
-        ]
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "jump",
         "start": [
-          392,
-          192
+          376,
+          176
         ],
         "target": [
-          448,
-          224
-        ]
+          424,
+          232
+        ],
+        "jump_hold": 60
       }
     ],
+    "reward_routes": [
+      {
+        "kind": "spring",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          128,
+          240
+        ]
+      },
+      {
+        "kind": "dash",
+        "start": [
+          128,
+          240
+        ],
+        "target": [
+          208,
+          256
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          208,
+          256
+        ],
+        "target": [
+          280,
+          248
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          280,
+          248
+        ],
+        "target": [
+          352,
+          256
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          352,
+          256
+        ],
+        "target": [
+          424,
+          232
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          440,
+          232
+        ],
+        "target": [
+          528,
+          216
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          528,
+          216
+        ],
+        "target": [
+          600,
+          200
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "branch_fruit": true,
     "final": false,
     "advanced": false
   },
@@ -486,19 +811,14 @@
     "width": 640,
     "ledges": [
       [
-        112,
+        104,
         240,
-        48
+        56
       ],
       [
-        248,
-        144,
-        72
-      ],
-      [
-        360,
+        408,
         184,
-        72
+        64
       ],
       [
         584,
@@ -512,7 +832,7 @@
         288
       ],
       [
-        416,
+        456,
         184
       ]
     ],
@@ -521,14 +841,14 @@
         192,
         240,
         "Ride",
-        104,
+        0,
         48
       ],
       [
-        464,
+        504,
         136,
         "Ride",
-        104,
+        0,
         48
       ]
     ],
@@ -540,11 +860,15 @@
     "gates": [
       [
         280,
-        224
+        216
       ],
       [
-        504,
-        112
+        360,
+        192
+      ],
+      [
+        544,
+        136
       ]
     ],
     "routes": [
@@ -569,49 +893,152 @@
         "waypoints": [
           [
             280,
-            224
+            216,
+            280
           ],
           [
-            328,
-            176
+            320,
+            200
+          ],
+          [
+            360,
+            192,
+            360
           ]
         ],
         "target": [
-          376,
+          432,
           184
         ],
-        "jump_x": 332
+        "jump_x": 384
       },
       {
         "kind": "spring",
         "start": [
-          416,
+          456,
           184
         ],
         "target": [
-          464,
+          504,
           136
         ]
       },
       {
         "kind": "flight",
-        "carpet": 464,
+        "carpet": 504,
         "start": null,
         "waypoints": [
           [
-            504,
-            112
+            544,
+            136,
+            544
+          ],
+          [
+            580,
+            136
           ]
         ],
         "target": [
-          600,
+          616,
           104
         ],
-        "jump_x": 556
+        "jump_x": 572
       }
     ],
     "crumbles": [],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          128,
+          240
+        ]
+      },
+      {
+        "kind": "flight",
+        "carpet": 192,
+        "start": [
+          144,
+          240
+        ],
+        "waypoints": [
+          [
+            280,
+            216,
+            280
+          ],
+          [
+            304,
+            190
+          ],
+          [
+            360,
+            192,
+            360
+          ]
+        ],
+        "target": [
+          432,
+          184
+        ],
+        "jump_x": 384
+      },
+      {
+        "kind": "chain",
+        "start": [
+          432,
+          184
+        ],
+        "target": [
+          504,
+          136
+        ],
+        "segments": [
+          {
+            "steer": 470
+          },
+          {
+            "steer": 456,
+            "dash": [
+              24,
+              "u"
+            ]
+          },
+          {
+            "steer": 504
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "flight",
+        "carpet": 504,
+        "start": null,
+        "waypoints": [
+          [
+            544,
+            136,
+            544
+          ],
+          [
+            580,
+            136
+          ]
+        ],
+        "target": [
+          616,
+          104
+        ],
+        "jump_x": 572
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": false
   },
@@ -621,43 +1048,47 @@
     "width": 768,
     "ledges": [
       [
-        112,
+        120,
         248,
-        56
+        48
       ],
       [
-        288,
+        352,
+        224,
+        64
+      ],
+      [
+        472,
         216,
-        72
+        16
       ],
       [
-        360,
-        168,
-        80
-      ],
-      [
-        616,
+        536,
         144,
         48
       ],
       [
-        712,
+        704,
         104,
-        56
+        64
       ]
     ],
     "springs": [
       [
-        336,
+        400,
+        224
+      ],
+      [
+        480,
         216
       ]
     ],
     "carpets": [
       [
-        480,
-        168,
+        608,
+        144,
         "Ride",
-        104,
+        0,
         40
       ]
     ],
@@ -668,8 +1099,8 @@
     ],
     "gates": [
       [
-        552,
-        136
+        648,
+        120
       ]
     ],
     "routes": [
@@ -683,6 +1114,7 @@
           136,
           248
         ],
+        "jump_hold": 60,
         "dash_up": true,
         "dash_frame": 16
       },
@@ -694,89 +1126,218 @@
         ],
         "target": [
           224,
-          216
+          224
         ],
+        "jump_hold": 60,
         "dash_up": true
       },
       {
         "kind": "dash",
         "start": [
-          240,
-          216
+          224,
+          224
         ],
         "target": [
           304,
-          216
-        ]
+          232
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
-        "kind": "spring",
+        "kind": "dash",
         "start": [
-          336,
-          216
+          304,
+          232
         ],
         "target": [
-          392,
-          168
-        ]
+          368,
+          224
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "chain",
+        "start": [
+          384,
+          224
+        ],
+        "target": [
+          552,
+          144
+        ],
+        "segments": [
+          {
+            "steer": 400
+          },
+          {
+            "steer": 480,
+            "dash": [
+              22,
+              "r"
+            ]
+          },
+          {
+            "steer": 552,
+            "dash": [
+              20,
+              "ur"
+            ]
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
       },
       {
         "kind": "flight",
-        "carpet": 480,
+        "carpet": 608,
         "start": [
-          424,
-          168
+          568,
+          144
         ],
         "waypoints": [
           [
-            552,
-            136
+            648,
+            120,
+            648
           ]
         ],
         "target": [
-          632,
-          144
-        ],
-        "jump_x": 588
-      },
-      {
-        "kind": "dash",
-        "start": [
-          648,
-          144
-        ],
-        "target": [
-          696,
-          128
-        ],
-        "dash_up": true
-      },
-      {
-        "kind": "dash",
-        "start": [
-          696,
-          128
-        ],
-        "target": [
-          752,
+          720,
           104
         ],
-        "dash_up": true
+        "jump_x": 676
       }
     ],
     "crumbles": [
       [
         208,
-        216,
-        48
+        224,
+        32
       ],
       [
-        680,
-        128,
+        288,
+        232,
         32
       ]
     ],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "dash",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          136,
+          248
+        ],
+        "jump_hold": 60,
+        "dash_up": true,
+        "dash_frame": 16
+      },
+      {
+        "kind": "dash",
+        "start": [
+          152,
+          248
+        ],
+        "target": [
+          224,
+          224
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          224,
+          224
+        ],
+        "target": [
+          304,
+          232
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          304,
+          232
+        ],
+        "target": [
+          368,
+          224
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "chain",
+        "start": [
+          384,
+          224
+        ],
+        "target": [
+          552,
+          144
+        ],
+        "segments": [
+          {
+            "steer": 400
+          },
+          {
+            "steer": 480,
+            "dash": [
+              22,
+              "r"
+            ]
+          },
+          {
+            "steer": 480,
+            "dash": [
+              18,
+              "u"
+            ]
+          },
+          {
+            "steer": 552,
+            "dash": [
+              20,
+              "ur"
+            ]
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "flight",
+        "carpet": 608,
+        "start": [
+          568,
+          144
+        ],
+        "waypoints": [
+          [
+            648,
+            120,
+            648
+          ]
+        ],
+        "target": [
+          720,
+          104
+        ],
+        "jump_x": 676
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": false
   },
@@ -793,23 +1354,32 @@
       [
         352,
         160,
-        104
+        112
       ],
       [
         472,
-        168,
-        80
+        96,
+        40
       ],
       [
-        568,
+        488,
+        176,
+        64
+      ],
+      [
+        584,
         168,
-        72
+        56
       ]
     ],
     "springs": [
       [
         80,
         288
+      ],
+      [
+        456,
+        160
       ]
     ],
     "carpets": [
@@ -817,7 +1387,7 @@
         208,
         240,
         "Ride",
-        104,
+        0,
         56
       ]
     ],
@@ -849,44 +1419,147 @@
         "waypoints": [
           [
             288,
-            176
+            180
           ],
           [
             336,
-            184
+            180
           ]
         ],
         "target": [
-          376,
+          384,
           160
         ],
-        "jump_x": 332
-      },
-      {
-        "kind": "jump",
-        "start": [
-          448,
-          160
-        ],
-        "target": [
-          488,
-          168
-        ]
+        "jump_x": 328
       },
       {
         "kind": "dash",
         "start": [
-          528,
-          168
+          432,
+          160
         ],
         "target": [
-          592,
+          512,
+          176
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          536,
+          176
+        ],
+        "target": [
+          616,
           168
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       }
     ],
     "crumbles": [],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          128,
+          240
+        ]
+      },
+      {
+        "kind": "flight",
+        "carpet": 208,
+        "start": [
+          152,
+          240
+        ],
+        "waypoints": [
+          [
+            264,
+            158
+          ],
+          [
+            304,
+            180
+          ]
+        ],
+        "target": [
+          384,
+          160
+        ],
+        "jump_x": 328
+      },
+      {
+        "kind": "chain",
+        "start": [
+          432,
+          160
+        ],
+        "target": [
+          492,
+          96
+        ],
+        "segments": [
+          {
+            "steer": 456
+          },
+          {
+            "steer": 492
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            492,
+            72
+          ],
+          "window": [
+            0.55,
+            0.65
+          ]
+        }
+      },
+      {
+        "kind": "chain",
+        "start": [
+          496,
+          96
+        ],
+        "target": [
+          520,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 520
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          536,
+          176
+        ],
+        "target": [
+          616,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": false
   },
@@ -896,24 +1569,34 @@
     "width": 880,
     "ledges": [
       [
-        392,
-        192,
+        240,
+        232,
+        16
+      ],
+      [
+        336,
+        216,
+        16
+      ],
+      [
+        408,
+        176,
         64
       ],
       [
-        672,
-        128,
-        40
-      ],
-      [
-        760,
-        160,
-        40
-      ],
-      [
-        832,
-        160,
+        648,
+        144,
         48
+      ],
+      [
+        768,
+        184,
+        40
+      ],
+      [
+        824,
+        168,
+        56
       ]
     ],
     "springs": [
@@ -922,15 +1605,25 @@
         288
       ],
       [
-        440,
-        192
+        248,
+        232
+      ],
+      [
+        344,
+        216
       ]
     ],
     "carpets": [],
-    "side_springs": [],
+    "side_springs": [
+      [
+        652,
+        144,
+        "Right"
+      ]
+    ],
     "exit": [
       856,
-      160
+      168
     ],
     "gates": [],
     "routes": [
@@ -947,103 +1640,132 @@
         "dash_frame": 18
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
           160,
           216
         ],
         "target": [
-          240,
-          200
+          424,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 248,
+            "dash": [
+              14,
+              "r"
+            ]
+          },
+          {
+            "steer": 344,
+            "dash": [
+              20,
+              "r"
+            ]
+          },
+          {
+            "steer": 424,
+            "dash": [
+              20,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          456,
+          176
+        ],
+        "target": [
+          520,
+          152
+        ],
+        "segments": [
+          {
+            "steer": 520,
+            "dash": [
+              12,
+              "ur"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            488,
+            150
+          ],
+          "window": [
+            0.1,
+            0.2
+          ]
+        }
+      },
+      {
+        "kind": "dash",
+        "start": [
+          520,
+          152
+        ],
+        "target": [
+          600,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          600,
+          168
+        ],
+        "target": [
+          672,
+          144
         ],
         "jump_hold": 60,
         "dash_up": true
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
-          240,
-          200
-        ],
-        "target": [
-          320,
-          216
-        ],
-        "jump_hold": 60
-      },
-      {
-        "kind": "dash",
-        "start": [
-          320,
-          216
-        ],
-        "target": [
-          408,
-          192
-        ],
-        "dash_up": true,
-        "jump_hold": 60
-      },
-      {
-        "kind": "spring_dash",
-        "start": [
-          440,
-          192
-        ],
-        "target": [
-          520,
-          128
-        ],
-        "dash_frame": 18
-      },
-      {
-        "kind": "dash",
-        "start": [
-          520,
-          128
-        ],
-        "target": [
-          608,
-          144
-        ],
-        "jump_hold": 60
-      },
-      {
-        "kind": "dash",
-        "start": [
-          608,
+          680,
           144
         ],
         "target": [
-          688,
-          128
-        ],
-        "jump_hold": 60,
-        "dash_up": true
-      },
-      {
-        "kind": "dash",
-        "start": [
-          696,
-          128
-        ],
-        "target": [
-          776,
-          160
-        ],
-        "jump_hold": 60
-      },
-      {
-        "kind": "dash",
-        "start": [
           784,
-          160
+          184
+        ],
+        "segments": [
+          {
+            "steer": 640
+          },
+          {
+            "steer": 784
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          792,
+          184
         ],
         "target": [
           856,
-          160
+          168
         ],
-        "jump_hold": 60
+        "jump_hold": 60,
+        "dash_up": true
       }
     ],
     "crumbles": [
@@ -1053,27 +1775,183 @@
         56
       ],
       [
-        224,
-        200,
-        40
+        504,
+        152,
+        32
       ],
       [
-        304,
-        216,
-        40
-      ],
-      [
-        488,
-        128,
-        64
-      ],
-      [
-        592,
-        144,
-        40
+        584,
+        168,
+        32
       ]
     ],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring_dash",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          160,
+          216
+        ],
+        "dash_frame": 18
+      },
+      {
+        "kind": "chain",
+        "start": [
+          160,
+          216
+        ],
+        "target": [
+          424,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 248,
+            "dash": [
+              14,
+              "r"
+            ]
+          },
+          {
+            "steer": 344,
+            "dash": [
+              20,
+              "r"
+            ]
+          },
+          {
+            "steer": 424,
+            "dash": [
+              20,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          416,
+          176
+        ],
+        "target": [
+          424,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 398,
+            "dash": [
+              14,
+              "u"
+            ],
+            "steer_after": 424
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          456,
+          176
+        ],
+        "target": [
+          520,
+          152
+        ],
+        "segments": [
+          {
+            "steer": 520,
+            "dash": [
+              12,
+              "ur"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            488,
+            150
+          ],
+          "window": [
+            0.1,
+            0.2
+          ]
+        }
+      },
+      {
+        "kind": "dash",
+        "start": [
+          520,
+          152
+        ],
+        "target": [
+          600,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          600,
+          168
+        ],
+        "target": [
+          672,
+          144
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "chain",
+        "start": [
+          680,
+          144
+        ],
+        "target": [
+          784,
+          184
+        ],
+        "segments": [
+          {
+            "steer": 640
+          },
+          {
+            "steer": 784
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          792,
+          184
+        ],
+        "target": [
+          856,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": true
   },
@@ -1093,24 +1971,24 @@
         40
       ],
       [
-        456,
-        192,
-        56
+        504,
+        160,
+        48
       ],
       [
-        672,
+        744,
         192,
         40
       ],
       [
-        824,
+        896,
         192,
         64
       ],
       [
-        936,
+        1000,
         120,
-        40
+        32
       ],
       [
         1056,
@@ -1124,7 +2002,7 @@
         288
       ],
       [
-        872,
+        944,
         192
       ]
     ],
@@ -1133,7 +2011,7 @@
         200,
         217,
         "Ride",
-        104,
+        0,
         24
       ]
     ],
@@ -1169,31 +2047,31 @@
             216
           ],
           [
-            456,
-            56,
-            216
+            504,
+            48,
+            184
           ],
           [
-            672,
+            744,
             40,
             216
           ]
         ],
         "target": [
-          840,
+          912,
           192
         ],
-        "jump_x": 792,
-        "speed": 48
+        "jump_x": 864,
+        "speed": 52
       },
       {
         "kind": "spring_dash",
         "start": [
-          872,
+          944,
           192
         ],
         "target": [
-          952,
+          1016,
           120
         ],
         "dash_frame": 22
@@ -1201,34 +2079,96 @@
       {
         "kind": "dash",
         "start": [
-          952,
+          1016,
           120
         ],
         "target": [
-          1040,
-          136
+          1080,
+          120
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      }
+    ],
+    "crumbles": [],
+    "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          128,
+          240
         ]
+      },
+      {
+        "kind": "weave",
+        "carpet": 200,
+        "start": [
+          152,
+          240
+        ],
+        "islands": [
+          [
+            272,
+            40,
+            216
+          ],
+          [
+            504,
+            48,
+            184
+          ],
+          [
+            744,
+            40,
+            216
+          ]
+        ],
+        "target": [
+          912,
+          192
+        ],
+        "jump_x": 864,
+        "speed": 52,
+        "reward_lanes": [
+          [
+            376,
+            396,
+            206
+          ]
+        ]
+      },
+      {
+        "kind": "spring_dash",
+        "start": [
+          944,
+          192
+        ],
+        "target": [
+          1016,
+          120
+        ],
+        "dash_frame": 22
       },
       {
         "kind": "dash",
         "start": [
-          1040,
-          136
+          1016,
+          120
         ],
         "target": [
-          1096,
+          1080,
           120
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       }
     ],
-    "crumbles": [
-      [
-        1024,
-        136,
-        32
-      ]
-    ],
-    "optional_routes": [],
+    "branch_fruit": false,
     "final": false,
     "advanced": true
   },
@@ -1238,29 +2178,29 @@
     "width": 800,
     "ledges": [
       [
-        144,
+        128,
         216,
-        48
+        120
       ],
       [
-        72,
-        160,
-        32
-      ],
-      [
-        152,
+        240,
         112,
-        80
+        72
       ],
       [
-        440,
-        184,
-        64
+        512,
+        192,
+        56
       ],
       [
-        720,
+        616,
+        128,
+        40
+      ],
+      [
+        704,
         112,
-        80
+        96
       ]
     ],
     "springs": [
@@ -1269,8 +2209,8 @@
         288
       ],
       [
-        488,
-        184
+        552,
+        192
       ]
     ],
     "carpets": [],
@@ -1291,124 +2231,301 @@
           160,
           216
         ],
-        "dash_frame": 22
+        "dash_frame": 18
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
-          160,
+          208,
           216
         ],
         "target": [
-          88,
-          160
-        ],
-        "dash_frame": 18
-      },
-      {
-        "kind": "dash",
-        "start": [
-          88,
-          160
-        ],
-        "target": [
-          168,
+          272,
           112
         ],
-        "dash_frame": 18
-      },
-      {
-        "kind": "dash",
-        "start": [
-          216,
-          112
+        "segments": [
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 250,
+            "wall": true
+          },
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 250,
+            "wall": true
+          },
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 272
+          }
         ],
-        "target": [
-          296,
-          136
-        ]
+        "walk": false,
+        "jump_hold": 60
       },
       {
         "kind": "dash",
         "start": [
           296,
-          136
+          112
         ],
         "target": [
           376,
-          160
-        ]
+          144
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
         "start": [
           376,
-          160
+          144
         ],
         "target": [
           456,
-          184
-        ]
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          456,
+          168
+        ],
+        "target": [
+          528,
+          192
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "spring_dash",
         "start": [
-          488,
-          184
+          552,
+          192
         ],
         "target": [
-          568,
-          112
+          632,
+          128
         ],
-        "dash_frame": 22
+        "dash_frame": 20
       },
       {
         "kind": "dash",
         "start": [
-          568,
-          112
+          640,
+          128
         ],
         "target": [
-          648,
-          136
-        ]
-      },
-      {
-        "kind": "dash",
-        "start": [
-          648,
-          136
-        ],
-        "target": [
-          736,
+          720,
           112
         ],
+        "jump_hold": 60,
         "dash_up": true
       }
     ],
     "crumbles": [
       [
-        280,
-        136,
-        40
-      ],
-      [
         360,
-        160,
-        40
+        144,
+        32
       ],
       [
-        552,
-        112,
-        40
-      ],
-      [
-        632,
-        136,
-        40
+        440,
+        168,
+        32
       ]
     ],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring_dash",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          160,
+          216
+        ],
+        "dash_frame": 18
+      },
+      {
+        "kind": "chain",
+        "start": [
+          208,
+          216
+        ],
+        "target": [
+          272,
+          112
+        ],
+        "segments": [
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 250,
+            "wall": true
+          },
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 250,
+            "wall": true
+          },
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 272
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          248,
+          112
+        ],
+        "target": [
+          208,
+          216
+        ],
+        "segments": [
+          {
+            "steer": 208,
+            "dash": [
+              14,
+              "u"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          208,
+          216
+        ],
+        "target": [
+          272,
+          112
+        ],
+        "segments": [
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 250,
+            "wall": true
+          },
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 250,
+            "wall": true
+          },
+          {
+            "steer": 170,
+            "wall": true
+          },
+          {
+            "steer": 272
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          296,
+          112
+        ],
+        "target": [
+          376,
+          144
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          376,
+          144
+        ],
+        "target": [
+          456,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          456,
+          168
+        ],
+        "target": [
+          528,
+          192
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "spring_dash",
+        "start": [
+          552,
+          192
+        ],
+        "target": [
+          632,
+          128
+        ],
+        "dash_frame": 20
+      },
+      {
+        "kind": "dash",
+        "start": [
+          640,
+          128
+        ],
+        "target": [
+          720,
+          112
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": true
   },
@@ -1424,23 +2541,28 @@
       ],
       [
         448,
-        216,
-        72
+        224,
+        136
       ],
       [
-        568,
+        592,
+        160,
+        48
+      ],
+      [
+        680,
+        160,
+        32
+      ],
+      [
+        752,
         144,
         40
       ],
       [
-        744,
-        144,
-        40
-      ],
-      [
-        864,
+        872,
         176,
-        64
+        56
       ]
     ],
     "springs": [
@@ -1449,8 +2571,8 @@
         288
       ],
       [
-        504,
-        216
+        576,
+        224
       ]
     ],
     "carpets": [],
@@ -1481,7 +2603,9 @@
         "target": [
           224,
           240
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
@@ -1492,7 +2616,9 @@
         "target": [
           304,
           224
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
@@ -1504,7 +2630,8 @@
           384,
           240
         ],
-        "jump_hold": 6
+        "jump_hold": 6,
+        "dash_up": false
       },
       {
         "kind": "dash",
@@ -1514,95 +2641,303 @@
         ],
         "target": [
           464,
-          216
+          224
         ],
-        "dash_frame": 24
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
-        "kind": "spring_dash",
+        "kind": "chain",
         "start": [
-          504,
-          216
+          512,
+          224
         ],
         "target": [
-          584,
-          144
-        ],
-        "dash_frame": 22
-      },
-      {
-        "kind": "dash",
-        "start": [
-          584,
-          144
-        ],
-        "target": [
-          680,
+          616,
           160
-        ]
+        ],
+        "segments": [
+          {
+            "steer": 600
+          },
+          {
+            "steer": 616
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
       },
       {
         "kind": "dash",
         "start": [
-          680,
+          632,
+          160
+        ],
+        "target": [
+          696,
+          160
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          696,
           160
         ],
         "target": [
           760,
           144
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
           760,
           144
         ],
         "target": [
-          832,
+          840,
           160
-        ]
+        ],
+        "segments": [
+          {
+            "steer": 840,
+            "dash": [
+              14,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            780,
+            112
+          ],
+          "window": [
+            0.62,
+            0.75
+          ]
+        }
       },
       {
         "kind": "dash",
         "start": [
-          832,
+          840,
           160
         ],
         "target": [
-          904,
+          896,
           176
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       }
     ],
     "crumbles": [
       [
         208,
         240,
-        40
+        32
       ],
       [
         288,
         224,
-        40
+        32
       ],
       [
         368,
         240,
-        40
+        32
       ],
       [
-        664,
-        160,
-        40
-      ],
-      [
-        816,
+        824,
         160,
         32
       ]
     ],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          128,
+          240
+        ]
+      },
+      {
+        "kind": "dash",
+        "start": [
+          152,
+          240
+        ],
+        "target": [
+          224,
+          240
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "chain",
+        "start": [
+          224,
+          240
+        ],
+        "target": [
+          304,
+          224
+        ],
+        "segments": [
+          {
+            "steer": 304,
+            "dash": [
+              22,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          304,
+          224
+        ],
+        "target": [
+          384,
+          240
+        ],
+        "jump_hold": 6,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          384,
+          240
+        ],
+        "target": [
+          464,
+          224
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "chain",
+        "start": [
+          512,
+          224
+        ],
+        "target": [
+          616,
+          160
+        ],
+        "segments": [
+          {
+            "steer": 600
+          },
+          {
+            "steer": 616
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          632,
+          160
+        ],
+        "target": [
+          696,
+          160
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "chain",
+        "start": [
+          696,
+          160
+        ],
+        "target": [
+          760,
+          144
+        ],
+        "segments": [
+          {
+            "steer": 760,
+            "dash": [
+              12,
+              "ur"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "chain",
+        "start": [
+          760,
+          144
+        ],
+        "target": [
+          840,
+          160
+        ],
+        "segments": [
+          {
+            "steer": 840,
+            "dash": [
+              14,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60,
+        "wait": {
+          "thought": [
+            780,
+            112
+          ],
+          "window": [
+            0.62,
+            0.75
+          ]
+        }
+      },
+      {
+        "kind": "dash",
+        "start": [
+          840,
+          160
+        ],
+        "target": [
+          896,
+          176
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      }
+    ],
+    "branch_fruit": false,
     "final": false,
     "advanced": true
   },
@@ -1611,6 +2946,11 @@
     "title": "Crown of the Wind",
     "width": 1448,
     "ledges": [
+      [
+        232,
+        224,
+        16
+      ],
       [
         304,
         216,
@@ -1637,15 +2977,29 @@
         72
       ],
       [
-        1400,
-        144,
-        48
+        1160,
+        136,
+        40
+      ],
+      [
+        1256,
+        176,
+        40
+      ],
+      [
+        1392,
+        160,
+        56
       ]
     ],
     "springs": [
       [
         80,
         288
+      ],
+      [
+        240,
+        224
       ],
       [
         1112,
@@ -1657,14 +3011,20 @@
         408,
         217,
         "Ride",
-        104,
+        0,
         24
       ]
     ],
-    "side_springs": [],
+    "side_springs": [
+      [
+        1164,
+        136,
+        "Right"
+      ]
+    ],
     "exit": [
       1424,
-      144
+      160
     ],
     "gates": [],
     "routes": [
@@ -1678,29 +3038,36 @@
           160,
           216
         ],
-        "dash_frame": 22
+        "dash_frame": 18
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
-          160,
+          168,
           216
         ],
         "target": [
-          240,
-          200
-        ]
-      },
-      {
-        "kind": "dash",
-        "start": [
-          240,
-          200
-        ],
-        "target": [
-          320,
+          328,
           216
-        ]
+        ],
+        "segments": [
+          {
+            "steer": 240,
+            "dash": [
+              12,
+              "r"
+            ]
+          },
+          {
+            "steer": 328,
+            "dash": [
+              22,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
       },
       {
         "kind": "weave",
@@ -1740,73 +3107,213 @@
           192
         ],
         "target": [
-          1192,
-          120
-        ],
-        "dash_frame": 22
-      },
-      {
-        "kind": "dash",
-        "start": [
-          1192,
-          120
-        ],
-        "target": [
-          1272,
+          1184,
           136
-        ]
+        ],
+        "dash_frame": 18
       },
       {
-        "kind": "dash",
+        "kind": "chain",
         "start": [
-          1272,
+          1184,
           136
         ],
         "target": [
-          1352,
-          120
-        ]
+          1272,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 1150
+          },
+          {
+            "steer": 1272
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
       },
       {
         "kind": "dash",
         "start": [
-          1352,
-          120
+          1280,
+          176
+        ],
+        "target": [
+          1336,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          1336,
+          168
         ],
         "target": [
           1424,
-          144
-        ]
+          160
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       }
     ],
     "crumbles": [
       [
-        144,
+        128,
         216,
-        40
+        56
       ],
       [
-        224,
-        200,
-        40
-      ],
-      [
-        1176,
-        120,
-        40
-      ],
-      [
-        1256,
-        136,
-        40
-      ],
-      [
-        1336,
-        120,
-        40
+        1320,
+        168,
+        32
       ]
     ],
     "optional_routes": [],
+    "reward_routes": [
+      {
+        "kind": "spring_dash",
+        "start": [
+          80,
+          288
+        ],
+        "target": [
+          160,
+          216
+        ],
+        "dash_frame": 18
+      },
+      {
+        "kind": "chain",
+        "start": [
+          168,
+          216
+        ],
+        "target": [
+          328,
+          216
+        ],
+        "segments": [
+          {
+            "steer": 240,
+            "dash": [
+              10,
+              "ur"
+            ]
+          },
+          {
+            "steer": 328,
+            "dash": [
+              22,
+              "r"
+            ]
+          }
+        ],
+        "walk": false,
+        "jump_hold": 60
+      },
+      {
+        "kind": "weave",
+        "carpet": 408,
+        "start": [
+          360,
+          216
+        ],
+        "islands": [
+          [
+            480,
+            40,
+            216
+          ],
+          [
+            680,
+            56,
+            192
+          ],
+          [
+            904,
+            40,
+            216
+          ]
+        ],
+        "target": [
+          1072,
+          192
+        ],
+        "jump_x": 1024,
+        "speed": 56,
+        "reward_lanes": [
+          [
+            586,
+            612,
+            186
+          ]
+        ]
+      },
+      {
+        "kind": "spring_dash",
+        "start": [
+          1112,
+          192
+        ],
+        "target": [
+          1184,
+          136
+        ],
+        "dash_frame": 18
+      },
+      {
+        "kind": "chain",
+        "start": [
+          1184,
+          136
+        ],
+        "target": [
+          1272,
+          176
+        ],
+        "segments": [
+          {
+            "steer": 1150
+          },
+          {
+            "steer": 1272
+          }
+        ],
+        "walk": true,
+        "jump_hold": 60
+      },
+      {
+        "kind": "dash",
+        "start": [
+          1280,
+          176
+        ],
+        "target": [
+          1336,
+          168
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      },
+      {
+        "kind": "dash",
+        "start": [
+          1336,
+          168
+        ],
+        "target": [
+          1424,
+          160
+        ],
+        "jump_hold": 60,
+        "dash_up": true
+      }
+    ],
+    "branch_fruit": false,
     "final": true,
     "advanced": true
   }
