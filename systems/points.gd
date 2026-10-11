@@ -78,11 +78,11 @@ var _shown := 0
 func _ready() -> void:
 	_build_hud()
 	# The score is tracked all through play but never SHOWN during it — a final
-	# score is a separate feature, surfaced later. So the HUD stays hidden for the
-	# whole run (title screen and gameplay alike) and nothing turns it back on;
-	# the "+N" tag is a child of this same layer, so it never renders either. The
-	# total, the roll, award() and save/load are all untouched underneath.
-	_hud.visible = false
+	# score is a separate feature, surfaced later. Only the running COUNTER is
+	# hidden; the layer stays visible because the "+N" tag pops on it (hiding the
+	# whole layer is what silently killed the tag, commit e22c2ea5). The total,
+	# the roll, award() and save/load are all untouched underneath.
+	_root.visible = false
 
 
 ## Pay out. `source` is whatever earned it — the tag pops over that, so a fruit
@@ -162,9 +162,7 @@ func _build_hud() -> void:
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_label)
 
-	# Never shown to the player (see _ready) — the score is banked and saved, not
-	# displayed, until a final-score screen surfaces it.
-	_hud.visible = false
+	# The counter itself is hidden in _ready(); the layer carries the "+N" tag.
 	_refresh()
 
 

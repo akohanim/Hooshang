@@ -87,6 +87,10 @@ const FIXED_SIZE := Vector2(16.0, 8.0)
 ## reduced launch_speed above while ~1.2x-ing the airtime: same height, ~20%
 ## slower (measured). See launch_speed's own note for the paired tuning.
 @export var bounce_gravity_scale := 0.77
+## Touching this spring refills his dash (Player.dash_available), same as
+## landing. Off by default so a spring in any other Act is unchanged; the LDtk
+## importer turns it on for Act 2's placements.
+@export var refill_dash := false
 ## How long the compressed frame shows before it starts releasing — the
 ## "under his weight" beat in the reference, held long enough to actually read
 ## as a landing rather than a flicker.
@@ -242,6 +246,8 @@ func _try_launch(body: Node2D) -> void:
 		who.bounce_horizontal(signf(direction.x) * horizontal_launch_speed, bounce_gravity_scale)
 	else:
 		who.bounce(launch_speed, bounce_gravity_scale)
+	if refill_dash:
+		who.dash_available = true
 	_play_bounce()
 	var sound := get_node_or_null("FeedbackSound") as AudioStreamPlayer2D
 	if sound != null and who.state != Player.State.DEAD:sound.play()

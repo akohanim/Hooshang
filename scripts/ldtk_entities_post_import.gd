@@ -108,6 +108,8 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 			# it reuses the same builder — see spring_platform.gd.
 			"SpringPlatform":
 				var spring := _build_platform(data, SPRING_PLATFORM_SCENE)
+				# Only Act 2's LDtk project places springs; they refill the dash.
+				spring.refill_dash = true
 				match _field_enum(data, "Facing"):
 					"Right": spring.rotation_degrees = 90.0
 					"Left": spring.rotation_degrees = -90.0
