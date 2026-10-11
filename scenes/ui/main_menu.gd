@@ -170,6 +170,8 @@ func show_root() -> void:
 	# LOAD GAME directly below; a player with one run should not have to choose.
 	var latest := SaveGame.latest_slot()
 	if latest >= 0:
+		if SaveGame.summary(latest).get("world", "") == "res://ldtk/Act2World.tscn":
+			subtitle.text = "ACT II  —  THE POND"
 		built.append(_row("CONTINUE", _describe(latest, "SLOT %d" % (latest + 1)),
 			func() -> void: _start(func() -> void: SaveGame.resume(latest))))
 	built.append(_row("NEW GAME", "a fresh run, in a slot you pick",
@@ -278,12 +280,13 @@ func _show_levels(i: int) -> void:
 	title.text = "LEVEL SELECT"
 	subtitle.text = "slot %d  —  rooms you have reached" % (i + 1)
 	var built: Array[Dictionary] = []
+	var world_path: String = SaveGame.summary(i).get("world", SaveGame.FIRST_WORLD)
 	for room_name in SaveGame.unlocked_rooms(i):
-		var number := LdtkWorld.index_in_name(room_name) + 1
+		var room_label := SaveGame.room_label(world_path, room_name)
 		# The detail says what a level-select run IS rather than naming the LDtk
 		# level: "ROOM 5 / Level_6" reads as an off-by-one bug report, and the
 		# thing a player needs told here is that this trip does not count.
-		built.append(_row("ROOM %d" % number, "practice run  —  nothing is saved",
+		built.append(_row(room_label, "practice run  —  nothing is saved",
 			func() -> void: _start(func() -> void: SaveGame.practice(i, room_name))))
 	if built.is_empty():
 		built.append(_row("— NOTHING REACHED YET —", "", Callable()))
@@ -296,8 +299,8 @@ func _describe(i: int, when_empty: String) -> String:
 	var card := SaveGame.summary(i)
 	if card.get("empty", true):
 		return "%s  —  empty" % when_empty
-	return "ROOM %d   %d LEMONS   %d DEATHS   %s" % [
-		card["room_number"], card["lemons"], card["deaths"],
+	return "%s   %d LEMONS   %d DEATHS   %s" % [
+		card["room_label"], card["lemons"], card["deaths"],
 		_clock(card["play_seconds"])]
 
 

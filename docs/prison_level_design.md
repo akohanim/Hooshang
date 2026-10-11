@@ -1,5 +1,6 @@
 # The school that became a prison
 
+> Historical first-pass document. The current harder-mechanism revision is [prison_challenge_design.md](prison_challenge_design.md); its scope supersedes the exclusions below.
 Phase 2 • 2026-10-05 • **Review draft; stop before building**
 
 One continuous rescue mission in `ldtk/hooshang_act2.ldtk`, containing **17 LDtk
@@ -450,3 +451,22 @@ hub/spoke and relief-room lessons without copying its room geometry.
 Dimensions, room identifiers, adjacency pairs, key identities and checkpoint
 rules remain as in the original table. The room geometry is still authored in
 LDtk; no runtime route map replaces it.
+
+## Room checkpoints and readable exits — 2026-10-07
+
+This replaces the earlier flag and post-key checkpoint rules. Every prison room
+is a checkpoint automatically. Death returns to the safe entrance used on that
+visit; a key pickup never changes that entrance, and collected keys survive.
+There are no Checkpoint entities in the prison rooms. Legacy saves retain key
+and lock progress; old flag-based checkpoint coordinates are ignored.
+
+Keys now draw at 16×16 pixels above the landing, with a bright ring and an
+explicit color label. Each wing still has one key, in its `03` room. Open exits
+have green direction arrows; closed shortcuts show the required key.
+
+The shelves inside downward doorways were removed. A crossing platform sits
+24px above the floor instead, leaving the full doorway width clear underneath.
+Closed vertical shortcuts block flush with the floor, so the player cannot fall
+into a deep locked shaft. The one-cell recess adjoining G02's downward exit was
+filled. Normal room transitions and safe arrival selection still use the actual
+LDtk adjacency and collision data.

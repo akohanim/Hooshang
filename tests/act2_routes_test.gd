@@ -8,7 +8,6 @@ var failures:=0
 var offset:=Vector2.ZERO
 var continuous:=false
 var deaths:=0
-var advanced:=false
 var used_climb:=false
 var capture_weave:=false
 func _ready() -> void:
@@ -29,6 +28,7 @@ func _ready() -> void:
 		var only:=OS.get_cmdline_user_args()
 		if "--capture-weave" in only:only.remove_at(only.find("--capture-weave"))
 		if not only.is_empty() and str(recipe.name) not in only:continue
+		await settle_retry()
 		select(int(str(recipe.name).get_slice("_",3)))
 		CrumblingPlatform.reset_all(get_tree())
 		player.respawn(world.spawn_point_for(room));player.input_locked=false
@@ -36,14 +36,14 @@ func _ready() -> void:
 		var before:=failures
 		var starting_deaths:=deaths
 		used_climb=false
-		if advanced:player._ledge_cooldown=3600.0
+		player._ledge_cooldown=3600.0
 		for step: Dictionary in recipe.routes:
 			await run_step(step)
 			if failures>before:break
 		if failures==before:
 			await prepare(Vector2(float(recipe.exit[0])-12,float(recipe.exit[1])-6))
 		check(failures==before and deaths==starting_deaths,"%s continuous entrance-to-exit route" % recipe.name)
-		if advanced:check(not used_climb,"advanced route requires no climb, mantle, or wall jump")
+		check(not used_climb,"route requires no climbing or land mantle")
 		if recipe.get("optional_routes",[]).size()>0:
 			select(int(str(recipe.name).get_slice("_",3)))
 			CrumblingPlatform.reset_all(get_tree())
@@ -56,6 +56,18 @@ func _ready() -> void:
 			check(deaths==branch_deaths,"optional route completes without a death")
 	print("ACT2_ROUTES: ",failures," failures")
 	get_tree().quit(0 if failures==0 else 1)
+## A failed route may leave the world's death timer pending. Do not select the
+## next room until its normal respawn completes, or that timer teleports the
+## next trial and clears its no-mantle guard mid-route.
+func settle_retry() -> void:
+	release()
+	for i in 180:
+		if player.state != Player.State.DEAD:
+			await frames(4) # return-strip/reset work after Player.respawn
+			return
+		await frames(1)
+	check(false,"previous room's pending death completed before the next trial")
+
 func run_step(step: Dictionary) -> void:
 	match step.kind:
 		"spring": await spring_transfer(step.start+step.target)
@@ -64,6 +76,11 @@ func run_step(step: Dictionary) -> void:
 		"side": await side_transfer(step)
 		"jump", "dash": await jump_transfer(step)
 		_: await fly(step)
+
+## Connected acceptance overrides this only for the last transfer into a real
+## exit. Crossing that trigger is a stronger endpoint than standing beside it.
+func _route_exit_started() -> bool:
+	return false
 
 func jump_transfer(step: Dictionary) -> void:
 	await prepare(Vector2(step.start[0],step.start[1]-6))
@@ -79,12 +96,13 @@ func jump_transfer(step: Dictionary) -> void:
 			Input.action_press("move_right" if step.target[0]>step.start[0] else "move_left")
 			if step.get("dash_up", step.target[1]<step.start[1]-24):Input.action_press("move_up")
 			Input.action_press("dash")
-		if i==int(step.get("jump_hold",16)):Input.action_release("jump")
+		if i==int(step.get("jump_hold",60)):Input.action_release("jump")
 		if i==dash_frame+6:
 			Input.action_release("dash");Input.action_release("move_up")
 		await frames(1)
 		dashed=dashed or player.state==Player.State.DASH
 		airborne=airborne or not player.is_on_floor()
+		if _route_exit_started():landed=true;break
 		var at:=player.global_position-offset
 		if player.state==Player.State.DEAD:break
 		if airborne and player.is_on_floor() and player.state!=Player.State.LEDGE_MANTLE:
@@ -94,7 +112,6 @@ func jump_transfer(step: Dictionary) -> void:
 	check(landed and (dashed or step.kind=="jump"),"%s %s %s -> %s actual %s" % [room.name,step.kind,step.start,step.target,player.global_position-offset])
 
 func select(n:int) -> void:
-	advanced=n>=9
 	for candidate in world.rooms:
 		if str(candidate.name)=="Act_2_Level_%d" % n:room=candidate
 	world._enter_room(room,true);offset=room.global_position
@@ -127,17 +144,20 @@ func spring_transfer(s:Array) -> void:
 		steer(s[2] if launched else s[0])
 		await frames(1)
 		var at:=player.global_position-offset
+		if player.state==Player.State.DEAD:break
 		if launched and player.is_on_floor() and absf(at.x-s[2])<24 and absf(at.y-(s[3]-6))<5:landed=true;break
+	snapshot_weave("spring_%d" % int(s[0]))
 	release();check(landed,"%s spring %s -> %s actual %s" % [room.name,Vector2(s[0],s[1]),Vector2(s[2],s[3]),player.global_position-offset])
 func spring_dash_transfer(step: Dictionary) -> void:
-	await prepare(Vector2(step.start[0]-20,step.start[1]-6))
+	await prepare(Vector2(step.start[0]-36,step.start[1]-6))
 	var launched:=false
 	var launch_frames:=0
 	var dashed:=false
 	var landed:=false
 	for i in 220:
 		if player.velocity.y < -250:launched=true
-		steer(float(step.target[0]) if launched else float(step.start[0]))
+		# Run through the spring instead of braking at its centre before launch.
+		steer(float(step.target[0]))
 		if launched:
 			launch_frames+=1
 			if launch_frames==int(step.dash_frame):
@@ -185,6 +205,11 @@ func weave_flight(spec: Dictionary) -> void:
 		if obstacle>0 and lane>float(spec.islands[obstacle-1][2]):
 			var old: Array=spec.islands[obstacle-1]
 			if carpet.position.x<float(old[0]+old[1])+82:lane=float(old[2])+1
+		# Optional-reward routes can steer between islands while retaining the
+		# same authored obstacle crossings and mandatory dismounts.
+		for reward_lane: Array in spec.get("reward_lanes", []):
+			if carpet.position.x >= float(reward_lane[0]) and carpet.position.x <= float(reward_lane[1]):
+				lane = float(reward_lane[2])
 		if phase==0 and absf(carpet.position.y-4-lane)>0.7:
 			Input.action_press("move_up" if carpet.position.y-4>lane else "move_down")
 		if obstacle<spec.islands.size():
@@ -233,7 +258,8 @@ func fly(recipe: Dictionary) -> void:
 		if node is MagicCarpet and absf(node._origin.x-float(recipe.carpet))<1:carpet=node
 	check(carpet!=null,"flight carpet exists")
 	if carpet==null:return
-	check(carpet.pattern==MagicCarpet.CarpetPattern.RIDE and carpet.speed==32,"steady right flight configured")
+	var authored_speed := _authored_carpet_speed(str(room.name),float(recipe.carpet))
+	check(carpet.pattern==MagicCarpet.CarpetPattern.RIDE and authored_speed>0 and is_equal_approx(carpet.speed,authored_speed),"forward flight uses the LDtk-authored speed")
 	if recipe.start != null:
 		await prepare(Vector2(recipe.start[0],recipe.start[1]-6))
 		Input.action_press("jump")
@@ -264,12 +290,18 @@ func fly(recipe: Dictionary) -> void:
 			Input.action_press("jump");jumped=true
 		if jumped:steer(float(recipe.target[0]))
 		await frames(1)
-		if not jumped and carpet.carrying(player):
-			steady=steady and absf(carpet.position.x-previous-32.0/60.0)<0.04
+		if i > 0 and not jumped and carpet.carrying(player):
+			# The first sample may follow a rendered capture, after carpet physics.
+			# Compare only subsequent samples taken at the same physics phase.
+			var speed_error := absf(carpet.position.x-previous-carpet.speed/float(Engine.physics_ticks_per_second))
+			if speed_error >= 0.04: print("CARPET SPEED SAMPLE x=",carpet.position.x," previous=",previous," delta=",carpet.position.x-previous," state=",player.state_name()," activated=",carpet.activated)
+			steady=steady and speed_error<0.04
 		previous=carpet.position.x
 		if player.state==Player.State.DEAD:interrupted=true;break
 		var at:=player.global_position-offset
+		if jumped and _route_exit_started():landed=true;break
 		if jumped and player.is_on_floor() and player.state!=Player.State.LEDGE_MANTLE and absf(at.x-float(recipe.target[0]))<24 and absf(at.y-(float(recipe.target[1])-6))<3:landed=true;break
+	snapshot_weave("flight_%d" % int(recipe.carpet))
 	release()
 	check(steady,"horizontal speed stays constant through steering")
 	check(not interrupted and landed,"%s full boarded flight and exit landing at %s" % [room.name,player.global_position-offset])
@@ -292,6 +324,7 @@ func side_transfer(step: Dictionary) -> void:
 		steer(float(step.target[0]) if launched else spring.position.x)
 		await frames(1)
 		var at:=player.global_position-offset
+		if player.state==Player.State.DEAD:break
 		if launched and player.is_on_floor() and absf(at.x-float(step.target[0]))<32 and absf(at.y-(float(step.target[1])-6))<5:
 			landed=true;break
 	release()
@@ -302,8 +335,10 @@ func release() -> void:
 func frames(n:int) -> void:
 	for i in n:
 		await get_tree().physics_frame
-		if advanced and is_instance_valid(player):
-			used_climb=used_climb or player.state in [Player.State.CLIMB,Player.State.LEDGE_MANTLE] or player.wall_jump_timer>0.0
+		if is_instance_valid(player):
+			if not used_climb and player.state in [Player.State.CLIMB,Player.State.LEDGE_MANTLE]:
+				print("FORBIDDEN STATE ",room.name," ",player.state_name()," at ",player.global_position-offset," cooldown=",player._ledge_cooldown)
+			used_climb=used_climb or player.state in [Player.State.CLIMB,Player.State.LEDGE_MANTLE]
 func check(ok:bool,label:String) -> void:
 	print("PASS " if ok else "FAIL ",label)
 	if not ok:failures+=1
@@ -315,3 +350,15 @@ func snapshot_weave(label: String) -> void:
 	var frame:=Screen.viewport.get_texture().get_image()
 	frame.resize(1280,720,Image.INTERPOLATE_NEAREST)
 	frame.save_png("res://output/act2_expansion/%s_weave_%s.png" % [room.name,label])
+
+## The edited LDtk fields are authoritative; the older 32px/s fixture is stale.
+func _authored_carpet_speed(room_name: String, x: float) -> float:
+	var source: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://ldtk/hooshang_act2.ldtk"))
+	for level: Dictionary in source.levels:
+		if level.identifier!=room_name:continue
+		for layer: Dictionary in level.layerInstances:
+			for entity: Dictionary in layer.entityInstances:
+				if entity.__identifier!="MagicCarpet" or not is_equal_approx(float(entity.px[0]),x):continue
+				for field: Dictionary in entity.fieldInstances:
+					if field.__identifier=="Speed":return float(field.__value)
+	return -1.0

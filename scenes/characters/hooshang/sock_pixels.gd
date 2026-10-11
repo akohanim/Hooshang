@@ -3,7 +3,8 @@ extends Node2D
 ## facing changes, swimming rotation and Juice's squash/stretch. No new art:
 ## source frame coordinates come from the same Aseprite export as SpriteFrames.
 
-@onready var _visual: AnimatedSprite2D = get_parent().get_node("SpriteSquash/Visual")
+@export var visual_path: NodePath = ^"SpriteSquash/Visual"
+@onready var _visual: AnimatedSprite2D = get_parent().get_node(visual_path)
 
 
 func _process(_delta: float) -> void:
@@ -14,7 +15,7 @@ func _draw() -> void:
 	if not is_instance_valid(_visual) or not _visual.is_visible_in_tree():
 		return
 	var frames := _visual.sprite_frames
-	if not frames.get_meta("child_hooshang", false):
+	if not frames.has_meta("sock_pixels"):
 		return
 	var clips: Dictionary = frames.get_meta("sock_pixels", {})
 	var positions: Array = clips.get(String(_visual.animation), [])

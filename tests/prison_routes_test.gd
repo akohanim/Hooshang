@@ -25,7 +25,10 @@ func _ready() -> void:
 			# These rooms enter through a seam, not their debug PlayerSpawn.
 			var start: Vector2=world.spawn_point_for(room)
 			if name=="Prison_R02": start=room.global_position+Vector2(292,154)
-			if name=="Prison_G01": start=room.global_position+Vector2(100,170)
+			if name=="Prison_G01":
+				for portal in world.portals:
+					if portal.to==room and str(portal.from.name)=="Prison_Hub":
+						start=world._safe_landing(room,portal.center+portal.direction*24)
 			world.player.respawn(start)
 			await frames(20)
 			var success:=true

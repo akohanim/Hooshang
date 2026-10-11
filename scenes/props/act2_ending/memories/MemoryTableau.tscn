@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/props/act2_ending/memories/memory_tableau.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/poem_first_line.png" id="2"]
+[node name="Memory" type="Node2D"]
+script = ExtResource("1")
+[node name="Painting" type="TextureRect" parent="."]
+show_behind_parent = true
+texture_filter = 2
+offset_right = 320.0
+offset_bottom = 180.0
+mouse_filter = 2
+expand_mode = 1
+[node name="Poem" type="Sprite2D" parent="."]
+position = Vector2(185,82)
+scale = Vector2(0.9,0.9)
+texture = ExtResource("2")
+modulate = Color(0.55,0.62,0.65,0.85)

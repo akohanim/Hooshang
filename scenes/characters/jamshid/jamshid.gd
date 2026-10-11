@@ -4,22 +4,18 @@ extends Node2D
 ## Movement and story timing belong to the scene directing him.
 
 const FACES := {
-	"friendly": preload("res://assets/characters/jamshid/portraits/jamshid_friendly.tres"),
-	"joyful": preload("res://assets/characters/jamshid/portraits/jamshid_joyful.tres"),
-	"worried": preload("res://assets/characters/jamshid/portraits/jamshid_worried.tres"),
-	"sad": preload("res://assets/characters/jamshid/portraits/jamshid_sad.tres"),
-	"determined": preload("res://assets/characters/jamshid/portraits/jamshid_determined.tres"),
-	# A state the script asks for that has no drawing of its own, pointed at the
-	# nearest one that does — the same aliasing Act1Beats.FACES uses, and listed
-	# here rather than having the beat just say "joyful", because the beat is
-	# where the ACTING is described: when the sheet grows an excited face this
-	# gets its own art and not one line of dialogue moves.
-	"excited": preload("res://assets/characters/jamshid/portraits/jamshid_joyful.tres"),
+	"friendly": preload("res://assets/characters/jamshid/portraits_v2/jamshid_friendly.png"),
+	"joyful": preload("res://assets/characters/jamshid/portraits_v2/jamshid_joyful.png"),
+	"worried": preload("res://assets/characters/jamshid/portraits_v2/jamshid_worried.png"),
+	"sad": preload("res://assets/characters/jamshid/portraits_v2/jamshid_sad.png"),
+	"determined": preload("res://assets/characters/jamshid/portraits_v2/jamshid_determined.png"),
+	"excited": preload("res://assets/characters/jamshid/portraits_v2/jamshid_excited.png"),
 }
-const SOURCE_HEIGHT := {"idle": 740.0, "walk": 500.0, "sit": 800.0, "jump": 429.0}
+const NATIVE_HEIGHT := 15.0
+const SOURCE_SCALE := 0.375
 
 ## Standing height in world pixels; sitting and crouching stay proportionally lower.
-@export_range(8.0, 64.0, 1.0) var standing_height := 16.0
+@export_range(8.0, 64.0, 1.0) var standing_height := 15.0
 ## Pose to play when this actor enters the scene.
 @export_enum("idle", "walk", "sit", "jump") var initial_pose := "idle"
 ## Start facing left; every source frame faces right.
@@ -35,10 +31,12 @@ func _ready() -> void:
 
 
 func play_pose(pose: String) -> void:
-	if not SOURCE_HEIGHT.has(pose):
+	if not visual.sprite_frames.has_animation(pose):
 		push_warning("Unknown Jamshid pose: " + pose)
 		return
-	var factor: float = standing_height / SOURCE_HEIGHT[pose]
+	var ratio: float = standing_height / NATIVE_HEIGHT
+	var factor: float = SOURCE_SCALE * ratio
+	visual.position.y = -6.0 * ratio
 	visual.scale = Vector2(-factor if facing_left else factor, factor)
 	visual.play(pose)
 

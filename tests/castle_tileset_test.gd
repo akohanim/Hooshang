@@ -11,7 +11,7 @@ func _ready() -> void:
 		if definition.identifier in ["Act2CastleMasonry", "Act2CastleDecor"]:
 			sheets[definition.identifier] = definition
 	check(sheets.size() == 2, "both castle sheets are registered")
-	var layer_names := ["CastleTerrain", "CastleBackground", "CastleDecor"]
+	var layer_names := ["CastleTerrain", "CastleBackground", "CastleDecor", "PrisonMasonry"]
 	for definition: Dictionary in source.levels:
 		var room := imported.get_node(NodePath(definition.identifier))
 		for layer_name: String in layer_names:
@@ -19,9 +19,27 @@ func _ready() -> void:
 			check(layer != null, definition.identifier + " has " + layer_name)
 			if layer == null: continue
 			check(layer.tile_set.tile_size == Vector2i(8, 8), "castle layer uses the 8px grid")
-			check(layer.collision_enabled == (layer_name == "CastleTerrain"), "correct solid/scenery collision")
-			if layer_name != "CastleTerrain":
+			# Prison physics comes exclusively from the semantic Collision IntGrid.
+			# CastleTerrain is unused there; do not silently permit inert masonry.
+			var prison: bool = str(definition.identifier).begins_with("Prison_")
+			check(layer.collision_enabled == (layer_name == "CastleTerrain" and not prison), "correct solid/scenery collision")
+			if prison and layer_name == "CastleTerrain":
+				check(layer.get_used_cells().is_empty(), "prison solids must use semantic Collision")
+			if layer_name in ["CastleBackground", "CastleDecor"]:
 				check(layer.z_index < 0, "castle scenery draws behind the player")
+				for nested in layer.find_children("*", "TileMapLayer", true, false):
+					check(not nested.collision_enabled, "overlapping scenery stamps stay pass-through")
+			# Transparency alternatives added during import once disappeared on disk
+			# reload: source cell counts passed while whole walls rendered as sky.
+			for cell in layer.get_used_cells():
+				check(layer.get_cell_tile_data(cell) != null, "saved tile has valid atlas data: " + layer_name)
+			if layer_name == "PrisonMasonry":
+				var solid_count := 0
+				for source_layer: Dictionary in definition.layerInstances:
+					if source_layer.__identifier == "Collision":
+						for value in source_layer.intGridCsv:
+							if value == 1: solid_count += 1
+				check(layer.get_used_cells().size() == solid_count, "masonry covers exactly the semantic solids")
 	var first_room := imported.get_node(NodePath(source.levels[0].identifier))
 	for i in layer_names.size():
 		var template := first_room.get_node(NodePath(layer_names[i])) as TileMapLayer

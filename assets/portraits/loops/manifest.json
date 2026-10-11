@@ -33,47 +33,47 @@
   },
   "rumi_sorrowful": {
     "sheet": "rumi_sorrowful_sheet.png",
-    "frames": 6,
+    "frames": 6.0,
     "frame_size": [
       256.0,
       256.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      2,
-      3,
-      2,
-      1,
-      4,
-      2,
-      3,
-      1
+      2.0,
+      3.0,
+      2.0,
+      1.0,
+      4.0,
+      2.0,
+      3.0,
+      1.0
     ],
-    "blink": 5,
+    "blink": 5.0,
     "authored_roles": true,
     "source": "rumi_speech_v2"
   },
   "rumi_urgent": {
     "sheet": "rumi_urgent_sheet.png",
-    "frames": 5,
+    "frames": 5.0,
     "frame_size": [
       256.0,
       256.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      2,
-      3,
-      2,
-      1,
-      4,
-      2,
-      3,
-      1
+      2.0,
+      3.0,
+      2.0,
+      1.0,
+      4.0,
+      2.0,
+      3.0,
+      1.0
     ],
     "authored_roles": true,
     "source": "rumi_speech_v2"
@@ -530,89 +530,104 @@
     "pixel_art": true
   },
   "jamshid_friendly": {
-    "sheet": "../../characters/jamshid/source/jamshid_friendly.png",
-    "frames": 4.0,
+    "sheet": "jamshid_friendly_sheet.png",
+    "frames": 4,
     "frame_size": [
-      443.5,
-      887.0
+      512,
+      512
     ],
-    "fps": 8.0,
+    "fps": 8,
     "loop": true,
-    "rest": 0.0,
+    "rest": 0,
     "talk": [
-      1.0,
-      2.0
+      1,
+      2
     ],
-    "blink": 3.0,
-    "authored_roles": true
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "jamshid_friendly"
   },
   "jamshid_joyful": {
-    "sheet": "../../characters/jamshid/source/jamshid_joyful.png",
-    "frames": 4.0,
+    "sheet": "jamshid_joyful_sheet.png",
+    "frames": 4,
     "frame_size": [
-      443.5,
-      887.0
+      512,
+      512
     ],
-    "fps": 8.0,
+    "fps": 8,
     "loop": true,
-    "rest": 0.0,
+    "rest": 0,
     "talk": [
-      1.0,
-      2.0
+      1,
+      2
     ],
-    "blink": 3.0,
-    "authored_roles": true
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "jamshid_joyful"
   },
   "jamshid_worried": {
-    "sheet": "../../characters/jamshid/source/jamshid_worried.png",
-    "frames": 4.0,
+    "sheet": "jamshid_worried_sheet.png",
+    "frames": 4,
     "frame_size": [
-      443.5,
-      887.0
+      512,
+      512
     ],
-    "fps": 8.0,
+    "fps": 8,
     "loop": true,
-    "rest": 0.0,
+    "rest": 0,
     "talk": [
-      1.0,
-      2.0
+      1,
+      2
     ],
-    "blink": 3.0,
-    "authored_roles": true
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "jamshid_worried"
   },
   "jamshid_sad": {
-    "sheet": "../../characters/jamshid/source/jamshid_sad.png",
-    "frames": 4.0,
+    "sheet": "jamshid_sad_sheet.png",
+    "frames": 4,
     "frame_size": [
-      443.5,
-      887.0
+      512,
+      512
     ],
-    "fps": 8.0,
+    "fps": 8,
     "loop": true,
-    "rest": 0.0,
+    "rest": 0,
     "talk": [
-      1.0,
-      2.0
+      1,
+      2
     ],
-    "blink": 3.0,
-    "authored_roles": true
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "jamshid_sad"
   },
   "jamshid_determined": {
-    "sheet": "../../characters/jamshid/source/jamshid_determined.png",
-    "frames": 4.0,
+    "sheet": "jamshid_determined_sheet.png",
+    "frames": 4,
     "frame_size": [
-      443.5,
-      887.0
+      512,
+      512
     ],
-    "fps": 8.0,
+    "fps": 8,
     "loop": true,
-    "rest": 0.0,
+    "rest": 0,
     "talk": [
-      1.0,
-      2.0
+      1,
+      2
     ],
-    "blink": 3.0,
-    "authored_roles": true
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "jamshid_determined"
   },
   "hooshang_confused": {
     "sheet": "hooshang_confused_sheet.png",
@@ -818,5 +833,145 @@
     ],
     "source": "pixel_v2",
     "pixel_art": true
+  },
+  "childhooshang_neutral": {
+    "sheet": "childhooshang_neutral_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "childhooshang_neutral"
+  },
+  "childhooshang_happy": {
+    "sheet": "childhooshang_happy_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "childhooshang_happy"
+  },
+  "childhooshang_sad": {
+    "sheet": "childhooshang_sad_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "childhooshang_sad"
+  },
+  "childhooshang_surprised": {
+    "sheet": "childhooshang_surprised_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "childhooshang_surprised"
+  },
+  "childhooshang_annoyed": {
+    "sheet": "childhooshang_annoyed_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "childhooshang_annoyed"
+  },
+  "childhooshang_vulnerable": {
+    "sheet": "childhooshang_vulnerable_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "childhooshang_vulnerable"
+  },
+  "jamshid_excited": {
+    "sheet": "jamshid_excited_sheet.png",
+    "frames": 4,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 8,
+    "loop": true,
+    "rest": 0,
+    "talk": [
+      1,
+      2
+    ],
+    "blink": 3,
+    "authored_roles": true,
+    "pixel_art": true,
+    "source": "act2_children_v2",
+    "voice_key": "jamshid_joyful"
   }
 }

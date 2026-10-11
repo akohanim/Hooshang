@@ -30,14 +30,26 @@ func _ready() -> void:
 	await frames(90)
 	Input.action_release("move_right")
 	await frames(45)
-	check(str(world.current_room.name)=="Prison_Hub" and not finale.get_node("SkyGarden")._finished,"room 13 leads into the prison without a premature finale")
+	check(str(world.current_room.name)=="Act_2_Level_14" and not Game.completed,
+		"room 13 leads into the castle approach without completing the act")
+	check(finale.get_node("SkyGarden").get_child_count()==0,
+		"leaving the final garden adds no premature completion banner")
+	# The approach now has a real story encounter. Finish its retained control
+	# ownership before this doorway fixture changes rooms for the return sweep.
+	for i in 360:
+		if not world.player.input_locked and not world._transitioning:break
+		Input.action_press("skip_dialogue")
+		await frames(1)
+	Input.action_release("skip_dialogue")
+	check(not world.player.input_locked,"castle encounter releases controls through ordinary skip input")
 	# Independently retain the pre-prison return-chain acceptance test.
 	world._enter_room(finale,true)
 	world.player.respawn(world.spawn_point_for(finale))
 	world._arm_return(world._room_before(finale))
 	for candidate in world.rooms:
 		if str(candidate.name)=="Act_2_Level_8":
-			check(not candidate.get_node("SkyGarden")._finished,"room 8 continues without a premature completion")
+			check(candidate.get_node("SkyGarden").get_child_count()==0,
+				"room 8 continues without a premature completion banner")
 	for n in range(13,3,-1):
 		var room:=world.current_room
 		world.player.respawn(world.spawn_point_for(room))
@@ -48,8 +60,12 @@ func _ready() -> void:
 			if world.current_room!=room:break
 		Input.action_release("move_left")
 		await frames(40)
-		check(str(world.current_room.name)=="Act_2_Level_%d" % (n-1),"actual return doorway reaches room "+str(n-1))
+		check(str(world.current_room.name)=="Act_2_Level_%d" % (n-1),
+			"actual return doorway reaches room %d [actual %s, position %s, state %s, locked %s, armed %s, transition %s]" % [
+				n-1,world.current_room.name,world.player.global_position-world.current_room.global_position,
+				world.player.state_name(),world.player.input_locked,world._return_armed,world._transitioning])
 		check(world.player.is_on_floor(),"return lands clear of the destination trigger, on solid ground")
+		if str(world.current_room.name)!="Act_2_Level_%d" % (n-1):break
 	check(world._return_zone.global_position.x<world.room_rect(world.current_room).get_center().x,"legacy tall-room portal keeps the new room's return at its entrance")
 	print("ACT2_PROGRESSION: ",failures," failures")
 	get_tree().quit(0 if failures==0 else 1)

@@ -10,6 +10,10 @@ func _ready() -> void:
 	SaveGame.unbind()
 	var world = load("res://ldtk/Act2World.tscn").instantiate()
 	world.debug_start_room = "Prison_Hub"
+	# This fixture grants rescue solely to exercise every unlocked portal.
+	# The authored reunion otherwise begins and locks input for dialogue.
+	# Its real playback/skip contract is covered by cell_reunion_test.
+	world.get_node("CellReunion").free()
 	add_child(world)
 	await frames(12)
 	world.collected.assign(world.IDS)
@@ -17,7 +21,27 @@ func _ready() -> void:
 	world.rescued = true
 	world.rescue_started = true
 	world._refresh()
+	var expected: Dictionary={}
+	for wing in ["R","G","B","Y"]:
+		var route=["Prison_Hub","Prison_%s01" % wing,"Prison_%s02" % wing,"Prison_%s03" % wing,"Prison_%s04" % wing,"Prison_Hub"]
+		for i in range(route.size()-1):
+			for pair in [[route[i],route[i+1]],[route[i+1],route[i]]]:
+				expected[pair[0]+">"+pair[1]]=["Red","Green","Blue","Gold"][["R","G","B","Y"].find(wing)] if i>=3 else ""
+	var actual: Dictionary={}
 	for portal in world.portals:
+		var edge=str(portal.from.name)+">"+str(portal.to.name)
+		check(not actual.has(edge),"no duplicate portal "+edge)
+		actual[edge]=portal.gate
+	check(actual==expected,"exact directed room pairs and key gates match all four loops")
+	for prop in world.props:
+		if prop.kind=="TimedGate":
+			world.timers.start(prop.puzzle_id)
+			world.timers.bank(prop.puzzle_id)
+		elif prop.kind in ["CircuitNode","FloodValve"]:
+			world.circuits.touch(prop.circuit_id,prop.entity_iid)
+	var crossings:=0
+	for portal in world.portals:
+		crossings+=1
 		world._enter_room(portal.from,true)
 		world.player.respawn(world.spawn_point_for(portal.from))
 		world._portal_cooldown = 0.0
@@ -33,10 +57,12 @@ func _ready() -> void:
 		check(world.room_rect(portal.to).encloses(world.player.hitbox_rect()),"arrival body clear of world boundary")
 		await frames(45)
 		check(world.current_room == portal.to,"idle must not bounce through return")
+		var checkpoint: Vector2=world._checkpoint
 		world.player.die()
 		await frames(90)
 		check(world.current_room == portal.to and world.player.state != Player.State.DEAD,"death keeps destination checkpoint")
+		check(world._checkpoint==checkpoint,"death preserves the room entry checkpoint")
 	world.queue_free()
 	await frames(3)
-	print("PRISON PORTALS: 40 crossings/idle/death checks; ",failures," failures")
+	print("PRISON PORTALS: ",crossings," expected crossings/idle/death checks; ",failures," failures")
 	get_tree().quit(1 if failures else 0)

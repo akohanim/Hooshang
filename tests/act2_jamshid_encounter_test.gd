@@ -153,6 +153,7 @@ func _run() -> void:
 	_check(settled, "the cutscene finishes and returns control")
 	if settled:
 		_check(not world.player.input_locked, "...control is the player's again at the end")
+		_check(bool(world.get("story_flags").get("pond_dawn", false)), "full playback banks the same departure flag as skip")
 		# Ended at dawn: warm/pale, red back over blue.
 		_check(canvas_mod == null or canvas_mod.color.r >= canvas_mod.color.b,
 			"...and the sky has come round to dawn  [r %.2f b %.2f]"

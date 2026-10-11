@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="Script" path="res://scenes/props/friendly_chase/chase_room.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/plaster.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/poem_first_line.png" id="3"]
+[node name="ChaseRoom" type="Node2D"]
+script = ExtResource("1")
+[node name="Wall" type="Node2D" parent="."]
+position = Vector2(128,200)
+z_index = -1
+[node name="Plaster" type="Sprite2D" parent="Wall"]
+position = Vector2(0,-104)
+texture = ExtResource("2")
+centered = false
+[node name="Poem" type="Sprite2D" parent="Wall"]
+position = Vector2(38,-92)
+texture = ExtResource("3")
+centered = false

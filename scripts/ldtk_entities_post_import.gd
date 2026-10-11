@@ -171,6 +171,21 @@ func post_import(entity_layer: LDTKEntityLayer) -> LDTKEntityLayer:
 				entity_layer.add_child(
 					_build_conveyor_belt(data, ConveyorBelt.Direction.LEFT))
 			# Act 2's rideable flying carpet — see _build_magic_carpet.
+			"FinaleMark":
+				var mark := Marker2D.new()
+				mark.position = data.position
+				mark.set_meta("finale_role", _field_str(data,"Role"))
+				entity_layer.add_child(mark)
+			"ChaseGuide":
+				var guide := preload("res://scenes/characters/jamshid/Jamshid.tscn").instantiate()
+				guide.position = data.position
+				guide.set_meta("chase_guide", true)
+				entity_layer.add_child(guide)
+			"Act2StoryScene":
+				var story := preload("res://scenes/props/school_wall/SchoolStory.tscn").instantiate()
+				story.position = data.position
+				story.chapter = _field_str(data, "Chapter")
+				entity_layer.add_child(story)
 			"MagicCarpet":
 				entity_layer.add_child(_build_magic_carpet(data))
 			# Act 2's quest key — see _build_key.

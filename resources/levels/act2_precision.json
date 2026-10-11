@@ -1,0 +1,614 @@
+[
+  {
+    "name": "Prison_Hub",
+    "title": "The Four Courtyards",
+    "idea": "Choose a wing; broad terraces reconnect the school around Jamshid.",
+    "paths": [],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_R01",
+    "title": "Terracotta Switchback",
+    "idea": "Dash onto a raised shelf, countersteer, then transfer down through the open arch.",
+    "paths": [
+      [
+        [
+          296,
+          160
+        ],
+        [
+          224,
+          128
+        ],
+        [
+          152,
+          104
+        ],
+        [
+          80,
+          136
+        ],
+        [
+          24,
+          160
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_R02",
+    "title": "The Broken Stair",
+    "idea": "Alternate leftward rise and controlled descent into the lower classroom.",
+    "paths": [
+      [
+        [
+          296,
+          160
+        ],
+        [
+          232,
+          128
+        ],
+        [
+          160,
+          96
+        ],
+        [
+          88,
+          128
+        ],
+        [
+          48,
+          160
+        ],
+        [
+          80,
+          176
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_R03",
+    "title": "Red Seal",
+    "idea": "Brake on descending shelves, collect the seal, then dash back into daylight.",
+    "paths": [
+      [
+        [
+          80,
+          24
+        ],
+        [
+          128,
+          56
+        ],
+        [
+          88,
+          104
+        ],
+        [
+          168,
+          136
+        ],
+        [
+          248,
+          112
+        ],
+        [
+          296,
+          160
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_R04",
+    "title": "Lintel Run",
+    "idea": "A short low-ceiling jump rhythm after the long descent.",
+    "paths": [
+      [
+        [
+          24,
+          160
+        ],
+        [
+          88,
+          144
+        ],
+        [
+          152,
+          160
+        ],
+        [
+          216,
+          152
+        ],
+        [
+          296,
+          160
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_G01",
+    "title": "Windcatcher",
+    "idea": "Cross the shaft in three ascending diagonal transfers.",
+    "paths": [
+      [
+        [
+          88,
+          176
+        ],
+        [
+          160,
+          136
+        ],
+        [
+          224,
+          96
+        ],
+        [
+          184,
+          56
+        ],
+        [
+          240,
+          24
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_G02",
+    "title": "Windward Walls",
+    "idea": "Alternate wall jumps up the windcatcher, then transfer onto the upper arch.",
+    "paths": [],
+    "water_paths": [],
+    "wall_path": [
+      [
+        240,
+        176
+      ],
+      [
+        280,
+        72
+      ],
+      [
+        296,
+        64
+      ]
+    ]
+  },
+  {
+    "name": "Prison_G03",
+    "title": "Green Seal",
+    "idea": "A descending aerial key line with a safe landing before the return shaft.",
+    "paths": [
+      [
+        [
+          24,
+          64
+        ],
+        [
+          88,
+          88
+        ],
+        [
+          160,
+          120
+        ],
+        [
+          224,
+          144
+        ],
+        [
+          240,
+          176
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_G04",
+    "title": "Falling Leaves",
+    "idea": "Steer between staggered shelves; the same route supports a retreat upward.",
+    "paths": [
+      [
+        [
+          240,
+          24
+        ],
+        [
+          176,
+          80
+        ],
+        [
+          112,
+          112
+        ],
+        [
+          160,
+          144
+        ],
+        [
+          88,
+          176
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_B01",
+    "title": "Qanat Descent",
+    "idea": "Drop into water, swim under the first baffle and over the second, then land dry.",
+    "paths": [
+      [
+        [
+          56,
+          40
+        ],
+        [
+          88,
+          24
+        ]
+      ]
+    ],
+    "water_paths": [
+      [
+        [
+          88,
+          24
+        ],
+        [
+          104,
+          56
+        ],
+        [
+          96,
+          140
+        ],
+        [
+          152,
+          140
+        ],
+        [
+          152,
+          80
+        ],
+        [
+          216,
+          80
+        ],
+        [
+          216,
+          152
+        ],
+        [
+          192,
+          176
+        ]
+      ],
+      [
+        [
+          192,
+          176
+        ],
+        [
+          216,
+          152
+        ],
+        [
+          216,
+          80
+        ],
+        [
+          152,
+          80
+        ],
+        [
+          152,
+          140
+        ],
+        [
+          96,
+          140
+        ],
+        [
+          104,
+          56
+        ],
+        [
+          56,
+          40
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "Prison_B02",
+    "title": "Two Breaths",
+    "idea": "A dry landing separates two submerged direction changes.",
+    "paths": [
+      [
+        [
+          240,
+          56
+        ],
+        [
+          192,
+          24
+        ]
+      ]
+    ],
+    "water_paths": [
+      [
+        [
+          192,
+          24
+        ],
+        [
+          208,
+          72
+        ],
+        [
+          208,
+          88
+        ],
+        [
+          144,
+          88
+        ],
+        [
+          144,
+          144
+        ],
+        [
+          80,
+          144
+        ],
+        [
+          56,
+          120
+        ],
+        [
+          24,
+          160
+        ]
+      ],
+      [
+        [
+          24,
+          160
+        ],
+        [
+          56,
+          120
+        ],
+        [
+          80,
+          144
+        ],
+        [
+          144,
+          144
+        ],
+        [
+          144,
+          88
+        ],
+        [
+          208,
+          88
+        ],
+        [
+          208,
+          72
+        ],
+        [
+          240,
+          56
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "Prison_B03",
+    "title": "Blue Seal",
+    "idea": "Climb out of the last pool, then use a dry diagonal dash to reach the key.",
+    "paths": [
+      [
+        [
+          296,
+          160
+        ],
+        [
+          264,
+          136
+        ],
+        [
+          232,
+          104
+        ],
+        [
+          160,
+          80
+        ],
+        [
+          88,
+          56
+        ],
+        [
+          88,
+          24
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_B04",
+    "title": "The Dry Well",
+    "idea": "A compact rising countersteer sequence returns to the courtyard.",
+    "paths": [
+      [
+        [
+          88,
+          176
+        ],
+        [
+          152,
+          136
+        ],
+        [
+          216,
+          96
+        ],
+        [
+          152,
+          64
+        ],
+        [
+          88,
+          56
+        ],
+        [
+          88,
+          24
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_Y01",
+    "title": "Gilded Rhythm",
+    "idea": "Three committed landings join two broad safe ends.",
+    "paths": [
+      [
+        [
+          24,
+          160
+        ],
+        [
+          96,
+          136
+        ],
+        [
+          176,
+          96
+        ],
+        [
+          248,
+          136
+        ],
+        [
+          296,
+          160
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_Y02",
+    "title": "The High Note",
+    "idea": "Ascend away from the exit, then deliberately drop back to it.",
+    "paths": [
+      [
+        [
+          24,
+          160
+        ],
+        [
+          96,
+          128
+        ],
+        [
+          144,
+          96
+        ],
+        [
+          192,
+          136
+        ],
+        [
+          240,
+          176
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_Y03",
+    "title": "Gold Seal",
+    "idea": "Catch a descending crumble chain and brake on the seal terrace.",
+    "paths": [
+      [
+        [
+          240,
+          24
+        ],
+        [
+          184,
+          80
+        ],
+        [
+          120,
+          112
+        ],
+        [
+          168,
+          144
+        ],
+        [
+          96,
+          160
+        ],
+        [
+          24,
+          160
+        ]
+      ]
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Prison_Y04",
+    "title": "Last Bell",
+    "idea": "Alternate high and low catches before the safe hub.",
+    "paths": [
+      [
+        [
+          296,
+          160
+        ],
+        [
+          232,
+          128
+        ],
+        [
+          160,
+          144
+        ],
+        [
+          88,
+          112
+        ],
+        [
+          24,
+          160
+        ]
+      ]
+    ],
+    "water_paths": []
+  }
+]

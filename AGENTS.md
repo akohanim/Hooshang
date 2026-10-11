@@ -1683,6 +1683,19 @@ Levels 9 and 11 use up-forward dash recipes.
 
 ### Childhood sprite authoring
 
+Jamshid's gameplay counterpart uses the **child** source, not adult Hooshang:
+`assets/characters/jamshid/aseprite/jamshid_child_movement.aseprite` preserves
+all 63 child frames, 24 tags, five editable layers and durations, with green /
+cream / navy clothing and warmer dark hair. Export saved edits using
+`python3 tools/import_jamshid_aseprite.py`; the build script is a one-time
+recipe that replaces hand edits. His actor uses 0.375 scale and a 15px standing
+height, with its origin at the feet. `tests/jamshid_pair_preview.tscn` shows
+all 24 actions beside child Hooshang on the 320×180 viewport; `jamshid_test`
+checks animation parity and `jamshid_outline_render_test` checks both facings
+at gameplay scale (graphical Godot required). The shared SockPixels prefab's
+`visual_path` supports both characters without changing Hooshang's setup.
+
+
 The user explicitly replaced the earlier loose eight-frame interpretation with
 Small Mario's actual facial/body structure and animation language. The editable
 source is `assets/characters/hooshang_child/aseprite/young_hooshang_movement.aseprite`:
@@ -1751,3 +1764,49 @@ Acts keep their atlas presentation. Collider authority remains the painted cells
 See scripts/README.md for the measured Celeste behavior and adaptation details.
 Run `act1_dust_test.tscn` headless and `thought_dust_preview.tscn` windowed; the
 latter catches shader compile failures and holes in connected patches.
+
+
+## Castle authoring reset and child proportions (2026-10-10)
+
+The user has replaced the precision-puzzle goal with manual room design.
+`Prison_*` interiors in Act2 are now empty shells: keep their map positions,
+outer boundaries and paired threshold ledges. Do not regenerate the removed
+puzzles from old scripts or treat the historical precision build as current.
+Cage/keys/Jamshid remain movable design anchors. See
+`docs/castle_authoring_reset.md` for backups and connection evidence.
+
+Both child Aseprite sources now have slimmer proportions and upright seated
+poses, superseding the earlier exact reference silhouette. Frame count, tag
+ranges, timing, colours,15px standing height and physics remain unchanged.
+Use the ordinary exporters for hand edits; the proportion/outline recipes are
+one-time migrations. FishingRod's grip matches the new seated hands.
+
+
+## Act 2 precision redesign (2026-10-11)
+
+The user-requested redesign supersedes the older empty-castle authoring reset above.
+`Prison_*` now contains four authored key loops around a navigable hub. Preserve
+these interiors, the original paired openings, and the room-entry retry supports.
+Garden rooms 3/4/5/7 and finale rooms 16–18 also have revised geometry.
+See `docs/ACT2_REDESIGN.md` for room intentions and verification limitations.
+`tools/rework_act2_precision.py` uses an immutable pre-redesign snapshot and refuses
+to overwrite later source edits using a SHA-256 guard; it is a construction recipe,
+not a routine import step. Use `tools/validate_act2_precision.py` for source checks.
+New gameplay tests are `act2_precision_routes_test`, `act2_precision_mission_test`,
+`act2_precision_portals_test`, `act2_precision_hub_test`,
+`act2_precision_shortcuts_test`, and `act2_final_trials_test` (`-- --retry` tests
+its three interior checkpoints, `-- --capture` records rendered gameplay).
+
+## Act 2 child dialogue portraits (2026-10-11)
+
+Child Hooshang and Jamshid now use six square emotional portraits each, with
+authored speech and blink poses matching Act 1's close-up presentation. Preserve
+the original gameplay Aseprite characters. Sources and prompts live under
+`assets/portraits/source/act2_children_v2/`; its README documents the measured
+row boundaries and `tools/build_act2_child_portraits.gd` packing step. Keep the
+`childhooshang_<emotion>`/`jamshid_<emotion>` basenames for voice and loop routing.
+`jamshid_excited` is distinct art and deliberately maps to the joyful voice pool.
+Later story acting directions live in `resources/dialogue/act2_portrait_directions.json`,
+compiled by `tools/compile_act2_script.py` without changing the author's words.
+The wall, reunion, chase and farewell read each line's `face` field.
+`act2_child_portraits_test` verifies all expressions and captures their UI.

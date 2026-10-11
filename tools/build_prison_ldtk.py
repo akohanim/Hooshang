@@ -164,6 +164,8 @@ def build(rebuild=False):
      # Nonlethal recovery floor: every missed jump has a short way out.
     if wing=='R':
      for j,x in enumerate([224] if index==3 else [164] if index==1 else [144,240]):entity(name,'DarkThought',x,112,{'Motion':'Vertical','Amplitude':18.0,'Speed':1.0,'Phase':float(j)*3.14,'Glow':True})
+    # Fill the one-cell recess that otherwise merges with G02's bottom exit.
+    if wing=='G' and index==2:put(name,28,20,1,3,1)
     # Library challenge lives on the floor; keep transit stair headroom clear.
    if wing=='Y' and index<4:
     # Solid faces, 4-cell channel; two short bursts rather than a tall climb.
@@ -187,11 +189,10 @@ def build(rebuild=False):
    if index==3:
     kx,ky=(296,90) if wing=='B' else (64,154) if wing=='Y' else (288,154)
     entity(name,'Key',kx,ky,{'KeyId':COLORS[wing]},label='key')
-    entity(name,'Checkpoint',kx,ky,{'CheckpointID':'prison_'+wing+'_key'})
    entity(name,'PrisonSign',160,40,{'Text':({'R':'CAFETERIA','G':'LIBRARY','B':'FLOODED BASEMENT','Y':'GYM'}[wing] if index<4 else 'RETURN TO JAMSHID')+'  '+str(index)})
   if name=='Prison_Hub':
    for x,y,label in [(54,120,'< CAFETERIA'),(582,120,'GYM >'),(110,72,'LIBRARY ^'),(449,335,'BASEMENT v')]:entity(name,'PrisonSign',x,y,{'Text':label},label=label)
-  entity(name,'PlayerSpawn',*spawn_xy);entity(name,'Checkpoint',*spawn_xy,{'CheckpointID':name+'_entry'})
+  entity(name,'PlayerSpawn',*spawn_xy)
  # Re-open the authored seams after challenge painting; a hazard must never seal a route.
  for n,ps in portals.items():
   for o,side,x,y,length,gate in ps:
@@ -199,8 +200,7 @@ def build(rebuild=False):
    else:
     wet=side=='s' and n[7:8]=='B' and n[-2:] in ['01','02','03']
     put(n,x,y-3 if side=='s' else y,length,4 if side=='s' else 1,4 if wet else 0)
-    # A locked bottom mouth is a shallow pocket, never a one-way trap.
-    if side=='s' and not wet:put(n,x+1,y-1,2,1,2)
+    if side=='s' and not wet:put(n,x-2,y-6,length+4,1,2)
  # Shortcut EntityRefs are real cross-level refs to the authored Key instance.
  key_entities={}
  for w in COLORS:

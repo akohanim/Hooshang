@@ -4,32 +4,17 @@ extends Node2D
 const FONT := preload("res://assets/fonts/pixel5x7.fnt")
 const SHEET := preload("res://assets/props/sky_gardens/ornaments.png")
 var _clock := 0.0
-var _finished := false
-var _checkpoints: Array[Checkpoint] = []
 
 func _ready() -> void:
 	var room := get_parent()
 	for node in get_tree().get_nodes_in_group("checkpoint"):
 		if room.is_ancestor_of(node):
 			node._visual.hide()
-			_checkpoints.append(node)
 	for node in get_tree().get_nodes_in_group("exit"):
 		if room.is_ancestor_of(node):
 			var sign := node.get_node_or_null("ExitSign")
 			if sign != null: sign.hide()
-			if recipe.get("final",false): node.body_entered.connect(_complete)
 	queue_redraw()
-
-func _complete(body: Node2D) -> void:
-	if body is not Player or _finished: return
-	_finished = true
-	var label := Label.new()
-	label.text = str(recipe.title).to_upper()+"\nYOU MADE IT."
-	label.position = Vector2(float(recipe.exit[0])-124,float(recipe.exit[1])-72)
-	label.add_theme_font_override("font", FONT)
-	label.add_theme_font_size_override("font_size",7)
-	label.add_theme_color_override("font_color",Color("ffe9b5"))
-	add_child(label)
 
 func _process(delta: float) -> void:
 	_clock += delta
@@ -40,14 +25,14 @@ func _sprite(at: Vector2, source: Rect2, tint := Color.WHITE) -> void:
 
 func _draw() -> void:
 	if recipe.is_empty():return
-	# Existing native pennant art makes earned resting islands readable.
-	for checkpoint in _checkpoints:
-		if not is_instance_valid(checkpoint):continue
-		var at := to_local(checkpoint.global_position) - Vector2(2,22)
-		_sprite(at,Rect2(174,66,18,30),Color.WHITE if checkpoint.is_active else Color(0.7,0.7,0.7))
-	draw_string(FONT,Vector2(16,248),str(recipe.title),HORIZONTAL_ALIGNMENT_LEFT,-1,7,Color("ffe9b5"))
+	# Resting islands retain their checkpoint behavior without flags competing
+	# with the route. Their broad grass edge is the landing cue.
+	draw_string(FONT,Vector2(17,265),str(recipe.title),HORIZONTAL_ALIGNMENT_LEFT,-1,7,Color(0.24,0.20,0.13,0.9))
+	draw_string(FONT,Vector2(16,264),str(recipe.title),HORIZONTAL_ALIGNMENT_LEFT,-1,7,Color("ffe9b5"))
 	for l: Array in recipe.ledges:
-		if recipe.get("advanced",false) and float(l[2])<=48:continue
+		# Small transfer ledges need their whole silhouette to read as footing.
+		# Reserve botanical accents for the broad resting islands.
+		if float(l[2]) < 64:continue
 		var transfer_island:=false
 		for step: Dictionary in recipe.get("routes",[]):
 			if step.kind=="weave":
@@ -77,4 +62,3 @@ func _draw() -> void:
 		var x := fposmod(i*57.0+_clock*3.0,float(recipe.width)-10.0)
 		var y := 64.0+fposmod(i*31.0+sin(_clock*0.6+i)*4.0,206.0)
 		draw_rect(Rect2(Vector2(x,y).floor(),Vector2(2,1)),Color(1,0.83,0.58,0.35))
-

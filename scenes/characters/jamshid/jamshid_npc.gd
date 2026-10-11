@@ -58,7 +58,7 @@ signal triggered(player: Player)
 @export_enum("idle", "walk", "sit") var idle_pose := "idle"
 
 ## Standing height in world pixels, handed straight to the actor.
-@export_range(8.0, 64.0, 1.0) var standing_height := 16.0
+@export_range(8.0, 64.0, 1.0) var standing_height := 15.0
 
 ## Stand him on the floor beneath where he was placed rather than at exactly the
 ## height the LDtk entity sits at. Off = he stays put, for a Jamshid deliberately

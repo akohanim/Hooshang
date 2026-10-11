@@ -2,8 +2,12 @@ extends LdtkWorld
 ## Act 2's prison mission. Ordinary Act 2 rooms retain LdtkWorld's routing.
 signal prison_completed
 const IDS := ["Red", "Green", "Blue", "Gold"]
+const PuzzleSave := preload("res://scripts/prison/prison_save_migration.gd")
 var collected: Array[String] = []
 var inserted: Array[String] = []
+var story_flags: Dictionary = {}
+var circuits = preload("res://scenes/props/prison/circuits/circuit_state.gd").new()
+var timers = preload("res://scenes/props/prison/timed/timed_state.gd").new()
 var rescued := false
 var rescue_started := false
 var portals: Array[Dictionary] = []
@@ -11,6 +15,7 @@ var props: Array[Node] = []
 var _portal_cooldown := 0.0
 var _portal_armed: Dictionary = {}
 var _hud: Label
+var _shortcut_hint: Label
 var _rescue_tween: Tween
 var _cage: Node2D
 
@@ -24,13 +29,16 @@ func _ready() -> void:
 				if prop.kind == "Cage": _cage = prop
 	for prop in props: prop.bind(self)
 	_build_portals()
+	for room in rooms:
+		if is_prison(room): room.get_node("PrisonGeometry").world = self
 	var layer := preload("res://scenes/props/prison/PrisonHUD.tscn").instantiate()
 	layer.custom_viewport = get_tree().root
 	add_child(layer)
 	_hud = layer.get_node("Keys")
+	_shortcut_hint = layer.get_node("Shortcut")
 	_refresh()
 	var state: Dictionary = SaveGame.state_for("world_state").get("prison",{})
-	if is_prison(current_room) and state.get("checkpoint_room", "") == str(current_room.name):
+	if is_prison(current_room) and state.get("checkpoint_mode", "") == "room_entry" and state.get("checkpoint_room", "") == str(current_room.name):
 		var point: Array = state.get("checkpoint",[])
 		if point.size() == 2:
 			var saved := Vector2(float(point[0]),float(point[1]))
@@ -46,16 +54,28 @@ func _add_ceiling(room: Node2D) -> void:
 	if not is_prison(room): super._add_ceiling(room)
 	# Prison Collision has closed boundaries except authored paired apertures.
 
+func _room_before(room: Node2D) -> Node2D:
+	if room != null and room.name == "Act_2_Level_16":
+		for candidate in rooms:
+			if candidate.name == "Prison_Hub": return candidate
+	return super._room_before(room)
+
 func _arm_return(from_room: Node2D) -> void:
-	if is_prison(current_room):
+	if is_prison(current_room) or (current_room != null and current_room.name == "Act_2_Level_20"):
 		_clear_return()
 		return
 	super._arm_return(from_room)
 
 func _enter_room(room: Node2D, snap: bool) -> void:
+	circuits.reset_attempts()
+	timers.reset_attempts()
 	super._enter_room(room,snap)
 	if is_prison(room):
 		_portal_armed.clear()
+		# Untimed musical routes use the existing crumble stones. Revisiting
+		# their room must restore the route even without a linked lever.
+		for entity in room.get_node("Entities").get_children():
+			if entity is CrumblingPlatform: entity.reset()
 		_clear_return()
 		player.has_dash = true
 		for prop in props:
@@ -64,8 +84,12 @@ func _enter_room(room: Node2D, snap: bool) -> void:
 
 func _restore_state() -> void:
 	super._restore_state()
+	story_flags = SaveGame.state_for("world_state").get("act2_story", {}).duplicate()
 	var raw: Variant = SaveGame.state_for("world_state").get("prison",{})
 	if not raw is Dictionary: return
+	raw = PuzzleSave.upgrade(raw, str(SaveGame.state_for("world_state").get("room", "")))
+	circuits.restore(raw.get("completed_circuits", []))
+	timers.restore(raw.get("completed_timers", []))
 	for id in raw.get("collected",[]):
 		if id in IDS and not collected.has(id): collected.append(id)
 	for id in raw.get("inserted",[]):
@@ -75,10 +99,27 @@ func _restore_state() -> void:
 
 func save_state() -> Dictionary:
 	var state := super.save_state()
+	state["act2_story"] = story_flags.duplicate()
 	state["prison"] = {"collected":collected.duplicate(),"inserted":inserted.duplicate(),"rescued":rescued,
-		"checkpoint_room":str(current_room.name) if current_room != null else "",
+		"puzzle_revision":PuzzleSave.REVISION,
+		"completed_circuits":circuits.save_completed(),
+		"completed_timers":timers.save_completed(),
+		"checkpoint_mode":"room_entry", "checkpoint_room":str(current_room.name) if current_room != null else "",
 		"checkpoint":[_checkpoint.x,_checkpoint.y]}
 	return state
+
+func circuit_reference(reference: Variant) -> Node2D:
+	var ref := str(reference)
+	for prop in props:
+		if prop.kind in ["CircuitGate", "FloodGate", "MusicalGate"] and (prop.entity_iid == ref or str(prop.get_path()) == ref):
+			return prop
+	return null
+
+func timed_reference(reference: Variant) -> Node2D:
+	var ref := str(reference)
+	for prop in props:
+		if prop.kind == "TimedGate" and (prop.entity_iid == ref or str(prop.get_path()) == ref): return prop
+	return null
 
 func key_for_reference(reference: Variant) -> String:
 	var ref := str(reference)
@@ -86,21 +127,55 @@ func key_for_reference(reference: Variant) -> String:
 		if prop.kind == "Key" and (prop.entity_iid == ref or str(prop.get_path()) == ref): return prop.key_id
 	return ""
 
-func collect_key(id: String, at: Vector2) -> void:
+func collect_key(id: String, _at: Vector2) -> void:
 	if not IDS.has(id) or collected.has(id): return
 	collected.append(id)
-	_checkpoint = _safe_landing(current_room,at)
+	$Act2Audio.play_cue(&"Key")
 	_refresh()
 	SaveGame.save_now()
 
 func _refresh() -> void:
 	for prop in props: prop.refresh()
+	for room in rooms:
+		if is_prison(room): room.get_node("PrisonGeometry").queue_redraw()
 	if _hud == null: return
 	_hud.visible = is_prison(current_room)
 	var text := ""
 	for id in IDS:
 		text += ("✓" if inserted.has(id) else "●" if collected.has(id) else "○") + id + "  "
-	_hud.text = "JAMSHID FREE — SCHOOL COMPLETE" if rescued else text + "  %d/4 locks" % inserted.size()
+	_hud.text = "JAMSHID FREE — FOLLOW HIM TO THE COURTYARD" if rescued else text + "  %d/4 locks" % inserted.size()
+	_update_shortcut_hint()
+	_layout_prison_hud()
+
+func _layout_prison_hud() -> void:
+	# Keep the status in a stable corner opposite a wing's upper doorway.
+	# Do not follow the player: moving labels would distract during jumps.
+	var right := false
+	if is_prison(current_room) and current_room.size.x == Screen.GAME_SIZE.x:
+		for portal in portals:
+			if portal.from == current_room and portal.direction == Vector2.UP:
+				right = portal.center.x - current_room.global_position.x < Screen.GAME_SIZE.x * 0.5
+				break
+	for label in [_hud, _shortcut_hint]:
+		label.reset_size()
+		label.position.x = Screen.GAME_SIZE.x * 4 - 24 - label.size.x if right else 24
+
+func _update_shortcut_hint() -> void:
+	if _shortcut_hint == null: return
+	_shortcut_hint.hide()
+	if not is_prison(current_room) or _transitioning or player.input_locked or player.state == Player.State.DEAD: return
+	var nearest := 80.0
+	var needed := ""
+	for portal in portals:
+		if portal.from != current_room or portal.gate == "" or collected.has(portal.gate): continue
+		var distance: float = player.global_position.distance_to(portal.center)
+		if distance < nearest:
+			nearest = distance
+			needed = portal.gate
+	if needed != "":
+		_shortcut_hint.text = needed.to_upper() + " KEY OPENS THIS SHORTCUT"
+		_shortcut_hint.show()
+	_layout_prison_hud()
 
 func insert_keys(cage: Node2D) -> void:
 	if rescue_started or player.state == Player.State.DEAD: return
@@ -112,6 +187,7 @@ func insert_keys(cage: Node2D) -> void:
 	for id in cage.lock_ids():
 		if collected.has(id) and not inserted.has(id):
 			inserted.append(id)
+			$Act2Audio.play_cue(&"Lock")
 			_refresh()
 			await get_tree().create_timer(0.2,false).timeout
 	if inserted.size() < 4:
@@ -121,6 +197,7 @@ func insert_keys(cage: Node2D) -> void:
 	player.input_locked = true
 	player.velocity = Vector2.ZERO
 	cage.sprite.texture = preload("res://ldtk/art/prison/cage_open.png")
+	$Act2Audio.play_cue(&"Gate")
 	cage.barrier.set_deferred("disabled",true)
 	var actor := cage.get_parent().get_node_or_null("PrisonJamshid") as Jamshid
 	if actor != null:
@@ -139,7 +216,7 @@ func finish_rescue() -> void:
 	_position_rescued_actor()
 	player.input_locked = false
 	_refresh()
-	Game.completed = true
+	# The cell reunion, chase and farewell still follow this milestone.
 	SaveGame.save_now()
 	prison_completed.emit()
 
@@ -209,10 +286,12 @@ func _build_portals() -> void:
 					run_start = -INF
 
 func _physics_process(delta: float) -> void:
+	_update_shortcut_hint()
 	if not is_prison(current_room):
 		super._physics_process(delta)
 		return
 	if _transitioning or player.state == Player.State.DEAD or player.input_locked: return
+	timers.tick(delta)
 	_portal_cooldown = maxf(0,_portal_cooldown-delta)
 	var geo: Node = current_room.get_node("PrisonGeometry")
 	if geo.hazard_overlaps(player.hitbox_rect()):
@@ -248,6 +327,8 @@ func surface_y_at(point: Vector2) -> float:
 	return super.surface_y_at(point)
 
 func _on_player_died() -> void:
+	circuits.reset_attempts()
+	timers.reset_attempts()
 	_portal_armed.clear()
 	await super._on_player_died()
 	_portal_armed.clear()

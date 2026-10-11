@@ -1,0 +1,356 @@
+{
+  "start_room": "Act_2_Level_16",
+  "evidence": "Observed frame-directed run. Harness releases movement, jump, dash and glow after each command; skip_dialogue releases are explicit. No position writes after debug entry.",
+  "commands": [
+    {
+      "label": "invite",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 40
+        }
+      ]
+    },
+    {
+      "label": "banter",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 35
+        },
+        {
+          "press": [
+            "skip_dialogue"
+          ],
+          "frames": 65
+        },
+        {
+          "release": [
+            "skip_dialogue"
+          ],
+          "frames": 2
+        }
+      ]
+    },
+    {
+      "label": "banter_skip",
+      "steps": [
+        {
+          "press": [
+            "skip_dialogue"
+          ],
+          "frames": 140
+        },
+        {
+          "release": [
+            "skip_dialogue"
+          ],
+          "frames": 30
+        }
+      ]
+    },
+    {
+      "label": "first_roof",
+      "steps": [
+        {
+          "press": [
+            "move_right",
+            "jump"
+          ],
+          "frames": 65
+        },
+        {
+          "release": [
+            "jump"
+          ],
+          "frames": 15
+        }
+      ]
+    },
+    {
+      "label": "high_roof",
+      "steps": [
+        {
+          "press": [
+            "move_right",
+            "jump"
+          ],
+          "frames": 60
+        },
+        {
+          "release": [
+            "jump",
+            "move_right"
+          ],
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "label": "across_roofs",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 20
+        },
+        {
+          "press": [
+            "jump"
+          ],
+          "frames": 80
+        },
+        {
+          "release": [
+            "jump",
+            "move_right"
+          ],
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "label": "second_roof_jump",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 28
+        },
+        {
+          "press": [
+            "jump"
+          ],
+          "frames": 70
+        },
+        {
+          "release": [
+            "jump",
+            "move_right"
+          ],
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "label": "alley_entry",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 185
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 45
+        }
+      ]
+    },
+    {
+      "label": "alley_low_path",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 145
+        }
+      ]
+    },
+    {
+      "label": "alley_rise",
+      "steps": [
+        {
+          "press": [
+            "move_right",
+            "jump"
+          ],
+          "frames": 65
+        },
+        {
+          "release": [
+            "jump"
+          ],
+          "frames": 12
+        },
+        {
+          "press": [
+            "jump"
+          ],
+          "frames": 62
+        },
+        {
+          "release": [
+            "jump",
+            "move_right"
+          ],
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "label": "alley_variation",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 65
+        },
+        {
+          "press": [
+            "jump"
+          ],
+          "frames": 78
+        },
+        {
+          "release": [
+            "jump"
+          ],
+          "frames": 12
+        },
+        {
+          "press": [
+            "jump"
+          ],
+          "frames": 72
+        },
+        {
+          "release": [
+            "jump",
+            "move_right"
+          ],
+          "frames": 10
+        }
+      ]
+    },
+    {
+      "label": "pond_entry",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 70
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 45
+        }
+      ]
+    },
+    {
+      "label": "pond_swim_recovery",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 340
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 15
+        }
+      ]
+    },
+    {
+      "label": "pond_far_bank",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 345
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 15
+        }
+      ]
+    },
+    {
+      "label": "painted_wall_entry",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 65
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 45
+        }
+      ]
+    },
+    {
+      "label": "wall_reunion",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 240
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 60
+        }
+      ]
+    },
+    {
+      "label": "wall_skip_endpoint",
+      "steps": [
+        {
+          "press": [
+            "skip_dialogue"
+          ],
+          "frames": 140
+        },
+        {
+          "release": [
+            "skip_dialogue"
+          ],
+          "frames": 30
+        }
+      ]
+    },
+    {
+      "label": "wall_backtrack",
+      "steps": [
+        {
+          "press": [
+            "move_left"
+          ],
+          "frames": 255
+        },
+        {
+          "release": [
+            "move_left"
+          ],
+          "frames": 30
+        }
+      ]
+    }
+  ]
+}

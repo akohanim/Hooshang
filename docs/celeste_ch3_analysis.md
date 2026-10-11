@@ -1,5 +1,6 @@
 # Celestial Resort → Hooshang school-prison
 
+> Historical first-pass document. The current harder-mechanism revision is [celeste_ch3_challenge_analysis.md](celeste_ch3_challenge_analysis.md); its scope supersedes the exclusions below.
 Phase 1 • 2026-10-05 • A-side only • design research, not copied geometry.
 
 ## Evidence and limits

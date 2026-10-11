@@ -5,7 +5,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().current_scene = null
 	SaveGame.slot = -1
-	for marker in ["Hold that thought!", "You’d better start from the beginning.", "Come over after school."]:
+	for marker in ["Finally!!", "You'd better start from the beginning.", "Come over after school."]:
 		await _check_act2_skip(marker)
 	print("ACT 2 STAGING SKIP: %s" % ("ALL PASS" if failures.is_empty() else str(failures)))
 	get_tree().quit(0 if failures.is_empty() else 1)

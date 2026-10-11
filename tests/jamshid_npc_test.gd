@@ -69,12 +69,11 @@ func _run() -> void:
 		"...with the (excited) stage direction stripped  [%s]" % beats[0]["text"])
 	_check(beats[0]["face"] == "excited",
 		"...and read as a portrait state  [%s]" % beats[0]["face"])
-	# The alias: "excited" has no drawing of its own and points at the joyful
-	# one, so a script can ask for the acting rather than for the file.
-	_check(Jamshid.portrait("excited") == Jamshid.portrait("joyful"),
-		"'excited' resolves to the joyful painting")
+	# Excitement has its own child portrait and animation key.
+	_check(Jamshid.portrait("excited") != Jamshid.portrait("joyful"),
+		"'excited' has distinct artwork")
 	_check(Jamshid.portrait("excited").resource_path.get_file().get_basename()
-			== "jamshid_joyful",
+			== "jamshid_excited",
 		"...and still NAMES that face, so DialogueBox can find its rig")
 
 	# A line naming no state falls back to default_face rather than to "".
@@ -165,13 +164,16 @@ func _run() -> void:
 	# prove the entity became a node with its fields on it. A `Jamshid` entity
 	# the post-import hook did not handle would import as nothing at all.
 	var imported: Node = load("res://ldtk/hooshang_act2.ldtk").instantiate()
-	var room: Node2D = imported.get_node("Act_2_Level_0")
+	var encounter := Act2Beats.new()
+	var encounter_room := encounter.room_name
+	encounter.free()
+	var room: Node2D = imported.get_node(encounter_room)
 	imported.remove_child(room)
 	imported.free()
 	world.add_child(room)
 	await _frames(2)
 	var placed := _find_npc(room)
-	_check(placed != null, "Act_2_Level_0 has a JamshidNpc in it")
+	_check(placed != null, encounter_room + " has a JamshidNpc in it")
 	if placed != null:
 		_check(placed.dialogue_line == GREETING,
 			"...carrying the greeting  [%s]" % placed.dialogue_line)

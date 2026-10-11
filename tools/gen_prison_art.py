@@ -79,8 +79,16 @@ for name,opened in [('door_closed',False),('door_open',True)]:
 # Temporary readability pass: reuse the project's steel scaffold vocabulary.
 # Only the prison atlas changes; the shared source sheet remains untouched.
 from gen_scaffolding import connected
-for index,mask in [(0,15),(1,14),(2,7),(3,13),(4,11),(5,10)]:
+for index,mask in [(0,15),(1,14),(2,7),(3,13),(4,11),(9,10)]:
  im.paste(connected(mask,0),tile(index))
+# Jump-through shelves: thin warm wooden lip, open underneath, no steel braces.
+# Scaffolding stays solid; collapsing supports use the existing crumble stones.
+x,y=tile(5)
+d.rectangle((x,y,x+7,y+7),fill=(0,0,0,0))
+d.line((x,y,x+7,y),fill=light)
+d.line((x,y+1,x+7,y+1),fill=stone)
+d.line((x,y+2,x+7,y+2),fill=shade)
+d.point((x+6,y+1),fill=gold)
 # Background must sit behind gameplay, without false ledges or repeated windows.
 for index in [16,17,18,19]:
  x,y=tile(index);d.rectangle((x,y,x+7,y+7),fill=(25,35,45))
@@ -89,5 +97,5 @@ x,y=tile(6)
 d.rectangle((x,y,x+7,y+7),fill=(0,0,0,0))
 for j in [0,4]:d.polygon([(x+j,y+7),(x+j+2,y),(x+j+3,y+7)],fill=(235,116,126));d.point((x+j+2,y),fill=(255,222,206))
 im.save(OUT/'school.png')
-(OUT/'atlas.json').write_text(json.dumps({'tile_size':8,'tiles':{'fill':0,'top':1,'left':2,'right':3,'bottom':4,'one_way':5,'hazard':6,'water':7,'surface':8},'props':{'locker':[0,32,16,24],'shelf':[16,32,24,24],'board':[40,32,32,16],'desk':[72,32,24,16]}},indent=2)+'\n')
+(OUT/'atlas.json').write_text(json.dumps({'tile_size':8,'tiles':{'fill':0,'top':1,'left':2,'right':3,'bottom':4,'one_way':5,'hazard':6,'water':7,'surface':8,'solid_shelf':9},'props':{'locker':[0,32,16,24],'shelf':[16,32,24,24],'board':[40,32,32,16],'desk':[72,32,24,16]}},indent=2)+'\n')
 print('Generated school atlas and cage/door states')

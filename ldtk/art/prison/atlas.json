@@ -9,7 +9,8 @@
     "one_way": 5,
     "hazard": 6,
     "water": 7,
-    "surface": 8
+    "surface": 8,
+    "solid_shelf": 9
   },
   "props": {
     "locker": [

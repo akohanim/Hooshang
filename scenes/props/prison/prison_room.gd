@@ -53,3 +53,26 @@ func hazard_overlaps(rect: Rect2) -> bool:
 		for x in range(a.x,b.x+1):
 			if value_at(Vector2i(x,y)) == 3: return true
 	return false
+
+func _draw() -> void:
+	if world == null: return
+	for portal in world.portals:
+		if portal.from != get_parent(): continue
+		var direction: Vector2 = portal.direction
+		var at: Vector2 = to_local(portal.center)-direction*20
+		var locked: bool = portal.gate!="" and not world.collected.has(portal.gate)
+		var tint := Color("e6b66d") if locked else Color("b8efc1")
+		var tangent := Vector2(-direction.y,direction.x)
+		draw_line(at-direction*5,at+direction*5,tint,2)
+		draw_line(at+direction*5,at+tangent*4,tint,2)
+		draw_line(at+direction*5,at-tangent*4,tint,2)
+		if locked:
+			if direction==Vector2.DOWN:
+				var mouth: Vector2=to_local(portal.rect.position)
+				draw_rect(Rect2(Vector2(mouth.x,at.y-12),Vector2(portal.rect.size.x,3)),tint)
+			# A small lock marks the seam; the named requirement belongs in
+			# the nearby-player HUD, where it cannot cover a landing or key.
+			var index: int = world.IDS.find(str(portal.gate))
+			var icon_at := at+tangent*11-Vector2(4,4)
+			draw_texture_rect_region(preload("res://ldtk/art/prison/school.png"),
+				Rect2(icon_at,Vector2(8,8)),Rect2(32+index*8,16,8,8))

@@ -4,6 +4,8 @@ extends Node
 ## actual player reaches it. Mantle assists are disabled in the player fixture.
 var world: Node
 var deaths := 0
+## Retry fixtures may continue after a verified intentional death.
+var navigation_deaths_allowed := 0
 var failure := ""
 var trace: Array = []
 var nodes: Array[Vector2] = []
@@ -15,10 +17,16 @@ var policy := 0
 var trial_deaths := 0
 var saw_wall_jump := false
 var reverse_mode := false
+var retreat_mode := false
+var run_on_ready := true
+# Timed recipes choose their observation wait before committing to a crossing.
+var skip_patrol_wait := false
 
 func _ready() -> void:
+	if not run_on_ready: return
 	await setup_world()
 	print("NAV START speed=",world.player.max_run_speed," jump=",world.player.jump_speed)
+	retreat_mode="--retreat" in OS.get_cmdline_user_args()
 	reverse_mode="--reverse" in OS.get_cmdline_user_args()
 	if reverse_mode:
 		world.collected.assign(world.IDS)
@@ -29,10 +37,10 @@ func _ready() -> void:
 		if arg.begins_with("--wing="): wings=[arg.trim_prefix("--wing=")]
 	for wing in wings:
 		var itinerary: Array=[]
-		for number in ([4,3,2,1] if reverse_mode else [1,2,3,4]): itinerary.append("Prison_%s%02d" % [wing,number])
+		for number in ([1,2,3,2,1] if retreat_mode else [4,3,2,1] if reverse_mode else [1,2,3,4]): itinerary.append("Prison_%s%02d" % [wing,number])
 		itinerary.append("Prison_Hub")
 		for destination in itinerary:
-			if str(world.current_room.name).ends_with("03") and not reverse_mode:
+			if str(world.current_room.name).ends_with("03") and not reverse_mode and not retreat_mode:
 				var key: Node
 				for prop in world.props:
 					if prop.kind=="Key" and prop.get_parent().get_parent()==world.current_room: key=prop
@@ -41,8 +49,9 @@ func _ready() -> void:
 				if not world.collected.has(key.key_id): failure="missed key "+key.key_id; break
 			if not await cross(destination): break
 		if failure!="": break
+		if retreat_mode and not world.collected.is_empty(): failure="retreat collected an unintended key";break
 		print("LOOP PASS ",wing," keys=",world.collected)
-	if failure=="" and wings.size()==4 and not reverse_mode:
+	if failure=="" and wings.size()==4 and not reverse_mode and not retreat_mode:
 		if not await navigate(Vector2(292,346)): failure="return to cage"
 		await frames(240)
 		if not world.rescued: failure="rescue did not complete"
@@ -66,8 +75,10 @@ func frames(count: int) -> void:
 func local_player() -> Vector2:
 	return world.player.global_position-world.current_room.global_position
 func clear_at(p: Vector2) -> bool:
-	for dx in [-4.0,4.0]:
-		for dy in [-5.5,5.5]:
+	# Use the full normal body: the previous 8px probe approved paths whose
+	# outer half-pixel clipped a spike during the library return.
+	for dx in [-Player.HALF_WIDTH+0.01,Player.HALF_WIDTH-0.01]:
+		for dy in [-Player.HALF_HEIGHT+0.01,Player.HALF_HEIGHT-0.01]:
 			if geo.value_at(Vector2i(floori((p.x+dx)/8),floori((p.y+dy)/8))) in [1,3]: return false
 	if str(world.current_room.name)=="Prison_Hub" and not world.rescued:
 		if Rect2(302,308,68,50).has_point(p): return false
@@ -141,7 +152,7 @@ func navigate(target: Vector2, attempt: int=0) -> bool:
 	print("PATH ",room_name," ",local_player()," -> ",target," ",path)
 	for point in path:
 		if not await move_to(point,room_name):
-			if deaths==0 and attempt<3:
+			if deaths==navigation_deaths_allowed and attempt<3:
 				print("RECOVER ",failure)
 				failure=""
 				return await navigate(target,attempt+1)
@@ -150,6 +161,7 @@ func navigate(target: Vector2, attempt: int=0) -> bool:
 func move_to(target: Vector2,room_name: String) -> bool:
 	# Wait on the approach deck for an overhead patrol to move away.
 	for prop in world.props:
+		if skip_patrol_wait: break
 		if prop.kind!="Patrol" or prop.get_parent().get_parent()!=world.current_room: continue
 		if prop.position.x < minf(local_player().x,target.x)-8 or prop.position.x > maxf(local_player().x,target.x)+8: continue
 		for wait_frame in 240:
@@ -163,7 +175,7 @@ func move_to(target: Vector2,room_name: String) -> bool:
 		var p: Player=world.player
 		var at:=local_player()
 		var delta:=target-at
-		if deaths>0: failure="death in "+room_name;release();return false
+		if deaths>navigation_deaths_allowed: failure="death in "+room_name;release();return false
 		if absf(delta.x)<4 and absf(delta.y)<5 and (p.is_on_floor() or p.swimming() or not supported(target)):
 			release();await frames(12);return true
 		for action in ["move_left","move_right","move_up","move_down","dash"]: Input.action_release(action)
@@ -183,8 +195,30 @@ func move_to(target: Vector2,room_name: String) -> bool:
 		await frames(1)
 	failure="stalled in %s at %s aiming %s" % [room_name,local_player(),target]
 	release();return false
+func balcony_cross(forward: bool) -> bool:
+	# Observed input recipe for the original dash crossing; no state injection.
+	if not await navigate(Vector2(48,154) if forward else Vector2(190,154)): return false
+	release()
+	await frames(30)
+	var recipes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://resources/levels/gym_balcony_routes.json"))
+	for step: Dictionary in recipes["forward" if forward else "reverse"]:
+		for action: String in step.get("press",[]): Input.action_press(action)
+		for action: String in step.get("release",[]): Input.action_release(action)
+		await frames(int(step.frames))
+	release()
+	if deaths > 0 or forbidden or not world.player.is_on_floor() or (local_player().x < 176 if forward else local_player().x > 112):
+		failure = "balcony dash did not reach its bank at " + str(local_player())
+		return false
+	print("BALCONY DASH PASS forward=",forward," at=",local_player())
+	return true
+
 func cross(destination: String) -> bool:
-	if str(world.current_room.name) in ["Prison_Y01","Prison_Y02","Prison_Y03"] and local_player().x<184 and destination in ["Prison_Y02","Prison_Y03"]:
+	if str(world.current_room.name) == "Prison_Y02":
+		if destination == "Prison_Y03" and local_player().x < 176:
+			if not await balcony_cross(true): return false
+		elif destination == "Prison_Y01" and local_player().x > 112:
+			if not await balcony_cross(false): return false
+	if str(world.current_room.name) in ["Prison_Y01","Prison_Y03"] and local_player().x<184 and destination in ["Prison_Y02","Prison_Y03"]:
 		if not await navigate(Vector2(172,154)): return false
 		for point in [Vector2(176,114),Vector2(196,98)]:
 			if not await gym_go(world.current_room.global_position+point,false):
@@ -195,7 +229,6 @@ func cross(destination: String) -> bool:
 		if entry.from==world.current_room and str(entry.to.name)==destination: portal=entry
 	if portal.is_empty(): failure="missing portal "+destination;return false
 	var target: Vector2=portal.center-world.current_room.global_position
-	if portal.direction==Vector2.DOWN: target.x+=12
 	if portal.direction.x!=0: target.y=portal.rect.end.y-world.current_room.global_position.y-6.1
 	# Stop just inside the edge; crossing itself is driven by held input.
 	var approach: Vector2=target-portal.direction*20

@@ -176,9 +176,12 @@ func summary(i: int) -> Dictionary:
 	var deaths: Dictionary = payload.get("deaths", {})
 	var points: Dictionary = payload.get("points", {})
 	var room := str(world_state.get("room", ""))
+	var world_path := str(payload.get("world", FIRST_WORLD))
 	return {
 		"empty": false,
+		"world": world_path,
 		"room": room,
+		"room_label": room_label(world_path, room),
 		# +1 because Level_0 is the first room; the debug picker counts the same
 		# way, so a room named in one menu means the same room in the other.
 		"room_number": LdtkWorld.index_in_name(room) + 1,
@@ -188,6 +191,28 @@ func summary(i: int) -> Dictionary:
 		"play_seconds": float(payload.get("play_seconds", 0.0)),
 		"visited": _names(payload.get("visited", [])),
 	}
+
+
+## Act 2's branching school rooms need names, not the large integer used to
+## sort their identifiers. Keep Act 1's existing menu numbering unchanged.
+func room_label(world_path: String, room: String) -> String:
+	if world_path != "res://ldtk/Act2World.tscn":
+		return "ROOM %d" % (LdtkWorld.index_in_name(room) + 1)
+	if room == "Prison_Hub": return "ASSEMBLY HALL"
+	const WINGS := {
+		"R": ["LUNCH HALL", "KITCHEN PASS", "PANTRY", "SERVICE HALL"],
+		"G": ["READING ROOM", "BOOK STACKS", "ARCHIVE", "STAFF STAIRS"],
+		"B": ["LOWER LANDING", "FLOODED STORES", "PUMP ROOM", "DRAINAGE PASS"],
+		"Y": ["TRAINING HALL", "BALCONY RUN", "EQUIPMENT STORE", "LOCKER PASS"],
+	}
+	if room.begins_with("Prison_") and room.length() == 10:
+		var wing := room.substr(7, 1)
+		var number := int(room.right(2))
+		if WINGS.has(wing) and number >= 1 and number <= 4:
+			return WINGS[wing][number - 1]
+	var index := LdtkWorld.index_in_name(room)
+	if index >= 0 and index <= 2100: return "ROOM %d" % (index / 100 + 1)
+	return room.replace("_", " ").to_upper()
 
 
 ## The rooms a slot has actually stood in, in play order — what its level select

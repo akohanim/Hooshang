@@ -16,9 +16,11 @@ func _ready() -> void:
 	Screen.load_scene("res://ldtk/Act2World.tscn")
 	await frames(15)
 	var world = Screen.current
+	var entry: Vector2=world._checkpoint
 	var key = world.props.filter(func(p): return p.kind=="Key" and p.key_id=="Blue")[0]
 	world.collect_key("Red",key.global_position)
 	world.collect_key("Blue",key.global_position)
+	check(world._checkpoint==entry,"key pickup does not move the room checkpoint")
 	world.inserted.append("Red")
 	check(SaveGame.save_now(),"prison save written")
 	SaveGame.unbind()
@@ -28,7 +30,7 @@ func _ready() -> void:
 	check(str(world.current_room.name)=="Prison_B03","saved room restored")
 	check(world.collected.size()==2 and world.collected.has("Red") and world.collected.has("Blue"),"collected keys restored")
 	check(world.inserted==["Red"],"inserted lock restored separately")
-	check(world.player.is_on_floor() and not world.player.swimming(),"dry post-key checkpoint restored with full footing")
+	check(world.player.is_on_floor() and not world.player.swimming(),"room-entry checkpoint restored with full footing")
 	for prop in world.props:
 		if prop.kind=="ShortcutDoor": check(prop.barrier.disabled == (prop.key_id in ["Red","Blue"]),"shutter state restored")
 	world.player.die()

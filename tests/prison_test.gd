@@ -10,13 +10,17 @@ func _ready() -> void:
 	SaveGame.unbind()
 	world = load("res://ldtk/Act2World.tscn").instantiate()
 	world.debug_start_room = "Prison_Hub"
+	world.get_node("CellReunion").free() # Story playback is covered separately.
 	add_child(world)
 	var completed := [0]
 	world.prison_completed.connect(func(): completed[0] += 1)
 	await frames(15)
+	var cues: Array[StringName] = []
+	world.get_node("Act2Audio").cue_started.connect(func(cue): cues.append(cue))
 	check(world.rooms.filter(func(r): return world.is_prison(r)).size()==17,"17 prison rooms imported")
 	check(world.portals.size()==40,"20 reciprocal adjacency links")
 	check(world.props.filter(func(p): return p.kind=="Key").size()==4,"four keys")
+	check(world.props.filter(func(p): return p.kind=="Checkpoint").is_empty(),"no checkpoint flags")
 	check(world.props.filter(func(p): return p.kind=="ShortcutDoor" and p.key_id in world.IDS).size()==8,"all eight reference-driven shutters resolve")
 	check(world.player.is_on_floor(),"hub spawn has solid footing")
 	check(world.player.childhood_momentum,"real Act 2 movement applied")
@@ -34,10 +38,12 @@ func _ready() -> void:
 	for prop in world.props:
 		if prop.kind != "Key": continue
 		world._enter_room(prop.get_parent().get_parent(),false)
+		var entry_checkpoint: Vector2=world._checkpoint
 		world.player.respawn(prop.global_position)
 		world._portal_cooldown = 5.0
 		await frames(8)
 		check(world.collected.has(prop.key_id),"contact banks "+prop.key_id)
+		check(world._checkpoint==entry_checkpoint,"pickup keeps room entry checkpoint")
 		world.player.die()
 		await frames(55)
 		check(world.collected.has(prop.key_id) and not prop.visible,"death retains "+prop.key_id)
@@ -50,7 +56,11 @@ func _ready() -> void:
 	check(world.rescued and world.inserted.size()==4,"cage contact opens all locks and rescues")
 	check(not world.player.input_locked,"rescue restores controls")
 	world.finish_rescue()
-	check(completed[0]==1,"level-complete event fires exactly once")
+	check(not Game.completed,"rescue does not prematurely end Act 2")
+	check(completed[0]==1,"rescue milestone fires exactly once")
+	check(cues.count(&"Key")==4 and cues.count(&"Lock")==4 and cues.count(&"Gate")==1,"pickups, lock insertions and cage opening each sound once")
+	world.collect_key("Red",Vector2.ZERO)
+	check(cues.count(&"Key")==4,"already-collected key does not replay pickup audio")
 	var actor = world._cage.get_parent().get_node("PrisonJamshid")
 	check(actor.position.x > world._cage.position.x+32,"Jamshid walks out past the cage")
 	check(world._hud.get_parent().custom_viewport == get_tree().root and world._hud.get_parent().scale == Vector2(0.25,0.25),"HUD uses the separate UI surface at the project scale")

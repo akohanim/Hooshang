@@ -283,7 +283,7 @@ func _step_down() -> void:
 
 ## One press and release of a physical key, straight into the input system.
 ## Released as well as pressed so a held action cannot leak into the next check.
-func _press(key: Key) -> void:
+func _press(key: int) -> void:
 	for down in [true, false]:
 		var ev := InputEventKey.new()
 		ev.keycode = key

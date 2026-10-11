@@ -16,6 +16,11 @@ var world: LdtkWorld
 
 
 func _ready() -> void:
+	SaveGame.unbind()
+	# These are fruit/landing fixtures, not dialogue tests. Level_0's opening
+	# director freezes physics mid-probe; changing input_locked alone cannot
+	# release that conversation. Use the quiet tutorial entrance on every load.
+	LdtkWorld.debug_start_room = "Level_1"
 	Collectibles.reset()
 	world = Screen.load_scene("res://ldtk/Act1World.tscn")
 	await _frames(60)
@@ -459,6 +464,9 @@ func _check(cond: bool, name: String) -> void:
 	print(("  PASS  " if cond else "  FAIL  ") + name)
 	if not cond:
 		failures.append(name)
+		if is_instance_valid(world) and is_instance_valid(world.player):
+			print("  FIXTURE STATE room=",world.current_room.name," locked=",world.player.input_locked,
+				" physics=",world.player.is_physics_processing()," state=",world.player.state_name())
 
 
 ## Every lemon picture currently on Screen's token surface.

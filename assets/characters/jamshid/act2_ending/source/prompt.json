@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen.imagegen",
+  "reference": "assets/characters/jamshid/idle/frame_000.png",
+  "transparent_background": true,
+  "prompt": "Edit this existing game character sprite into ONE ending-only relaxed half-salute pose. Preserve the exact character identity, hair, face, pixel-art style, colors, clothing, legs, boots, proportions, right-facing profile, full-body framing and transparent background. He is Jamshid, seventeen years old, dark tousled hair, olive vest, ivory rolled-sleeve shirt, brown trousers and boots. Change ONLY his near arm (currently hanging at image left): bend it and raise the hand to just beside his brow in an informal lazy half-salute, palm roughly toward viewer, elbow bent. Do not add a military uniform, props, text, ground, shadow or background. Other arm stays down. The gesture is quiet and affectionate, not waving overhead. Keep both feet at the same baseline and the head exactly where it was. One isolated full-body sprite on transparent canvas, approximately 800x900 matching the reference framing. Detailed pixel art with the same chunky shaded pixels as the supplied source, not smooth illustration. Preserve crisp pixel clusters and no outlines beyond the reference. Do not redesign or beautify the character."
+}

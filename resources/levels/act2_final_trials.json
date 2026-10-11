@@ -1,0 +1,226 @@
+[
+  {
+    "name": "Act_2_Level_16",
+    "title": "The Rooftop Answer",
+    "routes": [
+      {
+        "kind": "dash",
+        "start": [
+          112,
+          200
+        ],
+        "target": [
+          192,
+          176
+        ],
+        "dash_up": true,
+        "dash_frame": 18
+      },
+      {
+        "kind": "dash",
+        "start": [
+          208,
+          176
+        ],
+        "target": [
+          288,
+          144
+        ],
+        "dash_up": true,
+        "dash_frame": 18
+      },
+      {
+        "kind": "dash",
+        "start": [
+          304,
+          144
+        ],
+        "target": [
+          384,
+          176
+        ],
+        "dash_up": false,
+        "dash_frame": 14
+      },
+      {
+        "kind": "dash",
+        "start": [
+          400,
+          176
+        ],
+        "target": [
+          480,
+          144
+        ],
+        "dash_up": true,
+        "dash_frame": 18
+      },
+      {
+        "kind": "dash",
+        "start": [
+          496,
+          144
+        ],
+        "target": [
+          592,
+          200
+        ],
+        "dash_up": false,
+        "dash_frame": 14
+      }
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Act_2_Level_17",
+    "title": "The Last Loose Tiles",
+    "routes": [
+      {
+        "kind": "dash",
+        "start": [
+          112,
+          200
+        ],
+        "target": [
+          176,
+          192
+        ],
+        "dash_up": false,
+        "dash_frame": 14
+      },
+      {
+        "kind": "dash",
+        "start": [
+          176,
+          192
+        ],
+        "target": [
+          248,
+          160
+        ],
+        "dash_up": true,
+        "dash_frame": 18
+      },
+      {
+        "kind": "dash",
+        "start": [
+          248,
+          160
+        ],
+        "target": [
+          344,
+          184
+        ],
+        "dash_up": false,
+        "dash_frame": 14
+      },
+      {
+        "kind": "dash",
+        "start": [
+          368,
+          184
+        ],
+        "target": [
+          416,
+          152
+        ],
+        "dash_up": true,
+        "dash_frame": 18
+      },
+      {
+        "kind": "dash",
+        "start": [
+          416,
+          152
+        ],
+        "target": [
+          480,
+          128
+        ],
+        "dash_up": true,
+        "dash_frame": 18
+      },
+      {
+        "kind": "dash",
+        "start": [
+          488,
+          128
+        ],
+        "target": [
+          592,
+          200
+        ],
+        "dash_up": false,
+        "dash_frame": 14
+      }
+    ],
+    "water_paths": []
+  },
+  {
+    "name": "Act_2_Level_18",
+    "title": "Two Qanats",
+    "routes": [],
+    "water_paths": [
+      [
+        [
+          104,
+          184
+        ],
+        [
+          144,
+          200
+        ],
+        [
+          152,
+          216
+        ],
+        [
+          200,
+          216
+        ],
+        [
+          200,
+          196
+        ],
+        [
+          264,
+          196
+        ],
+        [
+          312,
+          184
+        ]
+      ],
+      [
+        [
+          328,
+          184
+        ],
+        [
+          368,
+          196
+        ],
+        [
+          424,
+          196
+        ],
+        [
+          424,
+          216
+        ],
+        [
+          488,
+          216
+        ],
+        [
+          496,
+          196
+        ],
+        [
+          544,
+          184
+        ]
+      ]
+    ]
+  }
+]

@@ -1,0 +1,136 @@
+[gd_scene load_steps=20 format=3]
+[ext_resource type="Script" path="res://scenes/props/act2_ending/act2_ending.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/props/act2_ending/StoryCarpet.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/jamshid/Jamshid.tscn" id="3"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/rumi/rumi_frames.tres" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/props/FishingRod.tscn" id="5"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/plaster.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/poem_first_line.png" id="7"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/spray_can.png" id="8"]
+[ext_resource type="Font" path="res://assets/fonts/pixel5x7.fnt" id="9"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/poem_second_line.png" id="12"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/hooshang/act2_ending/finale_frames.tres" id="13"]
+[ext_resource type="Texture2D" path="res://assets/characters/hooshang/act2_ending/coat.png" id="14"]
+[ext_resource type="Script" path="res://scenes/props/act2_ending/ending_gestures.gd" id="15"]
+[ext_resource type="Shader" path="res://scenes/props/act2_ending/paint_reveal.gdshader" id="16"]
+[ext_resource type="PackedScene" path="res://scenes/props/act2_ending/memories/MemoryTableau.tscn" id="17"]
+[ext_resource type="Texture2D" path="res://assets/characters/jamshid/act2_ending/half_salute_child.png" id="18"]
+[sub_resource type="Gradient" id="DawnGradient"]
+offsets = PackedFloat32Array(0,0.65,1)
+colors = PackedColorArray(0.42,0.58,0.62,1,0.82,0.86,0.77,1,0.98,0.84,0.55,1)
+[sub_resource type="GradientTexture2D" id="DawnTexture"]
+gradient = SubResource("DawnGradient")
+width = 320
+height = 180
+fill_from = Vector2(0,0)
+fill_to = Vector2(0,1)
+[sub_resource type="ShaderMaterial" id="PaintReveal"]
+resource_local_to_scene = true
+shader = ExtResource("16")
+shader_parameter/progress = 0.0
+[node name="Act2Ending" type="Node2D"]
+script = ExtResource("1")
+[node name="GroundCarpet" parent="." instance=ExtResource("2")]
+visible = false
+[node name="Rumi" type="AnimatedSprite2D" parent="."]
+z_index = 8
+visible = false
+sprite_frames = ExtResource("4")
+animation = &"idle"
+autoplay = "idle"
+scale = Vector2(0.5,0.5)
+modulate = Color(1,0.85,0.54,1)
+[node name="Rod" parent="." instance=ExtResource("5")]
+visible = false
+rotation = 0.8
+[node name="Wall" type="Node2D" parent="."]
+visible = false
+z_index = -1
+[node name="Plaster" type="Sprite2D" parent="Wall"]
+position = Vector2(0,-104)
+texture = ExtResource("6")
+centered = false
+[node name="FirstLine" type="Sprite2D" parent="Wall"]
+position = Vector2(38,-92)
+texture = ExtResource("7")
+centered = false
+[node name="SecondLine" type="Sprite2D" parent="Wall"]
+visible = false
+material = SubResource("PaintReveal")
+position = Vector2(38,-54)
+texture = ExtResource("12")
+centered = false
+[node name="Can" type="Sprite2D" parent="Wall"]
+z_index = 5
+position = Vector2(126,-3)
+texture = ExtResource("8")
+[node name="Sunlight" type="Polygon2D" parent="Wall"]
+polygon = PackedVector2Array(0,-104,308,-104,308,0,110,0)
+color = Color(1,0.83,0.5,0)
+[node name="Coat" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("14")
+z_index = 3
+[node name="Gestures" type="Node2D" parent="."]
+script = ExtResource("15")
+z_index = 8
+[node name="Actor" type="AnimatedSprite2D" parent="Gestures"]
+visible = false
+sprite_frames = ExtResource("13")
+animation = &"idle"
+offset = Vector2(0,-3)
+[node name="Cinema" type="CanvasLayer" parent="."]
+layer = 15
+[node name="Stage" type="Node2D" parent="Cinema"]
+visible = false
+[node name="Night" type="ColorRect" parent="Cinema/Stage"]
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.06,0.07,0.12,0)
+mouse_filter = 2
+[node name="Morning" type="TextureRect" parent="Cinema/Stage"]
+modulate = Color(1,1,1,0)
+offset_right = 320.0
+offset_bottom = 180.0
+texture = SubResource("DawnTexture")
+mouse_filter = 2
+[node name="Memory" parent="Cinema/Stage" instance=ExtResource("17")]
+visible = false
+[node name="Flight" type="Node2D" parent="Cinema/Stage"]
+position = Vector2(200,84)
+[node name="Carpet" parent="Cinema/Stage/Flight" instance=ExtResource("2")]
+[node name="Jamshid" parent="Cinema/Stage/Flight" instance=ExtResource("3")]
+position = Vector2(8,-4)
+[node name="Salute" type="Sprite2D" parent="Cinema/Stage/Flight"]
+visible = false
+texture_filter = 1
+position = Vector2(8,-4)
+scale = Vector2(0.375,0.375)
+offset = Vector2(0,-19)
+texture = ExtResource("18")
+[node name="Child" type="AnimatedSprite2D" parent="Cinema/Stage/Flight"]
+position = Vector2(-16,10)
+[node name="Prompt" type="Label" parent="Cinema/Stage"]
+offset_left = 80.0
+offset_right = 240.0
+offset_top = 16.0
+horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("9")
+theme_override_font_sizes/font_size = 10
+[node name="Curtain" type="CanvasLayer" parent="."]
+layer = 95
+[node name="Fade" type="ColorRect" parent="Curtain"]
+offset_right = 320.0
+offset_bottom = 180.0
+mouse_filter = 2
+color = Color(0.06,0.07,0.12,0)
+[node name="EndCard" type="Label" parent="Curtain"]
+visible = false
+offset_left = 32.0
+offset_top = 46.0
+offset_right = 288.0
+offset_bottom = 160.0
+text = "END OF ACT TWO\n\nTHE SECOND LINE\n\nPress Enter to return to the title"
+horizontal_alignment = 1
+theme_override_fonts/font = ExtResource("9")
+theme_override_font_sizes/font_size = 8

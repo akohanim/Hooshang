@@ -1,0 +1,251 @@
+{
+  "start_room": "Act_2_Level_0",
+  "evidence": "Observed input commands, including underwater lemon detour. Pond endpoint uses real held skip after the water-dialogue fix. Harness releases movement between commands. No position writes.",
+  "commands": [
+    {
+      "label": "meadow_first_spring",
+      "steps": [
+        {
+          "frames": 190.0,
+          "press": [
+            "move_right"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "meadow_stone_jump",
+      "steps": [
+        {
+          "frames": 60.0,
+          "press": [
+            "move_right",
+            "jump"
+          ]
+        },
+        {
+          "frames": 70.0,
+          "release": [
+            "jump"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "spring_and_pond_approach",
+      "steps": [
+        {
+          "frames": 150.0,
+          "press": [
+            "move_right"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "first_pond_swim",
+      "steps": [
+        {
+          "frames": 150.0,
+          "press": [
+            "move_right"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "underwater_lemon_detour",
+      "steps": [
+        {
+          "frames": 90.0,
+          "press": [
+            "move_down"
+          ]
+        },
+        {
+          "frames": 112.0,
+          "press": [
+            "move_right"
+          ],
+          "release": [
+            "move_down"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "dive_below_bank",
+      "steps": [
+        {
+          "frames": 65.0,
+          "press": [
+            "move_left"
+          ]
+        },
+        {
+          "frames": 110.0,
+          "press": [
+            "move_down"
+          ],
+          "release": [
+            "move_left"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "under_bank_reward",
+      "steps": [
+        {
+          "frames": 93.0,
+          "press": [
+            "move_right",
+            "move_down"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "return_from_underwater_reward",
+      "steps": [
+        {
+          "frames": 80.0,
+          "press": [
+            "move_left"
+          ]
+        },
+        {
+          "frames": 90.0,
+          "press": [
+            "move_up"
+          ],
+          "release": [
+            "move_left"
+          ]
+        },
+        {
+          "frames": 110.0,
+          "press": [
+            "move_right"
+          ],
+          "release": [
+            "move_up"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "opening_actual_exit",
+      "steps": [
+        {
+          "frames": 220.0,
+          "press": [
+            "move_right"
+          ]
+        },
+        {
+          "frames": 75.0,
+          "release": [
+            "move_right"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "fishing_pond_approach",
+      "steps": [
+        {
+          "frames": 275.0,
+          "press": [
+            "move_right"
+          ]
+        },
+        {
+          "frames": 60.0,
+          "press": [
+            "jump"
+          ]
+        },
+        {
+          "frames": 15.0,
+          "release": [
+            "jump"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "swim_to_jamshid",
+      "steps": [
+        {
+          "frames": 60.0,
+          "press": [
+            "move_right",
+            "jump"
+          ]
+        },
+        {
+          "frames": 200.0,
+          "release": [
+            "jump"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "fishing_encounter_arrival",
+      "steps": [
+        {
+          "frames": 60.0,
+          "press": [
+            "move_right",
+            "jump"
+          ]
+        },
+        {
+          "frames": 165.0,
+          "release": [
+            "jump"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "pond_morning",
+      "steps": [
+        {
+          "frames": 180
+        },
+        {
+          "press": [
+            "skip_dialogue"
+          ],
+          "frames": 150
+        },
+        {
+          "release": [
+            "skip_dialogue"
+          ],
+          "frames": 60
+        }
+      ]
+    },
+    {
+      "label": "pond_exit",
+      "steps": [
+        {
+          "press": [
+            "move_right"
+          ],
+          "frames": 120
+        },
+        {
+          "release": [
+            "move_right"
+          ],
+          "frames": 90
+        }
+      ]
+    }
+  ]
+}

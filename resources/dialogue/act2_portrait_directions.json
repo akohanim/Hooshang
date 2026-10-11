@@ -1,0 +1,520 @@
+{
+  "wall": [
+    {
+      "speaker": "HOOSHANG",
+      "text": "Cousin joon!",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You coming to paint, or are you planning to stare at the wall until we're thirty?",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I'm coming.",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Good. We haven't committed the crime yet.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Your moustache is crooked.",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "It's political commentary.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "On what?",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Moustaches.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Come on. One good one before we go.",
+      "face": "excited"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "My mother said home before dark.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Fine. Something quick.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Write this.",
+      "face": "determined"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "What?",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Rumi.",
+      "face": "determined"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "We get one last wall and you want homework?",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Just write.",
+      "face": "determined"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "“This world is a prison, and we are prisoners...”",
+      "face": "determined"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Cheerful.",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Keep going.",
+      "face": "determined"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "“Dig through the prison and -”",
+      "face": "determined"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Mine.",
+      "face": "determined"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Jamshid—",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "All of it.",
+      "face": "determined"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Wait—",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Go home, cousin joon.",
+      "face": "worried"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Detention?",
+      "face": "vulnerable"
+    }
+  ],
+  "palace": [
+    {
+      "speaker": "HOOSHANG",
+      "text": "Four keys.",
+      "face": "surprised"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Of course there are four keys.",
+      "face": "annoyed"
+    }
+  ],
+  "cell": [
+    {
+      "speaker": "HOOSHANG",
+      "text": "Cousin Joon!",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Took you long enough.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Come on lets go.",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Where?",
+      "face": "worried"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Home.",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Oh.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Your mother is going to kill both of us.",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Probably just you.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Come on.",
+      "face": "happy"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Slow down!",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You slow down. You got old.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Whose fault is that?",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "We never finished it.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "No.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "We can finish it now. Come on — you always started. You start.",
+      "face": "happy"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "It isn't my line to finish anymore, cousin joon.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "What does that mean?",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "They're waiting for me.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Who is? Jamshid — who's waiting?",
+      "face": "vulnerable"
+    }
+  ],
+  "carpet": [
+    {
+      "speaker": "HOOSHANG",
+      "text": "There it is.",
+      "face": "neutral"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "There it is.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Come on. We'll take it back.",
+      "face": "happy"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Move over.",
+      "face": "happy"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Jamshid.",
+      "face": "neutral"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You go home.",
+      "face": "worried"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "What?",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Your mother said before dark.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "It's morning.",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Then you're very late.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Stop.",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Cousin joon—",
+      "face": "worried"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "We're going home.",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You are.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I found all four keys.",
+      "face": "surprised"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I know.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "So get off the carpet.",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I can't.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "What do you mean you can't?",
+      "face": "surprised"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "No. No, no — Jamshid, get off.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Get off!",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I'm not letting go.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I can fix it.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You tried.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I can fix it!",
+      "face": "annoyed"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Tell me what I missed. Tell me which key.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Hooshang—",
+      "face": "worried"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "There has to be another key. There's always another key.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "There were never any keys, cousin joon.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Don't.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Mine.",
+      "face": "determined"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Go home, cousin joon.",
+      "face": "worried"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I should have said they were mine.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "We both painted it.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I should have said something.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You were seventeen.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "So were you.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "You were supposed to come home.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I know.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I waited.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I know.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I left.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I know.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I got old.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I noticed.",
+      "face": "joyful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I wasted it.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "All that time.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Is that why you came back?",
+      "face": "worried"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Please let go.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "No.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Hooshang.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "If I let go, you leave.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I already left.",
+      "face": "sad"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I'm sorry.",
+      "face": "sad"
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "I know.",
+      "face": "friendly"
+    }
+  ]
+}

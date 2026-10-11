@@ -94,7 +94,7 @@ const POOL_DROP := 18.0
 ## walks BEHIND.
 const Z_BANDS := {"Background": -1, "Foreground": 1, "CastleBackground": -2, "CastleDecor": -1}
 ## Castle scenery shares an atlas with solid masonry but never blocks movement.
-const CASTLE_SCENERY := ["CastleBackground", "CastleDecor"]
+const CASTLE_SCENERY := ["CastleBackground", "CastleDecor", "PrisonMasonry"]
 
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
@@ -124,6 +124,12 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 		if child is not TileMapLayer:
 			continue
 		var layer: TileMapLayer = child
+		if str(level.name) == "Act_2_Level_15" and layer.name == &"Decor":
+			# Classroom wall boards are scenery, including overlapping stamps.
+			layer.z_index = -1
+			layer.collision_enabled = false
+			for nested in layer.find_children("*", "TileMapLayer", true, false):
+				nested.collision_enabled = false
 		if layer.name.ends_with(VALUES_LAYER_SUFFIX):
 			layer.visible = false
 			layer.collision_enabled = false
@@ -146,6 +152,10 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 			layer.z_index = Z_BANDS[layer.name]
 		if str(layer.name) in CASTLE_SCENERY:
 			layer.collision_enabled = false
+			# Overlapping LDtk stamps become nested TileMapLayers. A child does
+			# not inherit collision_enabled from its scenery parent.
+			for nested in layer.find_children("*", "TileMapLayer", true, false):
+				nested.collision_enabled = false
 		if layer.name == GEOMETRY_LAYER:
 			preload("res://scripts/terrain_variation.gd").apply(layer)
 			_light_panels(level, layer)

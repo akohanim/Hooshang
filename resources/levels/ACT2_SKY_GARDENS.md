@@ -1,40 +1,35 @@
 # Act 2 — the sky gardens
 
-Six additional rooms, `Act_2_Level_3` through `Act_2_Level_8`, follow the
-existing three-room Act 2 project. All terrain remains on its 8px grass grid.
-Each expansion room has a distinct watercolor Persian landmark painting,
-blended at its borders; earlier rooms retain the original panorama.
-Native garden ornaments use a new PixelLab swatch for their color ramps;
-short original synthesized sounds mark spring releases and carpet boarding.
+Eleven rooms, `Act_2_Level_3` through `Act_2_Level_13`, follow the meadow,
+pond story and carpet lesson. The garden finale leads into the castle approach;
+it does not complete the act. Current LDtk geometry is authoritative.
 
-- **Saffron Steps:** a safe spring lesson and short steering flight, followed
-  by two ascending spring transfers. Broad landings teach air control; the
-  high lemons invite more precise arcs.
-- **The Flying Courtyard:** duck beneath a hanging garden, climb to a rest
-  island, then spring onto a second parked rug. A light-thought opening guards
-  the final ride. The island banks a checkpoint, with no visible flag.
-- **Orchard of Detours:** spring up to a launch terrace and choose above or
-  below the central island. Both paths reach the exit. The high path offers a
-  lemon balcony: jump off, collect, then catch the same moving rug again.
-- **Silk in the Wind:** climb two spring steps, walk past a side spring and
-  turn back into its face to launch onto a lower rug. A slowly moving thought
-  gate leads into a tighter static opening; a low exit gives room to dismount.
-- **The Sky Garden:** a longer, 768px finale. Spring directly onto a rug,
-  thread a precise opening, rest at a checkpoint, bounce to an upper terrace,
-  side-launch onto a second rug, and make the final climb through light thoughts.
-
-- **Garden of Kings:** a calm coda beneath the Tomb of Cyrus. A spring climb,
-  short carpet flight, and final spring lead to the completion terrace.
+- **Saffron Steps:** ascending jump/dash transfers, with broad first landings.
+- **The Spring Courtyard:** spring steering and increasingly raised catches.
+- **Orchard of Choices:** a low crumbling route or an upper spring/reward route,
+  converging at a supported checkpoint terrace.
+- **Silk in the Wind:** two steered carpet passages separated by a rest island.
+- **The Sky Garden:** spring, crumble and carpet challenges with a checkpoint
+  between movement phrases.
+- **Garden of Kings:** quiet recovery floor, wider landings and a short flight.
+- **Apex Relay:** spring-to-dash transfers with widened catch surfaces.
+- **Needlewind Passage:** leave a carpet, cross an island, then recatch it.
+- **The Turning Stair:** changes of direction and alternating ascent/descent.
+- **Under the Thorns:** short controlled hops under readable low ceilings.
+- **Crown of the Wind:** combines familiar flight and transfer ideas, then
+  releases the player into the calmer castle approach.
 
 All rugs travel right at 32 px/s after boarding. Up/down arrows, W/S,
 controller D-pad or left stick steer vertically at 36 px/s. Neutral input holds
-height. Flight limits stay above the recovery floor. Hazards are LightThought
-entities; solid garden architecture creates route choices and headroom puzzles.
-After dismounting, a rug keeps flying for five seconds, then returns to its
-original parked position. Landing on the floor does not shorten that delay.
-Reboarding before the deadline cancels it, preserving the optional balcony loop.
-Tutorial signs and checkpoint flags stay removed. Only the first three existing
-Act 2 rooms are outside the builder's authored expansion and remain unchanged.
+height. Hazards are LightThought entities; solid garden architecture creates
+route choices and headroom puzzles. After dismounting, a rug keeps flying for
+five seconds, then returns to its original parked position. Reboarding before
+the deadline cancels that return.
+
+Checkpoint behavior remains on resting islands; flags and decorative checkpoint
+pennants are hidden. Small transfer ledges stay clear of botanical props, while
+broad resting islands retain accents. Room titles sit below the first elevated
+platforms with a dark one-pixel shadow. The final garden has no completion banner.
 
 ## Mechanical contracts
 
@@ -57,18 +52,20 @@ edge even when the preceding room's exit is an interior portal.
 
 ## Build and play
 
-Keep **the Act 2 project** closed in LDtk before running:
+Edit the current LDtk project for continued level authoring. The original
+`tools/build_act2_expansion.py` generates the earlier baseline; rerunning it
+wholesale can overwrite later room and accessibility polish. The focused
+`revise_act2_garden_landings.py` documents the subsequent landing corrections.
+Keep LDtk closed during scripted changes and reload afterward.
+
+For a targeted import of the current Act 2 source:
 
 ```
-python3 tools/build_act2_expansion.py
-python3 tools/gen_sky_garden_decor.py
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import
+/Applications/Godot.app/Contents/MacOS/Godot --headless --editor --path . --script res://tools/import_act2_expansion.gd
 ```
 
-The builder is deterministic and preserves unrelated JSON formatting/content.
-If Godot's editor holds a stale importer, close it normally and reimport.
-`tools/import_act2_expansion.gd` is also a targeted import diagnostic; it
-imports only Act 2 through the existing importer and configured hooks.
+An already-open editor may retain old import hooks. Do not terminate the user's
+editor process; distinguish targeted-import results from its cached view.
 
 Save-free playable entry:
 

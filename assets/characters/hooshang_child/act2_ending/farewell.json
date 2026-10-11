@@ -1,0 +1,70 @@
+{ "frames": [
+   {
+    "filename": "farewell 0.aseprite",
+    "frame": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "sourceSize": { "w": 88, "h": 88 },
+    "duration": 160
+   },
+   {
+    "filename": "farewell 1.aseprite",
+    "frame": { "x": 88, "y": 0, "w": 88, "h": 88 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "sourceSize": { "w": 88, "h": 88 },
+    "duration": 240
+   },
+   {
+    "filename": "farewell 2.aseprite",
+    "frame": { "x": 176, "y": 0, "w": 88, "h": 88 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "sourceSize": { "w": 88, "h": 88 },
+    "duration": 160
+   },
+   {
+    "filename": "farewell 3.aseprite",
+    "frame": { "x": 264, "y": 0, "w": 88, "h": 88 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "sourceSize": { "w": 88, "h": 88 },
+    "duration": 160
+   },
+   {
+    "filename": "farewell 4.aseprite",
+    "frame": { "x": 352, "y": 0, "w": 88, "h": 88 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "sourceSize": { "w": 88, "h": 88 },
+    "duration": 160
+   },
+   {
+    "filename": "farewell 5.aseprite",
+    "frame": { "x": 440, "y": 0, "w": 88, "h": 88 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 88 },
+    "sourceSize": { "w": 88, "h": 88 },
+    "duration": 300
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.18.5-dev",
+  "image": "farewell.png",
+  "format": "RGBA8888",
+  "size": { "w": 528, "h": 88 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "hold", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "release", "from": 1, "to": 5, "direction": "forward", "color": "#000000ff" },
+   { "name": "fall_rest", "from": 5, "to": 5, "direction": "forward", "color": "#000000ff" }
+  ]
+ }
+}

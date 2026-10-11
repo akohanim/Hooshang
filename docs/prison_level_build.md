@@ -146,3 +146,34 @@ geometries, tile placements, entity transforms and typed fields survived. A
 fresh process against the main workspace confirmed that all imported prison
 collision cells and visible scaffold-atlas pixels match the source. Final
 rendered room previews are in `output/prison_build/previews/`.
+
+## Room checkpoint revision — 2026-10-07
+
+Removed all 21 prison checkpoint flags, including those overlapping the keys.
+Room entry now owns the checkpoint throughout the visit; collecting a key
+only banks the key. Save state records `checkpoint_mode: room_entry`; old flag
+coordinates are ignored while collected/inserted keys remain compatible.
+The four keys have larger sprites, rings and text labels. The key rendering is
+verified in a real rendered viewport by hiding each key and comparing pixels
+inside its screen region, with captures saved for visual inspection.
+
+Downward exits no longer require threading the side of a shelf. Their crossing
+platforms are above the floor, with the complete shaft left open. Closed gates
+cap the shaft at floor height. The migration tool `tools/revise_prison_access.py`
+backs up and patches only prison checkpoint entities and the affected collision
+cells; it does not rebuild rooms or change the other Act 2 levels. The bootstrap
+generator implements the same layout for future clean builds.
+
+New checks include taking each wing first with empty inventory and `--retreat`
+on `prison_navigation_test.tscn`: enter each wing, reach its key room, then return
+through the entrance route without picking up a key. The normal mission and
+`--reverse` modes still exercise the key shortcuts. Portal death checks and the
+disk save round trip assert that collecting a key cannot move the room entrance
+checkpoint. Evidence: `output/prison_build/room_checkpoints/`.
+
+Final main-project verification: all 17 selected regression scenes passed,
+including the full input-driven rescue, recovery, portal respawns, save/load,
+and source/import consistency. All four rendered keys passed the local pixel
+visibility check. LDtk 1.5.3 opened and saved a validation copy successfully;
+all 17 prison rooms retained their geometry, tiles, entities and typed fields,
+and the saved file passed the official schema validator.

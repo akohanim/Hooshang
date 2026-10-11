@@ -1,33 +1,38 @@
 [
   {
     "name": "Act_2_Level_3",
-    "title": "Saffron Steps",
+    "title": "Saffron Switchbacks",
     "width": 640,
     "ledges": [
       [
         128,
         264,
-        48
+        40
       ],
       [
-        216,
-        248,
-        48
+        208,
+        232,
+        40
       ],
       [
         304,
-        248,
-        56
+        264,
+        64
       ],
       [
-        408,
-        216,
-        48
+        392,
+        232,
+        40
       ],
       [
-        504,
+        464,
+        200,
+        40
+      ],
+      [
+        552,
         216,
-        48
+        40
       ],
       [
         592,
@@ -54,62 +59,86 @@
           144,
           264
         ],
-        "jump_hold": 60
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
         "start": [
-          160,
+          144,
           264
         ],
         "target": [
-          232,
-          248
-        ]
+          224,
+          232
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
         "start": [
-          248,
-          248
+          224,
+          232
         ],
         "target": [
-          320,
-          248
-        ]
+          328,
+          264
+        ],
+        "jump_hold": 60,
+        "dash_up": false
       },
       {
         "kind": "dash",
         "start": [
-          344,
-          248
+          328,
+          264
         ],
         "target": [
-          424,
-          216
-        ]
+          408,
+          232
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
         "start": [
-          440,
-          216
+          408,
+          232
         ],
         "target": [
-          520,
-          216
-        ]
+          480,
+          200
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
         "start": [
-          536,
+          480,
+          200
+        ],
+        "target": [
+          568,
+          216
+        ],
+        "jump_hold": 60,
+        "dash_up": false
+      },
+      {
+        "kind": "dash",
+        "start": [
+          568,
           216
         ],
         "target": [
           608,
           192
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       }
     ],
     "crumbles": [],
@@ -119,23 +148,23 @@
   },
   {
     "name": "Act_2_Level_4",
-    "title": "The Spring Courtyard",
+    "title": "Courtyard Arcs",
     "width": 640,
     "ledges": [
       [
-        112,
-        240,
+        104,
+        232,
         56
       ],
       [
+        176,
         184,
-        192,
         80
       ],
       [
-        280,
-        144,
-        64
+        256,
+        136,
+        80
       ],
       [
         480,
@@ -155,11 +184,11 @@
       ],
       [
         152,
-        240
+        232
       ],
       [
         240,
-        192
+        184
       ]
     ],
     "carpets": [],
@@ -178,36 +207,36 @@
         ],
         "target": [
           128,
-          240
+          232
         ]
       },
       {
         "kind": "spring",
         "start": [
           152,
-          240
+          232
         ],
         "target": [
           200,
-          192
+          184
         ]
       },
       {
         "kind": "spring",
         "start": [
           240,
-          192
+          184
         ],
         "target": [
-          296,
-          144
+          280,
+          136
         ]
       },
       {
         "kind": "dash",
         "start": [
           328,
-          144
+          136
         ],
         "target": [
           416,
@@ -250,7 +279,7 @@
   },
   {
     "name": "Act_2_Level_5",
-    "title": "Orchard of Choices",
+    "title": "Orchard of Commitments",
     "width": 640,
     "ledges": [
       [
@@ -387,19 +416,19 @@
     ],
     "crumbles": [
       [
-        200,
+        196,
         264,
-        48
+        40
       ],
       [
-        280,
+        276,
         248,
-        48
+        40
       ],
       [
-        360,
+        356,
         248,
-        48
+        40
       ]
     ],
     "optional_routes": [
@@ -514,7 +543,7 @@
         224
       ],
       [
-        536,
+        504,
         112
       ]
     ],
@@ -570,7 +599,7 @@
         "start": null,
         "waypoints": [
           [
-            536,
+            504,
             112
           ]
         ],
@@ -588,12 +617,12 @@
   },
   {
     "name": "Act_2_Level_7",
-    "title": "The Sky Garden",
+    "title": "The Garden Threshold",
     "width": 768,
     "ledges": [
       [
         112,
-        240,
+        248,
         56
       ],
       [
@@ -602,9 +631,9 @@
         72
       ],
       [
-        376,
+        360,
         168,
-        64
+        80
       ],
       [
         616,
@@ -618,10 +647,6 @@
       ]
     ],
     "springs": [
-      [
-        80,
-        288
-      ],
       [
         336,
         216
@@ -649,26 +674,29 @@
     ],
     "routes": [
       {
-        "kind": "spring",
+        "kind": "dash",
         "start": [
           80,
           288
         ],
         "target": [
-          128,
-          240
-        ]
+          136,
+          248
+        ],
+        "dash_up": true,
+        "dash_frame": 16
       },
       {
         "kind": "dash",
         "start": [
           152,
-          240
+          248
         ],
         "target": [
           224,
           216
-        ]
+        ],
+        "dash_up": true
       },
       {
         "kind": "dash",
@@ -720,7 +748,8 @@
         "target": [
           696,
           128
-        ]
+        ],
+        "dash_up": true
       },
       {
         "kind": "dash",
@@ -731,7 +760,8 @@
         "target": [
           752,
           104
-        ]
+        ],
+        "dash_up": true
       }
     ],
     "crumbles": [
@@ -925,7 +955,9 @@
         "target": [
           240,
           200
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
@@ -936,7 +968,8 @@
         "target": [
           320,
           216
-        ]
+        ],
+        "jump_hold": 60
       },
       {
         "kind": "dash",
@@ -948,7 +981,8 @@
           408,
           192
         ],
-        "dash_up": true
+        "dash_up": true,
+        "jump_hold": 60
       },
       {
         "kind": "spring_dash",
@@ -971,7 +1005,8 @@
         "target": [
           608,
           144
-        ]
+        ],
+        "jump_hold": 60
       },
       {
         "kind": "dash",
@@ -982,7 +1017,9 @@
         "target": [
           688,
           128
-        ]
+        ],
+        "jump_hold": 60,
+        "dash_up": true
       },
       {
         "kind": "dash",
@@ -993,7 +1030,8 @@
         "target": [
           776,
           160
-        ]
+        ],
+        "jump_hold": 60
       },
       {
         "kind": "dash",
@@ -1004,14 +1042,15 @@
         "target": [
           856,
           160
-        ]
+        ],
+        "jump_hold": 60
       }
     ],
     "crumbles": [
       [
-        144,
+        128,
         216,
-        40
+        56
       ],
       [
         224,
@@ -1024,9 +1063,9 @@
         40
       ],
       [
-        504,
+        488,
         128,
-        48
+        64
       ],
       [
         592,
@@ -1157,7 +1196,7 @@
           952,
           120
         ],
-        "dash_frame": 18
+        "dash_frame": 22
       },
       {
         "kind": "dash",
@@ -1252,7 +1291,7 @@
           160,
           216
         ],
-        "dash_frame": 18
+        "dash_frame": 22
       },
       {
         "kind": "dash",
@@ -1321,7 +1360,7 @@
           568,
           112
         ],
-        "dash_frame": 18
+        "dash_frame": 22
       },
       {
         "kind": "dash",
@@ -1476,7 +1515,8 @@
         "target": [
           464,
           216
-        ]
+        ],
+        "dash_frame": 24
       },
       {
         "kind": "spring_dash",
@@ -1488,7 +1528,7 @@
           584,
           144
         ],
-        "dash_frame": 18
+        "dash_frame": 22
       },
       {
         "kind": "dash",
@@ -1638,7 +1678,7 @@
           160,
           216
         ],
-        "dash_frame": 18
+        "dash_frame": 22
       },
       {
         "kind": "dash",
@@ -1703,7 +1743,7 @@
           1192,
           120
         ],
-        "dash_frame": 18
+        "dash_frame": 22
       },
       {
         "kind": "dash",

@@ -37,12 +37,12 @@ const CHILD_FRAMES := preload("res://assets/characters/hooshang_child/act2_frame
 # letting a STATE name carry one ("warm_open"), so a speaker with an underscore
 # would misroute (see systems/voice_blips.gd's split, and voice_blip_test.gd).
 const CHILD_FACES := {
-	"neutral": preload("res://assets/characters/hooshang_child/faces/childhooshang_neutral.png"),
-	"happy": preload("res://assets/characters/hooshang_child/faces/childhooshang_happy.png"),
-	"sad": preload("res://assets/characters/hooshang_child/faces/childhooshang_sad.png"),
-	"surprised": preload("res://assets/characters/hooshang_child/faces/childhooshang_surprised.png"),
-	"annoyed": preload("res://assets/characters/hooshang_child/faces/childhooshang_annoyed.png"),
-	"vulnerable": preload("res://assets/characters/hooshang_child/faces/childhooshang_vulnerable.png"),
+	"neutral": preload("res://assets/characters/hooshang_child/faces_v2/childhooshang_neutral.png"),
+	"happy": preload("res://assets/characters/hooshang_child/faces_v2/childhooshang_happy.png"),
+	"sad": preload("res://assets/characters/hooshang_child/faces_v2/childhooshang_sad.png"),
+	"surprised": preload("res://assets/characters/hooshang_child/faces_v2/childhooshang_surprised.png"),
+	"annoyed": preload("res://assets/characters/hooshang_child/faces_v2/childhooshang_annoyed.png"),
+	"vulnerable": preload("res://assets/characters/hooshang_child/faces_v2/childhooshang_vulnerable.png"),
 }
 
 ## Which room the encounter lives in (LDtk level identifier).
@@ -127,11 +127,45 @@ func _ready() -> void:
 	_prepare_pond_fish(room, jamshid)
 	jamshid.defer_to_cutscene = true
 	jamshid.triggered.connect(_on_jamshid_reached.bind(jamshid))
+	_encounter_origin = jamshid.global_position
+	var flags: Dictionary = _world.get("story_flags")
+	if bool(flags.get("pond_dawn", false)):
+		_played = true
+		_restore_morning_scenery()
+	_world.room_changed.connect(_on_room_changed)
+	_on_room_changed(_world.current_room)
+
+
+func _on_room_changed(room: Node2D) -> void:
+	# Restore the quiet morning when revisiting the pond. Later directors retain
+	# their own lighting; loading the epilogue must not retint its waking scene.
+	if _played and room != null and str(room.name) == room_name and _canvas_mod != null:
+		_canvas_mod.color = DAWN
+
+
+func _restore_morning_scenery() -> void:
+	_speaker.hide()
+	_caught = true
+	if _canvas_mod != null and _world.current_room != null and str(_world.current_room.name) not in ["Act_2_Level_20", "Act_2_Level_21"]:
+		_canvas_mod.color = DAWN
+	if is_instance_valid(_pond_fish):
+		_pond_fish.hook()
+		_pond_fish.hide()
+	if is_instance_valid(_rod): _rod.queue_free()
+	_encounter_fire = _build_fire_at(_encounter_origin + Vector2(24, 0))
+	_encounter_fire.set_strength(0.0)
+
+
+func _bank_morning() -> void:
+	var flags: Dictionary = _world.get("story_flags")
+	flags["pond_dawn"] = true
+	SaveGame.save_now()
 
 
 ## Act 2 is the childhood memory. Keep the Player scene and physics unchanged,
 ## but swap its visual library before the first room becomes playable.
 func _apply_child_player_art() -> void:
+	if _world.current_room != null and str(_world.current_room.name) in ["Act_2_Level_20", "Act_2_Level_21"]: return
 	if _world.player == null:
 		return
 	var visual := _world.player.get_node_or_null("SpriteSquash/Visual") as AnimatedSprite2D
@@ -145,6 +179,7 @@ func _apply_child_player_art() -> void:
 ## Grounded in frame measurements of the US SNES reference at half tile scale.
 ## Enable only on this world's player; never change the shared prefab defaults.
 func _apply_child_movement() -> void:
+	if _world.current_room != null and str(_world.current_room.name) in ["Act_2_Level_20", "Act_2_Level_21"]: return
 	var player := _world.player
 	if player == null or player.has_meta("child_movement_applied"): return
 	player.set_meta("child_movement_applied", true)
@@ -188,7 +223,13 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	add_child(_ambience)
 	_ambience.blend(0.0, 0.0, 0.8)
 	_encounter_origin = jamshid.global_position
-	Dialogue.begin_conversation(self, player)
+	# The opening exchange is deliberately spoken while he floats in the pond.
+	# Ordinary dialogue settles an airborne player onto a floor; here that would
+	# pull him through the water and below the room before the first line opens.
+	# This director owns the later bank-exit arc and campfire positions.
+	Dialogue.begin_conversation(self, player, true)
+	if player.swimming():
+		player.visual.play("swim_idle")
 	var actor: Jamshid = jamshid.actor
 	# He is fishing: sitting on the bank, facing the water (Hooshang's side).
 	actor.play_pose("sit")
@@ -198,7 +239,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _jamshid(jamshid, "Cousin joon!", "excited")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Jamshid! It’s so good to see you!", "happy")
+	await _hooshang("Jamshid! It's so good to see you!", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "You saw me yesterday.", "friendly")
@@ -207,7 +248,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _hooshang("It feels like so much longer.", "vulnerable")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Well, get out of the water. You’re frightening dinner.", "joyful")
+	await _jamshid(jamshid, "Well, get out of the water. You're frightening dinner.", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _tween_arc(player, jamshid.global_position + Vector2(-20, -24),
@@ -218,11 +259,11 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _hooshang("Are the fish biting today?", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "They were. Then my cousin swam through their house.", "joyful")
+	await _jamshid(jamshid, "They would if little kids stopped swimming through their house.", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
 	_splash(rod.global_position + Vector2(-36, -2))
-	await _jamshid(jamshid, "Hold that thought!", "excited")
+	await _jamshid(jamshid, "Finally!!", "excited")
 	if _finish_encounter_skip(jamshid):
 		return
 	var fish := await _hook_fish(jamshid, rod)
@@ -234,29 +275,29 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	var fire := await _cut_to_campfire(jamshid, fish, rod)
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Does my mother know we’re here?", "neutral")
+	await _hooshang("Does my mother know we're here?", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Yes. She sent bread and cheese.", "friendly")
+	await _jamshid(jamshid, "Yes. She sent snacks.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Where is it?", "neutral")
+	await _hooshang("Did she send that pomegranate fruit roll up? Where is it!?", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "You were late.", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Jamshid.", "annoyed")
+	await _hooshang("Jamshid", "annoyed")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Fishing is hungry work. She also said to be home before dark.", "joyful")
+	await _jamshid(jamshid, "Fishing is hungry work. She also said to be home before dark...", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
 	_ambience.blend(1.0, 0.0, nightfall_time)
 	_fade_stars(1.0, nightfall_time)
 	await _wait_scene_tween(_tween_sky(NIGHT, nightfall_time))
 	await _hold(0.7)
-	await _jamshid(jamshid, "You’re quiet today.", "friendly")
+	await _jamshid(jamshid, "You're quiet today.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hooshang("I had a strange dream.", "vulnerable")
@@ -277,7 +318,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _jamshid(jamshid, "Good. Go on.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("I worked in an office. I didn’t like it, but I stayed for years. Then I lost the job… and I felt lost, too.", "sad")
+	await _hooshang("I worked in an office. I didn't like it, but I stayed for years. Then I lost the job... and I felt lost, too.", "sad")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "What happened?", "worried")
@@ -286,19 +327,19 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _hooshang("Rumi appeared.", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Rumi from school?", "joyful")
+	await _jamshid(jamshid, "Rumi, the poet, from school?", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hooshang("Yes. He taught me how to stay equanimous with my thoughts.", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "You’d better start from the beginning.", "friendly")
+	await _jamshid(jamshid, "You'd better start from the beginning.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _night_timelapse(player, actor, fish, fire)
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("…and then I woke up here.", "vulnerable")
+	await _hooshang("...and then I woke up here.", "vulnerable")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "What a dream.", "friendly")
@@ -307,47 +348,32 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _hooshang("Do you remember yours?", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Almost never. By the time I wake up, they’re gone.", "friendly")
+	await _jamshid(jamshid, "Almost never. By the time I wake up, they're gone.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("This one felt like I’d lived it.", "vulnerable")
+	await _hooshang("This one felt like I'd lived it.", "vulnerable")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "No wonder you looked so tired.", "worried")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hold(0.7)
-	await _hooshang("I’m glad you’re here.", "happy")
+	await _hooshang("I'm glad you're here.", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "I’m glad you came down.", "friendly")
+	await _jamshid(jamshid, "I'm glad you came down.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hold(0.7)
-	await _jamshid(jamshid, "Next time you’re old, come looking for me.", "friendly")
-	if _finish_encounter_skip(jamshid):
-		return
-	await _hooshang("Here?", "happy")
-	if _finish_encounter_skip(jamshid):
-		return
-	await _jamshid(jamshid, "Here. Or at home. You don’t have to wait for a reason.", "friendly")
+	await _jamshid(jamshid, "Next time you're old, come looking for me.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	_school_bell()
 	actor.play_pose("idle")
-	await _jamshid(jamshid, "That can’t be school.", "worried")
+	await _jamshid(jamshid, "That can't be the school bell.", "worried")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hooshang("We talked all night.", "surprised")
-	if _finish_encounter_skip(jamshid):
-		return
-	await _jamshid(jamshid, "Your mother is going to kill me.", "worried")
-	if _finish_encounter_skip(jamshid):
-		return
-	await _hooshang("I’ll tell her it was my fault.", "happy")
-	if _finish_encounter_skip(jamshid):
-		return
-	await _jamshid(jamshid, "She’ll say I should’ve known better.", "worried")
 	if _finish_encounter_skip(jamshid):
 		return
 	_school_bell()
@@ -360,6 +386,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	player.cutscene_rest(false, 1)
 	Dialogue.end_conversation()
 	_ambience.finish()
+	_bank_morning()
 
 
 ## Apply the same morning endpoint from any spoken beat, without playing the
@@ -400,6 +427,7 @@ func _finish_encounter_skip(jamshid: JamshidNpc) -> bool:
 	player.velocity = Vector2.ZERO
 	player.cutscene_rest(false, 1)
 	Dialogue.end_conversation()
+	_bank_morning()
 	return true
 
 
@@ -525,7 +553,7 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 		return
 	_play_cue(preload("res://assets/audio/traversal/carpet_board.wav"), -14.0)
 	actor.play_pose("idle")
-	await _hooshang("That’s how you get to school?", "surprised")
+	await _hooshang("That's how you get to school?", "surprised")
 	if Dialogue.scene_skip_requested(self):
 		return
 	await _jamshid(jamshid, "How do you think I keep arriving before you?", "joyful")
