@@ -98,6 +98,7 @@ const CASTLE_SCENERY := ["CastleBackground", "CastleDecor", "PrisonMasonry"]
 
 
 func post_import(level: LDTKLevel) -> LDTKLevel:
+	_entities_to_front(level)
 	if str(level.name).begins_with("Prison_"):
 		return preload("res://scripts/prison/prison_import.gd").apply(level)
 	if str(level.name) == "Level_V9":
@@ -160,6 +161,21 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 			preload("res://scripts/terrain_variation.gd").apply(layer)
 			_light_panels(level, layer)
 	return level
+
+
+## Act 2 only: draw the Entities layer in FRONT of the same-z tile layers.
+## The importer push_front()s each LDtk layer, so whichever layer is listed LAST
+## in the project ends up FIRST in the tree and draws behind its siblings at
+## equal z. Act 2 lists Entities last (Acts 1 and 3 list it third), so keys, cages
+## and doors were hidden behind the tiles. Moving it to the end of the children
+## fixes the order without touching the other Acts or any z_index. Act 2 is
+## recognised by its CastleTerrain layer; no other project has one.
+func _entities_to_front(level: LDTKLevel) -> void:
+	if level.get_node_or_null("CastleTerrain") == null:
+		return
+	var entities := level.get_node_or_null("Entities")
+	if entities != null:
+		level.move_child(entities, level.get_child_count() - 1)
 
 
 ## Hang a light on every painted ceiling panel in this level.
