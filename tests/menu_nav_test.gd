@@ -136,7 +136,7 @@ func _mouse_checks() -> void:
 	_mouse(menu.rows.get_child(1), false)
 	_check(menu.selected == 1, "mouse hover selects the pointed title row")
 	_mouse(first, true)
-	_check(menu.page == MainMenu.Page.SLOTS, "click opens the new-game slot menu")
+	_check(menu.page == MainMenu.Page.CHAPTERS, "click opens the chapter browser")
 	_mouse(menu.back_button, true)
 	_check(menu.page == MainMenu.Page.ROOT, "clickable Back returns to title")
 	menu._show_confirm(0)

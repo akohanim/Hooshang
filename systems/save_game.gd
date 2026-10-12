@@ -527,3 +527,19 @@ func _shift_conveyor_room_names(value: Variant) -> Variant:
 			result[_shift_conveyor_room_names(key)] = _shift_conveyor_room_names(value[key])
 		return result
 	return value
+
+
+## Unrestricted, save-free replay from the chapter browser.
+func replay_room(act: int, room: String) -> void:
+	if act == 1:
+		open_finished(room)
+		return
+	unbind()
+	Collectibles.reset()
+	Act2Quest.reset()
+	Deaths.reset()
+	Points.reset()
+	ActStats.reset()
+	Game.completed = false
+	_pending = {"world_state": {"has_dash": true}}
+	_enter_world("res://ldtk/Act%dWorld.tscn" % act, room)

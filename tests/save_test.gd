@@ -308,10 +308,10 @@ func _check_menu_offers() -> void:
 
 	menu.show_root()
 	_check(_labels().has("CONTINUE") and _labels().has("LOAD GAME")
-			and _labels().has("LEVEL SELECT"),
+			and _labels().has("EXPLORE CHAPTERS"),
 		"with runs on disk the title screen offers them  %s" % str(_labels()))
-	_check(_labels()[0] == "CONTINUE",
-		"and CONTINUE is the row you land on  [%s]" % _labels()[0])
+	_check(_labels()[0] == "EXPLORE CHAPTERS",
+		"the complete chapter browser is the default  [%s]" % _labels()[0])
 
 	menu._show_levels(0)
 	var rooms := _labels()
@@ -338,8 +338,8 @@ func _check_menu_offers() -> void:
 		SaveGame.erase(i)
 	menu.show_root()
 	_check(not _labels().has("CONTINUE") and not _labels().has("LOAD GAME")
-			and not _labels().has("LEVEL SELECT"),
-		"with nothing saved it offers only NEW GAME and QUIT  %s" % str(_labels()))
+			and _labels().has("EXPLORE CHAPTERS"),
+		"without saves, replay stays available alongside NEW GAME and QUIT  %s" % str(_labels()))
 	for i in SaveGame.SLOTS:
 		if not kept[i].is_empty():
 			SaveGame._write(i, kept[i])

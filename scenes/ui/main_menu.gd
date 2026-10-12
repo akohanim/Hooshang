@@ -19,24 +19,22 @@ extends CanvasLayer
 ##
 ## NAVIGATION. Deliberately the pause menu's, key for key: confirm on `jump` or
 ## `ui_accept`, move on `move_up`/`move_down` as well as the arrows, back out on
-## `ui_cancel` or `pause`. No mouse anywhere — this is a pad-and-keyboard game
-## and a menu you can only leave with a cursor is one a controller cannot leave.
+## `ui_cancel` or `pause`. Mouse and touch use the same selection model.
 ##
-## SCREENS. One scene, four screens, because they are the same list of words with
-## different rows in it (ROOT, SLOTS, LEVELS, CONFIRM). Rows are built in code
+## SCREENS. The chapter browser adds CHAPTERS and EXPLORE to the save pages.
+## Every room is available, independently of save progress. Rows are built in code
 ## rather than authored per screen, so a slot card that gains a field, or an Act
 ## that gains rooms, changes one function and no layout.
 
 ## The pages this menu moves between. SLOTS serves all three things you can do
 ## to a slot; `_slot_mode` says which.
-enum Page { ROOT, SLOTS, LEVELS, CONFIRM }
+enum Page { ROOT, SLOTS, LEVELS, CONFIRM, CHAPTERS, EXPLORE }
 ## What choosing a slot on the SLOTS screen means.
 enum SlotMode { NEW, LOAD, PRACTICE }
 
 const SCENE := "res://scenes/ui/MainMenu.tscn"
-## The dev launcher. Kept reachable — the tests and the token-density prototype
-## both go through it — but off the menu in a release build, where a player has
-## no business dropping into room 14 of a run they never played.
+## The chapter browser is the player-facing launcher; developer scenes remain
+## available from the editor.
 @export_group("Controller")
 ## How far a stick must be pushed before the cursor moves. Well above the 0.25
 ## deadzone the movement actions use in project.godot: that number is tuned for
@@ -59,7 +57,7 @@ const PICKER := "res://scenes/debug_level_picker.tscn"
 ## The row the cursor is on.
 @export var selected_color := Color(1.0, 0.82, 0.42, 1.0)
 ## Every other row. Dim enough to read as "not this one" at a glance.
-@export var dimmed_color := Color(0.74, 0.75, 0.82, 0.5)
+@export var dimmed_color := Color(0.74, 0.78, 0.84, 0.85)
 ## Gap between the caret and the word it points at, in the menu's 1280x720 space.
 @export var caret_gap := 26.0
 ## Height of one row, and the pitch between them, in that same space.
@@ -89,6 +87,17 @@ var _top := 0
 var _slot_mode := 0
 var _touch_gesture = preload("res://scenes/ui/touch/touch_menu_gesture.gd").new()
 
+var _room_cursors := [0,0,0]
+var _chapter := 1
+var _selection_tween: Tween
+var _catalog: Array = []
+var _preview: Control
+var _hero: TextureRect
+var _eyebrow: Label
+var _caption: Label
+var _counter: Label
+var _selection: Panel
+
 var _fade: Tween
 var _font: FontVariation
 ## Which way the cursor is being held right now (-1 up, 0 neutral, 1 down), and
@@ -116,6 +125,7 @@ func _ready() -> void:
 	# out of a level, a title screen that cannot be navigated is a dead game.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_font()
+	_build_explorer()
 	show_root()
 	root.modulate.a = 0.0
 	_fade_to(1.0)
@@ -161,10 +171,12 @@ func reopen() -> void:
 # --------------------------------------------------------------- screens ----
 
 func show_root() -> void:
+	_chapter = 1
 	page = Page.ROOT
 	title.text = "HOOSHANG"
-	subtitle.text = "ACT I  —  THE OFFICE"
+	subtitle.text = "A JOURNEY BACK TO YOURSELF"
 	var built: Array[Dictionary] = []
+	built.append(_row("EXPLORE CHAPTERS", "Every room unlocked. Your next journey is yours to choose.", _show_chapters))
 	# CONTINUE is offered only when there is something to continue, and it takes
 	# the most recent slot without asking. A player who wants a different one has
 	# LOAD GAME directly below; a player with one run should not have to choose.
@@ -179,20 +191,6 @@ func show_root() -> void:
 	if SaveGame.has_any():
 		built.append(_row("LOAD GAME", "pick up any of the three runs",
 			func() -> void: _show_slots(SlotMode.LOAD)))
-		built.append(_row("LEVEL SELECT", "replay a room you have reached — nothing is saved",
-			func() -> void: _show_slots(SlotMode.PRACTICE)))
-	# Shown in EXPORTED builds too, not just debug ones. It used to be gated on
-	# OS.is_debug_build(), which is false in a release export — so the row was
-	# missing from the itch.io build, which is the one build anybody other than
-	# the developer ever sees. That is now deliberate: this game ships with its
-	# room list open, so a player can jump straight to anything.
-	#
-	# It still writes to no save slot (see scenes/debug_level_picker.gd), so an
-	# afternoon spent in here cannot touch a real run.
-	built.append(_row("DEBUG PICKER", "jump straight to any room or scene",
-		func() -> void: _start(func() -> void:
-			LdtkWorld.debug_start_room = ""
-			get_tree().change_scene_to_file(PICKER))))
 	if not OS.has_feature("web"):
 		built.append(_row("QUIT", "leave the office the other way",
 			func() -> void: get_tree().quit()))
@@ -353,9 +351,10 @@ func _rebuild() -> void:
 		label.text = str(entry["text"])
 		label.position = Vector2(0.0, i * row_step)
 		label.size = Vector2(rows.size.x, row_height)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.add_theme_font_size_override("font_size", 34)
+		label.add_theme_font_size_override("font_size", 24)
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		label.add_theme_font_override("font", _font)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		rows.add_child(label)
@@ -365,6 +364,7 @@ func _rebuild() -> void:
 
 
 func _refresh() -> void:
+	_update_explorer()
 	var shown := rows.get_child_count()
 	for i in shown:
 		var label := rows.get_child(i) as Label
@@ -384,16 +384,11 @@ func _place_caret() -> void:
 	if index < 0 or index >= rows.get_child_count():
 		caret.visible = false
 		return
-	caret.visible = true
-	var row := rows.get_child(index) as Label
-	var font := row.get_theme_font("font")
-	if font == null:
-		return
-	var width := font.get_string_size(row.text, HORIZONTAL_ALIGNMENT_LEFT, -1.0,
-		row.get_theme_font_size("font_size")).x
-	caret.position = Vector2(
-		rows.position.x + rows.size.x * 0.5 - width * 0.5 - caret_gap - caret.size.x,
-		rows.position.y + row.position.y + (row.size.y - caret.size.y) * 0.5)
+	caret.visible = false
+	if _selection_tween and _selection_tween.is_valid(): _selection_tween.kill()
+	_selection_tween = create_tween()
+	_selection_tween.tween_property(_selection,"position",rows.position + Vector2(-16,index*row_step),0.10).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_selection.size = Vector2(rows.size.x+32,row_height)
 
 
 # ----------------------------------------------------------------- input ----
@@ -422,6 +417,10 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouse:
 		_mouse_input(event)
+		return
+	if page == Page.EXPLORE and (event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right")):
+		get_viewport().set_input_as_handled()
+		_show_explore(posmod(_chapter + (1 if event.is_action_pressed("ui_right") else -1),3))
 		return
 	var taken := Callable()
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("pause"):
@@ -501,7 +500,7 @@ func _is_nav(event: InputEvent) -> bool:
 ## held direction repeats. Holding an arrow key now repeats too, which it did not
 ## before — a menu that ignores a held key feels broken in the other direction.
 func _process(delta: float) -> void:
-	hint.text = "TAP TO SELECT    SWIPE TO SCROLL" if InputDevice.is_touch() else "W/S / STICK  MOVE    C / A / CLICK  SELECT    ESC / B  BACK"
+	hint.text = "TAP TO SELECT    SWIPE TO SCROLL" if InputDevice.is_touch() else ("↑ ↓  ROOM    ← →  CHAPTER    ENTER / A  PLAY    ESC / B  BACK" if page == Page.EXPLORE else "W/S / STICK  MOVE    ENTER / A / CLICK  SELECT    ESC / B  BACK")
 	if _rows.is_empty():
 		return
 	var axis := Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
@@ -535,7 +534,9 @@ func _process(delta: float) -> void:
 ## because these lists are short enough that stopping at the end reads as broken
 ## rather than as safe — the same call the pause menu makes.
 func _move(step: int) -> void:
+	if _rows.is_empty(): return
 	selected = (selected + step + _rows.size()) % _rows.size()
+	if page == Page.EXPLORE: _room_cursors[_chapter] = selected
 	var shown := mini(visible_rows, _rows.size())
 	_top = clampi(_top, maxi(selected - shown + 1, 0), selected)
 	_top = clampi(_top, 0, maxi(_rows.size() - shown, 0))
@@ -561,6 +562,12 @@ func back() -> void:
 			show_root()
 		Page.CONFIRM:
 			_show_slots(SlotMode.NEW)
+		Page.CHAPTERS:
+			show_root()
+		Page.EXPLORE:
+			_room_cursors[_chapter] = selected
+			_show_chapters()
+			_move(_chapter)
 
 
 # -------------------------------------------------------------- plumbing ----
@@ -594,3 +601,131 @@ func _fade_to(a: float) -> void:
 	_fade = create_tween()
 	_fade.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	_fade.tween_property(root, "modulate:a", a, fade_time)
+
+
+const CHAPTERS := [
+	{"name":"THE OFFICE", "subtitle":"I  /  BREAK THE ROUTINE", "note":"Fluorescent nights. Impossible deadlines. One way out.", "color":"b7bccd", "art":"res://assets/background/act1_office/level_1.png"},
+	{"name":"THE GARDENS OF MEMORY", "subtitle":"II  /  RETURN TO IRAN", "note":"Sunlit gardens, an old friendship, and four keys to freedom.", "color":"e6bb78", "art":"res://assets/backdrop/act2_sky/center.png"},
+	{"name":"BENEATH THE SURFACE", "subtitle":"III  /  INTO THE BLUE", "note":"Leave the noise behind. Find your rhythm in the depths.", "color":"76d6d5", "art":"res://assets/act3/showcase_room.png"}
+]
+
+func _build_explorer() -> void:
+	_catalog = JSON.parse_string(FileAccess.get_file_as_string("res://resources/menu/rooms.json"))
+	for act: Array in _catalog:
+		act.sort_custom(func(a: Dictionary,b: Dictionary) -> bool: return LdtkWorld.index_in_name(a.id)<LdtkWorld.index_in_name(b.id))
+	root.get_node("Backdrop").color = Color("0d1520")
+	root.get_node("Rule").visible = false
+	subtitle.add_theme_color_override("font_color",Color("a4b1c3"))
+	hint.add_theme_color_override("font_color",Color("95a6bb"))
+	detail.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title.position = Vector2(64,68)
+	title.size = Vector2(1120,80)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	title.add_theme_font_size_override("font_size",48)
+	subtitle.position = Vector2(68,146)
+	subtitle.size = Vector2(1100,34)
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	subtitle.add_theme_font_size_override("font_size",18)
+	rows.position = Vector2(80,238)
+	rows.size = Vector2(400,360)
+	row_step = 56
+	row_height = 48
+	more_above.position = Vector2(64,202)
+	more_above.size.x = 430
+	more_below.position = Vector2(64,574)
+	more_below.size.x = 430
+	detail.position = Vector2(64,615)
+	detail.size = Vector2(1150,40)
+	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	detail.add_theme_font_size_override("font_size",18)
+	hint.add_theme_font_size_override("font_size",16)
+	back_button.position = Vector2(1080,28)
+	back_button.size = Vector2(160,44)
+	back_button.add_theme_font_size_override("font_size",18)
+	_selection = Panel.new()
+	_selection.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("273342")
+	style.border_color = Color("e6bb78")
+	style.border_width_left = 3
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	_selection.add_theme_stylebox_override("panel",style)
+	root.add_child(_selection)
+	root.move_child(_selection,root.get_node("Rows").get_index())
+	_hero = TextureRect.new()
+	_hero.position = Vector2(552,220)
+	_hero.size = Vector2(664,350)
+	_hero.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_hero)
+	_preview = preload("res://scenes/ui/chapter_preview.gd").new()
+	_preview.position = _hero.position
+	_preview.size = _hero.size
+	_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_preview)
+	_eyebrow = _explorer_label(Vector2(552,190),16)
+	_caption = _explorer_label(Vector2(552,575),18)
+	_counter = _explorer_label(Vector2(64,28),14)
+
+func _explorer_label(at: Vector2, font_size: int) -> Label:
+	var label := Label.new()
+	label.position = at
+	label.size = Vector2(664,30)
+	label.add_theme_font_override("font",_font)
+	label.add_theme_font_size_override("font_size",font_size)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(label)
+	return label
+
+func _show_chapters() -> void:
+	page = Page.CHAPTERS
+	title.text = "CHOOSE YOUR CHAPTER"
+	subtitle.text = "THE COMPLETE JOURNEY  /  ALL ROOMS OPEN"
+	var built: Array[Dictionary] = []
+	for i in 3:
+		built.append(_row(CHAPTERS[i].name,CHAPTERS[i].note,func() -> void: _show_explore(i)))
+	_populate(built)
+
+func _room_title(id: String) -> String:
+	if id == "Prison_Hub": return "The four-key courtyard"
+	if id.begins_with("Prison_"):
+		var wing: String = {"R":"Red", "G":"Green", "B":"Blue", "Y":"Gold"}.get(id.substr(7,1),"Castle")
+		return "%s wing · %02d" % [wing,int(id.right(2))]
+	return id.replace("Act_2_", "").replace("Act3_", "").replace("Level_", "Room ").replace("_"," ")
+
+func _show_explore(act: int) -> void:
+	if page == Page.EXPLORE: _room_cursors[_chapter] = selected
+	_chapter = act
+	page = Page.EXPLORE
+	title.text = CHAPTERS[act].name
+	subtitle.text = "SELECT A ROOM  /  %d AVAILABLE" % _catalog[act].size()
+	var built: Array[Dictionary] = []
+	for room: Dictionary in _catalog[act]:
+		built.append(_row(room.title if room.title != "" else _room_title(room.id),room.idea if room.idea != "" else "REPLAY  /  Your save files stay untouched.",func() -> void: _start(func() -> void: SaveGame.replay_room(act+1,room.id))))
+	_populate(built)
+	_move(_room_cursors[act])
+
+func _update_explorer() -> void:
+	if _hero == null: return
+	var act := selected if page == Page.CHAPTERS else _chapter
+	act = clampi(act,0,2)
+	var chapter: Dictionary = CHAPTERS[act]
+	selected_color = Color(chapter.color)
+	_eyebrow.text = chapter.subtitle
+	_eyebrow.modulate = selected_color
+	_counter.text = "HOOSHANG  /  THE COMPLETE JOURNEY"
+	_hero.visible = page != Page.EXPLORE
+	_preview.visible = page == Page.EXPLORE
+	if _preview.visible:
+		_preview.room = _catalog[act][selected]
+		_preview.accent = selected_color
+		_preview.queue_redraw()
+		_caption.text = "%02d / %02d   •   %s" % [selected+1,_catalog[act].size(),_room_title(_catalog[act][selected].id)]
+		_eyebrow.text = "ROOM MAP  /  GOLD: GOAL   MINT: START"
+	else:
+		_hero.texture = load(chapter.art)
+		_caption.text = "%d ROOMS   /   ALL UNLOCKED" % _catalog[act].size()
+		if page == Page.ROOT:
+			_caption.text = "%d ROOMS   /   THREE CHAPTERS   /   ALL OPEN" % (_catalog[0].size()+_catalog[1].size()+_catalog[2].size())
