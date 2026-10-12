@@ -14,7 +14,7 @@ func _ready() -> void:
 	var rooms := {"Act_2_Level_0": C.PONDS, "Act_2_Level_1": C.PONDS, "Level_2": C.PONDS,
 		"Act_2_Level_3": C.WONDER, "Act_2_Level_7": C.WONDER, "Act_2_Level_8": C.PONDS,
 		"Act_2_Level_13": C.WONDER, "Act_2_Level_14": C.CODA, "Act_2_Level_15": C.REST,
-		"Prison_Hub": C.REST, "Act_2_Level_19": C.REST}
+		"Prison_Hub": C.PRISON, "Prison_Y03": C.PRISON, "Act_2_Level_19": C.REST}
 	for room_name: String in rooms:
 		var fake := Node2D.new()
 		fake.name = room_name
@@ -33,12 +33,15 @@ func _ready() -> void:
 	check(music.bus == &"Music", "on the Music bus, so the pause menu's MUSIC row mutes it")
 	check(world._music == music, "LdtkWorld ducks it under dialogue")
 	var stream := music.stream as AudioStreamInteractive
-	check(stream != null and stream.clip_count == 5, "five cues in one interactive stream")
+	check(stream != null and stream.clip_count == 6, "six cues in one interactive stream")
 	if stream != null:
 		for i in [C.PONDS, C.WONDER, C.REST]:
 			var ogg := stream.get_clip_stream(i) as AudioStreamOggVorbis
 			check(ogg != null and ogg.loop and is_equal_approx(ogg.bpm, 100.0) and ogg.bar_beats == 4,
 				"%s loops and counts bars at 100 BPM" % stream.get_clip_name(i))
+		var cell := stream.get_clip_stream(C.PRISON) as AudioStreamOggVorbis
+		check(cell != null and cell.loop and is_equal_approx(cell.bpm, 60.0) and absf(cell.get_length() - 64.0) < 0.1,
+			"the prison theme loops 16 bars at its own 60 BPM")
 		for i in [C.INTRO, C.CODA]:
 			check(not (stream.get_clip_stream(i) as AudioStreamOggVorbis).loop, "%s plays once" % stream.get_clip_name(i))
 		check(stream.get_clip_auto_advance_next_clip(C.INTRO) == C.PONDS, "intro runs into the ponds loop")
@@ -56,6 +59,8 @@ func _ready() -> void:
 	music._on_room_changed(_room(world, "Act_2_Level_15"))
 	music._on_room_changed(_room(world, "Act_2_Level_14"))
 	check(music._cue == C.REST, "walking back into room 14 does not replay the ending")
+	music._on_room_changed(_room(world, "Prison_Hub"))
+	check(music._cue == C.PRISON, "the prison plays its own theme")
 	music._on_room_changed(_room(world, "Act_2_Level_13"))
 	check(music._cue == C.WONDER, "back in the gardens, wonder returns")
 

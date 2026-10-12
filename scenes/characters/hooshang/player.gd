@@ -2314,6 +2314,10 @@ func enter_swim(zone: Node) -> void:
 	if sliding():
 		_clear_slide()
 	swim_zone = zone
+	# Falling or jumping in makes a splash; being placed in the water (a
+	# respawn below the surface, a room loading with him already in it) does not.
+	if velocity.y > 40.0:
+		Sfx.play(&"splash")
 	jump_hold_timer = 0.0
 	# The water catches him immediately rather than letting an existing fall
 	# carry straight through — without this, jumping in from height kept him

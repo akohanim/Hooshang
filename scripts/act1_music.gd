@@ -3,7 +3,10 @@ extends AudioStreamPlayer
 ## gains without restarting either cue; the world's dialogue duck still acts on
 ## this player's volume, and the Settings music bus still mutes both together.
 
-## Alternate, somber arrangement heard throughout the Darkshang chase.
+## The Darkshang chase's own score (ElevenLabs, looped and levelled by
+## tools/master_elevenlabs_music.py — see assets/music/README.md). It used to be
+## darkshang_shur_requiem.ogg, a somber remix of the office theme; that file is
+## kept for comparison.
 @export var chase_stream: AudioStream
 ## Seconds to blend into or out of the chase arrangement.
 @export var transition_time := 2.0
@@ -21,6 +24,9 @@ var _fade: Tween
 func _ready() -> void:
 	if stream == null or chase_stream == null:
 		return
+	# Loop in code rather than trusting each .import's loop flag.
+	if chase_stream is AudioStreamOggVorbis:
+		(chase_stream as AudioStreamOggVorbis).loop = true
 	_mix = AudioStreamSynchronized.new()
 	_mix.stream_count = 2
 	_mix.set_sync_stream(0, stream)

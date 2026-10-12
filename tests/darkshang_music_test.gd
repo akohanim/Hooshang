@@ -2,7 +2,7 @@ extends Node
 
 const MUSIC_SCRIPT = preload("res://scripts/act1_music.gd")
 const NORMAL = preload("res://assets/music/shur_circuit_climb.mp3")
-const SOMBER = preload("res://assets/music/darkshang_shur_requiem.ogg")
+const SOMBER = preload("res://assets/music/darkshang_theme.ogg")
 var failures := 0
 
 func _ready() -> void:
@@ -20,7 +20,7 @@ func _run() -> void:
 	check(world.get_node("Music").chase_stream == SOMBER, "actual Act 1 world wires alternate music")
 	world.free()
 	check(SOMBER.loop, "somber soundtrack loops")
-	check(SOMBER.get_length() > 180.0, "complete alternate arrangement loads")
+	check(SOMBER.get_length() >= 59.9 and SOMBER.get_length() <= 125.0, "complete chase loop loads (a minute or more, bar-aligned)")
 	var music := AudioStreamPlayer.new()
 	music.set_script(MUSIC_SCRIPT)
 	music.stream = NORMAL

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/act1_chase_pacing.gd" id="chase_pacing"]
 [ext_resource type="Script" path="res://scripts/act1_music.gd" id="chase_music_script"]
-[ext_resource type="AudioStream" path="res://assets/music/darkshang_shur_requiem.ogg" id="chase_music"]
+[ext_resource type="AudioStream" path="res://assets/music/darkshang_theme.ogg" id="chase_music"]
 [ext_resource type="PackedScene" path="res://scenes/props/backdrop/office_posters/OfficePosters.tscn" id="office_posters"]
 [ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
 [ext_resource type="PackedScene" uid="uid://dc8v6mkhcimnl" path="res://ldtk/hooshang_act1.ldtk" id="2_ldtk"]

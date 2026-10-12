@@ -108,6 +108,7 @@ func _try_arm(body: Node2D) -> void:
 	_spent = true
 	_timer = 0.0
 	_apply_warning(0.0)
+	Sfx.play(&"crumble_warn")
 
 
 ## Every player currently inside the detection skin — usually none or one.
@@ -191,6 +192,7 @@ func _warning_offset(index: int, progress: float) -> Vector2:
 ## nothing depends on how long the animation takes.
 func _drop() -> void:
 	_falling = true
+	Sfx.play(&"crumble_break")
 	set_collision_layer_value(1, false)
 	if _visual == null:
 		return

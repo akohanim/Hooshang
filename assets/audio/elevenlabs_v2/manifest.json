@@ -1,0 +1,366 @@
+{
+  "provider": "ElevenLabs",
+  "plan": "starter (commercial license)",
+  "sfx": {
+    "step_scaffold": {
+      "request": {
+        "text": "One single footstep of a light leather shoe on a hollow steel scaffolding grate: a short metallic clank with a faint ring. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 4,
+      "files": [
+        {
+          "file": "step_scaffold_1.wav",
+          "seconds": 0.35
+        },
+        {
+          "file": "step_scaffold_2.wav",
+          "seconds": 0.35
+        },
+        {
+          "file": "step_scaffold_3.wav",
+          "seconds": 0.35
+        },
+        {
+          "file": "step_scaffold_4.wav",
+          "seconds": 0.35
+        }
+      ]
+    },
+    "jump": {
+      "request": {
+        "text": "A single quick light jump: a soft cloth whoosh and a shoe pushing off the ground, very short. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "files": [
+        {
+          "file": "jump.wav",
+          "seconds": 0.35
+        }
+      ]
+    },
+    "step_stone": {
+      "request": {
+        "text": "One single footstep of a soft leather shoe on an old stone castle floor: a gentle tap and scuff. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 4,
+      "unused": "Footsteps play on scaffolding only, barely audible (2026-10-11 direction): none on brick, stone or grass."
+    },
+    "step_grass": {
+      "request": {
+        "text": "Four separate single footsteps of a small child's light sandals on soft garden grass and earth, each a gentle soft rustle, evenly spaced with clear silence between each step. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 3.0,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 4,
+      "unused": "Footsteps play on scaffolding only, barely audible (2026-10-11 direction): none on brick, stone or grass."
+    },
+    "ladder": {
+      "request": {
+        "text": "One single climbing step on a metal ladder: a short dull metallic clunk of a hand and shoe gripping a steel rung. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 4,
+      "files": [
+        {
+          "file": "ladder_1.wav",
+          "seconds": 0.35
+        },
+        {
+          "file": "ladder_2.wav",
+          "seconds": 0.35
+        },
+        {
+          "file": "ladder_3.wav",
+          "seconds": 0.35
+        },
+        {
+          "file": "ladder_4.wav",
+          "seconds": 0.35
+        }
+      ]
+    },
+    "swim": {
+      "request": {
+        "text": "Three separate gentle swimming strokes in calm pond water, each a soft paddling splash, evenly spaced with clear silence between each stroke. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 3.0,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 3,
+      "files": [
+        {
+          "file": "swim_1.wav",
+          "seconds": 0.293
+        },
+        {
+          "file": "swim_2.wav",
+          "seconds": 0.6
+        },
+        {
+          "file": "swim_3.wav",
+          "seconds": 0.6
+        }
+      ]
+    },
+    "land": {
+      "request": {
+        "text": "A single soft landing thud of a small person landing on their feet after a short hop, light cloth rustle, very short. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "files": [
+        {
+          "file": "land.wav",
+          "seconds": 0.35
+        }
+      ]
+    },
+    "wall_jump": {
+      "request": {
+        "text": "A quick sneaker scuff kicking off a brick wall with a light airy whoosh, very short. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "files": [
+        {
+          "file": "wall_jump.wav",
+          "seconds": 0.4
+        }
+      ]
+    },
+    "splash": {
+      "request": {
+        "text": "A small person dropping into a garden pond: one short soft water splash. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.8,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "files": [
+        {
+          "file": "splash.wav",
+          "seconds": 0.8
+        }
+      ]
+    },
+    "crumble": {
+      "request": {
+        "text": "An old stone ledge cracking and crumbling away: a short dry crack followed by falling grit and small pebbles. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 1.2,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "unused": "Replaced by crumble_warn + crumble_break (2026-10-11): one late-cracking 1.2 s swell never lined up with the 0.6 s jitter and the drop."
+    },
+    "checkpoint": {
+      "request": {
+        "text": "A warm gentle checkpoint chime for a cozy platformer: two soft rising plucked santur notes with a little shimmer, short. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 1.0,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "unused": "Checkpoints are silent by design (CLAUDE.md), and every room entrance holds one; kept as source only."
+    },
+    "death": {
+      "request": {
+        "text": "A soft muffled whump as a small dark storm cloud swallows someone: a quick low airy puff, like a pillow-muffled balloon pop, dissolving into a short breathy whoosh. Gentle, not violent, no shimmer, no sparkle, no chime. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.6,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 3,
+      "files": [
+        {
+          "file": "death_1.wav",
+          "seconds": 0.6
+        },
+        {
+          "file": "death_2.wav",
+          "seconds": 0.6
+        }
+      ],
+      "keep": [
+        1,
+        2
+      ]
+    },
+    "darkshang_gather": {
+      "request": {
+        "text": "A dark ominous inhale gathering into a low rumbling swell: a living storm-cloud shadow drawing itself together before it lunges. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 1.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "files": [
+        {
+          "file": "darkshang_gather.wav",
+          "seconds": 1.48
+        }
+      ]
+    },
+    "darkshang_lunge": {
+      "request": {
+        "text": "A fast heavy dark whoosh of smoky wind rushing past at speed, with a low rumble. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.8,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "files": [
+        {
+          "file": "darkshang_lunge.wav",
+          "seconds": 0.8
+        }
+      ]
+    },
+    "crumble_warn": {
+      "request": {
+        "text": "Small loose stone blocks shifting under weight: a quick dry gritty rattle and scrape of stones grinding together, starting immediately and steady for half a second. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.7,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 3,
+      "keep": [
+        2,
+        3
+      ],
+      "files": [
+        {
+          "file": "crumble_warn_1.wav",
+          "seconds": 0.6
+        },
+        {
+          "file": "crumble_warn_2.wav",
+          "seconds": 0.6
+        }
+      ]
+    },
+    "crumble_break": {
+      "request": {
+        "text": "A few small stone bricks breaking apart and dropping away: one crisp dry crack immediately followed by a short clatter of falling pebbles. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 3,
+      "keep": [
+        1,
+        2,
+        3
+      ],
+      "files": [
+        {
+          "file": "crumble_break_1.wav",
+          "seconds": 0.4
+        },
+        {
+          "file": "crumble_break_2.wav",
+          "seconds": 0.4
+        },
+        {
+          "file": "crumble_break_3.wav",
+          "seconds": 0.4
+        }
+      ]
+    },
+    "respawn": {
+      "request": {
+        "text": "A small figure gently re-forming out of mist: a quick soft rising breath with a faint warm low tone, very subtle and short. No shimmer, no sparkle, no chime. Dry close recording, no music, no voices, no background ambience.",
+        "duration_seconds": 0.5,
+        "prompt_influence": 0.6,
+        "model_id": "eleven_text_to_sound_v2"
+      },
+      "slices": 1,
+      "takes": 3,
+      "keep": [
+        2
+      ],
+      "unused": "Dropped 2026-10-11 by direction: the re-forming breath landed 0.5 s after the death and read as the death sound arriving late."
+    }
+  },
+  "mastering": "mono 44.1 kHz 16-bit; leading silence trimmed at -45 dB; peak -3 dBFS; 3 ms attack / 25 ms release; multi-event clips sliced at their strongest onsets",
+  "generation_date": "2026-10-11",
+  "music": {
+    "prison_theme": {
+      "request": {
+        "model_id": "music_v1",
+        "music_length_ms": 120000,
+        "force_instrumental": true,
+        "prompt": "Instrumental game soundtrack loop for a 2D pixel-art platformer: a child explores a storybook Persian castle that has become a school-prison dungeon of locked cages, keys and stone wings. Mysterious and curious rather than scary, playful tension. Plucked tar and setar ostinato, soft daf frame drum pulse, low bowed kamancheh drone, distant santur glints, echoing stone-hall space. Medium-slow tempo around 90 BPM, steady pulse, minor Persian Shur colour. Consistent energy throughout with no big intro, breakdown or ending, so it loops cleanly. No vocals."
+      },
+      "loop": {
+        "bpm": 60.0,
+        "loop_start": 22.7,
+        "loop_end": 86.7,
+        "loop_seconds": 64.0,
+        "bars": 16,
+        "seam_match": 0.915,
+        "gain_db": 0.82
+      },
+      "used_by": "Act 2 prison hub and wings (scripts/act2_music.gd, cue PRISON)"
+    },
+    "darkshang_theme": {
+      "request": {
+        "made_by": "Ari, by hand in the ElevenLabs Music web app (2026-10-12)",
+        "title": "Escape From Homayun",
+        "prompt_draft": "oud and darbuka lead, dastgah Homayun, 120 BPM, no intro/ending (see the session draft)"
+      },
+      "loop": {
+        "bpm": 60.0,
+        "loop_start": 0.03,
+        "loop_end": 120.03,
+        "loop_seconds": 120.0,
+        "bars": 30,
+        "seam_match": null,
+        "fixed": true,
+        "gain_db": -2.04
+      },
+      "used_by": "Act 1 Darkshang chase, Level_14..25 (scripts/act1_music.gd chase_stream)",
+      "revision": "2026-10-12: replaced by \"Escape From Homayun\" (oud + darbuka lead), made by hand in ElevenLabs Music; looped and levelled by tools/master_elevenlabs_music.py, no melody layering.",
+      "alternates": {
+        "source/darkshang_theme_taiko_v1.mp3": "Instrumental Persian chase music for a dark platformer pursuit, built around percussion. Lead percussion is a Persian tombak goblet drum played with fast virtuosic finger rolls, deep bass 'tom' strokes and sharp rim 'bak' clicks, answered by a darbuka (doumbek) playing a driving maqsum dum-tek-tek-dum-tek rhythm, with a large frame daf and riq jingles on the off-beats. Over the drums, a tense kamancheh spike fiddle and a breathy ney flute trade short ominous phrases in Persian dastgah Homayun with its augmented second, plucked tar ostinato underneath, a low drone. Urgent, relentless, dark and mysterious, around 120 BPM, consistent high intensity the whole way with no intro, no breakdown and no ending so it loops seamlessly. No Western orchestra, no taiko, no synths, no vocals.",
+        "source/darkshang_theme_darbuka.mp3": "Instrumental Middle Eastern chase music for a dark platformer pursuit: a darbuka (doumbek) and a Persian tombak drive the whole piece with fast interlocking dum-tek-ka patterns and finger rolls in 6/8, a deep daf frame drum pulse, finger cymbals and riq accents. A low santur tremolo ostinato and a gritty tar riff in Persian Chahargah mode, with a mournful kamancheh and ney answering on top. Ominous, urgent, a shadow is chasing you through a moonlit city at night. Around 126 BPM, constant intensity from start to finish with no intro, breakdown or ending so it loops seamlessly. Acoustic instruments only: no taiko, no orchestral strings, no synths, no vocals.",
+        "source/darkshang_theme_tombak_v2.mp3": "Instrumental Persian chase music for a dark platformer pursuit, built around percussion. Lead percussion is a Persian tombak goblet drum played with fast virtuosic finger rolls, deep bass 'tom' strokes and sharp rim 'bak' clicks, answered by a darbuka (doumbek) playing a driving maqsum dum-tek-tek-dum-tek rhythm, with a large frame daf and riq jingles on the off-beats. Over the drums, a tense kamancheh spike fiddle and a breathy ney flute trade short ominous phrases in Persian dastgah Homayun with its augmented second, plucked tar ostinato underneath, a low drone. Urgent, relentless, dark and mysterious, around 120 BPM, consistent high intensity the whole way with no intro, no breakdown and no ending so it loops seamlessly. No Western orchestra, no taiko, no synths, no vocals.",
+        "source/darkshang_theme_melodic_shur.mp3": "Dark Middle Eastern instrumental chase loop: percussion-led, with the tombak and darbuka dominating the mix in a fast driving dum-tek-ka groove with rolls and accents, daf and riq on the off-beats. A haunting santur melody in low register, played with tremolo, carries a dark motif in Persian dastgah Shur, answered by a tense kamancheh and a gritty tar riff, with a sustained low ney drone beneath. Shadowy, ominous, a living darkness chasing you through a city at night. Steady around 120 BPM, same intensity throughout with no intro, breakdown or ending so it loops seamlessly. Acoustic instruments only: no taiko, no synths, no orchestral strings, no sub-bass, no vocals.",
+        "source/darkshang_theme_layered_bed.mp3": "Dark instrumental Persian chase music for a platformer pursuit at night. The Persian tombak goblet drum and a darbuka are the most prominent instruments, loud and upfront in the mix: fast finger rolls, deep 'tom' bass strokes, sharp rim clicks, a driving maqsum dum-tek-tek-dum-tek rhythm, with daf frame drum on the downbeats. Underneath and between the drums, dark melodic instruments: a hammered santur playing a nervous tremolo motif, a mournful kamancheh spike fiddle and a breathy low ney flute trading ominous phrases, a plucked oud ostinato, and a low drone, all in the dark Persian dastgah Homayun with its augmented second, low register, minor and menacing. Urgent and relentless around 120 BPM, constant intensity from start to finish with no intro, no breakdown and no ending so it loops seamlessly. Acoustic Middle Eastern instruments only: no taiko, no Western orchestra, no synths, no sub-bass rumble, no vocals.",
+        "layered version (bed + source/darkshang_melody_stem.mp3, tools/layer_darkshang_melody.py)": {
+          "melody_stem": "source/darkshang_melody_stem.mp3",
+          "semitones": -1,
+          "bpm": 120.0,
+          "melody_start": 10.04,
+          "onset_correlation": 0.06,
+          "melody_db": -4.0,
+          "loop_seconds": 96.0,
+          "melody_prompt": "Dark Persian melodic instrumental with absolutely no percussion and no drums of any kind: only melodic instruments. A hammered santur plays a fast nervous tremolo ostinato and a haunting repeating motif, a mournful kamancheh spike fiddle plays long ominous phrases, a breathy low ney flute answers it, a plucked oud adds a dark rhythmic ostinato, over a low sustained drone. Dastgah Homayun with the tonic on B (B, C, D sharp, E, F sharp, G, A), low register, minor, menacing and tense, music for a shadow chasing someone at night. Strict steady tempo of exactly 120 BPM, constant intensity, no intro, no breakdown, no ending. No drums, no tombak, no darbuka, no daf, no percussion, no synths, no vocals.",
+          "why": "In play no melody could be heard in the drum-led take (measured ~43% percussive vs ~6% melodic energy), so a percussion-free melody stem is mixed in here at a set balance: final mix ~28% percussive, ~23% melodic, drums still on top."
+        }
+      }
+    }
+  }
+}

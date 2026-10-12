@@ -175,6 +175,8 @@ const SPARKLE_TEXTURE := preload("res://assets/light_radial.png")
 
 var _squash_tween: Tween
 var _trail_timer := 0.0
+
+
 var _turn_cooldown := 0.0
 var _sparkle_timer := 0.0
 var _sparkle_material: CanvasItemMaterial
@@ -199,6 +201,46 @@ var _tremor_to := Vector2.ZERO
 var _tremor_phase := 1.0
 
 
+## Footsteps and ladder rungs are spaced by DISTANCE covered, not by animation
+## frame: the adult run clip has eight frames and the child's two, so frame
+## beats would give the two bodies wildly different step rates, while a stride
+## in pixels sounds right at any speed (a slow start steps slowly, a full run
+## about four to five times a second). Swim strokes come on a timer while he is
+## actually paddling.
+@export var footstep_stride := 14.0
+@export var ladder_stride := 10.0
+@export var swim_stroke_time := 0.55
+var _stride := 0.0
+var _climb := 0.0
+var _stroke := 0.0
+
+
+func _physics_process(delta: float) -> void:
+	var state: int = _player.get("state")
+	if state == Player.State.RUN and _player.is_on_floor():
+		_stride += absf(_player.velocity.x) * delta
+		if _stride >= footstep_stride:
+			_stride -= footstep_stride
+			Sfx.footstep(_player)
+	else:
+		# Half a stride banked, so the first step of a run comes promptly.
+		_stride = footstep_stride * 0.5
+	if state == Player.State.CLIMB:
+		_climb += absf(_player.velocity.y) * delta
+		if _climb >= ladder_stride:
+			_climb -= ladder_stride
+			Sfx.play(&"ladder")
+	else:
+		_climb = ladder_stride * 0.5
+	if state == Player.State.SWIM and _player.get("_swim_paddling"):
+		_stroke -= delta
+		if _stroke <= 0.0:
+			_stroke = swim_stroke_time
+			Sfx.play(&"swim")
+	else:
+		_stroke = 0.0
+
+
 func _exit_tree() -> void:
 	# Safety net: if the player is freed mid-hitstop (e.g. a death right after
 	# a dash), don't leave the whole game stuck in slow motion.
@@ -211,6 +253,8 @@ func _exit_tree() -> void:
 ## Call the instant a jump's velocity is applied (buffered, coyote, or wall
 ## jump — doesn't matter which). Purely cosmetic; never delays the jump.
 func on_jump() -> void:
+	# _do_wall_jump arms wall_jump_timer before calling this; a ground jump never does.
+	Sfx.play(&"wall_jump" if _player.get("wall_jump_timer") > 0.0 else &"jump")
 	_play_squash_sequence([
 		[jump_anticipation_scale, jump_anticipation_time],
 		[jump_squash_scale, jump_squash_time],
@@ -237,8 +281,13 @@ func on_land(impact_speed: float) -> void:
 		(impact_speed - landing_squash_min_speed)
 			/ maxf(landing_squash_max_speed - landing_squash_min_speed, 1.0),
 		0.0, 1.0)
+	# Every landing is a footstep on whatever he lands on (on scaffolding only
+	# — see Sfx.footstep), a little heavier than a stride and more so the
+	# harder he hit; a real drop adds the thud on top.
+	Sfx.footstep(_player, lerpf(3.0, 6.0, t))
 	if t <= 0.0:
 		return  # too soft a landing to bother with
+	Sfx.play(&"land", lerpf(-8.0, 0.0, t))
 	var squash := Vector2.ONE.lerp(land_squash_scale, t)
 	_play_squash_sequence([
 		[squash, 0.03],
@@ -338,6 +387,7 @@ func dash_tick(delta: float) -> void:
 ## respawning is Player.death_time, not this — an animation that also controlled
 ## the pacing would mean retuning the feel every time the art changed.
 func on_death() -> void:
+	Sfx.play(&"death")
 	hitstop(death_hitstop)
 	_camera_shake(death_shake_strength, death_shake_time)
 	var world := _player.get_parent()

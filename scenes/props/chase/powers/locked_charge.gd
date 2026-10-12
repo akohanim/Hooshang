@@ -89,6 +89,7 @@ func tick(delta: float, actor: Node2D, player: Player) -> bool:
 			if phase == Phase.WARNING:
 				launch_position = actor.global_position
 				phase = Phase.CHARGE
+				Sfx.play(&"darkshang_lunge")
 			else:
 				if return_to_launch: actor.global_position = launch_position
 				phase = Phase.IDLE

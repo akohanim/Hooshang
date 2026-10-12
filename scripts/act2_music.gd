@@ -9,7 +9,9 @@ extends AudioStreamPlayer
 ##   gardens 3-13              wonder  (Playful Wonder, looped)
 ##   room 8 (the breather)     ponds   — the rest room gets the calmer theme
 ##   room 14 (leaving)         coda    (Loop Coda, once; it fades itself out)
-##   everywhere else           rest    (a silent bar: castle, prison, chase,
+##   prison hub + wings        prison  (its own ElevenLabs theme, 60 BPM; see
+##                                      assets/music/README.md)
+##   everywhere else           rest    (a silent bar: gatehouse, escape and
 ##                                      finale keep their own soundscape)
 ##
 ## Silence is a CLIP ("rest"), not a volume fade, because LdtkWorld owns this
@@ -19,6 +21,9 @@ extends AudioStreamPlayer
 ## the campfire carry that scene.
 
 const BPM := 100.0
+## The prison theme's own tempo (tools/master_elevenlabs_music.py measured it):
+## bar-quantized transitions count bars in the SOURCE clip's tempo.
+const PRISON_BPM := 60.0
 const BAR_BEATS := 4
 
 @export var intro: AudioStream
@@ -26,12 +31,13 @@ const BAR_BEATS := 4
 @export var wonder: AudioStream
 @export var coda: AudioStream
 @export var rest_stream: AudioStream
+@export var prison: AudioStream
 ## Crossfade length, in beats, for every cue change (4 = one bar).
 @export var fade_beats := 4.0
 ## Garden rooms that play the calmer ponds theme instead of wonder.
 @export var breather_rooms: PackedInt32Array = [8]
 
-enum Cue { INTRO, PONDS, WONDER, CODA, REST }
+enum Cue { INTRO, PONDS, WONDER, CODA, REST, PRISON }
 
 var _interactive: AudioStreamInteractive
 var _resting := false
@@ -39,15 +45,15 @@ var _cue := -1
 
 
 func _ready() -> void:
-	if intro == null or ponds == null or wonder == null or coda == null or rest_stream == null:
+	if intro == null or ponds == null or wonder == null or coda == null or rest_stream == null or prison == null:
 		return
 	_interactive = AudioStreamInteractive.new()
 	var clips := [[intro, &"intro", false], [ponds, &"ponds", true], [wonder, &"wonder", true],
-		[coda, &"coda", false], [rest_stream, &"rest", true]]
+		[coda, &"coda", false], [rest_stream, &"rest", true], [prison, &"prison", true]]
 	_interactive.clip_count = clips.size()
 	for i in clips.size():
 		var clip: AudioStream = clips[i][0]
-		_tag(clip, bool(clips[i][2]))
+		_tag(clip, bool(clips[i][2]), PRISON_BPM if i == Cue.PRISON else BPM)
 		_interactive.set_clip_stream(i, clip)
 		_interactive.set_clip_name(i, clips[i][1])
 	# The intro is the head of the same recording: it ends exactly where the
@@ -94,6 +100,8 @@ static func cue_for(room: Node2D, breathers: PackedInt32Array = [8]) -> int:
 			return Cue.PONDS if n in breathers else Cue.WONDER
 		if n == 14:
 			return Cue.CODA
+	if room_name.begins_with("Prison_"):
+		return Cue.PRISON
 	return Cue.REST
 
 
@@ -136,10 +144,10 @@ func _switch(cue: int) -> void:
 
 
 ## Give an imported cue the tempo the interactive transitions count bars in.
-func _tag(clip: AudioStream, looping: bool) -> void:
+func _tag(clip: AudioStream, looping: bool, bpm: float) -> void:
 	if clip is AudioStreamOggVorbis:
 		var ogg := clip as AudioStreamOggVorbis
 		ogg.loop = looping
-		ogg.bpm = BPM
+		ogg.bpm = bpm
 		ogg.bar_beats = BAR_BEATS
-		ogg.beat_count = int(round(ogg.get_length() * BPM / 60.0))
+		ogg.beat_count = int(round(ogg.get_length() * bpm / 60.0))

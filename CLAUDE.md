@@ -353,8 +353,18 @@ so the two agree now. The tiles are still placeholder art.
 - `Godot --headless --path . res://tests/act2_music_test.tscn` — Act 2's garden
   score (`scripts/act2_music.gd`, cues from `tools/gen_act2_garden_music.py`,
   see `assets/music/README.md`): which room plays which cue, the loops counting
-  whole bars at 100 BPM, the coda playing once per arrival, rest()/resume()
+  whole bars at 100 BPM (and the prison theme its 16 bars at 60), the coda
+  playing once per arrival, rest()/resume()
   around the Jamshid night encounter, and the Music bus + dialogue duck hookup.
+- `Godot --headless --path . res://tests/sfx_test.tscn` — the `Sfx` autoload
+  (`systems/sfx.gd`, ElevenLabs cues in `assets/audio/elevenlabs_v2/`): every
+  cue's variations load, footsteps play ONLY on Act 1 scaffolding (read off
+  the actual tile via `surfaces.json`) and barely audibly — grass, brick and
+  stone are silent by direction — and real running/jumping/dying/respawning
+  fires the right cues. Footsteps and ladder rungs are spaced
+  by DISTANCE (`Juice.footstep_stride`), not animation frame — the adult run
+  clip has eight frames and the child's two, so frame beats gave the two bodies
+  different step rates. Checkpoints stay silent on purpose.
 - `Godot --headless --path . res://tests/forward_entry_test.tscn` — checks
   imported room identities against each Act's LDtk source, enters Level_2 via
   Level_1's actual Exit Area, idles on the entrance floor, and dies/respawns

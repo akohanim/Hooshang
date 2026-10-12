@@ -253,6 +253,7 @@ func locked_charge(warning: float, speed: float, distance: float, recovery: floa
 	var reach := maxf(distance * 2.0, aim.length() + 160.0)
 	if not _locked_charge.begin(aim, warning, speed, reach, recovery):
 		return false
+	Sfx.play(&"darkshang_gather")
 	# The cloud-to-humanoid performance belongs to the attack, including
 	# charges started directly rather than through a room recipe.
 	if _visual != null: _visual.cloud_form = true
@@ -551,6 +552,7 @@ func surge(duration: float, intensity: float) -> void:
 	_pending_surge = Vector2(maxf(duration, 0.0), clampf(intensity, 0.0, 1.0))
 	_warning_timer = maxf(surge_warning, 0.0)
 	surge_warned.emit(_warning_timer)
+	Sfx.play(&"darkshang_gather")
 	if _warning_timer <= 0.0:
 		_begin_surge()
 
@@ -623,6 +625,7 @@ func _begin_surge() -> void:
 	# to reading is the tape at the shorter delay.
 	read_delay = follow_delay * (1.0 - intensity)
 	surge_started.emit(duration, intensity)
+	Sfx.play(&"darkshang_lunge")
 
 
 ## Following: stand where he stood. A straight write, no physics — see the header.

@@ -29,6 +29,7 @@ Points="*res://systems/points.gd"
 SaveGame="*res://systems/save_game.gd"
 ActStats="*res://systems/act_stats.gd"
 Settings="*res://systems/settings.gd"
+Sfx="*res://systems/sfx.gd"
 Pause="*res://scenes/ui/PauseMenu.tscn"
 TouchControls="*res://scenes/ui/touch/TouchControls.tscn"
 

@@ -1,8 +1,10 @@
 # Act I score
 
 `shur_circuit_climb.mp3` is the original office score, preserved unchanged.
-`darkshang_shur_requiem.ogg` is a somber alternate mix of that recording for
-Darkshang's Levels 14–25. It retains the melody, lowers the register three
+`darkshang_shur_requiem.ogg` was a somber alternate mix of that recording for
+Darkshang's Levels 14–25; it is now superseded by `darkshang_theme.ogg` (an
+ElevenLabs chase score, see `assets/audio/elevenlabs_v2/README.md`) and kept
+for comparison only. It retains the melody, lowers the register three
 semitones, eases the tempo by 7.5%, softens the bright percussion, and adds a
 quiet octave shadow and distant echoes. It is a reprise, not a new composition.
 
@@ -33,7 +35,14 @@ recording up to the ponds loop, so it runs into it with no seam at all.
 AudioStreamInteractive, every change on the next bar with a one-bar crossfade.
 Intro then ponds in the opening rooms (0–2), Playful Wonder through the sky
 gardens (3–13) with ponds again in the breather room 8, the coda once on
-leaving the gardens (14), then silence for the castle, prison, chase and
-finale. The Jamshid night encounter rests the score and resumes it at dawn.
+leaving the gardens (14), the prison theme in the prison hub and wings, and
+silence for the gatehouse, escape and finale. The Jamshid night encounter rests the score and resumes it at dawn.
 Silence is a clip, not a volume fade, because LdtkWorld's dialogue duck owns
 the node's volume. Check with `tests/act2_music_test.tscn`.
+
+# Act II prison and Act I Darkshang (ElevenLabs)
+
+`prison_theme.ogg` plays in Act 2's prison hub and wings as a sixth cue of
+`act2_music.gd`'s interactive stream (counted in its own 60 BPM).
+`darkshang_theme.ogg` is now Act 1's `chase_stream`. Both are generated, looped
+and levelled as described in `assets/audio/elevenlabs_v2/README.md`.
