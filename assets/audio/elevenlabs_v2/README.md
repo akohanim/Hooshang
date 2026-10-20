@@ -25,7 +25,8 @@ matches its start, crossfades the seam over one bar, and levels both to
 | `step_scaffold` | 4 | footsteps on Act 1 scaffolding ONLY, at -25 dB; a landing on scaffolding plays one 3–6 dB louder (read off the tile, see `surfaces.json`) |
 | `ladder` | 4 | climbing, one per 10 px, quiet |
 | `swim` | 3 | paddling, one stroke per 0.55 s |
-| `jump`, `wall_jump`, `land` | 1 each | `Juice.on_jump` / `on_land` (landing thud scales with the drop); wall jump toned down to -24 dB |
+| `jump`, `land` | 1 each | `Juice.on_jump` / `on_land` (landing thud scales with the drop) |
+| `wall_jump` | 2 | `Juice.on_jump` off a wall, at -24 dB: a soft scuff, peak within 20 ms and gone by ~120 ms, so a chimney climb of back-to-back kicks stays crisp. Takes 3 and 6 of six; the other four were 150–250 ms scrapes that smear when chained |
 | `splash` | 1 | falling or jumping into water |
 | `crumble_warn` | 2 | a gritty stone rattle the instant a crumbling platform arms (its 0.6 s jitter), at -32 dB — barely there |
 | `crumble_break` | 3 | the crack and clatter at the moment the blocks drop (`_drop`), at -29 dB |

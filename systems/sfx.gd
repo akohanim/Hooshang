@@ -25,7 +25,9 @@ const CUES := {
 	&"swim": [3, -22.0, 0.08],
 	&"jump": [1, -18.0, 0.08],
 	&"land": [1, -15.0, 0.06],
-	&"wall_jump": [1, -24.0, 0.06],
+	# Two short warm scuffs: they alternate like left and right kicks up a
+	# chimney, and each is over in well under the time between two kicks.
+	&"wall_jump": [2, -24.0, 0.06],
 	&"splash": [1, -11.0, 0.05],
 	# Muted like the footsteps: a hint under the music, not an alarm — the
 	# blocks' own shake already says the floor is going.

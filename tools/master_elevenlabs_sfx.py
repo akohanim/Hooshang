@@ -9,9 +9,9 @@ mono 44.1 kHz 16-bit, leading silence trimmed at -45 dB, peak-normalized to
 <cue>_1.wav .. <cue>_N.wav, one variation each, so the game can avoid
 repeating the same step twice in a row.
 
-  python3 tools/master_elevenlabs_sfx.py
+  python3 tools/master_elevenlabs_sfx.py [cue ...]   # default: every cue
 """
-import json, subprocess, wave
+import json, subprocess, sys, wave
 from pathlib import Path
 import numpy as np
 
@@ -21,7 +21,7 @@ SR = 44100
 GATE_DB = -45.0
 PEAK_DB = -3.0
 MAX_SECONDS = {'crumble_warn': 0.6, 'crumble_break': 0.4, 'respawn': 0.45, 'step_scaffold': 0.35, 'step_stone': 0.3, 'step_grass': 0.3, 'ladder': 0.35, 'swim': 0.6,
-               'jump': 0.35, 'land': 0.35, 'wall_jump': 0.4, 'splash': 0.8, 'crumble': 1.2,
+               'jump': 0.35, 'land': 0.35, 'wall_jump': 0.18, 'splash': 0.8, 'crumble': 1.2,
                'checkpoint': 1.0, 'death': 0.6, 'darkshang_gather': 1.5, 'darkshang_lunge': 0.8}
 
 
@@ -78,8 +78,9 @@ def write(path, x):
 
 def main():
     manifest = json.loads((DIR / 'manifest.json').read_text())
+    wanted = sys.argv[1:]
     for name, cue in manifest['sfx'].items():
-        if cue.get('unused'):
+        if cue.get('unused') or (wanted and name not in wanted):
             continue
         n = int(cue.get('slices', 1))
         takes = int(cue.get('takes', 0))

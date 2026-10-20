@@ -27,7 +27,11 @@ SFX = {
     'swim': dict(slices=3, seconds=3.0, text='Three separate gentle swimming strokes in calm pond water, each a soft paddling splash, evenly spaced with clear silence between each stroke.'),
     'jump': dict(seconds=0.5, text='A single quick light jump: a soft cloth whoosh and a shoe pushing off the ground, very short.'),
     'land': dict(seconds=0.5, text='A single soft landing thud of a small person landing on their feet after a short hop, light cloth rustle, very short.'),
-    'wall_jump': dict(seconds=0.5, text='A quick sneaker scuff kicking off a brick wall with a light airy whoosh, very short.'),
+    # Wall jumps CHAIN — up a chimney he kicks every few tenths of a second — so
+    # this is a tight soft scuff with no whoosh: the first pass's airy whoosh
+    # swelled to its peak 75 ms after the kick and, one take repeated, read as
+    # the same hiss lagging every kick. Several takes so a climb never repeats.
+    'wall_jump': dict(takes=6, seconds=0.5, text='One single soft quick push-off of a shoe sole against a brick wall: a short muted scuff with a tiny cloth flick, tight and dry, starting instantly and over in a fraction of a second. Gentle and understated, no whoosh tail, no impact boom.'),
     'splash': dict(seconds=0.8, text='A small person dropping into a garden pond: one short soft water splash.'),
     # The crumble is TWO cues, timed to crumbling_platform.gd: a rattle that
     # starts the instant he lands (crumble_time 0.6 s of jitter) and the break

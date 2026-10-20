@@ -134,16 +134,25 @@
     },
     "wall_jump": {
       "request": {
-        "text": "A quick sneaker scuff kicking off a brick wall with a light airy whoosh, very short. Dry close recording, no music, no voices, no background ambience.",
+        "text": "One single soft quick push-off of a shoe sole against a brick wall: a short muted scuff with a tiny cloth flick, tight and dry, starting instantly and over in a fraction of a second. Gentle and understated, no whoosh tail, no impact boom. Dry close recording, no music, no voices, no background ambience.",
         "duration_seconds": 0.5,
         "prompt_influence": 0.6,
         "model_id": "eleven_text_to_sound_v2"
       },
       "slices": 1,
+      "takes": 6,
+      "keep": [
+        3,
+        6
+      ],
       "files": [
         {
-          "file": "wall_jump.wav",
-          "seconds": 0.4
+          "file": "wall_jump_1.wav",
+          "seconds": 0.18
+        },
+        {
+          "file": "wall_jump_2.wav",
+          "seconds": 0.18
         }
       ]
     },
