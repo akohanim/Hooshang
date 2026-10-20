@@ -1,9 +1,13 @@
 @tool
 class_name CrumblingPlatform
 extends Platform
-## Beveled 8px crumble stones. A footfall starts individual block jitter,
+## Loose, cracked 8px chunks. A footfall starts individual block jitter,
 ## then collision drops and pieces fall independently. A dashed outline stays
 ## until player respawn or level reset. Room changes preserve collapsed state.
+##
+## Each Act has its own sheet (tools/gen_crumble_blocks.py), drawn to stand
+## apart from that Act's scaffolding; `palette` picks one, and AUTO reads the
+## Act off the world the panel was loaded into.
 
 ## How far the detection skin stands proud of the solid box.
 const SKIN := 2.0
@@ -12,6 +16,28 @@ const FRAMES := [
 	preload("res://assets/props/platform/crumble_1.png"),
 	preload("res://assets/props/platform/crumble_2.png"),
 ]
+## Act 2's sun-baked mud-brick — same chunks and damage frames, Act 2 ramp.
+const FRAMES_CHILDHOOD := [
+	preload("res://assets/props/platform/crumble_act2_0.png"),
+	preload("res://assets/props/platform/crumble_act2_1.png"),
+	preload("res://assets/props/platform/crumble_act2_2.png"),
+]
+## Act 3's black and white: solid white chunks broken by black cracks.
+const FRAMES_PSYCHEDELIC := [
+	preload("res://assets/props/platform/crumble_act3_0.png"),
+	preload("res://assets/props/platform/crumble_act3_1.png"),
+	preload("res://assets/props/platform/crumble_act3_2.png"),
+]
+
+## The same three looks DarkThought.Palette names, plus AUTO.
+enum Palette { AUTO, OFFICE, CHILDHOOD, PSYCHEDELIC }
+
+## Which Act's sheet this panel wears. AUTO asks the world it sits in, so no
+## LDtk field (and no re-import) is needed for a room to get its Act's look.
+@export var palette := Palette.AUTO:
+	set(value):
+		palette = value
+		_rebuild()
 
 ## How long from first footfall to the floor going away. Under a second, and the
 ## three damage frames are spread across it.
@@ -23,6 +49,8 @@ const FRAMES := [
 ## Brief one-pixel slips stay visible at native scale; pauses keep them subtle.
 @export var shudder := 1.0
 
+## The damage frames in use, resolved from `palette` on every rebuild.
+var _sheet: Array = FRAMES
 var _skin: Area2D
 var _skin_shape: CollisionShape2D
 ## Armed once, by the first footfall. Cleared only by reset().
@@ -45,6 +73,7 @@ func _ready() -> void:
 
 
 func _after_rebuild() -> void:
+	_sheet = _resolve_sheet()
 	if _skin == null:
 		_skin = Area2D.new()
 		_skin.name = "Skin"
@@ -66,7 +95,7 @@ func _after_rebuild() -> void:
 		child.queue_free()
 	for i in int(size.x / 8):
 		var block := Sprite2D.new()
-		block.texture = FRAMES[0]
+		block.texture = _sheet[0]
 		block.region_enabled = true
 		block.region_rect = Rect2((i % 3) * 8, 0, 8, 8)
 		block.position = Vector2(i * 8 + 4, 4) - size * 0.5
@@ -79,10 +108,41 @@ func _after_rebuild() -> void:
 func _apply_frame(i: int) -> void:
 	if _visual == null:
 		return
-	var tex: Texture2D = FRAMES[clampi(i, 0, FRAMES.size() - 1)]
+	var tex: Texture2D = _sheet[clampi(i, 0, _sheet.size() - 1)]
 	for child in _visual.get_children():
 		if child is Sprite2D:
 			(child as Sprite2D).texture = tex
+
+
+func _resolve_sheet() -> Array:
+	var look := palette
+	if look == Palette.AUTO:
+		look = _world_palette()
+	match look:
+		Palette.CHILDHOOD:
+			return FRAMES_CHILDHOOD
+		Palette.PSYCHEDELIC:
+			return FRAMES_PSYCHEDELIC
+	return FRAMES
+
+
+## The Act, read off the LDtk project the enclosing world loaded. Each Act's
+## rooms all come out of one project (hooshang_act2.ldtk holds the gardens AND
+## the prison), so the project is the Act. Outside a world — the editor, a
+## test stage — it is the office.
+func _world_palette() -> Palette:
+	var node := get_parent()
+	while node != null:
+		var scene = node.get("world_scene")
+		if scene is PackedScene:
+			var path := (scene as PackedScene).resource_path
+			if path.contains("act2"):
+				return Palette.CHILDHOOD
+			if path.contains("act3"):
+				return Palette.PSYCHEDELIC
+			return Palette.OFFICE
+		node = node.get_parent()
+	return Palette.OFFICE
 
 
 func _on_touched(body: Node2D) -> void:

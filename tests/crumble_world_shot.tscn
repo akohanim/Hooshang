@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/crumble_world_shot.gd" id="1_shot"]
+
+[node name="CrumbleWorldShot" type="Node"]
+script = ExtResource("1_shot")

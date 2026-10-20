@@ -26,14 +26,14 @@ func _ready() -> void:
 		return
 	var shelf=shelves[0]
 	var block=shelf._visual.get_child(0)
-	check(block.texture==CrumblingPlatform.FRAMES[0],"intact shelf uses existing crumble stones")
+	check(block.texture==CrumblingPlatform.FRAMES_CHILDHOOD[0],"intact shelf wears Act 2's crumble art")
 	world.player.respawn(shelf.global_position+Vector2(0,-22))
 	var seen: Array[int]=[]
 	for i in 120:
 		await frames(1)
 		if shelf._falling:break
 		if not shelf._spent:continue
-		var frame=CrumblingPlatform.FRAMES.find(block.texture)
+		var frame=CrumblingPlatform.FRAMES_CHILDHOOD.find(block.texture)
 		if not seen.has(frame):
 			seen.append(frame)
 			check(shelf.get_collision_layer_value(1),"warning preserves solid collision")
@@ -48,7 +48,7 @@ func _ready() -> void:
 	await frames(4)
 	Input.action_release("move_up")
 	check(not shelf._spent and shelf.get_collision_layer_value(1),"lever restores collision")
-	check(block.texture==CrumblingPlatform.FRAMES[0],"lever restores existing intact crumble artwork")
+	check(block.texture==CrumblingPlatform.FRAMES_CHILDHOOD[0],"lever restores the intact Act 2 crumble artwork")
 	await capture("restored")
 	print("CRUMBLE WARNING: ",failures," failures; seen=",seen)
 	get_tree().quit(1 if failures else 0)
