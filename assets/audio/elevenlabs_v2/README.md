@@ -4,19 +4,24 @@ Generated on the **Starter plan (commercial license)** — unlike the earlier
 free-plan prototype cues in `../act2_elevenlabs/`. `manifest.json` records every
 prompt and setting; `source/` keeps the raw MP3s (hidden from Godot by
 `.gdignore`, so they never reach an export). No API key is stored anywhere:
-the generators read `XI_API_KEY` from the environment.
+the generators read `XI_API_KEY` from the environment (the music generator
+also falls back to `~/.config/elevenlabs/api_key`).
 
-## Music (ElevenLabs Music, `music_v1`, 2 min each)
+## Music (ElevenLabs Music, `music_v1` / `music_v2_5`, 2 min each)
 
 | File | Plays | Loop |
 |---|---|---|
 | `assets/music/prison_theme.ogg` | Act 2 prison hub and wings (`act2_music.gd`, cue PRISON) | 16 bars @ 60 BPM, 64 s |
 | `assets/music/darkshang_theme.ogg` | Act 1 Darkshang chase, Level_14–25 (`act1_music.gd` `chase_stream`) — "Escape From Homayun", oud + darbuka lead, made by hand in the ElevenLabs Music web app | the whole 120 s piece: its four 30 s sections (15 bars each @ 120 BPM) in order |
 
+| `assets/music/menu_theme.ogg` | The title screen (`MainMenu.tscn`'s `MenuMusic`) — `music_v2_5`, prompt in `tools/gen_elevenlabs_music.py`: ney lead in Dashti over santur/setar, 76 BPM, warm, sparse daf | its 7.2 s opening once, then 21 bars @ 76 BPM, 66 s (`loop_offset` 7.1586) |
+
 `tools/master_elevenlabs_music.py` finds the bar-aligned loop whose end best
 matches its start, crossfades the seam over one bar, and levels both to
--17 dBFS RMS (the garden score's level). The replaced chase mix,
-`darkshang_shur_requiem.ogg`, is kept for comparison.
+-17 dBFS RMS (the garden score's level). A track listed in its `INTRO` keeps
+the generated opening ahead of the loop, and the printed `loop_offset` goes
+into that `.ogg.import` by hand so Godot loops back past it. The replaced chase
+mix, `darkshang_shur_requiem.ogg`, is kept for comparison.
 
 ## Sound effects (Sound Effects v2) — played through the `Sfx` autoload
 
@@ -53,7 +58,8 @@ their onsets (the model delivered even events for those two, not the others).
 ```
 XI_API_KEY=... python3 tools/gen_elevenlabs_sfx.py step_stone   # or no args: all missing
 python3 tools/master_elevenlabs_sfx.py
-python3 tools/master_elevenlabs_music.py prison_theme darkshang_theme
+python3 tools/gen_elevenlabs_music.py menu_theme   # key: XI_API_KEY or ~/.config/elevenlabs/api_key
+python3 tools/master_elevenlabs_music.py prison_theme darkshang_theme menu_theme
 python3 tools/gen_footstep_surfaces.py      # after changing Act 1's Collisions auto-rules
 ```
 

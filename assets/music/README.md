@@ -1,9 +1,17 @@
-# Act I score
+# Title screen
 
-`menu_shur.ogg` is the title cue, adapted from the ElevenLabs-generated
-`prison_theme.ogg`: its Persian Shur palette of tar, setar, daf, kamancheh
-and santur is slowed 10%, softened with a 5.2 kHz low-pass filter, and played
-quietly on the Music bus. It loops only while the main menu is open.
+`menu_theme.ogg` is the title cue (`MenuMusic` in `scenes/ui/MainMenu.tscn`, on
+the Music bus at -15 dB): an ElevenLabs Music track composed for the menu —
+ney melody in Dashti colour over santur and setar, 76 BPM, warm and quiet, only
+a few soft daf touches. It plays its own 7.2 s swell up out of silence ONCE,
+then loops a 21-bar, 66 s body (`loop_offset` in its `.import` jumps back past
+the intro). Generated, looped and levelled as described in
+`assets/audio/elevenlabs_v2/README.md`.
+
+`menu_shur.ogg` (built by `python3 tools/build_menu_shur.py` from the garden
+score plus a sparse darbuka hit) is the cue it replaced, kept for comparison.
+
+# Act I score
 
 `shur_circuit_climb.mp3` is the original office score, preserved unchanged.
 `darkshang_shur_requiem.ogg` was a somber alternate mix of that recording for

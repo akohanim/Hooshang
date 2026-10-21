@@ -35,6 +35,13 @@ TARGET_RMS = -17.0   # dBFS, matched to the garden score's sections
 # runs back into its first downbeat (0.03 s) cleanly (seam jump 0.048 against
 # a 0.26 sample step). The automatic search would cut across the sections.
 FIXED_LOOPS = {'darkshang_theme': (0.03, 120.03)}
+# Tracks that keep their generated opening as a one-time INTRO ahead of the
+# loop. The file is head + loop, and the loop start is recorded as
+# `loop_offset`, which goes into the .ogg.import: Godot jumps back there at the
+# end, so the head plays once per play() and never again. The title screen's
+# swell up out of silence suits a menu fading in; it would be wrong in a level.
+INTRO = {'menu_theme'}
+SILENCE_DB = -60.0   # leading digital silence trimmed off an intro
 
 
 def decode(path, sr, mono):
@@ -66,7 +73,11 @@ def beat_grid(x, sr):
 
 
 def fingerprint(x, sr, start, seconds):
-    a = x[int(start * sr):int((start + seconds) * sr)].astype(np.float64)
+    # Length from `seconds` alone: int(start + seconds) - int(start) rounds to a
+    # different sample count at different starts, and two fingerprints of
+    # different lengths cannot be compared.
+    i = int(start * sr)
+    a = x[i:i + int(seconds * sr)].astype(np.float64)
     frames = a[:len(a) // 2048 * 2048].reshape(-1, 2048) * np.hanning(2048)
     spec = np.log(np.abs(np.fft.rfft(frames, axis=1))[:, 4:400] + 1e-4)
     spec -= spec.mean()
@@ -106,7 +117,15 @@ def master(name):
         body = x[ia:ib].copy()
         k = np.linspace(0.0, 1.0, n, dtype=np.float32)[:, None]
         body[-n:] = body[-n:] * np.cos(k * np.pi / 2) + x[ia - n:ia] * np.sin(k * np.pi / 2)
+    # Level from the loop alone: a quiet intro would otherwise pull the gain up.
     rms = float(20 * np.log10(np.sqrt((body.astype(np.float64) ** 2).mean()) + 1e-9))
+    offset = 0.0
+    if name in INTRO:
+        ia = int(round(a * SR))
+        lead = int(np.argmax(np.abs(x[:ia]).max(1) > 10 ** (SILENCE_DB / 20)))
+        lead = max(0, lead - int(0.01 * SR))
+        body = np.concatenate([x[lead:ia], body])
+        offset = (ia - lead) / SR
     body *= 10 ** ((TARGET_RMS - rms) / 20)
     peak = np.abs(body).max()
     # Never clip: lower the whole loop. 0.89 (-1 dBFS), not nearer 1.0 —
@@ -124,6 +143,8 @@ def master(name):
                 loop_seconds=round(b - a, 3), bars=int(round((b - a) / bar)), seam_match=None if score != score else round(score, 3),
                 fixed=name in FIXED_LOOPS,
                 gain_db=round(TARGET_RMS - rms, 2))
+    if name in INTRO:
+        info['loop_offset'] = round(offset, 4)
     print(name, json.dumps(info))
     return info
 

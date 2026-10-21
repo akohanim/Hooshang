@@ -370,6 +370,25 @@
           "why": "In play no melody could be heard in the drum-led take (measured ~43% percussive vs ~6% melodic energy), so a percussion-free melody stem is mixed in here at a set balance: final mix ~28% percussive, ~23% melodic, drums still on top."
         }
       }
+    },
+    "menu_theme": {
+      "request": {
+        "prompt": "Instrumental title-screen theme for a 2D pixel-art platformer about Hooshang, an elderly Iranian office worker who escapes a dark corporate office and rediscovers the warmth of his childhood in Iran, guided by the poet Rumi. Warm, nostalgic and hopeful, bittersweet but never eerie, dark or scary. A breathy ney reed flute carries a simple, memorable, singable melody in Persian Dashti colour (from dastgah Shur), over gently rolling santur arpeggios and soft setar plucks, with a warm low string pad underneath. Only a few soft daf frame-drum touches, no driving percussion and no tombak. Slow, calm, unhurried tempo around 76 BPM, steady pulse. Consistent energy throughout with no big intro, build, breakdown or ending, so it loops cleanly. No vocals.",
+        "music_length_ms": 120000,
+        "model_id": "music_v2_5",
+        "force_instrumental": true
+      },
+      "loop": {
+        "bpm": 76.0,
+        "loop_start": 7.735,
+        "loop_end": 74.051,
+        "loop_seconds": 66.316,
+        "bars": 21,
+        "seam_match": 0.823,
+        "fixed": false,
+        "gain_db": -2.51,
+        "loop_offset": 7.1586
+      }
     }
   }
 }
