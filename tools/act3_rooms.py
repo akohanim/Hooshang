@@ -280,10 +280,10 @@ r = room('Act3_Level_7', 'Air Pockets', 2, (1920, 384), [
     '#.................####...........#######',
     '#.................####...........#######',
     '#.................####.................#',
+    '#.................####.................#',
     '#.................####....#######......#',
-    '#.................####....#,,,,,#......#',
     '..................####....#,,,,,#......#',
-    '.......................................#',
+    '..........................#,,,,,#......#',
     '.......................................#',
     '.......................................#',
     '.......................................#',
@@ -292,7 +292,10 @@ r = room('Act3_Level_7', 'Air Pockets', 2, (1920, 384), [
     'g' * 40,
     '#' * 40,
 ], water=12)
-r.extra.append(('Lemon', (29 * 8 + 4, 14 * 8 + 4), (16, 16), {}))
+# The cup sits two rows under the surface, not one: he floats 7px down, and with
+# a single row of water over its top his feet caught the corner and the slower
+# stroke (SeaWorld.apply_sea_movement) could not carry him across.
+r.extra.append(('Lemon', (29 * 8 + 4, 15 * 8 + 4), (16, 16), {}))
 r.chain = ['under the wall', 'surface on the far side', 'Dive up out of the water, dash up onto the high ledge']
 r.notes = ['An upturned cup of rock holds air, and a lemon: swim under its rim and up.']
 r.step(('w', 2, 17), ('w', 29, 12, 14), ('swim',), path=[(15, 17), (24, 17), (29, 12)])
@@ -341,7 +344,8 @@ r = room('Act3_Level_8', 'The Drop-off', 2, (2240, 384), [
 r.set('G', {'motion': 'Horizontal', 'amp': 24.0, 'speed': 0.3},
       {'motion': 'Horizontal', 'amp': 24.0, 'speed': 0.3, 'phase': 0.5},
       {'motion': 'Horizontal', 'amp': 24.0, 'speed': 0.3, 'phase': 0.25})
-r.current(1, 18, 38, 46, 0, 45)
+# 29, not 45: currents he steers across are kept under his 40 px/s stroke.
+r.current(1, 18, 38, 46, 0, 29)
 r.chain = ['walk off the ledge into the deep', 'down the zigzag past three thoughts', 'into the wreck']
 r.step((3, 8), ('w', 9, 19, 40), ('walk',), steer=12)
 r.step(('w', 9, 19), {'portal': 'Act3_Level_9'}, ('swim',),
@@ -516,7 +520,10 @@ r.decor('cabinet', 33, 9)
 r.mark('Shadow', 30, 11)
 r.chain = ['the lights are out', 'along the bottom floor (the letter)', 'up at the end',
            'back along the middle floor, the shadow watching', 'up and out at the top']
-r.step(('w', 2, 17), ('w', 34, 17, 16), ('swim',), wait=300)
+# Past the letter, then UNDER the thought: it sweeps the middle of this 6-row
+# lane, so the straight line through it only got by on drift. A player drops
+# into the 24px of clear water below it.
+r.step(('w', 2, 17), ('w', 34, 17, 16), ('swim',), path=[(14, 17), (17, 19), (33, 19), (34, 17)], wait=300)
 r.step(('w', 34, 17), ('w', 4, 10, 16), ('swim',), path=[(35, 10), (4, 10)], wait=300)
 r.step(('w', 4, 10), {'portal': 'Act3_Level_13'}, ('swim',), path=[(4, 7), (38, 7)], wait=300)
 
@@ -801,8 +808,10 @@ def trench(name, title, pos, top, bottom, shelves, ink, bubbles=(), jellies=()):
 
 r = trench('Act3_Level_19', 'The Trench', (4800, 1344), (12, 27), (10, 16),
            [(8, 10, 22, 18, 22), (18, 17, 29, 17, 21), (28, 10, 22, 18, 22), (38, 17, 29, 17, 21)],
-           (30.0, 0.6), bubbles=[(26, 13), (13, 23), (26, 33), (13, 43)])
-r.current(10, 1, 29, 46, 0, 55)
+           (20.0, 0.4), bubbles=[(26, 13), (13, 23), (26, 33), (13, 43)])
+# The current and the ink were paced for a 62 px/s stroke; both are scaled by
+# the same 40/62 as the stroke, so the chase keeps its shape.
+r.current(10, 1, 29, 46, 0, 36)
 r.chain = ['the ink pours in above', 'down the zigzag, never stopping', 'through the floor']
 r.step(('w', 20, 2), {'portal': 'Act3_Level_20'}, ('swim', 'divechain'),
        path=[(26, 4), (26, 13), (13, 14), (13, 23), (26, 24), (26, 33), (13, 34), (13, 46)])
@@ -814,12 +823,12 @@ r = trench('Act3_Level_20', 'The Deep Trench', (4800, 1728), (10, 16), (10, 29),
             (39, 17, 29, 17, 21)],
            # The bells hang at the shelf lips: in a chase DOWN a bounce throws
            # you back up toward the ink, so these are for cutting corners into.
-           (30.0, 0.6), bubbles=[(20, 11), (19, 19), (20, 27), (19, 35)],
+           (20.0, 0.4), bubbles=[(20, 11), (19, 19), (20, 27), (19, 35)],
            jellies=[(16, 8, {'motion': 'Vertical', 'amp': 3.0, 'speed': 0.3}),
                                  (23, 16, {'motion': 'Vertical', 'amp': 3.0, 'speed': 0.3, 'phase': 0.5}),
                                  (16, 24, {'motion': 'Vertical', 'amp': 3.0, 'speed': 0.3}),
                                  (23, 32, {'motion': 'Vertical', 'amp': 3.0, 'speed': 0.3, 'phase': 0.5})])
-r.current(10, 1, 29, 46, 0, 45)
+r.current(10, 1, 29, 46, 0, 29)
 r.chain = ['faster now, and brighter', 'Dive bubble to bubble across each lane to stay ahead of the ink',
            'round the bells at the shelf lips', 'to the floor']
 r.step(('w', 13, 2), {'portal': 'Act3_Level_21'}, ('swim', 'divechain'),

@@ -66,7 +66,7 @@ Act III adds the sea's own:
 
 | verb | what | where taught |
 |---|---|---|
-| **Sea swimming** | Act III's water is quicker and lighter than the pond (`Act3Sea` movement profile): swim 62 px/s, faster turns. Water **refills the air dash** (Celeste's rule; the prison already does it). | Ch I |
+| **Sea swimming** | An old man's stroke, a little slower than the pond (`SeaWorld.apply_sea_movement`): 40 px/s, drawn side-on like the child's (`tools/build_adult_swim.lua`). Water **refills the air dash** (Celeste's rule; the prison already does it). | Ch I |
 | **The Dive** | Rumi's Act III gift: **dash underwater**. A burst in any of 8 directions, one per breath, refilled by surfacing, landing or an air bubble. Dashing up through the surface breaches him high into the air — with his air dash ready. | Ch II, room 4 |
 | **Currents** | Rivers in the sea (`Current`). Carry him while swimming; the Dive is how you cross one. Bubble columns are upward currents. | Ch II |
 | **Air bubbles** | `AirBubble` — touch to refill the Dive and the dash; pops and comes back. The sea's refill crystal. | Ch II |

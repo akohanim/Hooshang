@@ -6,6 +6,7 @@ Run after saving Aseprite edits. No image resampling or palette modification.
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -52,11 +53,19 @@ def build(export=True):
     for name, poses in phases.items():
         entries = ['{"duration": ' + str(float(ms)) + ', "texture": SubResource("frame_' + str(i) + '")}' for i, ms in poses]
         animations.append('{"frames": [' + ', '.join(entries) + '], "loop": false, "name": &"' + name + '", "speed": 1000.0}')
-    text = f'[gd_resource type="SpriteFrames" load_steps={len(resources)+2} format=3]\n\n'
-    text += '[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]\n\n'
+    # Keep the resource's and the sheet's uids: Hooshang.tscn refers to this
+    # file by uid, and a rewrite without one leaves that reference dangling.
+    out = ROOT / 'assets/characters/hooshang/hooshang_frames.tres'
+    old = re.search(r'uid="(uid://[^"]+)"', out.read_text().split('\n', 1)[0]) if out.exists() else None
+    sheet_uid = re.search(r'uid="(uid://[^"]+)"', (ART / 'movement.png.import').read_text())
+    text = f'[gd_resource type="SpriteFrames" load_steps={len(resources)+2} format=3' + (f' uid="{old.group(1)}"' if old else '') + ']\n\n'
+    text += '[ext_resource type="Texture2D"' + (f' uid="{sheet_uid.group(1)}"' if sheet_uid else '') + ' path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]\n\n'
     text += '\n\n'.join(resources) + '\n\n[resource]\nanimations = [' + ',\n'.join(animations) + ']\n'
     # Standing opaque pixels end at row 18: 18 - 9 - 3 = collider feet (+6).
     text += 'metadata/visual_scale = 1.0\nmetadata/visual_offset = Vector2(0, -3)\nmetadata/native_pixel_size = 18\n'
+    # The swim clips are drawn side-on, like the child's (tools/build_adult_swim.lua),
+    # so player.gd keeps them upright instead of turning him to face his stroke.
+    text += 'metadata/swim_side_view = true\n'
     (ROOT / 'assets/characters/hooshang/hooshang_frames.tres').write_text(text)
     print(f'Imported {len(frames)} frames in {len(animations)} clips from Aseprite')
 

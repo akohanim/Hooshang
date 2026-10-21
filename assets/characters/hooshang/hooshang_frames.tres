@@ -1,6 +1,6 @@
-[gd_resource type="SpriteFrames" load_steps=83 format=3]
+[gd_resource type="SpriteFrames" load_steps=83 format=3 uid="uid://caq57j1uwt3s5"]
 
-[ext_resource type="Texture2D" path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]
+[ext_resource type="Texture2D" uid="uid://ds27rvxswwpdn" path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]
 
 [sub_resource type="AtlasTexture" id="frame_0"]
 atlas = ExtResource("sheet")
@@ -420,7 +420,7 @@ animations = [{"frames": [{"duration": 180.0, "texture": SubResource("frame_0")}
 {"frames": [{"duration": 130.0, "texture": SubResource("frame_53")}, {"duration": 130.0, "texture": SubResource("frame_54")}, {"duration": 130.0, "texture": SubResource("frame_55")}, {"duration": 130.0, "texture": SubResource("frame_56")}], "loop": true, "name": &"fall", "speed": 1000.0},
 {"frames": [{"duration": 180.0, "texture": SubResource("frame_57")}], "loop": false, "name": &"wall_land", "speed": 1000.0},
 {"frames": [{"duration": 180.0, "texture": SubResource("frame_58")}], "loop": false, "name": &"crouch", "speed": 1000.0},
-{"frames": [{"duration": 110.0, "texture": SubResource("frame_59")}, {"duration": 110.0, "texture": SubResource("frame_60")}, {"duration": 110.0, "texture": SubResource("frame_61")}, {"duration": 110.0, "texture": SubResource("frame_62")}, {"duration": 110.0, "texture": SubResource("frame_63")}, {"duration": 110.0, "texture": SubResource("frame_64")}], "loop": true, "name": &"swim", "speed": 1000.0},
+{"frames": [{"duration": 66.0, "texture": SubResource("frame_59")}, {"duration": 66.0, "texture": SubResource("frame_60")}, {"duration": 66.0, "texture": SubResource("frame_61")}, {"duration": 66.0, "texture": SubResource("frame_62")}, {"duration": 66.0, "texture": SubResource("frame_63")}, {"duration": 66.0, "texture": SubResource("frame_64")}], "loop": true, "name": &"swim", "speed": 1000.0},
 {"frames": [{"duration": 220.0, "texture": SubResource("frame_65")}, {"duration": 220.0, "texture": SubResource("frame_66")}, {"duration": 220.0, "texture": SubResource("frame_67")}, {"duration": 220.0, "texture": SubResource("frame_68")}], "loop": true, "name": &"swim_idle", "speed": 1000.0},
 {"frames": [{"duration": 100.0, "texture": SubResource("frame_69")}, {"duration": 100.0, "texture": SubResource("frame_70")}, {"duration": 100.0, "texture": SubResource("frame_71")}, {"duration": 100.0, "texture": SubResource("frame_72")}, {"duration": 100.0, "texture": SubResource("frame_73")}, {"duration": 100.0, "texture": SubResource("frame_74")}], "loop": false, "name": &"exit_water", "speed": 1000.0},
 {"frames": [{"duration": 40.0, "texture": SubResource("frame_75")}, {"duration": 40.0, "texture": SubResource("frame_76")}, {"duration": 40.0, "texture": SubResource("frame_77")}, {"duration": 40.0, "texture": SubResource("frame_78")}, {"duration": 40.0, "texture": SubResource("frame_79")}, {"duration": 40.0, "texture": SubResource("frame_80")}], "loop": false, "name": &"ledge_climb", "speed": 1000.0},
@@ -432,3 +432,4 @@ animations = [{"frames": [{"duration": 180.0, "texture": SubResource("frame_0")}
 metadata/visual_scale = 1.0
 metadata/visual_offset = Vector2(0, -3)
 metadata/native_pixel_size = 18
+metadata/swim_side_view = true

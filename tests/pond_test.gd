@@ -161,41 +161,51 @@ func _ready() -> void:
 		"holding down is capped at swim_max_sink_speed  [%.1f of %.1f]" % [
 			down_speed, player.swim_max_sink_speed])
 
-	# --- orientation: the visual's own body axis tilts to face the stroke,
-	# not just its stroke-reach axis (which would keep him upright even
-	# swimming sideways — see _swim_visual_angle's own doc for why that
-	# reading is wrong) ---
+	# --- orientation: the stroke is drawn side-on, like the child's Super
+	# Mario World swim (tools/build_adult_swim.lua), so he stays upright in
+	# every direction and only horizontal input mirrors him. The old clips
+	# were turned 90 degrees to face the stroke; a side-on stroke turned that
+	# way would stand him on his head. ---
+	_check(player.visual.sprite_frames.get_meta("swim_side_view", false),
+		"the adult rig's swim clips are marked side-on")
 	await _settle(IN)
 	Input.action_press("move_right")
 	await _frames(30)
-	_check(absf(player.visual.rotation - PI / 2.0) < 0.05,
-		"swimming right lays him horizontal, head leading  [%.1f deg]"
-			% rad_to_deg(player.visual.rotation))
+	_check(absf(player.visual.rotation) < 0.01 and not player.visual.flip_h,
+		"swimming right stays upright, facing right  [%.1f deg, flip %s]"
+			% [rad_to_deg(player.visual.rotation), player.visual.flip_h])
 	Input.action_release("move_right")
+
+	await _settle(IN)
+	Input.action_press("move_left")
+	await _frames(30)
+	_check(absf(player.visual.rotation) < 0.01 and player.visual.flip_h,
+		"swimming left mirrors him, still upright  [%.1f deg, flip %s]"
+			% [rad_to_deg(player.visual.rotation), player.visual.flip_h])
+	Input.action_release("move_left")
 
 	await _settle(IN)
 	Input.action_press("move_up")
 	await _frames(30)
-	_check(absf(player.visual.rotation) < 0.05,
-		"swimming straight up keeps the clip's own upright pose  [%.1f deg]"
-			% rad_to_deg(player.visual.rotation))
+	_check(absf(player.visual.rotation) < 0.01 and player.visual.flip_h,
+		"swimming straight up keeps him upright and facing the way he was  [%.1f deg, flip %s]"
+			% [rad_to_deg(player.visual.rotation), player.visual.flip_h])
 	Input.action_release("move_up")
 
 	await _settle(IN)
 	Input.action_press("move_up")
 	Input.action_press("move_right")
 	await _frames(30)
-	_check(absf(player.visual.rotation - PI / 4.0) < 0.05,
-		"a diagonal stroke tilts exactly halfway between  [%.1f deg]"
+	_check(absf(player.visual.rotation) < 0.01 and not player.visual.flip_h,
+		"a diagonal stroke is not tilted either  [%.1f deg]"
 			% rad_to_deg(player.visual.rotation))
 	Input.action_release("move_up")
 	Input.action_release("move_right")
 
 	await _settle(IN)
 	await _frames(40)
-	_check(absf(player.visual.rotation) < 0.05,
-		"letting go levels the idle float back out  [%.1f deg]"
-			% rad_to_deg(player.visual.rotation))
+	_check(absf(player.visual.rotation) < 0.01,
+		"the idle float is level  [%.1f deg]" % rad_to_deg(player.visual.rotation))
 
 	# --- jump underwater pops him up without becoming a real jump ---
 	await _settle(IN)

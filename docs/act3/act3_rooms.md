@@ -282,10 +282,10 @@ See `docs/act3/ACT3_DESIGN.md` for the act. Legend: `#` rock, `g` seabed, `s` pi
 10 #.................####...........#######
 11 #.................####...........#######
 12 #~~~~~~~~~~~~~~~~~####~~~~~~~~~~~~~~~~~#
-13 #~~~~~~~~~~~~~~~~~####~~~~#######~~~~~~#
-14 #~~~~~~~~~~~~~~~~~####~~~~#,,,,,#~~~~~~#
+13 #~~~~~~~~~~~~~~~~~####~~~~~~~~~~~~~~~~~#
+14 #~~~~~~~~~~~~~~~~~####~~~~#######~~~~~~#
 15 ~~~~~~~~~~~~~~~~~~####~~~~#,,,,,#~~~~~~#
-16 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+16 ~~~~~~~~~~~~~~~~~~~~~~~~~~#,,,,,#~~~~~~#
 17 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 18 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 19 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -352,7 +352,7 @@ See `docs/act3/ACT3_DESIGN.md` for the act. Legend: `#` rock, `g` seabed, `s` pi
 47 ################~~~~~~~~################
 ```
 
-- current at 1,18 (38x29 cells) flow (0, 45)
+- current at 1,18 (38x29 cells) flow (0, 29)
 - route: walk off the ledge into the deep → down the zigzag past three thoughts → into the wreck
 
 ## III · THE DROWNED OFFICE
@@ -765,7 +765,7 @@ See `docs/act3/ACT3_DESIGN.md` for the act. Legend: `#` rock, `g` seabed, `s` pi
 47 ##########~~~~~~~#######################
 ```
 
-- current at 10,1 (20x46 cells) flow (0, 55)
+- current at 10,1 (20x46 cells) flow (0, 36)
 - route: the ink pours in above → down the zigzag, never stopping → through the floor
 
 ### Act3_Level_20 — The Deep Trench
@@ -822,7 +822,7 @@ See `docs/act3/ACT3_DESIGN.md` for the act. Legend: `#` rock, `g` seabed, `s` pi
 47 ##########~~~~~~~~~~~~~~~~~~~~##########
 ```
 
-- current at 10,1 (20x46 cells) flow (0, 45)
+- current at 10,1 (20x46 cells) flow (0, 29)
 - route: faster now, and brighter → Dive bubble to bubble across each lane to stay ahead of the ink → round the bells at the shelf lips → to the floor
 
 ### Act3_Level_21 — The Floor of the Sea

@@ -281,11 +281,9 @@ so the two agree now. The tiles are still placeholder art.
     swim/swim_idle animation split** (neutral input plays the idle float,
     holding a direction switches to the active stroke — checked against
     `player.visual.animation`, not just `state_name()`), **the swim
-    ORIENTATION** (swimming right rotates the visual to exactly PI/2 —
-    horizontal, head leading — straight up stays at the clip's own
-    unrotated 0, and a diagonal lands exactly halfway between; letting go
-    eases the tilt back to level — regression-guarding the "rotated the
-    wrong axis" bug the Layout section's own note on this describes), **and
+    ORIENTATION** (the adult swims side-on and UPRIGHT like the child, since
+    `tools/build_adult_swim.lua`: right, left, up, a diagonal and the idle
+    float all keep rotation 0, and only horizontal input mirrors him), **and
     the EXIT_WATER climb-out clip** — reaching solid ground (Pond's own OUT
     floor, in this test) actually plays it, and it lets go of its own accord
     once `exit_water_anim_time` elapses, both of which regression-guard the
@@ -752,6 +750,12 @@ organized per-character before this pass and needed no change.
   off the ground) — a floating-in-place idle needed to explicitly rule out
   "no walking or stepping motion of any kind, feet never touch the ground"
   before it held still.
+  **SUPERSEDED: the adult no longer rotates.** His swim clips were redrawn
+  in Aseprite as the child's Super Mario World stroke (reach, pull, kick,
+  glide, side-on; `tools/build_adult_swim.lua`, then
+  `tools/import_hooshang_aseprite.py`), and the frames carry
+  `swim_side_view`, so `Player._swims_side_on()` keeps him upright for the
+  adult as for the child. The rotation below is kept for a rig without it.
   **The active stroke ROTATES to face whichever way he is actually
   paddling** — level (lying flat, face down) for straight left or right,
   tilted to match for up/down/diagonal, exactly like a real freestyle stroke
@@ -1820,7 +1824,7 @@ going toward the light**: the act opens in the approved monochrome line art
   grace); `set_current()/clear_current()` for `SeaCurrent` zones (folded into
   the stroke target, water only); `deep_buoyancy` (Act III sets ~0 so he hangs
   where he stops in water with no surface). `SeaWorld.apply_sea_movement` sets
-  the sea's faster swim; the water also refills the air dash. His
+  the sea's swim (40 px/s, a little slower than the pond's 45); the water also refills the air dash. His
   `PresenceLight` is switched off (it blows the bright sea out to a halo).
 - **New props** (`scenes/props/sea/`): `SeaCurrent` (rect polled against his
   hitbox; a column draws bubbles), `AirBubble`, `Jellyfish` (a DarkThought:
@@ -1833,7 +1837,10 @@ going toward the light**: the act opens in the approved monochrome line art
 - **Two design rules the route proof taught**: one Dive crosses a current at
   most 5 cells wide (55px including his width); a room that NEEDS the Dive has a
   refill on its approach (surface, bubble or bell) or a wasted Dive is a
-  soft-lock. Chase rooms (the trench) cross each lane bubble to bubble.
+  soft-lock. Chase rooms (the trench) cross each lane bubble to bubble. A
+  current he must steer ACROSS stays under his 40 px/s stroke (stronger ones
+  are for riding or Diving through), and the stroke floats 7px down, so water
+  he swims over a block needs two rows above it, not one.
 - **Story**: `scripts/act3/act3_beats.gd` (`Act3Beats`) — the opening, Rumi's
   six scenes (it claims every Act III `RumiTrigger` with `defer_to_cutscene`),
   the memories' follow-ups, the dark floor (`act3_dark.gdshader`), the

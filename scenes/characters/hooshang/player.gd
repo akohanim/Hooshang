@@ -1297,10 +1297,19 @@ func _swim_surface_y() -> float:
 ## un-eased instant snap ordinary ground flip_h already uses, changes
 ## nothing about which way the character is already very nearly facing at
 ## that exact moment.
+## True for a rig whose swim clips are drawn side-on, Super Mario World style:
+## the child (`child_hooshang`) and, since tools/build_adult_swim.lua, the adult
+## (`swim_side_view`). Those swim upright and only mirror; turning a side-on
+## stroke 90 degrees would stand him on his head.
+func _swims_side_on() -> bool:
+	var frames := visual.sprite_frames
+	return frames != null and (frames.get_meta("child_hooshang", false) or frames.get_meta("swim_side_view", false))
+
+
 func _tick_swim_orientation(delta: float, input_x: float, input_y: float) -> void:
-	# SMW-style child frames already draw the side-on stroke. Keep the head
-	# upright even while travelling vertically; only horizontal intent mirrors it.
-	if visual.sprite_frames.get_meta("child_hooshang", false):
+	# SMW-style frames already draw the side-on stroke. Keep the head upright
+	# even while travelling vertically; only horizontal intent mirrors it.
+	if _swims_side_on():
 		_swim_visual_angle = 0.0
 		_swim_visual_flip = facing < 0.0
 		if not is_zero_approx(input_x):
@@ -2053,8 +2062,9 @@ func _update_visual() -> void:
 			# reads as pointing down, not the last horizontal key pressed on
 			# land) — see _swim_visual_flip's own doc.
 			visual.flip_h = _swim_visual_flip
-			# Child art stays in its authored side view; adult freestyle follows input.
-			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
+			# Side-on stroke art stays in its authored view; only a rig drawn
+			# for freestyle turns to follow the input.
+			visual.rotation = 0.0 if _swims_side_on() else _swim_visual_angle
 		State.LEDGE_MANTLE:
 			var clip := "ledge_climb" if visual.sprite_frames.has_animation("ledge_climb") else "exit_water"
 			visual.play(clip)
@@ -2072,7 +2082,7 @@ func _update_visual() -> void:
 			# this state starts. Snapping that to level in one frame is a
 			# visible pop, so the tilt UNWINDS across the clip instead (the
 			# decay itself lives in _state_exit_water, which has the delta).
-			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
+			visual.rotation = 0.0 if _swims_side_on() else _swim_visual_angle
 	# Dash availability tint (our stand-in for Celeste's hair color):
 	# normal colors = dash ready, cool blue tint = dash spent.
 	# Under water the colour answers for the Dive instead, once he has it.

@@ -131,11 +131,18 @@ func _ready() -> void:
 const PLAN_CACHE := "user://act3_route_plans.json"
 
 
+## The routes, the rooms AND the movement they were found with: a redrawn room,
+## a slower stroke or a longer Dive makes every cached input a guess.
+func _plan_key(routes_text: String) -> String:
+	return (routes_text + FileAccess.get_md5("res://ldtk/hooshang_act3.ldtk") + "|%s|%s|%s|%s|%s|%s" % [player.swim_speed, player.swim_accel,
+		player.swim_max_sink_speed, player.swim_dash_speed, player.swim_dash_time, player.max_run_speed]).md5_text()
+
+
 func _load_plans(routes_text: String) -> Dictionary:
 	if not FileAccess.file_exists(PLAN_CACHE):
 		return {}
 	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(PLAN_CACHE))
-	if not data is Dictionary or str(data.get("routes_md5", "")) != routes_text.md5_text():
+	if not data is Dictionary or str(data.get("routes_md5", "")) != _plan_key(routes_text):
 		print("  (plan cache is stale or missing; searching)")
 		return {}
 	print("  (reusing %d rooms' inputs from %s)" % [(data.plans as Dictionary).size(), PLAN_CACHE])
@@ -147,7 +154,7 @@ func _save_plans(routes_text: String, plans: Dictionary) -> void:
 	merged.merge(plans, true)
 	var f := FileAccess.open(PLAN_CACHE, FileAccess.WRITE)
 	if f != null:
-		f.store_string(JSON.stringify({"routes_md5": routes_text.md5_text(), "plans": merged}))
+		f.store_string(JSON.stringify({"routes_md5": _plan_key(routes_text), "plans": merged}))
 
 
 ## Every Rumi trigger is a tall pillar; in the sea's stacked rooms one that

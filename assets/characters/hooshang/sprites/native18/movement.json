@@ -537,7 +537,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 110
+    "duration": 66
    },
    {
     "filename": "hooshang_18px_movement 60.aseprite",
@@ -546,7 +546,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 110
+    "duration": 66
    },
    {
     "filename": "hooshang_18px_movement 61.aseprite",
@@ -555,7 +555,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 110
+    "duration": 66
    },
    {
     "filename": "hooshang_18px_movement 62.aseprite",
@@ -564,7 +564,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 110
+    "duration": 66
    },
    {
     "filename": "hooshang_18px_movement 63.aseprite",
@@ -573,7 +573,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 110
+    "duration": 66
    },
    {
     "filename": "hooshang_18px_movement 64.aseprite",
@@ -582,7 +582,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
-    "duration": 110
+    "duration": 66
    },
    {
     "filename": "hooshang_18px_movement 65.aseprite",

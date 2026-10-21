@@ -49,14 +49,15 @@ func _ready() -> void:
 		m.remembered.connect(_on_memory_remembered)
 
 
-## Act III's swim. Faster and more responsive than Act II's pond (which is a
-## gentle crossing), because here most of the act is IN the water and precision
-## underwater has to feel as good as precision on land.
+## Act III's swim: an old man's stroke, a touch slower than the pond's 45 and
+## nothing like a dash. It was 62 with a 380 snap, which read as gliding, not
+## swimming. The Dive (swim_dash_speed) is the sea's burst, and currents still
+## out-pull him.
 static func apply_sea_movement(p: Player) -> void:
-	p.swim_speed = 62.0
-	p.swim_accel = 380.0
-	p.swim_turn_speed = 16.0
-	p.swim_max_sink_speed = 62.0
+	p.swim_speed = 40.0
+	p.swim_accel = 260.0
+	p.swim_turn_speed = 14.0
+	p.swim_max_sink_speed = 40.0
 	p.swim_buoyancy = 22.0
 	p.deep_buoyancy = 2.0
 	p.swim_surface_pop_speed = 115.0
