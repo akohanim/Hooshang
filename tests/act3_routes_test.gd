@@ -557,7 +557,11 @@ func play_room(name: String, steps: Array, found: Array) -> bool:
 		if world.current_room != room:
 			check(false, "PLAYTHROUGH: %s step %d left the room early, into %s" % [name, i + 1, world.current_room.name])
 			return false
-		if resume_here:
+		# With the tiger on him he does what a player does: keeps running, straight
+		# into the next step from wherever he landed. Stopping to line up after
+		# every hop is exactly the hesitation the tiger exists to punish.
+		var chased := world.get_node_or_null("Tiger") is ChaseTiger and (world.get_node("Tiger") as ChaseTiger).chasing
+		if resume_here or (chased and i > 0):
 			resume_here = false
 		elif not steps[i].get("hurry", false) or i == 0:
 			if not steps[i].from.get("water", false):

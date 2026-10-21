@@ -911,8 +911,7 @@ func _play_vine(room: Node2D) -> void:
 		create_tween().tween_property(_tiger, "global_position", stand, 0.9)
 	await drop.finished
 	# He catches the vine.
-	player.visual.play(&"hang")
-	player.visual.flip_h = true
+	_hang_pose(player, &"hang")
 	Sfx.play(&"creak")
 	player.shake(1.2, 0.3)
 	var sway := create_tween().set_loops()
@@ -935,7 +934,7 @@ func _play_vine(room: Node2D) -> void:
 	pace.tween_property(below, "global_position:x", floor_at.x - 22, 3.4)
 	pace.tween_callback(below.visual.set.bind("flip_h", false))
 	pace.tween_property(below, "global_position:x", floor_at.x, 1.4)
-	player.visual.play(&"hang_look_down")
+	_hang_pose(player, &"hang_look_down")
 	await _hold(0.8)
 	var room_rect := _world.room_rect(room)
 	await _pan_camera(room_rect.end.y - 92.0, 1.8)
@@ -946,7 +945,7 @@ func _play_vine(room: Node2D) -> void:
 	Sfx.play(&"growl")
 	await _hold(1.8)
 	# He looks up: the first is still there, at the edge, looking down.
-	player.visual.play(&"hang_look_up")
+	_hang_pose(player, &"hang_look_up")
 	await _pan_camera(room_rect.position.y + 92.0, 2.0)
 	if _tiger != null:
 		_tiger.visual.play(&"roar")
@@ -960,32 +959,43 @@ func _play_vine(room: Node2D) -> void:
 	_vine.frame = 1
 	await _emote(player, EmoteBubble.Kind.ELLIPSIS)
 	await _hold(1.0)
-	# And there, within reach of his hand: a lemon.
-	player.visual.play(&"hang")
+	# And there, within reach of his hand: a lemon. Every step of it waits on his
+	# own words: he sees it, says so, takes it, says the rest, and only when that
+	# line is done does he eat. (A conversation re-poses him standing, facing the
+	# way he last ran; _hang_pose puts him back on the vine, facing the cliff.)
+	_hang_pose(player, &"hang")
 	await _emote(player, EmoteBubble.Kind.EXCLAIM)
 	Dialogue.begin_conversation(self, player, true)
+	_hang_pose(player, &"hang")
 	await _hooshang("All those lemons.", "dazed")
-	await _hooshang("I never ate a single one.", "vulnerable")
 	Dialogue.end_conversation()
 	player.freeze()
-	player.visual.play(&"hang_reach")
-	await _hold(0.5)
+	_hang_pose(player, &"hang_reach")
+	await _hold(0.4)
 	var take := create_tween()
 	take.tween_property(_lemon, "global_position", player.global_position + Vector2(-8, -1), 0.5)
 	await take.finished
+	await _hold(0.6)
+	Dialogue.begin_conversation(self, player, true)
+	_hang_pose(player, &"hang_reach")
+	await _hooshang("I never ate a single one.", "vulnerable")
+	Dialogue.end_conversation()
+	player.freeze()
+	# His own line is what makes him do it.
 	_lemon.visible = false
-	player.visual.play(&"hang_eat")
+	_hang_pose(player, &"hang_eat")
 	for i in 3:
 		Sfx.play(&"bite")
 		await _hold(0.9)
 	_vine.frame = 2
-	player.visual.play(&"hang_content")
+	_hang_pose(player, &"hang_content")
 	await _hold(1.2)
 	Dialogue.begin_conversation(self, player, true)
+	_hang_pose(player, &"hang_content")
 	await _hooshang("...Oh. That's good.", "happy")
 	Dialogue.end_conversation()
 	player.freeze()
-	player.visual.play(&"hang_content")
+	_hang_pose(player, &"hang_content")
 	await _hold(2.4)
 	_fade.color = Color(0, 0, 0, 0)
 	await _fade_to(1.0, 3.0)
@@ -995,6 +1005,14 @@ func _play_vine(room: Node2D) -> void:
 	Game.completed = true
 	SaveGame.save_now()
 	_finish_act()
+
+
+## On the vine, facing the cliff (and the lemon), in `clip`.
+func _hang_pose(player: Player, clip: StringName) -> void:
+	player.look(-1)
+	player.visual.rotation = 0.0
+	player.visual.flip_h = true
+	player.visual.play(clip)
 
 
 ## Chunks of the cliff top falling away into the ravine.

@@ -380,6 +380,14 @@ so the two agree now. The tiles are still placeholder art.
   opening, all six Rumi scenes, the Dive granted, the dark floor dark, the
   stillness finale, the pond, the ascent into the office, the real sea, and the
   act's results screen.
+- `Godot --headless --path . --fixed-fps 60 res://tests/act3_tiger_test.tscn`
+  — the way home's tiger and vine with real input: the tiger never moves away
+  from him, doubling back gets him caught, jumping on the spot is not copied, a
+  respawn lays it a run-up behind him that holds until he moves; and on the vine
+  he is never stood up by the dialogue box and the first bite waits for "I never
+  ate a single one.". (In `--playthrough`, while the tiger chases, the replay
+  runs straight on between steps: stopping after every hop is the hesitation it
+  punishes.)
 - `Godot --path . res://tests/act3_shot.tscn -- Act3_Level_17 ...` — capture
   harness (windowed, not pass/fail): photographs whole Act III rooms (two
   frames for a tall one) into `user://act3_shots/`, beats off.
@@ -1857,13 +1865,20 @@ going toward the light**: the act opens in the approved monochrome line art
   the room's real ground line). In 28 a tiger steps out of the tall grass
   behind him (`ChaseTiger`, `scenes/props/sea/chase_tiger.gd`, art from
   `tools/gen_tiger.py` -> `assets/characters/tiger/tiger.aseprite`): a
-  DELAYED ECHO of his path on Darkshang's `PlayerPositionBuffer`, one second
-  behind, so it catches only a man who stops. `clear_and_seed`'s `trail_dir`
-  is where he came FROM (LEFT here); passing his heading puts the tiger in
-  front of him. 31 is the edge, two screens tall: the land gives way, he
+  PURSUER, not an echo. It keeps a trail of his FURTHEST progress only (a
+  height per x, so pacing and jumping on the spot never get onto it) and moves
+  along it toward wherever he is, never away from him, a little slower than his
+  run (catching up faster when far behind). A delayed echo of his path, the
+  first version, copied his moves and walked off when he doubled back, so he
+  could chase it. Hesitation is what gets him caught; doubling back always does.
+  `tests/act3_tiger_test.tscn` holds the chase and the lemon's timing. 31 is the
+  edge, two screens tall: the land gives way, he
   catches a vine (`assets/act3/vine/`, `tools/gen_vine_scene.py`), the camera
   pans down to a second tiger and up to the first, a black and a white mouse
   gnaw the vine, and he eats the lemon (`hang*` clips, `tools/build_adult_vine.lua`).
+  Every step of that waits on his words: a conversation re-poses him standing
+  (`cutscene_rest`), so `Act3Beats._hang_pose` puts him back on the vine after
+  each one opens, and the first bite comes only after "I never ate a single one.".
   The cliff body below its grassy top is invisible solid (`x`) with the rock
   face PAINTED in the backdrop. Pans use `Camera2D.offset`, which ignores the
   camera's limits, so `Act3Beats._pan_camera` measures from the room. Chase

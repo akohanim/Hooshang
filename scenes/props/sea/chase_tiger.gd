@@ -4,17 +4,22 @@ extends Node2D
 ## and runs Hooshang to the edge of the land. Its twin waits at the foot of the
 ## cliff (THIRTEEN). Staged by Act3Beats; art from tools/gen_tiger.py.
 ##
-## It chases as a DELAYED ECHO of his own path, the way Darkshang chases him in
-## Act I: it leaps every gap he leaps, `follow_delay` behind him, so it catches
-## only a man who stops. Its tape is its own rather than Darkshang's
-## PlayerPositionBuffer, for two reasons that both showed up in play: it
-## records only while he is FREE TO MOVE, so a room slide or a cutscene pauses
-## the chase instead of handing the tiger the seconds he spent frozen; and it is
-## laid down again on EVERY respawn, not only on one far enough away to look
-## like a teleport. A tiger that caught him a few pixels from the checkpoint
-## used to catch him again the instant he stood up, forever. After a respawn it
-## waits behind him until he moves `hold_distance`, like the shadow at a
-## threshold in Act I.
+## It is a PURSUER, not an echo. It used to replay his path a second behind him,
+## Darkshang's way, and an echo is a recording, not a predator: it copied his
+## pacing and his jumps on the spot, and when he doubled back it walked away from
+## him and he could chase it. Now it keeps a TRAIL of his furthest progress only,
+## the ground he opened up running right, recorded as a height per x, so pacing
+## and jumping in place are never on it. Each frame it moves along that trail
+## TOWARD wherever he is: on after him when he is ahead, back at him when he has
+## turned round. It never moves away from him. It follows the trail's own
+## heights, so it leaps every gap and log he leapt, and goes nowhere he has not.
+##
+## It runs a little slower than he does (`speed`), so a man who keeps running
+## stays ahead and one who hesitates is caught; far behind (`catch_up_gap`) it
+## runs faster (`catch_up_speed`) so it never drops off the screen. Its trail is
+## recorded only while he is FREE TO MOVE, so a room slide or a cutscene pauses
+## the chase. After a death the trail is laid down again as a run-up behind him
+## and it waits there until he moves `hold_distance`.
 
 signal caught
 
@@ -23,23 +28,27 @@ const DATA_PATH := "res://assets/characters/tiger/tiger.json"
 const FRAME := Vector2(44, 22)
 ## Where the paws meet the ground inside a frame, from its top-left.
 const FEET := Vector2(22, 21)
-## The way he came from: the chase runs right, so his run-up lies to the left.
-const BEHIND := Vector2.LEFT
-const TICK := 60.0
 
-## Seconds behind him on his own path. Shorter is a closer, crueller chase.
-@export var follow_delay := 1.0
-## Speed of the run-up laid behind him after a respawn, px/s (his run speed).
-@export var run_in_speed := 72.0
+## How far behind him it starts after the roar or a respawn, px.
+@export var start_gap := 72.0
+## Its running pace, px/s. His run is 72: a little under means he gains while he
+## keeps going and loses ground every time he stops.
+@export var speed := 64.0
+## Further behind than this (px, along x) it runs at `catch_up_speed`.
+@export var catch_up_gap := 120.0
+@export var catch_up_speed := 92.0
 ## How far he has to move after a respawn before it comes on again, px.
 @export var hold_distance := 16.0
-## The jaws: a box just ahead of its shoulders, px. Small on purpose: the echo
-## is where he was a second ago, so it bites only when it is truly on him.
+## The jaws: a box just ahead of its shoulders, px.
 @export var catch_size := Vector2(10.0, 10.0)
 
 var chasing := false
 var visual: AnimatedSprite2D
-var _tape := PackedVector2Array()
+## The trail: his furthest progress, as x (strictly increasing) and the height he
+## was at there (his centre, world space).
+var _xs := PackedFloat32Array()
+var _ys := PackedFloat32Array()
+var _x := 0.0
 var _player: Player
 var _hold_at := Vector2.INF
 var _was_dead := false
@@ -95,19 +104,55 @@ func stop() -> void:
 	chasing = false
 
 
-## His past, as a straight run-up ending where he stands now.
+## A fresh start: the run-up laid behind him, and the hold set where he stands.
 func _reseed() -> void:
-	_tape.clear()
-	var frames := int(follow_delay * TICK) + 2
-	var step := BEHIND * (run_in_speed / TICK)
-	for i in frames:
-		_tape.append(_player.global_position + step * float(frames - 1 - i))
+	_lay_trail()
 	_hold_at = _player.global_position
 
 
-func _echo() -> Vector2:
-	var back := int(round(follow_delay * TICK))
-	return _tape[maxi(0, _tape.size() - 1 - back)]
+## A level run-up `start_gap` long ending where he stands, with the tiger at its
+## far end. Re-laid every frame of the hold so it waits that far behind him; the
+## hold point itself stays put, or he could never get clear of it.
+func _lay_trail() -> void:
+	var at := _player.global_position
+	# On the ground, never at the top of a jump: a run-up laid at the height he
+	# had in the air made the tiger hop on the spot with him.
+	var y := at.y if _player.is_on_floor() or _ys.is_empty() else _ys[_ys.size() - 1]
+	_xs.clear()
+	_ys.clear()
+	var n := 8
+	for i in n + 1:
+		_xs.append(at.x - start_gap * float(n - i) / n)
+		_ys.append(y)
+	_x = _xs[0]
+
+
+## Extend the trail only where he has gone further than ever before.
+func _record(at: Vector2) -> void:
+	if _xs.is_empty() or at.x > _xs[_xs.size() - 1] + 0.5:
+		_xs.append(at.x)
+		_ys.append(at.y)
+
+
+## The trail's height at `x`: where he was when he first got that far.
+func height_at(x: float) -> float:
+	var n := _xs.size()
+	if n == 0:
+		return global_position.y
+	if x <= _xs[0]:
+		return _ys[0]
+	if x >= _xs[n - 1]:
+		return _ys[n - 1]
+	var lo := 0
+	var hi := n - 1
+	while hi - lo > 1:
+		var mid := (lo + hi) / 2
+		if _xs[mid] <= x:
+			lo = mid
+		else:
+			hi = mid
+	var t := (x - _xs[lo]) / maxf(0.001, _xs[hi] - _xs[lo])
+	return lerpf(_ys[lo], _ys[hi], t)
 
 
 func _physics_process(delta: float) -> void:
@@ -122,24 +167,30 @@ func _physics_process(delta: float) -> void:
 	# Frozen for a slide or held by a beat: the chase waits with him.
 	if _player.input_locked:
 		return
+	var me := _player.global_position
 	if _hold_at != Vector2.INF:
-		if _player.global_position.distance_to(_hold_at) < hold_distance:
-			_reseed()
+		if me.distance_to(_hold_at) < hold_distance:
+			_lay_trail()
 		else:
 			_hold_at = Vector2.INF
-	_tape.append(_player.global_position)
-	if _tape.size() > 600:
-		_tape = _tape.slice(_tape.size() - 600)
-	var target := _echo() + Vector2(0.0, Player.HALF_HEIGHT)
-	var speed := (target - global_position) / maxf(delta, 1e-4)
-	global_position = target
-	if absf(speed.x) > 4.0:
-		visual.flip_h = speed.x < 0.0
-	var clip := &"run" if speed.length() > 24.0 else &"walk"
+	_record(me)
+	# Toward him along the trail, whichever side of it he is on, never past him.
+	var goal := clampf(me.x, _xs[0], _xs[_xs.size() - 1])
+	var gap := absf(goal - _x)
+	var pace := catch_up_speed if gap > catch_up_gap else speed
+	var step := minf(gap, pace * delta)
+	var dir := signf(goal - _x)
+	_x += dir * step
+	var was := global_position
+	global_position = Vector2(_x, height_at(_x) + Player.HALF_HEIGHT)
+	var moved := (global_position - was) / maxf(delta, 1e-4)
+	if dir != 0.0:
+		visual.flip_h = dir < 0.0
+	var clip := &"run" if absf(moved.x) > 24.0 else &"walk"
 	if visual.animation != clip:
 		visual.play(clip)
-	visual.speed_scale = 1.0 if speed.length() > 4.0 else 0.0
-	var reach := 1.0 if not visual.flip_h else -1.0
+	visual.speed_scale = 1.0 if moved.length() > 4.0 else 0.0
+	var reach := -1.0 if visual.flip_h else 1.0
 	var jaws := Rect2(global_position + Vector2(reach * 6.0 - catch_size.x * 0.5, -catch_size.y - 3.0), catch_size)
 	if jaws.intersects(_player.hitbox_rect()):
 		caught.emit()
