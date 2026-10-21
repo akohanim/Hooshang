@@ -77,17 +77,20 @@ const RUMI_GOLD := Color(1.0, 0.82, 0.42, 1.0)
 ##
 ## THE SHAPE OF THE SCENE. He asks what it is; Rumi does not answer with a name,
 ## he answers with what it IS — a seed Hooshang sowed and kept watering himself.
-## Hooshang works out the trap in his own words, which is what makes the last
-## three lines land: it cannot be fought for him, because he is the one growing
-## it. Only then the warning, and only then does the shadow move.
+## Hooshang works out the trap in his own words, then asks how to FIGHT it, and
+## the answer is that it cannot be fought, by him or for him. Only then the
+## instruction the chase itself enforces — don't stop, don't turn back — and
+## only then does the shadow move.
 const BEATS := {
 	"darkshang_appears": [
 		["Hooshang", "What is that??", "shocked"],
-		["Rumi", "That is the seed you have sown and watered, jaan. Water a bad thought faithfully enough, and it grows tall enough to shut out the light.", "wistful"],
-		["Hooshang", "Meaning... every time the thought came, I fed it. And it grew.", "vulnerable"],
-		["Rumi", "Yes. It wears the face of total darkness.", "sorrowful"],
-		["Rumi", "No one can fight this for you. Not even me.", "sorrowful"],
-		["Rumi", "Don't let it absorb you.", "urgent"],
+		["Rumi", "Every seed is in you, jaan.[p] Fear and joy. Cruelty and kindness. Whatever you water grows.", "wistful"],
+		["Rumi", "This is the one you watered most.", "sorrowful"],
+		["Hooshang", "...Every time the thought came, I fed it.", "vulnerable"],
+		["Rumi", "For thirty years. Faithfully.[p] Until it grew tall enough to shut out the light.", "sorrowful"],
+		["Hooshang", "How do I fight it?", "hesitant"],
+		["Rumi", "You don't.[p] No one can fight this for you either. Not even me.", "sorrowful"],
+		["Rumi", "Don't stop. Don't turn back to look at it.[p] Be aware of it, but keep your attention on your next step.", "urgent"],
 	],
 }
 

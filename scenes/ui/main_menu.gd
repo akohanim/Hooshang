@@ -24,7 +24,9 @@ extends CanvasLayer
 ## SCREENS. The chapter browser adds CHAPTERS and EXPLORE to the save pages.
 ## Every room is available, independently of save progress. Rows are built in code
 ## rather than authored per screen, so a slot card that gains a field, or an Act
-## that gains rooms, changes one function and no layout.
+## that gains rooms, changes one function and no layout. EXPLORE pairs the room
+## list with that Act's WORLD MAP (world_map.gd): the two share one selection,
+## and either one can pick the room to play.
 
 ## The pages this menu moves between. SLOTS serves all three things you can do
 ## to a slot; `_slot_mode` says which.
@@ -91,7 +93,11 @@ var _room_cursors := [0,0,0]
 var _chapter := 1
 var _selection_tween: Tween
 var _catalog: Array = []
-var _preview: Control
+const WorldMap := preload("res://scenes/ui/world_map.gd")
+var _map: WorldMap
+## True while a hover on the map is what moved the selection — the map then lights
+## the room where it stands instead of panning to it (see world_map.gd).
+var _map_hover := false
 var _hero: TextureRect
 var _eyebrow: Label
 var _caption: Label
@@ -104,6 +110,18 @@ var _font: FontVariation
 ## how long until it repeats. See _process.
 var _nav_held := 0
 var _repeat_in := 0.0
+## Smooth scrolling: the window still steps a whole row at a time (`_top`), but
+## the labels slide the difference over a few frames instead of jumping, so a
+## wheel flick reads as the list moving rather than the text being swapped.
+var _slide := 0.0
+@export var slide_speed := 18.0
+## The scrollbar beside a list that overflows its window: a track you can click
+## anywhere on and a thumb you can drag.
+var _track: ColorRect
+var _thumb: ColorRect
+var _dragging_bar := false
+## Wheel/trackpad deltas below one row accumulate rather than being dropped.
+var _wheel_accum := 0.0
 
 @onready var root: Control = $Root
 @onready var title: Label = $Root/Title
@@ -115,6 +133,7 @@ var _repeat_in := 0.0
 @onready var back_button: Label = $Root/Back
 @onready var more_above: Label = $Root/MoreAbove
 @onready var more_below: Label = $Root/MoreBelow
+@onready var menu_music: AudioStreamPlayer = $MenuMusic
 
 
 func _ready() -> void:
@@ -129,11 +148,13 @@ func _ready() -> void:
 	show_root()
 	root.modulate.a = 0.0
 	_fade_to(1.0)
+	menu_music.play()
 	if OS.has_feature("web") and bool(JavaScriptBridge.eval("window.HooshangTouchTest != null")):
 		_open_touch_test.call_deferred()
 
 
 func _open_touch_test() -> void:
+	menu_music.stop()
 	hide()
 	process_mode = Node.PROCESS_MODE_DISABLED
 	Screen.set_scene(preload("res://scenes/ui/touch/touch_test_room.gd").new())
@@ -163,6 +184,7 @@ static func open(tree: SceneTree) -> void:
 func reopen() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = true
+	menu_music.play()
 	show_root()
 	root.modulate.a = 0.0
 	_fade_to(1.0)
@@ -321,6 +343,18 @@ func _row(text: String, note: String, action: Callable) -> Dictionary:
 
 func _populate(built: Array[Dictionary]) -> void:
 	back_button.visible = page != Page.ROOT
+	# The room lists are long (Act 2 has 39 rooms), so they get compact rows and
+	# a taller window; the short title/slot pages keep the big type.
+	if page == Page.EXPLORE:
+		row_step = 40.0
+		row_height = 38.0
+		visible_rows = 9
+	else:
+		row_step = 56.0
+		row_height = 48.0
+		visible_rows = 6
+	rows.size.y = visible_rows * row_step
+	_slide = 0.0
 	_rows = built
 	# Every page opens on its first row. Carrying a cursor across pages that
 	# hold different things means landing on whatever happens to sit at that
@@ -353,14 +387,66 @@ func _rebuild() -> void:
 		label.size = Vector2(rows.size.x, row_height)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.add_theme_font_size_override("font_size", 24)
+		label.add_theme_font_size_override("font_size", 20 if page == Page.EXPLORE else 24)
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		label.add_theme_font_override("font", _font)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		rows.add_child(label)
-	more_above.visible = _top > 0
-	more_below.visible = _top + shown < _rows.size()
+	# A list with a scrollbar does not also need the ^/v arrows.
+	var overflow := _rows.size() > shown
+	more_above.visible = _top > 0 and not (overflow and _track != null)
+	more_below.visible = _top + shown < _rows.size() and not (overflow and _track != null)
+	_layout_rows()
+	_update_scrollbar()
 	_refresh()
+
+
+## Scroll the window so `top` is its first row, sliding rather than jumping.
+## The selection stays where it is: scrolling is looking, not choosing.
+func _scroll_to(top: int) -> void:
+	var shown := mini(visible_rows, _rows.size())
+	top = clampi(top, 0, maxi(_rows.size() - shown, 0))
+	if top == _top:
+		return
+	_slide += (top - _top) * row_step
+	_slide = clampf(_slide, -row_step * 3.0, row_step * 3.0)
+	_top = top
+	_rebuild()
+
+
+func _layout_rows() -> void:
+	for i in rows.get_child_count():
+		(rows.get_child(i) as Control).position.y = i * row_step + _slide
+
+
+## Thumb size is the visible share of the list, its position the window's share.
+func _update_scrollbar() -> void:
+	if _track == null:
+		return
+	var shown := mini(visible_rows, _rows.size())
+	var overflow := _rows.size() > shown
+	_track.visible = overflow
+	_thumb.visible = overflow
+	if not overflow:
+		return
+	_track.position = rows.position + Vector2(rows.size.x + 22.0, 0.0)
+	_track.size = Vector2(6.0, shown * row_step)
+	var share := float(shown) / _rows.size()
+	var span := _track.size.y
+	var thumb_h := maxf(span * share, 24.0)
+	var max_top := maxi(_rows.size() - shown, 1)
+	var t := (float(_top) - _slide / row_step) / max_top
+	_thumb.size = Vector2(10.0, thumb_h)
+	_thumb.position = _track.position + Vector2(-2.0, clampf(t, 0.0, 1.0) * (span - thumb_h))
+	_thumb.color = selected_color
+
+
+## A click or drag at `y` (in Root space) on the scrollbar: centre the thumb there.
+func _scroll_bar_to(y: float) -> void:
+	var shown := mini(visible_rows, _rows.size())
+	var span := _track.size.y - _thumb.size.y
+	var t := clampf((y - _track.position.y - _thumb.size.y * 0.5) / maxf(span, 1.0), 0.0, 1.0)
+	_scroll_to(roundi(t * (_rows.size() - shown)))
 
 
 func _refresh() -> void:
@@ -381,13 +467,14 @@ func _refresh() -> void:
 ## Straight out of pause_menu.gd, which had the same problem first.
 func _place_caret() -> void:
 	var index := selected - _top
-	if index < 0 or index >= rows.get_child_count():
-		caret.visible = false
-		return
 	caret.visible = false
+	if _selection != null:
+		_selection.visible = index >= 0 and index < rows.get_child_count()
+	if index < 0 or index >= rows.get_child_count():
+		return
 	if _selection_tween and _selection_tween.is_valid(): _selection_tween.kill()
 	_selection_tween = create_tween()
-	_selection_tween.tween_property(_selection,"position",rows.position + Vector2(-16,index*row_step),0.10).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_selection_tween.tween_property(_selection,"position",rows.position + Vector2(-16,index*row_step + _slide),0.10).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_selection.size = Vector2(rows.size.x+32,row_height)
 
 
@@ -405,13 +492,17 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		var gesture: Dictionary = _touch_gesture.read(event, true)
 		if gesture.has("scroll"):
-			_move(gesture.scroll)
+			_scroll_to(_top + int(gesture.scroll))
 		elif gesture.has("tap"):
 			var click := InputEventMouseButton.new()
 			click.button_index = MOUSE_BUTTON_LEFT
 			click.pressed = true
 			click.position = gesture.tap
 			_mouse_input(click)
+			if visible:
+				var lift := click.duplicate() as InputEventMouseButton
+				lift.pressed = false
+				_mouse_input(lift)
 		return
 	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
 		return
@@ -452,27 +543,69 @@ func _input(event: InputEvent) -> void:
 ## authored at 1280x720 but its CanvasLayer is scaled down to the game design size.
 func _mouse_input(event: InputEventMouse) -> void:
 	get_viewport().set_input_as_handled()
+	var at := root.get_global_transform_with_canvas().affine_inverse() * event.position
 	var click: bool = event is InputEventMouseButton and event.pressed
+	var release: bool = event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	# The world map takes its own clicks, drags and wheel (zoom), and keeps a drag
+	# that wanders off it. Ahead of the release check below, which would otherwise
+	# swallow the end of a map drag. Right-click still means BACK, there too.
+	if page == Page.EXPLORE and _map.visible and not _dragging_bar:
+		var right: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT
+		if not right and (_map.is_pressing() or Rect2(_map.position, _map.size).has_point(at)):
+			_map.mouse(event, at - _map.position)
+			return
+		_map.set_hover(-1)
+	if release:
+		_dragging_bar = false
+		return
+	if event is InputEventMouseMotion and _dragging_bar:
+		_scroll_bar_to(at.y)
+		return
 	if click and event.button_index == MOUSE_BUTTON_RIGHT:
 		back()
 		return
+	# The wheel SCROLLS the list; it no longer moves the selection a row per
+	# notch. Trackpads send fractional `factor`s, so small deltas add up.
 	if click and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 		if not _rows.is_empty():
-			_move(-1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1)
+			var amount: float = event.factor if event.factor > 0.0 else 1.0
+			_wheel_accum += amount * (-1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0)
+			var whole := int(_wheel_accum)
+			if whole != 0:
+				_wheel_accum -= whole
+				_scroll_to(_top + whole)
 		return
 	if click and event.button_index == MOUSE_BUTTON_LEFT and back_button.visible:
 		var back_point := back_button.get_global_transform_with_canvas().affine_inverse() * event.position
 		if Rect2(Vector2.ZERO, back_button.size).has_point(back_point):
 			back()
 			return
+	if click and event.button_index == MOUSE_BUTTON_LEFT:
+		# Scrollbar: click anywhere on the track (generously wide) to jump, then drag.
+		if _track != null and _track.visible and Rect2(_track.position - Vector2(14, 0), _track.size + Vector2(28, 0)).has_point(at):
+			_dragging_bar = true
+			_scroll_bar_to(at.y)
+			return
+		var shown := mini(visible_rows, _rows.size())
+		for arrow: Label in [more_above, more_below]:
+			if arrow.visible and Rect2(arrow.position, arrow.size).has_point(at):
+				_scroll_to(_top + (shown if arrow == more_below else -shown))
+				return
 	if not event is InputEventMouseMotion and not (click and event.button_index == MOUSE_BUTTON_LEFT):
 		return
+	# Each row's hit band is its whole step, gaps included, so there is no dead
+	# strip between two rows where a click does nothing.
 	for i in rows.get_child_count():
 		var row := rows.get_child(i) as Control
 		var point := row.get_global_transform_with_canvas().affine_inverse() * event.position
-		if Rect2(Vector2.ZERO, row.size).has_point(point):
-			selected = _top + i
-			_refresh()
+		var gap := (row_step - row.size.y) * 0.5
+		if Rect2(Vector2(-24.0, -gap), Vector2(row.size.x + 24.0, row_step)).has_point(point):
+			if _top + i >= _rows.size():
+				return
+			if selected != _top + i:
+				selected = _top + i
+				if page == Page.EXPLORE: _room_cursors[_chapter] = selected
+				_refresh()
 			if click:
 				choose()
 			return
@@ -500,7 +633,16 @@ func _is_nav(event: InputEvent) -> bool:
 ## held direction repeats. Holding an arrow key now repeats too, which it did not
 ## before — a menu that ignores a held key feels broken in the other direction.
 func _process(delta: float) -> void:
-	hint.text = "TAP TO SELECT    SWIPE TO SCROLL" if InputDevice.is_touch() else ("↑ ↓  ROOM    ← →  CHAPTER    ENTER / A  PLAY    ESC / B  BACK" if page == Page.EXPLORE else "W/S / STICK  MOVE    ENTER / A / CLICK  SELECT    ESC / B  BACK")
+	if not is_zero_approx(_slide):
+		_slide = lerpf(_slide, 0.0, clampf(slide_speed * delta, 0.0, 1.0))
+		if absf(_slide) < 0.5:
+			_slide = 0.0
+		_layout_rows()
+		_update_scrollbar()
+		if _selection != null and _selection.visible:
+			if _selection_tween and _selection_tween.is_valid(): _selection_tween.kill()
+			_selection.position = rows.position + Vector2(-16, (selected - _top) * row_step + _slide)
+	hint.text = "TAP TO SELECT    SWIPE TO SCROLL" if InputDevice.is_touch() else ("↑ ↓  ROOM    ← →  CHAPTER    ENTER / CLICK  PLAY    DRAG / WHEEL  MOVE MAP    ESC  BACK" if page == Page.EXPLORE else "W/S / STICK  MOVE    ENTER / A / CLICK  SELECT    ESC / B  BACK")
 	if _rows.is_empty():
 		return
 	var axis := Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
@@ -538,9 +680,19 @@ func _move(step: int) -> void:
 	selected = (selected + step + _rows.size()) % _rows.size()
 	if page == Page.EXPLORE: _room_cursors[_chapter] = selected
 	var shown := mini(visible_rows, _rows.size())
-	_top = clampi(_top, maxi(selected - shown + 1, 0), selected)
-	_top = clampi(_top, 0, maxi(_rows.size() - shown, 0))
-	_rebuild()
+	var top := clampi(_top, maxi(selected - shown + 1, 0), selected)
+	top = clampi(top, 0, maxi(_rows.size() - shown, 0))
+	if top != _top:
+		# A jump of more than a window (wrapping from last to first) snaps
+		# instead of sliding through rows that are not shown.
+		if absi(top - _top) > shown:
+			_top = top
+			_slide = 0.0
+			_rebuild()
+		else:
+			_scroll_to(top)
+	else:
+		_refresh()
 
 
 ## Take the highlighted row. Public so a test can drive the menu without
@@ -576,6 +728,7 @@ func back() -> void:
 ## world into Screen's viewport, and a menu still taking input over the top of it
 ## would swallow the first jump.
 func _start(action: Callable) -> void:
+	menu_music.stop()
 	visible = false
 	# DISABLED, not merely hidden: a hidden node still receives _input, and this
 	# one binds `jump`.
@@ -642,6 +795,14 @@ func _build_explorer() -> void:
 	back_button.position = Vector2(1080,28)
 	back_button.size = Vector2(160,44)
 	back_button.add_theme_font_size_override("font_size",18)
+	rows.clip_contents = true
+	_track = ColorRect.new()
+	_track.color = Color("273342")
+	_track.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_track)
+	_thumb = ColorRect.new()
+	_thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_thumb)
 	_selection = Panel.new()
 	_selection.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()
@@ -660,11 +821,22 @@ func _build_explorer() -> void:
 	_hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_hero)
-	_preview = preload("res://scenes/ui/chapter_preview.gd").new()
-	_preview.position = _hero.position
-	_preview.size = _hero.size
-	_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(_preview)
+	_map = WorldMap.new()
+	_map.position = _hero.position
+	_map.size = _hero.size
+	_map.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_map.font = _font
+	root.add_child(_map)
+	# Hovering the map selects where it stands; a click plays the selected room or,
+	# on a tap with no hover before it, selects that room first; the overview
+	# inset jumps the camera across the Act.
+	_map.room_hovered.connect(func(i: int) -> void: _pick_room(i, false))
+	_map.room_pressed.connect(func(i: int) -> void:
+		if i == selected:
+			choose()
+		else:
+			_pick_room(i, true))
+	_map.room_picked.connect(func(i: int) -> void: _pick_room(i, true))
 	_eyebrow = _explorer_label(Vector2(552,190),16)
 	_caption = _explorer_label(Vector2(552,575),18)
 	_counter = _explorer_label(Vector2(64,28),14)
@@ -704,8 +876,19 @@ func _show_explore(act: int) -> void:
 	var built: Array[Dictionary] = []
 	for room: Dictionary in _catalog[act]:
 		built.append(_row(room.title if room.title != "" else _room_title(room.id),room.idea if room.idea != "" else "REPLAY  /  Your save files stay untouched.",func() -> void: _start(func() -> void: SaveGame.replay_room(act+1,room.id))))
+	_map.set_world(act, _catalog[act], Color(CHAPTERS[act].color))
 	_populate(built)
 	_move(_room_cursors[act])
+	_map.snap()
+
+## Select room `index` in EXPLORE from the map, scrolling the list to it. `follow`
+## pans the map there too; a hover on the map itself does not (world_map.gd).
+func _pick_room(index: int, follow: bool) -> void:
+	if page != Page.EXPLORE or index == selected and not follow:
+		return
+	_map_hover = not follow
+	_move(index - selected)
+	_map_hover = false
 
 func _update_explorer() -> void:
 	if _hero == null: return
@@ -717,13 +900,11 @@ func _update_explorer() -> void:
 	_eyebrow.modulate = selected_color
 	_counter.text = "HOOSHANG  /  THE COMPLETE JOURNEY"
 	_hero.visible = page != Page.EXPLORE
-	_preview.visible = page == Page.EXPLORE
-	if _preview.visible:
-		_preview.room = _catalog[act][selected]
-		_preview.accent = selected_color
-		_preview.queue_redraw()
-		_caption.text = "%02d / %02d   •   %s" % [selected+1,_catalog[act].size(),_room_title(_catalog[act][selected].id)]
-		_eyebrow.text = "ROOM MAP  /  GOLD: GOAL   MINT: START"
+	_map.visible = page == Page.EXPLORE
+	if _map.visible:
+		_map.show_room(selected, not _map_hover)
+		_caption.text = "%02d / %02d   •   %s   •   CLICK TO PLAY" % [selected+1,_catalog[act].size(),_room_title(_catalog[act][selected].id)]
+		_eyebrow.text = "WORLD MAP  /  GOLD: EXIT   MINT: START"
 	else:
 		_hero.texture = load(chapter.art)
 		_caption.text = "%d ROOMS   /   ALL UNLOCKED" % _catalog[act].size()

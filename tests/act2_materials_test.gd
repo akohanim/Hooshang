@@ -1,6 +1,14 @@
 extends Node
 
 func _ready() -> void:
+	var project: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://ldtk/hooshang_act2.ldtk"))
+	var terrain_layer: Dictionary = {}
+	for definition: Dictionary in project.defs.layers:
+		if definition.identifier == "Collisions": terrain_layer = definition
+	assert(not terrain_layer.is_empty())
+	for brush: String in ["brick_new", "stone", "scaffolding"]:
+		assert(terrain_layer.intGridValues.any(func(value: Dictionary) -> bool: return value.identifier == brush), "Missing Act 2 brush: " + brush)
+		assert(terrain_layer.autoRuleGroups.any(func(group: Dictionary) -> bool: return group.name.begins_with(brush + " /")), "Missing Act 2 auto-rules: " + brush)
 	var ts: TileSet = load("res://ldtk/tilesets/tileset_8px_hooshang_act2.res")
 	assert(ts != null)
 	var atlas: TileSetAtlasSource = ts.get_source(206)

@@ -12,97 +12,59 @@ const WAKING: Array[String] = [
 	"Where am I?",
 	"This doesn't feel like my cubicle...",
 ]
-## The SPOKEN lines of the meeting, in order, both speakers interleaved.
+## The meeting as act1_beats.gd says it, one entry per LINE: [speaker, text,
+## Hooshang's face]. Rumi's face is "" — the recorder reads Hooshang's states.
 ##
-## The script's "!" and "..." beats are deliberately NOT here: they play as
-## bubbles over his head rather than in the banner, and are asserted separately
-## in MEETING_EMOTES. A regression that quietly routed them back through the
-## dialogue box would show up as extra entries in this list.
+## The script's "!" beat is deliberately NOT here: it plays as a bubble over
+## his head rather than in the banner, and is asserted separately in
+## MEETING_EMOTES. A regression that quietly routed it back through the
+## dialogue box would show up as an extra entry here.
 ##
-## "[p]" in the last line is a breath the typewriter holds for (see
-## DialogueBox.PAUSE_MARK) — it is stripped before it is drawn, so what is
-## pinned here is what a player actually reads.
-const MEETING: Array[String] = [
-	"Hello??",
-	"Who are you? I've worked in this office fifteen years. I've never seen you once.",
-	"Are you going to say something, or just stand there glowing at me...",
-	"I think I hit my head harder than I thought...",
-	"You stand at the beginning of your most important journey, Hooshang jaan.",
-	"A journey? I just wanted to make it to my car.",
-	"You will not reach the parking lot from here. This is not that building. It is the one you carry inside you.",
-	"...Inside me?",
-	"Inside you. Your mind has built its own rooms, and you must go down through every one.",
-	"The office that swallowed your years. Your childhood. And beneath them the places and things you have never let go of.",
-	"And I'm supposed to just — walk through my own head. On purpose.",
-	"Not walk through. You have done that your whole life.",
-	"To pass, you must meet what waits in each room.",
-	"The grief you swallowed. The dreams you set down \"for later.\" The thoughts that still circle you in the dark.",
-	"They are not memories, jaan. They are still alive. And they will not let you by until you face them.",
-	"Look — this really isn't a good time. I just lost my job. I'll get to all that. Later.",
-	"...Later. Yes. That is the word, isn't it.",
-	"You have knocked on this door your whole life, from the inside. Now it opens.",
+## Kept as whole lines with their "[p]" breaths, and expanded into what a
+## player actually reads — one entry per PAGE, breath marks stripped — by
+## _pages() at check time. A long line pages at the box's real width, and
+## copying those page breaks by hand is how this list went stale before.
+const MEETING_SCRIPT := [
+	["Hooshang", "Hello??", "hesitant"],
+	["Hooshang", "Who are you?[p] I've worked in this office thirty years. I've never once seen you.", "skeptical"],
+	["Hooshang", "Are you going to say something, or what?", "annoyed"],
+	["Hooshang", "...[p]I hit my head harder than I thought.", "vulnerable"],
+	["Rumi", "I am Rumi, your spiritual guide.[p] You stand at the beginning of your most important journey, Hooshang jaan.", ""],
+	["Hooshang", "A journey? I just wanted to make it to my car.[p] I want to go home.", "skeptical"],
+	["Rumi", "You will not find your car from here. This is not that building.[p] It is the one you carry inside you.", ""],
+	["Hooshang", "...Inside me?", "wary"],
+	["Rumi", "The office that swallowed your years.[p] Your childhood.[p] And under them, everything you never set down.", ""],
+	["Hooshang", "Look, this really isn't a good time. I just lost my job.[p] I'll get to all that...[p] later.", "deflecting"],
+	["Rumi", "Later.[p] Yes. It is always later.", ""],
+	["Rumi", "You have knocked on this door your whole life, from the inside.[p] Now it opens.", ""],
 ]
-const MEETING_SPEAKERS: Array[String] = [
-	"Hooshang", "Hooshang", "Hooshang", "Hooshang",
-	"Rumi",
-	"Hooshang",
-	"Rumi",
-	"Hooshang",
-	"Rumi", "Rumi",
-	"Hooshang",
-	"Rumi", "Rumi", "Rumi", "Rumi",
-	"Hooshang",
-	"Rumi",
-]
-## The wordless beats, in order: he startles, waits for an answer that does not
-## come, then deflates before admitting he might be concussed.
-const MEETING_EMOTES: Array[String] = ["!", "...", "..."]
+## The wordless beat: he startles when Rumi appears.
+const MEETING_EMOTES: Array[String] = ["!"]
 ## Hooshang's face per line, in order. The mapping is a directing choice, not
-## something the code can infer, so it is pinned here. Rumi's lines are "" —
-## he has no portrait art yet, only the tinted stand-in.
-##
-## The cardigan portrait set gives each named acting state its own drawing.
+## something the code can infer, so it is pinned here.
 const WAKING_FACES: Array[String] = ["dazed", "confused"]
-const MEETING_FACES: Array[String] = [
-	"hesitant", "skeptical", "annoyed", "vulnerable",
-	"",
-	"skeptical",
-	"",
-	"wary",
-	"", "",
-	"unconvinced",
-	"", "", "", "",
-	"deflecting",
-	"", "",
-]
 
-## The second encounter, in order. WORDLESS now: the scene opens with the gift
-## itself — Rumi steps over and hands the dash across with nothing said first —
-## and only the lesson line follows it, so the button is taught to someone who
-## already has the thing it operates. Empty rather than deleted, so a stale
-## copy of the old two-line hand-over cannot silently come back: see
-## DashTutorial.gift_lines, which this has to keep matching.
-const GIFT: Array[String] = []
-## Whether Hooshang already had the dash as each GIFT line went up — trivially
-## true now that there is nothing to check before the gift, but kept as the
-## same shape as GIFT so the two can be zipped without a special case.
-const GIFT_HAS_DASH: Array[bool] = []
+## The second encounter, hanging over the drop. Hooshang's alarm and Rumi's
+## breath come BEFORE the light crosses — the script's "(Light passes between
+## them.)" sits after them — and the lesson line follows the gift, so the
+## button is taught to someone who already has the thing it operates. Has to
+## keep matching DashTutorial.alarm_line and DashTutorial.gift_lines.
+const GIFT_SCRIPT := [
+	["Hooshang", "I'm going to fall!", "shocked"],
+	["Rumi", "Breathe, jaan.", ""],
+]
 
 ## The third encounter, at the mouth of the sounding tiles. He complains into the
 ## dark BEFORE Rumi turns up — the complaint is what Rumi answers by appearing —
 ## and nothing is granted here, so the room stays the gift.
-const TILES: Array[String] = [
-	"I can't see a thing.",
-	"You show up right before the parts I'm going to hate, don't you?",
-	"The dark awaits you, you think you've lost your rhythm. You haven't.",
-	"It's only sleeping, here, in these tiles.",
-	"Wake the notes in their order, one after the next, until they join into a melody. Complete",
-	"it, and its light will gather on you. The exit will open, and light will enter through it.",
-	"So I play the tune, I get a light. ...Fine.",
+const TILES_SCRIPT := [
+	["Hooshang", "I can't see a thing.", "confused"],
+	["Hooshang", "You only show up right before the parts I'm going to hate, don't you?", "annoyed"],
+	["Rumi", "You cannot fight the dark, jaan.[p] You can only make a light.", ""],
+	["Rumi", "Your rhythm is not lost.[p] It is sleeping, here, in these tiles.", ""],
+	["Rumi", "Wake the notes in order, and let them become a song.", ""],
+	["Hooshang", "Play the tune, get a light.[p] Fine.", "flat"],
 ]
-const TILES_SPEAKERS: Array[String] = ["Hooshang", "Hooshang", "Rumi", "Rumi", "Rumi", "Rumi", "Hooshang"]
-## Confused and flat now have their own drawings, like the meeting states.
-const TILES_FACES: Array[String] = ["confused", "annoyed", "", "", "", "", "flat"]
 
 var failures: Array[String] = []
 var world: LdtkWorld
@@ -189,17 +151,19 @@ func _ready() -> void:
 	# rather than button presses, and add a few seconds nothing can skip.
 	await _run_scene(2000)
 
-	_check(lines == MEETING, "meeting lines, in order  [got %s]" % str(lines))
-	_check(speakers == MEETING_SPEAKERS,
+	var meeting := _pages(MEETING_SCRIPT, 1)
+	var meeting_speakers := _pages(MEETING_SCRIPT, 0)
+	_check(lines == meeting, "meeting lines, in order  [got %s]" % str(lines))
+	_check(speakers == meeting_speakers,
 		"Rumi stays silent until Hooshang has run out of things to say  [got %s]"
 			% str(speakers))
-	_check(faces == MEETING_FACES,
+	_check(faces == _pages(MEETING_SCRIPT, 2),
 		"meeting portraits, one state per line  [got %s]" % str(faces))
 	_check(emotes == MEETING_EMOTES,
 		"the wordless beats play as bubbles, in order  [got %s]" % str(emotes))
 	_check(_speeds.size() == 1,
 		"every line types at the same speed  [saw %s]" % str(_speeds))
-	_check(sides == _sides_for(MEETING_SPEAKERS, _rumi_on_right == 1),
+	_check(sides == _sides_for(meeting_speakers, _rumi_on_right == 1),
 		"each face sits on the side that speaker is standing on  [Rumi %s, got %s]" % [
 			"right" if _rumi_on_right == 1 else "left", str(sides)])
 	_check(vsides.all(func(v: String) -> bool: return v == "top"),
@@ -267,13 +231,18 @@ func _ready() -> void:
 		return
 	await _run_scene(900)
 
-	var expect: Array[String] = GIFT.duplicate()
+	var expect := _pages(GIFT_SCRIPT, 1)
 	expect.append_array(tut.lines)
 	_check(lines == expect, "the dash lines, in order  [got %s]" % str(lines))
-	_check(speakers == ["Rumi"],
-		"all spoken by Rumi  [got %s]" % str(speakers))
-	_check(dash_when_said == [true],
-		"the gift is wordless, so the one line that IS said comes after it  [got %s]"
+	var expect_speakers := _pages(GIFT_SCRIPT, 0)
+	expect_speakers.append("Rumi")
+	_check(speakers == expect_speakers,
+		"he cries out, and Rumi answers and teaches  [got %s]" % str(speakers))
+	var expect_dash: Array[bool] = []
+	for page in _pages(GIFT_SCRIPT, 1): expect_dash.append(false)
+	expect_dash.append(true)
+	_check(dash_when_said == expect_dash,
+		"the breath comes before the light crosses, the lesson after it  [got %s]"
 			% str(dash_when_said))
 	_check(sides == _sides_for(speakers, _rumi_on_right == 1),
 		"his face is on his side of the screen here too  [Rumi %s, got %s]" % [
@@ -324,12 +293,13 @@ func _ready() -> void:
 		world.player.global_position = tile_trigger.global_position
 		await _run_scene(900)
 
-		_check(lines == TILES, "the tile lines, in order  [got %s]" % str(lines))
-		_check(speakers == TILES_SPEAKERS,
+		var tiles_speakers := _pages(TILES_SCRIPT, 0)
+		_check(lines == _pages(TILES_SCRIPT, 1), "the tile lines, in order  [got %s]" % str(lines))
+		_check(speakers == tiles_speakers,
 			"he complains into the dark before Rumi answers  [got %s]" % str(speakers))
-		_check(faces == TILES_FACES,
+		_check(faces == _pages(TILES_SCRIPT, 2),
 			"tile portraits, one state per line  [got %s]" % str(faces))
-		_check(sides == _sides_for(TILES_SPEAKERS, _rumi_on_right == 1),
+		_check(sides == _sides_for(tiles_speakers, _rumi_on_right == 1),
 			"each face sits on the side that speaker is standing on  [Rumi %s, got %s]" % [
 				"right" if _rumi_on_right == 1 else "left", str(sides)])
 		# The one room where he and Rumi are both up near the ceiling, not the
@@ -408,7 +378,8 @@ func _check_lines_fit() -> void:
 	var saved_portrait_entrance := box.portrait_entrance_time
 	box.entrance_time = 0.0
 	box.portrait_entrance_time = 0.0
-	for text in WAKING + MEETING + GIFT + TILES:
+	for text in WAKING + _pages(MEETING_SCRIPT, 1) + _pages(GIFT_SCRIPT, 1) \
+			+ _pages(TILES_SCRIPT, 1):
 		# With a portrait, which is the narrower and therefore worse case.
 		box.say("Hooshang", text, Color(1, 1, 1, 1))
 		# One frame for _fit_banner's offsets (set synchronously, before any
@@ -437,6 +408,18 @@ func _check_lines_fit() -> void:
 	box.portrait_entrance_time = saved_portrait_entrance
 	_check(clipped.is_empty(),
 		"every line fits its banner  %s" % ("" if clipped.is_empty() else str(clipped)))
+
+
+## One column of `script` ([speaker, text, face] per line), repeated once per
+## PAGE the box shows that line on. Column 1 is the page text itself, with the
+## breath marks stripped the way DialogueBox._page_raw holds it.
+func _pages(script: Array, column: int) -> Array[String]:
+	var box: DialogueBox = Dialogue
+	var out: Array[String] = []
+	for entry in script:
+		for page in box._paginate(entry[1]):
+			out.append(page.replace(DialogueBox.PAUSE_MARK, "") if column == 1 else str(entry[column]))
+	return out
 
 
 ## Expected portrait side per line, given which side Rumi actually turned up on.

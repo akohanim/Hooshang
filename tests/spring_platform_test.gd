@@ -151,6 +151,22 @@ func _run() -> void:
 	_check(relaunched, "it launches again on the very next landing  [no 'spent' flag]")
 	player.input_locked = false
 
+	# A downward dash reaching the coil must become a vertical spring launch;
+	# neither dash speed nor a live dash timer may carry through the bounce.
+	player.respawn(Vector2(100, 86))
+	player.state = Player.State.DASH
+	player.dash_dir = Vector2.DOWN
+	player.dash_timer = player.dash_time
+	player.velocity = Vector2(120, player.dash_speed)
+	spring._try_launch(player)
+	_check(player.state == Player.State.JUMP and player.dash_timer == 0.0,
+		"spring cancels the incoming dash")
+	_check(is_zero_approx(player.velocity.x) and player.velocity.y < -spring.launch_speed + 5.0,
+		"spring replaces dash momentum with a vertical launch  [%s]" % player.velocity)
+	await _frames(2)
+	_check(player.state != Player.State.DASH and absf(player.velocity.x) < 10.0,
+		"the dash does not resume after the spring launch  [%s, %s]" % [player.state_name(), player.velocity])
+
 	# --- the LDtk side: SpringPlatform reuses the same builder as Platform ---
 	var importer = load("res://scripts/ldtk_entities_post_import.gd").new()
 	var built: StaticBody2D = importer._build_platform(

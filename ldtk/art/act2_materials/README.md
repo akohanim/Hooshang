@@ -1,11 +1,11 @@
 # Act 2 terrain
 
-Current setup: **grass only** for all solid terrain. The other terrain brushes
-were replaced at the user's request. Water and entity props are unchanged.
-`tools/replace_act2_terrain_with_grass.py` performs the conversion and rebuilds
-LDtk cache entries as `[rule_uid, x + y * layer_width]` so erasing works.
-The multi-material atlas described below remains available as source art; its
-brick/stone regions are no longer used by the world.
+Current setup: existing solid terrain remains grass, with **brick, stone, and
+scaffolding** restored as additional paint brushes. Paint `brick_new`, `stone`,
+or `scaffolding` on the **Collisions** layer in `hooshang_act2.ldtk`. These use
+the shared atlas and have full collision. `tools/add_act2_masonry_brushes.py`
+restores their LDtk definitions without changing any room's painted cells.
+Water and entity props are unchanged.
 
 Paint `grass` on the **Collisions** layer in `hooshang_act2.ldtk`.
 The grass cap uses a dark green outline, lime highlight and scalloped fringe,

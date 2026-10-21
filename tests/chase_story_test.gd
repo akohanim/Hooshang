@@ -42,7 +42,8 @@ func run_case(number: int, skip: bool) -> void:
 	check(world.player.camera.limit_bottom==bottom,flag+" restores camera")
 	if not skip:
 		var expected: Array[String]=[]
-		for i in range(9 if number==16 else 12,12 if number==16 else 19):expected.append(TEXT.scenes.cell[i].text)
+		var at_wall:int=TEXT.cue("chase","We never finished it.")
+		for i in range(0 if number==16 else at_wall,at_wall if number==16 else TEXT.scenes.chase.size()):expected.append(TEXT.scenes.chase[i].text)
 		check(seen==expected,flag+" speaks every author line in order")
 	SaveGame._pending={"world_state":world.save_state()}
 	world.queue_free()

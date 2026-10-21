@@ -1,7 +1,7 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 [ext_resource type="Script" path="res://scenes/props/school_wall/school_story.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/props/school_wall/plaster.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/props/school_wall/principal_walk.png" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/characters/officer/Officer.tscn" id="3"]
 [ext_resource type="Texture2D" path="res://assets/props/school_wall/spray_can.png" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/characters/jamshid/Jamshid.tscn" id="5"]
 [ext_resource type="Texture2D" path="res://assets/props/school_wall/poem_first_line.png" id="6"]
@@ -9,9 +9,13 @@
 [ext_resource type="AudioStream" path="res://assets/audio/school_story/whistle.wav" id="8"]
 [ext_resource type="AudioStream" path="res://assets/audio/school_story/clack.wav" id="9"]
 [ext_resource type="Texture2D" path="res://assets/props/school_wall/moustache_poster.png" id="10"]
+[ext_resource type="Script" path="res://scenes/props/school_wall/graffiti_canvas.gd" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/props/school_wall/WallPainting.tscn" id="12"]
 [node name="SchoolStory" type="Node2D"]
 script = ExtResource("1")
 [node name="Wall" type="Node2D" parent="."]
+[node name="Graffiti" type="Node2D" parent="Wall"]
+script = ExtResource("11")
 [node name="Plaster" type="Sprite2D" parent="Wall"]
 z_index = -1
 position = Vector2(0,-104)
@@ -19,32 +23,21 @@ texture = ExtResource("2")
 centered = false
 [node name="Poem" type="Sprite2D" parent="Wall"]
 visible = false
-z_index = -1
 position = Vector2(38,-92)
 texture = ExtResource("6")
 centered = false
-[node name="EarlierGraffiti" type="Label" parent="Wall"]
-z_index = -1
-offset_left = 16.0
-offset_top = -64.0
-text = "marjan  /  marjan"
-theme_override_fonts/font = ExtResource("7")
-theme_override_font_sizes/font_size = 7
-theme_override_colors/font_color = Color(0.53,0.25,0.23,1)
 [node name="Jamshid" parent="Wall" instance=ExtResource("5")]
-position = Vector2(142,-16)
-[node name="Principal" type="Sprite2D" parent="Wall"]
+position = Vector2(142,0)
+[node name="Principal" parent="Wall" instance=ExtResource("3")]
 visible = false
-position = Vector2(270,-16)
-texture = ExtResource("3")
-hframes = 4
-offset = Vector2(0,-16)
+position = Vector2(270,0)
 [node name="Can" type="Sprite2D" parent="Wall"]
 position = Vector2(92,-12)
 texture = ExtResource("4")
 [node name="OtherCan" type="Sprite2D" parent="Wall"]
-position = Vector2(126,-20)
+position = Vector2(136,-7)
 texture = ExtResource("4")
+[node name="Painting" parent="Wall" instance=ExtResource("12")]
 [node name="Banner" type="Label" parent="."]
 offset_left = -34.0
 offset_right = 118.0

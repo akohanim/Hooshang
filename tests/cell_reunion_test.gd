@@ -44,7 +44,7 @@ func run_case(skip_at: int) -> void:
 	check(story.actor.position.x == 90, "Jamshid waits at the courtyard passage")
 	if skip_at == -1:
 		var expected: Array[String] = []
-		for i in 9: expected.append(TEXT.scenes.cell[i].text)
+		for line: Dictionary in TEXT.scenes.cell: expected.append(line.text)
 		check(seen == expected, "all nine author lines play in order")
 	world.player.die()
 	await frames(90)

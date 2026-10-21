@@ -82,11 +82,17 @@ var ledge_top_y := 0.0
 ##
 ## Skipped outright if he already has the dash, so a retry — or a level-select
 ## drop-in — goes straight to the lesson instead of granting it twice.
-@export var gift_lines: Array[String] = []
+##
+## Hooshang's alarm comes first and Rumi's breath answers it, BEFORE the light
+## crosses: the script's "(Light passes between them.)" sits between the two.
+@export var alarm_line := "I'm going to fall!"
+@export var gift_lines: Array[String] = [
+	"Breathe, jaan.",
+]
 ## The lesson itself. One line, because a tutorial that talks longer than the
 ## move takes is a tutorial nobody reads twice.
 @export var lines: Array[String] = [
-	"Dash up and onward!",
+	"Now hold the way you want to go, up and onward, and dash!",
 ]
 
 var _world: LdtkWorld
@@ -321,7 +327,11 @@ func _call_rumi() -> void:
 ## Hooshang's — the ability lands on the same frame the mote does. The key is
 ## named only afterwards, with the dash already his to press it with.
 func _give_the_dash() -> void:
-	if not gift_lines.is_empty():
+	if not alarm_line.is_empty():
+		# Hooshang's face stays LEFT, as everywhere in Act 1 (Act1Beats._hooshang).
+		await Dialogue.say("Hooshang", alarm_line, Act1Beats.HOOSHANG_PALE,
+			Act1Beats.FACES.get("shocked"), DialogueBox.Side.LEFT, DialogueBox.VSide.TOP)
+	if not gift_lines.is_empty() and not Dialogue.scene_skip_requested(self):
 		await _say(gift_lines[0], "warm_open")
 	if Dialogue.scene_skip_requested(self):
 		# The gift is progression; skipping its presentation must still grant it.

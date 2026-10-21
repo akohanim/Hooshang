@@ -28,7 +28,7 @@ func _ready()->void:
 		if started and shadow.state==Darkshang.State.FOLLOWING and not world.player.input_locked:break
 	check(started,"crossing the real reveal trigger routes the escape")
 	var reveal:=" ".join(pages)
-	for phrase in ["What is that", "seed you have sown", "No one can fight", "Don't let it absorb"]:
+	for phrase in ["What is that", "Every seed is in you", "No one can fight", "Don't turn back"]:
 		check(phrase in reveal,"reveal preserves: "+phrase)
 	var home:Node2D
 	for room in world.rooms:
@@ -44,7 +44,7 @@ func _ready()->void:
 		if Screen.current!=world:break
 	Input.action_release("move_left")
 	var ending:=" ".join(pages)
-	for phrase in ["gone", "stop watering it", "stop", "Let the thought come", "its origin story"]:
+	for phrase in ["gone", "stopped feeding it", "stop", "Let it come", "Where else is there to arrive", "its origin"]:
 		check(phrase in ending,"final conversation preserves: "+phrase)
 	await frames(5)
 	check(Screen.current_path()==destination,"final dialogue preserves its authored handoff")

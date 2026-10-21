@@ -69,15 +69,15 @@ func _ready() -> void:
 	# game's job.
 	_check(not tut.lines.is_empty(), "Rumi has something to say  [%d lines]"
 		% tut.lines.size())
-	# The hand-over itself is WORDLESS on purpose (see _give_the_dash): he
-	# steps over, swells, and the dash is Hooshang's with no line ahead of it.
-	# Asserting gift_lines stays empty pins that as the design rather than
-	# leaving a check here that used to demand a line silently stop meaning
-	# anything.
-	_check(tut.gift_lines.is_empty(), "...and the hand-over is wordless  [%d lines]"
-		% tut.gift_lines.size())
+	# The script's hand-over: Hooshang cries out, Rumi tells him to breathe,
+	# and only then does the light cross (see _give_the_dash).
+	_check(tut.alarm_line == "I'm going to fall!", "Hooshang cries out first  [%s]"
+		% tut.alarm_line)
+	_check(tut.gift_lines == ["Breathe, jaan."], "...and Rumi answers with a breath  [%s]"
+		% str(tut.gift_lines))
 	tut.lines = []
 	tut.gift_lines = []
+	tut.alarm_line = ""
 
 	var p := world.player
 	p.input_locked = false

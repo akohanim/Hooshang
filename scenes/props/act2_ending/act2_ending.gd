@@ -23,6 +23,9 @@ var paint_progress := 0.0:
 		if is_node_ready():
 			$Wall/SecondLine.material.set_shader_parameter("progress", value)
 			$Gestures.ink_target = $Wall/SecondLine.global_position + Vector2(232*(1.0-value),10)
+## Tweened only to hold the breath after the finale's school bell for a beat
+## the scene skip can still cut short; nothing reads it.
+var _breath := 0.0
 var coat_collected := false
 var coat_carried := false
 var _coat_placed := false
@@ -124,11 +127,24 @@ func _carpet() -> void:
 	$GroundCarpet.global_position = mark+Vector2(80,-24)
 	$GroundCarpet.show()
 	await _animate($GroundCarpet,"global_position",mark,0.8)
+	# Each beat is staged just BEFORE the line it is anchored to (Act2Script.cue).
+	var boards: int = TEXT.cue("carpet", "Move over.")
+	var lifts: int = TEXT.cue("carpet", "No. No, no.")
+	var alley: int = TEXT.cue("carpet", "I can fix it.")
+	var corridor: int = TEXT.cue("carpet", "Tell me what I missed.")
+	var drained: int = TEXT.cue("carpet", "Don't.")
+	var arrest: int = TEXT.cue("carpet", "Whose is this?")
+	var mother: int = TEXT.cue("carpet", "Where is my son?")
+	var rain: int = TEXT.cue("carpet", "I should have said they were mine.")
+	var hold_on: int = TEXT.cue("carpet", "Please let go.")
+	# "(Hooshang looks at their hands. The bright letters change.)" — his "No."
+	# is the very next line.
+	var let_go := hold_on + 1
 	for i in TEXT.scenes.carpet.size():
 		line_index = i
 		if Dialogue.scene_skip_requested(self): break
-		if i == 3: await _animate(guide,"global_position",mark+Vector2(0,-4),0.5)
-		if i == 19:
+		if i == boards: await _animate(guide,"global_position",mark+Vector2(0,-4),0.5)
+		if i == lifts:
 			stage.show()
 			$GroundCarpet.hide()
 			guide.hide()
@@ -139,16 +155,20 @@ func _carpet() -> void:
 			child.offset = world.player.visual.offset
 			child.play("hold")
 			await _animate($Cinema/Stage/Night,"color:a",0.45,0.8)
-		if i == 22: await _flash_memory("arrest",0.9)
-		if i == 25: await _flash_memory("corridor",1.0)
-		if i == 30: _show_memory("arrest")
-		if i == 33: _show_memory("mother")
-		if i == 34: await _flash_memory("rain",1.8)
-		if i == 28:
+		if i == alley: await _flash_memory("arrest",0.9)
+		if i == corridor: await _flash_memory("corridor",1.0)
+		if i == drained:
+			# "There were never any keys." The music stops; the colour drains.
 			if world._music != null: world._music.stop()
 			await _animate($Cinema/Stage/Night,"color:a",1.0,0.7)
-		if i == 50: $Cinema/Stage/Prompt.text = "HOLD ON"
-		if i == 51: $Cinema/Stage/Prompt.text = "LET GO"
+		if i == arrest: _show_memory("arrest")
+		if i == mother: _show_memory("mother")
+		if i == rain: await _flash_memory("rain",1.8)
+		if i == hold_on:
+			# "Look." Far below, at the edge of the dark, the sun is coming up.
+			await _animate($Cinema/Stage/Morning,"modulate:a",0.35,0.8)
+			$Cinema/Stage/Prompt.text = "HOLD ON"
+		if i == let_go: $Cinema/Stage/Prompt.text = "LET GO"
 		await _say(TEXT.scenes.carpet[i])
 	if not Dialogue.scene_skip_requested(self):
 		$Cinema/Stage/Prompt.text = ""
@@ -177,6 +197,14 @@ func _carpet() -> void:
 	var with_splash := not Dialogue.scene_skip_requested(self)
 	_finish("carpet_farewell")
 	await _travel_to_pond(with_splash)
+
+func _ring_school_bell() -> void:
+	var bell := AudioStreamPlayer.new()
+	bell.stream = Act2Beats.school_bell_stream()
+	add_child(bell)
+	bell.finished.connect(bell.queue_free)
+	bell.play()
+
 
 func _show_memory(kind: String) -> void:
 	$Cinema/Stage/Memory.show_memory(kind)
@@ -226,15 +254,20 @@ func _pond() -> void:
 	$Rumi.modulate.a = 0
 	$Rumi.show()
 	await _animate($Rumi,"modulate:a",1.0,0.8)
-	for i in range(38):
+	# THE FALL is spoken underwater; THE BANK once he has dragged himself out.
+	var lines: Array = TEXT.scenes.fall + TEXT.scenes.bank
+	var on_bank: int = TEXT.scenes.fall.size()
+	# "(Very gently, Rumi's glow begins to thin.)"
+	var thins: int = on_bank + TEXT.cue("bank", "Wait. Where are you going?")
+	for i in lines.size():
 		line_index = i
 		if Dialogue.scene_skip_requested(self): break
-		if i == 3:
+		if i == on_bank:
 			await _animate(world.player,"global_position",_mark(20,"Bank"),1.2)
 			$Rumi.global_position = _mark(20,"Rumi")
 			world.player.cutscene_rest(true,-1)
-		if i == 31: await _animate($Rumi,"modulate:a",0.5,0.8)
-		await _say(TEXT.scenes.second_line[i],true)
+		if i == thins: await _animate($Rumi,"modulate:a",0.5,0.8)
+		await _say(lines[i],true)
 	await _animate($Rumi,"modulate:a",0.0,0.8)
 	$Rumi.hide()
 	world.player.global_position = _mark(20,"Bank")
@@ -249,8 +282,9 @@ func _paint() -> void:
 	$Gestures.pose(world.player,"pickup",1)
 	await _animate($Wall/Can,"global_position",world.player.global_position+Vector2(8,-7),0.7)
 	$Gestures.holding_can = true
-	line_index = 38
-	await _say(TEXT.scenes.second_line[38],true)
+	# "Keep going." — Jamshid, unseen, across fifty years.
+	line_index = 0
+	await _say(TEXT.scenes.second_line[0],true)
 	$Wall/SecondLine.show()
 	paint_progress = 0.0
 	if not Dialogue.scene_skip_requested(self):
@@ -278,7 +312,10 @@ func _paint() -> void:
 	world.player.cutscene_rest(false,-1)
 	$Gestures.pose(world.player,"paint_idle",-1)
 	await _animate($Wall/Sunlight,"color:a",0.18,0.8)
-	for i in [39,40]:
+	# The verse read aloud, then "Took me long enough." The last line waits for
+	# the carpet and the bell.
+	var home: int = TEXT.scenes.second_line.size() - 1
+	for i in range(1, home):
 		line_index = i
 		await _say(TEXT.scenes.second_line[i],true)
 	$Wall/SecondLine.modulate.a = 1
@@ -293,6 +330,13 @@ func _paint() -> void:
 		$GroundCarpet.hide()
 		$Gestures.pose(world.player,"paint_idle",1)
 		await _animate(world.player.camera,"position:y",_camera_position.y,0.65)
+		# "(Far off, a school bell rings.)" Once he would have run, toward it or
+		# away. Now he stops, breathes in, breathes out.
+		_ring_school_bell()
+		_breath = 0.0
+		await _animate(self,"_breath",1.0,1.8)
+		line_index = home
+		await _say(TEXT.scenes.second_line[home],true)
 		world.player.look(1)
 		$Gestures.pose(world.player,"walk_home",1)
 		await _animate(world.player,"global_position:x",_mark(21,"Painter").x+20,0.4)

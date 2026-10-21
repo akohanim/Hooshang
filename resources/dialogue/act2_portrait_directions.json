@@ -7,17 +7,7 @@
     },
     {
       "speaker": "JAMSHID",
-      "text": "You coming to paint, or are you planning to stare at the wall until we're thirty?",
-      "face": "joyful"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "I'm coming.",
-      "face": "happy"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Good. We haven't committed the crime yet.",
+      "text": "Grab a can. This wall's ours.",
       "face": "joyful"
     },
     {
@@ -27,62 +17,32 @@
     },
     {
       "speaker": "JAMSHID",
-      "text": "It's political commentary.",
-      "face": "joyful"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "On what?",
-      "face": "surprised"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Moustaches.",
+      "text": "Art takes risks.",
       "face": "joyful"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Come on. One good one before we go.",
+      "text": "Your turn. Make it good.",
       "face": "excited"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "My mother said home before dark.",
+      "text": "We should go before dark.",
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Fine. Something quick.",
-      "face": "friendly"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Write this.",
+      "text": "One last thing. Rumi.",
       "face": "determined"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "What?",
-      "face": "surprised"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Rumi.",
-      "face": "determined"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "We get one last wall and you want homework?",
+      "text": "Poetry? On our last wall?",
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Just write.",
-      "face": "determined"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "“This world is a prison, and we are prisoners...”",
+      "text": "\"This world is a prison, and we are prisoners...\"",
       "face": "determined"
     },
     {
@@ -92,17 +52,22 @@
     },
     {
       "speaker": "JAMSHID",
-      "text": "Keep going.",
+      "text": "\"Dig through the prison and—\"",
       "face": "determined"
     },
     {
-      "speaker": "JAMSHID",
-      "text": "“Dig through the prison and -”",
-      "face": "determined"
+      "speaker": "OFFICER",
+      "text": "Hey! What are you doing?!",
+      "face": "alarmed"
+    },
+    {
+      "speaker": "OFFICER",
+      "text": "Who painted this?",
+      "face": "stern"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Mine.",
+      "text": "Me.",
       "face": "determined"
     },
     {
@@ -116,8 +81,13 @@
       "face": "determined"
     },
     {
+      "speaker": "OFFICER",
+      "text": "You're in serious trouble. Come with me.",
+      "face": "angry"
+    },
+    {
       "speaker": "HOOSHANG",
-      "text": "Wait—",
+      "text": "Wait!",
       "face": "surprised"
     },
     {
@@ -127,7 +97,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Detention?",
+      "text": "How long will he be gone?",
       "face": "vulnerable"
     }
   ],
@@ -146,7 +116,7 @@
   "cell": [
     {
       "speaker": "HOOSHANG",
-      "text": "Cousin Joon!",
+      "text": "Cousin joon!",
       "face": "happy"
     },
     {
@@ -156,7 +126,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Come on lets go.",
+      "text": "Come on. Let's go.",
       "face": "happy"
     },
     {
@@ -171,24 +141,21 @@
     },
     {
       "speaker": "JAMSHID",
-      "text": "Oh.",
+      "text": "...Oh.",
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Your mother is going to kill both of us.",
+      "text": "Your mother is going to kill us both.",
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
       "text": "Probably just you.",
       "face": "joyful"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "Come on.",
-      "face": "happy"
-    },
+    }
+  ],
+  "chase": [
     {
       "speaker": "HOOSHANG",
       "text": "Slow down!",
@@ -201,13 +168,13 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Whose fault is that?",
+      "text": "And whose fault is that?",
       "face": "annoyed"
     },
     {
       "speaker": "HOOSHANG",
       "text": "We never finished it.",
-      "face": "vulnerable"
+      "face": "happy"
     },
     {
       "speaker": "JAMSHID",
@@ -216,7 +183,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "We can finish it now. Come on — you always started. You start.",
+      "text": "Let's finish it now. You always started. You start.",
       "face": "happy"
     },
     {
@@ -236,7 +203,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Who is? Jamshid — who's waiting?",
+      "text": "Who is? Jamshid, who's waiting?",
       "face": "vulnerable"
     }
   ],
@@ -244,7 +211,7 @@
     {
       "speaker": "HOOSHANG",
       "text": "There it is.",
-      "face": "neutral"
+      "face": "happy"
     },
     {
       "speaker": "JAMSHID",
@@ -253,7 +220,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Come on. We'll take it back.",
+      "text": "Come on. We'll ride it back.",
       "face": "happy"
     },
     {
@@ -293,7 +260,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Stop.",
+      "text": "Stop it.",
       "face": "annoyed"
     },
     {
@@ -333,17 +300,17 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "What do you mean you can't?",
+      "text": "What do you mean, you can't?",
       "face": "surprised"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "No. No, no — Jamshid, get off.",
+      "text": "No. No, no. Jamshid, get off.",
       "face": "vulnerable"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Get off!",
+      "text": "GET OFF!",
       "face": "annoyed"
     },
     {
@@ -363,7 +330,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I can fix it!",
+      "text": "I CAN FIX IT!",
       "face": "annoyed"
     },
     {
@@ -399,7 +366,7 @@
     {
       "speaker": "JAMSHID",
       "text": "Go home, cousin joon.",
-      "face": "worried"
+      "face": "friendly"
     },
     {
       "speaker": "HOOSHANG",
@@ -448,7 +415,7 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I left.",
+      "text": "Then I left.",
       "face": "sad"
     },
     {
@@ -468,18 +435,23 @@
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I wasted it.",
+      "text": "I wasted it. All that time.",
       "face": "vulnerable"
     },
     {
+      "speaker": "JAMSHID",
+      "text": "You're wasting it now.",
+      "face": "friendly"
+    },
+    {
       "speaker": "HOOSHANG",
-      "text": "All that time.",
-      "face": "sad"
+      "text": "What?",
+      "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Is that why you came back?",
-      "face": "worried"
+      "text": "Look.",
+      "face": "friendly"
     },
     {
       "speaker": "JAMSHID",

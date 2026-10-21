@@ -89,6 +89,7 @@ func _run() -> void:
 
 			var anim_a := _build_anim_layer(layer.tile_set, source_id, coords)
 			add_child(anim_a)
+			anim_a.set_process(false)  # Only the synthetic ticks below advance it.
 			await get_tree().process_frame
 
 			var frames_over_time: Array[Array] = []
@@ -122,6 +123,7 @@ func _run() -> void:
 			# from anything that could differ between runs.
 			var anim_b := _build_anim_layer(layer.tile_set, source_id, coords)
 			add_child(anim_b)
+			anim_b.set_process(false)
 			await get_tree().process_frame
 			for tick in 200:
 				anim_b._process(1.0 / 60.0)

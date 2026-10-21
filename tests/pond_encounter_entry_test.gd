@@ -19,8 +19,10 @@ func run_encounter(skip_from_water: bool) -> void:
 	await frames(30)
 	var beats: Act2Beats = world.get_node("Act2Beats")
 	world.player.died.connect(func(): deaths += 1)
-	await swim_to_encounter()
+	await swim_to_encounter(beats)
 	await wait_for_line("Cousin joon!")
+	check(beats._speaker.trigger_region.has_point(world.player.global_position),
+		"encounter starts with Hooshang at the upper right pond corner")
 	check(beats._played and Dialogue._active, "swimming approach triggers the encounter")
 	check(world.player.swimming(), "opening exchange holds a swimmer")
 	check(world.player.visual.animation == &"swim_idle", "opening exchange uses the child float pose")
@@ -31,8 +33,8 @@ func run_encounter(skip_from_water: bool) -> void:
 	check(Dialogue._active and Dialogue._page_raw == "Cousin joon!", "first author line remains open until advanced")
 	if not skip_from_water:
 		for line in ["Jamshid! It's so good to see you!", "You saw me yesterday.",
-			"It feels like so much longer.", "Well, get out of the water. You're frightening dinner.",
-			"Are the fish biting today?"]:
+			"It feels like a lot longer.", "Well, get out of the water. You're frightening dinner.",
+			"Are they biting?"]:
 			Dialogue._finish_reveal_instantly()
 			Dialogue.line_finished.emit()
 			await wait_for_line(line)
@@ -49,7 +51,7 @@ func run_encounter(skip_from_water: bool) -> void:
 	world.queue_free()
 	await frames(4)
 
-func swim_to_encounter() -> void:
+func swim_to_encounter(beats: Act2Beats) -> void:
 	# Real child movement from the authored entrance; no position/velocity writes.
 	Input.action_press("move_right")
 	await frames(275)
@@ -64,7 +66,11 @@ func swim_to_encounter() -> void:
 	Input.action_press("jump")
 	await frames(60)
 	Input.action_release("jump")
-	await frames(165)
+	for i in 185:
+		await frames(1)
+		if i == 140:
+			check(not beats._played and not Dialogue._active,
+				"approaching through the pond does not trigger Jamshid before the corner")
 	Input.action_release("move_right")
 
 func wait_for_line(text: String) -> void:

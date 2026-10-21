@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Act 2's paintable thought-hazard tiles: a playful, childhood-memory palette
-for the same "sludge" mechanic tools/gen_thought_tiles.py builds for Act 1.
+"""Act 2's paintable thought-hazard tiles, based on Act 1's dark sludge.
 
 SAME 32x48 sheet, SAME six-frame x four-tile-type layout (fill, top edge, left
 edge, corner) as gen_thought_tiles.py, and the SAME static contour / travelling
@@ -9,28 +8,13 @@ every painted cell purely from tile geometry and a coordinate hash, with no
 palette-specific logic anywhere in it, so keeping the layout identical is what
 lets this drop straight in as a tileset swap with zero script changes.
 
-What actually changes is the read: Act 1's sludge is a dread-mass with a hot
-red rim and a haunted face. Act 2 is a "negative cloud" from a happy childhood
-memory, not a nightmare — so the contour is rounder (no sharp corner notch)
-and the face reads as a pouty grump rather than something haunted. THE RIM,
-though, is the SAME hot red as Act 1's (RED RIM PASS, 2026-09 — see
-gen_act2_thought.py's header for the reasoning: a hazard that stops reading as
-dangerous at a glance is worse regardless of how playful its body is), not the
-softer candy-purple pulse an earlier pass gave it. Still unmistakably a hazard
-— the rim is still the brightest, most saturated thing on the tile, and now
-the same colour every other hazard in the game uses for that job.
+The body is a dark plum watercolor ramp, with Act 1's red contour. Keeping the
+body dark makes the red edge legible at the game's native 8px cell size. The
+Act 2 contour remains a little rounder than the office version.
 
-WATERCOLOR PASS (2026-09). PALETTE ONLY, CONTOUR/ANIMATION UNCHANGED — reads a
-Pixellab "pulled back" watercolor generation (see
-experiments/act2_watercolor/README.md: pulled-back is the direction proven to
-survive reduction to this project's actual small-prop/8px-tile scale; heavy
-bleed measurably turns to mud there) for its body ramp and rim colour, rather
-than hand-picked hex. The STATIC contour and the per-cell hashed animation
-(gen_act2_thought.py's twin, and ldtk_thought_hazard_layer.gd on the runtime
-side) are exactly the kind of thing this codebase already decided NOT to
-source from a generated bitmap for a tile this small — see
-tools/gen_cone_spikes.py's own header on why photo/paint-sourced detail turns
-to mush at 8px, which applies here just as much as to a spike's point.
+The static contour and per-cell hashed animation are unchanged. The body ramp
+is darkened from the original watercolor source so it sits closer to Act 1's
+paintable DarkThought while retaining a plum cast.
 
 Source: ldtk/art/source/act2_sludge.png (Pixellab create_image_pixflux,
 prompt "small round bubbly pastel purple grump cloud creature, candy pink
@@ -40,17 +24,8 @@ restrained painterly bleed... dreamy pastel childhood-memory palette of
 lavender pink and plum", seed 2202) — the SAME source gen_act2_thought.py
 reads, so the painted tiles and the floating clouds are sampled from one
 image and cannot drift apart in tone. `_ramp_from_source()` sorts the
-source's most-common opaque colours by luminance; BODY_DARK/MID/LIGHT are its
-darkest/mid/lightest purple stops. RIM_HOT/RIM_DIM do NOT come from the
-source at all — as of the RED RIM PASS (2026-09) they are Act 1's own hot red
-(gen_dark_thought.py's RIM_LIT/RIM_DARK, copied byte-for-byte), not the
-source's violet-pink brightest pixels and not the project's earlier
-candy-pink either. The brief is explicit that the rim has to stay the
-brightest, most-saturated thing on the tile — the "spot the hazard fast" job
-— and, after this pass, the SAME colour that job uses everywhere else in the
-game. gen_act2_thought.py's SAME two constants are kept equal to these by
-hand; there is no automated check that they match (act2_hazards_test.gd
-proves the tiles still kill and draw Act 2's own sheet, not rim colour).
+source's most-common opaque colours by luminance. The red rim comes from
+gen_thought_tiles.py, the World 1 paintable hazard reference.
 
 Re-run after editing: python3 tools/gen_act2_thought_tiles.py
 """
@@ -87,12 +62,17 @@ _RAMP = _ramp_from_source(SOURCE)
 # Pixellab source (see header); rim is Act 1's hot red (RED RIM PASS, see
 # header) so the hazard still reads as dangerous regardless of body colour.
 # ---------------------------------------------------------------------------
-BODY_LIGHT = _RAMP[0]   # palest lavender highlight
-BODY_MID = _RAMP[2]     # solid mid purple
-BODY_DARK = _RAMP[-1]   # deepest plum shadow
+def _darken(color, scale, violet=0):
+    return tuple(min(255, int(component * scale + (violet if index == 2 else 0)))
+                 for index, component in enumerate(color))
 
-RIM_HOT = (236, 60, 42)
-RIM_DIM = (122, 20, 18)
+
+BODY_LIGHT = _darken(_RAMP[0], 0.32, 12)
+BODY_MID = _darken(_RAMP[2], 0.24, 8)
+BODY_DARK = _darken(_RAMP[-1], 0.18, 5)
+
+RIM_HOT = (215, 70, 80)
+RIM_DIM = (120, 35, 45)
 
 # Face — a small grump, not a haunted stare: darker than the body so it reads
 # as an expression rather than another glow.

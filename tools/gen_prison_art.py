@@ -26,9 +26,11 @@ for i in range(5):
 x,y=tile(5);d.rectangle((x,y,x+7,y+2),fill=shade);d.line((x,y,x+7,y),fill=gold)
 x,y=tile(6)
 for j in [0,3,5]:d.polygon([(x+j,y+7),(x+j+1,y+1),(x+min(j+3,7),y+7)],fill=(75,54,88));d.point((x+j+1,y+2),fill=(181,122,160))
+# Water is an even tint with ONE unbroken waterline: a highlight stroke inside
+# an 8px tile repeats every 8px and reads as rows of dashes across the pool.
 for i in [7,8]:
- x,y=tile(i);d.rectangle((x,y,x+7,y+7),fill=(43,110,136,190));d.line((x+1,y+5,x+4,y+5),fill=(70,148,166,210))
- if i==8:d.line((x,y,x+7,y),fill=(149,206,202));d.line((x+1,y+1,x+4,y+1),fill=(210,225,208))
+ x,y=tile(i);d.rectangle((x,y,x+7,y+7),fill=(43,110,136,190))
+ if i==8:d.line((x,y,x+7,y),fill=(149,206,202));d.line((x,y+1,x+7,y+1),fill=(86,160,170,215))
 # Background tiles: plaster, wainscot, barred window, school floor stripe.
 for i in [16,17,18,19]:
  x,y=tile(i);d.rectangle((x,y,x+7,y+7),fill=shade)

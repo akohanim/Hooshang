@@ -4,12 +4,22 @@ var grid: TileMapLayer
 var geometry: TileMapLayer
 var world: Node
 var size_cells := Vector2i.ZERO
+## Cells painted on Act 2's `Collisions` layer (scaffolding, brick...) over
+## empty or water `Collision` cells. That material is solid everywhere else in
+## the Act, so it is solid here too: a ledge painted in LDtk without also
+## painting `Collision` under it used to be one you fell straight through.
+var painted := {}
 
 func _ready() -> void:
 	for visual in get_parent().find_children("*", "TileMapLayer", true, false):
 		visual.collision_enabled = false
 	grid = get_parent().get_node("Collision-values")
+	var art := get_parent().get_node_or_null("Collisions") as TileMapLayer
+	if art != null:
+		for cell in art.get_used_cells():
+			if value_at(cell) in [0,4]: painted[cell] = true
 	size_cells = Vector2i(get_parent().size) / 8
+	_add_backdrop()
 	var set := TileSet.new()
 	set.tile_size = Vector2i(8, 8)
 	set.add_physics_layer()
@@ -32,8 +42,26 @@ func _ready() -> void:
 	for cell in grid.get_used_cells():
 		var value := value_at(cell)
 		if value in [1,2]: geometry.set_cell(cell,0,Vector2i(value-1,0))
+	for cell: Vector2i in painted:
+		geometry.set_cell(cell,0,Vector2i(0,0))
+
+## The room's own painted back wall (tools/gen_prison_backdrops.py), hung in
+## front of Act 2's outdoor panorama: every prison room is indoors, and the
+## sky painting showing through read as the school having no walls.
+func _add_backdrop() -> void:
+	var path := "res://assets/backdrop/prison/%s.png" % get_parent().name
+	if not ResourceLoader.exists(path): return
+	var back := Sprite2D.new()
+	back.name = "Backdrop"
+	back.texture = load(path)
+	back.centered = false
+	back.z_as_relative = false
+	back.z_index = -6
+	add_child(back)
+
 
 func value_at(cell: Vector2i) -> int:
+	if painted.has(cell): return 1
 	if grid.get_cell_source_id(cell) == -1: return 0
 	return grid.get_cell_atlas_coords(cell).x + 1
 

@@ -29,9 +29,10 @@ func play_scene() -> void:
 	world.player.camera.limit_bottom += 64
 	world.player.camera.reset_smoothing()
 	actor.face_left(true)
-	for i in 9:
+	var hug: int = TEXT.cue("cell", "Come on. Let's go.")
+	for i in TEXT.scenes.cell.size():
 		if Dialogue.scene_skip_requested(self): break
-		if i == 2:
+		if i == hug:
 			# The existing actor artwork has no embrace clip. Stage the reunion
 			# with close silhouettes, without replacing either character drawing.
 			await _animate(world.player, "global_position:x", actor.global_position.x - 9, 0.55)

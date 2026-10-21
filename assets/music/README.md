@@ -1,5 +1,10 @@
 # Act I score
 
+`menu_shur.ogg` is the title cue, adapted from the ElevenLabs-generated
+`prison_theme.ogg`: its Persian Shur palette of tar, setar, daf, kamancheh
+and santur is slowed 10%, softened with a 5.2 kHz low-pass filter, and played
+quietly on the Music bus. It loops only while the main menu is open.
+
 `shur_circuit_climb.mp3` is the original office score, preserved unchanged.
 `darkshang_shur_requiem.ogg` was a somber alternate mix of that recording for
 Darkshang's Levels 14–25; it is now superseded by `darkshang_theme.ogg` (an

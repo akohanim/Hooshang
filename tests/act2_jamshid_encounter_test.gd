@@ -90,8 +90,8 @@ func _run() -> void:
 	# Speed the tweened day/night up so this does not take a real minute.
 	Engine.time_scale = 8.0
 
-	# Walk him up to Jamshid — the trigger is proximity, so put him in reach.
-	world.player.global_position = jamshid.global_position + Vector2(-30, -8)
+	# Stage him at the actual swim arrival point beside the pond's right bank.
+	world.player.global_position = jamshid.trigger_region.get_center()
 
 	var name_label: Label = Dialogue.get_node("NameLabel")
 	var settled := false

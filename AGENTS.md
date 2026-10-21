@@ -1810,3 +1810,16 @@ Later story acting directions live in `resources/dialogue/act2_portrait_directio
 compiled by `tools/compile_act2_script.py` without changing the author's words.
 The wall, reunion, chase and farewell read each line's `face` field.
 `act2_child_portraits_test` verifies all expressions and captures their UI.
+
+## Paintable water life (2026-10-12)
+
+Act 2 Water now automatically dresses supported floors with waving algae,
+adds contained koi schools to broad lanes, and draws waterfalls beneath
+unsupported water down to the first pool/solid landing in the same room.
+`WaterLife` is an additional non-colliding Tiles layer: first-row brushes
+Algae, Fish, WaterfallOutlet add explicit placements. See
+`docs/water-authoring.md`; runtime lives in the `WaterLife.tscn` prefab.
+This supersedes the older “painted water has no fish” convention above;
+narrow shafts still have none. Test: `tests/water_life_test.tscn`.
+The aquatic source uses built-in ImageGen at the user's request, not PixelLab;
+keep its source and prompt under `assets/props/water_life/source/`.

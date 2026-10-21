@@ -40,6 +40,12 @@ signal triggered(player: Player)
 ## feet — so this is roughly "close enough to talk to", not a hitbox overlap.
 @export var trigger_radius := 50.0
 
+## A scripted encounter may supply a precise world-space arrival region.
+## Empty keeps ordinary Jamshid greetings on their proximity radius.
+var trigger_region := Rect2()
+var trigger_region_enabled := false
+var require_swimming_for_trigger := false
+
 ## When a cutscene owns this encounter, it sets this so the NPC does not play
 ## its own one-line greeting — it just emits `triggered` and steps aside. Set
 ## from code (the director that takes over), not from LDtk: which encounters are
@@ -107,7 +113,12 @@ func _physics_process(_delta: float) -> void:
 	# allowed to happen. He is still standing here; try again next frame.
 	if player.input_locked:
 		return
-	if global_position.distance_to(player.global_position) > trigger_radius:
+	if not trigger_region_enabled:
+		if global_position.distance_to(player.global_position) > trigger_radius:
+			return
+	elif not trigger_region.has_point(player.global_position):
+		return
+	if require_swimming_for_trigger and not player.swimming():
 		return
 	_greeted = true
 	triggered.emit(player)

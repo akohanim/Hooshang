@@ -8,6 +8,9 @@ extends Node2D
 @export var center_speed := 0.6
 ## Speed at which the eyes approach their target direction.
 @export var eye_turn_speed := 12.0
+## Per-cell variation in rotation, breathing, glances and blink timing.
+## Coordinate/cycle hashes give irregular motion without jittering each frame.
+@export_range(0.0, 1.0) var motion_variation := 0.0
 
 var elapsed := 0.0
 var eyes: Array[Dictionary] = []
@@ -27,6 +30,7 @@ func configure(layer: TileMapLayer) -> void:
 		if seed < 0.5:
 			var phase := ThoughtHazardLayer._hash(cell + Vector2i(131, 17))
 			eyes.append({"position": Vector2(local * 8) + Vector2(4, 4),
+				"cell": cell,
 				"direction": Vector2.from_angle(phase * TAU), "follow": seed < 0.15,
 				"period": 2.0 + phase * 1.5 + 0.25 + 0.02 + phase * 0.05, "phase": seed * 7.0,
 				"lag": 0.02 + phase * 0.05})
@@ -37,6 +41,7 @@ func configure(layer: TileMapLayer) -> void:
 	_body_material.set_shader_parameter("grid_origin", Vector2(bounds.position))
 	_body_material.set_shader_parameter("lobe_speed", lobe_speed)
 	_body_material.set_shader_parameter("center_speed", center_speed)
+	_body_material.set_shader_parameter("motion_variation", motion_variation)
 	var mat := CanvasItemMaterial.new()
 	mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 	material = mat
@@ -48,14 +53,26 @@ func _process(delta: float) -> void:
 	_body_material.set_shader_parameter("clock", elapsed)
 	if not is_instance_valid(_player):
 		_player = get_tree().get_first_node_in_group("player") as Node2D
-	if is_instance_valid(_player):
-		for eye in eyes:
-			if eye.follow:
-				var target := (to_local(_player.global_position) - Vector2(eye.position)).normalized()
-				eye.direction = Vector2(eye.direction).move_toward(target, eye_turn_speed * delta)
+	for eye in eyes:
+		if eye.follow and is_instance_valid(_player):
+			var target := (to_local(_player.global_position) - Vector2(eye.position)).normalized()
+			eye.direction = Vector2(eye.direction).move_toward(target, eye_turn_speed * delta)
+		elif motion_variation > 0.0:
+			var cycle := int(floor((elapsed + float(eye.phase)) / 2.4))
+			var angle := ThoughtHazardLayer._hash(Vector2i(eye.cell) + Vector2i(cycle * 37, 193)) * TAU
+			eye.direction = Vector2(eye.direction).move_toward(Vector2.from_angle(angle), eye_turn_speed * delta)
 	queue_redraw()
 
 func eye_visibility(eye: Dictionary) -> Vector2i:
+	if motion_variation > 0.0:
+		var time := elapsed + float(eye.phase)
+		var cycle := int(floor(time / 4.0))
+		var seed := ThoughtHazardLayer._hash(Vector2i(eye.cell) + Vector2i(cycle * 71, 307))
+		var start := 0.4 + seed * 2.8
+		var duration := 0.12 + seed * 0.12
+		var local_time := fposmod(time, 4.0)
+		return Vector2i(int(local_time < start or local_time >= start + duration),
+			int(local_time < start + float(eye.lag) or local_time >= start + duration + float(eye.lag)))
 	var t := fposmod(elapsed + float(eye.phase), float(eye.period))
 	var start := float(eye.period) - 0.25 - float(eye.lag)
 	return Vector2i(int(t < start), int(t < start + float(eye.lag)))

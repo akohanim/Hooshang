@@ -19,6 +19,8 @@ extends Node2D
 @export var flick_speed := 2.2
 
 const SHEET := preload("res://assets/props/pond_fish/fish.png")
+@export var artwork: Texture2D = SHEET
+
 const FRAME := Vector2(12.0, 8.0)
 const FRAME_COUNT := 3
 
@@ -37,7 +39,7 @@ func _ready() -> void:
 	for i in FRAME_COUNT:
 		var tex := AtlasTexture.new()
 		tex.filter_clip = true
-		tex.atlas = SHEET
+		tex.atlas = artwork
 		tex.region = Rect2(i * FRAME.x, 0.0, FRAME.x, FRAME.y)
 		_frames.append(tex)
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

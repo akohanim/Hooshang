@@ -5,7 +5,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().current_scene = null
 	SaveGame.slot = -1
-	for marker in ["Finally!!", "You'd better start from the beginning.", "Come over after school."]:
+	for marker in ["Finally!!", "You'd better start from the beginning.", "Come by after school."]:
 		await _check_act2_skip(marker)
 	print("ACT 2 STAGING SKIP: %s" % ("ALL PASS" if failures.is_empty() else str(failures)))
 	get_tree().quit(0 if failures.is_empty() else 1)
@@ -18,7 +18,7 @@ func _check_act2_skip(marker: String) -> void:
 	var beats: Act2Beats = world.get_node("Act2Beats")
 	var npc := beats._speaker
 	var origin := npc.global_position
-	world.player.global_position = origin + Vector2(-30, -8)
+	world.player.global_position = npc.trigger_region.get_center()
 	Engine.time_scale = 8.0
 	var reached := false
 	for i in 7000:

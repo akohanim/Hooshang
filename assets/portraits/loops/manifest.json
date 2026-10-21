@@ -531,19 +531,19 @@
   },
   "jamshid_friendly": {
     "sheet": "jamshid_friendly_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -551,19 +551,19 @@
   },
   "jamshid_joyful": {
     "sheet": "jamshid_joyful_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -571,19 +571,19 @@
   },
   "jamshid_worried": {
     "sheet": "jamshid_worried_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -591,19 +591,19 @@
   },
   "jamshid_sad": {
     "sheet": "jamshid_sad_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -611,19 +611,19 @@
   },
   "jamshid_determined": {
     "sheet": "jamshid_determined_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -836,19 +836,19 @@
   },
   "childhooshang_neutral": {
     "sheet": "childhooshang_neutral_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -856,19 +856,19 @@
   },
   "childhooshang_happy": {
     "sheet": "childhooshang_happy_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -876,19 +876,19 @@
   },
   "childhooshang_sad": {
     "sheet": "childhooshang_sad_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -896,19 +896,19 @@
   },
   "childhooshang_surprised": {
     "sheet": "childhooshang_surprised_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -916,19 +916,19 @@
   },
   "childhooshang_annoyed": {
     "sheet": "childhooshang_annoyed_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -936,19 +936,19 @@
   },
   "childhooshang_vulnerable": {
     "sheet": "childhooshang_vulnerable_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
@@ -956,22 +956,124 @@
   },
   "jamshid_excited": {
     "sheet": "jamshid_excited_sheet.png",
-    "frames": 4,
+    "frames": 4.0,
     "frame_size": [
-      512,
-      512
+      512.0,
+      512.0
     ],
-    "fps": 8,
+    "fps": 8.0,
     "loop": true,
-    "rest": 0,
+    "rest": 0.0,
     "talk": [
-      1,
-      2
+      1.0,
+      2.0
     ],
-    "blink": 3,
+    "blink": 3.0,
     "authored_roles": true,
     "pixel_art": true,
     "source": "act2_children_v2",
     "voice_key": "jamshid_joyful"
+  },
+  "officer_alarmed": {
+    "sheet": "officer_alarmed_sheet.png",
+    "frames": 9,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 9,
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      1,
+      2
+    ],
+    "blink": 6,
+    "eye_rows": 3,
+    "mouth_columns": 3,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "pixel_art": true,
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "open"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "officer/animation"
+  },
+  "officer_stern": {
+    "sheet": "officer_stern_sheet.png",
+    "frames": 9,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 9,
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      1,
+      2
+    ],
+    "blink": 6,
+    "eye_rows": 3,
+    "mouth_columns": 3,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "pixel_art": true,
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "open"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "officer/animation"
+  },
+  "officer_angry": {
+    "sheet": "officer_angry_sheet.png",
+    "frames": 9,
+    "frame_size": [
+      512,
+      512
+    ],
+    "fps": 9,
+    "rest": 0,
+    "talk": [
+      1,
+      2,
+      1,
+      2
+    ],
+    "blink": 6,
+    "eye_rows": 3,
+    "mouth_columns": 3,
+    "blink_duration": 0.2,
+    "authored_roles": true,
+    "loop": true,
+    "pixel_art": true,
+    "mouth_poses": [
+      "closed",
+      "parted",
+      "open"
+    ],
+    "eye_poses": [
+      "open",
+      "half",
+      "closed"
+    ],
+    "source": "officer/animation"
   }
 }

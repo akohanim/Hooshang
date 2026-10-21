@@ -1,973 +1,878 @@
-ACT TWO — THE POND
-==========================================================
+<!-- Act Two of "Hooshang - The Script", copied from the author's
+     script. tools/compile_act2_script.py turns the spoken lines into
+     resources/dialogue/act2_author_script.tres; stage directions stay here. -->
 
-ONE — THE POND
+# ACT TWO — THE POND
+*Childhood. Iran.*
 
-(Bright sun. A pond, and on its far bank, a boy sits fishing — JAMSHID. HOOSHANG, himself a boy now in this memory, swims across toward him.)
+## ONE — THE POND
 
-JAMSHID
+*(Bright sun. A pond, and on its far bank a boy sits fishing: JAMSHID. HOOSHANG, a boy again in this memory, swims across toward him, splashing.)*
+
+**JAMSHID**  
 Cousin joon!
 
-HOOSHANG
+**HOOSHANG**  
 Jamshid! It's so good to see you!
 
-JAMSHID
+**JAMSHID**  
 You saw me yesterday.
 
-HOOSHANG
-It feels like so much longer.
+**HOOSHANG**  
+It feels like a lot longer.
 
-JAMSHID
+**JAMSHID**  
 Well, get out of the water. You're frightening dinner.
 
-(Hooshang climbs up onto the bank beside him.)
+*(Hooshang climbs up onto the bank beside him.)*
 
-HOOSHANG
-Are the fish biting today?
+**HOOSHANG**  
+Are they biting?
 
-JAMSHID
-They would if little kids stopped swimming through their house.
+**JAMSHID**  
+They would be, if you stopped swimming through their house.
 
-(A splash — something takes the line.)
+*(Hooshang grabs for the line. Jamshid pulls it out of reach.)*
 
-JAMSHID
+**JAMSHID**  
+Not like that. Chase a fish and it goes. Sit still and it comes to you.
+
+**HOOSHANG**  
+That's it? Just sit there?
+
+**JAMSHID**  
+Sit. Watch the water. And stop wanting it so much. They can tell.
+
+*(Hooshang sits. For once in his life, he is still.)*
+
+*(A tug on the line.)*
+
+**JAMSHID**  
 Finally!!
 
-(Jamshid reels in a fish, triumphant.)
+*(Jamshid reels in a fish, triumphant.)*
 
-TWO — THE CAMPFIRE
+## TWO — THE CAMPFIRE
 
-(Sunset. The fish cooks over a small fire the boys have built.)
+*(Sunset. The fish cooks over a small fire the boys have built.)*
 
-HOOSHANG
+**HOOSHANG**  
 Does my mother know we're here?
 
-JAMSHID
-Yes. She sent snacks.
+**JAMSHID**  
+She sent snacks.
 
-HOOSHANG
-Did she send that pomegranate fruit roll up? Where is it!? 
+**HOOSHANG**  
+Lavashak? The pomegranate one? Where is it?
 
-JAMSHID
+**JAMSHID**  
 You were late.
 
-HOOSHANG (frustrated)
-Jamshid
+**HOOSHANG**  
+Jamshid!
 
-JAMSHID
-Fishing is hungry work. She also said to be home before dark...
+**JAMSHID**  
+Fishing is hungry work. She also said be home before dark.
 
-(The sky deepens toward night. Stars come out overhead.)
+*(The sky deepens toward night. Stars come out overhead.)*
 
-JAMSHID
-You're quiet today.
+**JAMSHID**  
+You're quiet tonight.
 
-HOOSHANG
+**HOOSHANG**  
 I had a strange dream.
 
-JAMSHID
+**JAMSHID**  
 Tell me.
 
-HOOSHANG
+**HOOSHANG**  
 I was old.
 
-JAMSHID
+**JAMSHID**  
 Did you have a moustache?
 
-HOOSHANG
+**HOOSHANG**  
 Yes.
 
-JAMSHID
+**JAMSHID**  
 Good. Go on.
 
-HOOSHANG
-I worked in an office. I didn't like it, but I stayed for years. Then I lost the job... and I felt lost, too.
+**HOOSHANG**  
+I worked in an office for 20 years. I hated it. Then they let me go, and I didn't know who I was anymore.
 
-JAMSHID
-What happened?
+**JAMSHID**  
+Then what?
 
-HOOSHANG
-Rumi appeared.
+**HOOSHANG**  
+Rumi showed up.
 
-JAMSHID
-Rumi, the poet, from school?
+**JAMSHID**  
+Rumi? The poet? From school?
 
-HOOSHANG
-Yes. He taught me how to stay equanimous with my thoughts.
+**HOOSHANG**  
+Yeah, that one. He glowed.
 
-JAMSHID
+**JAMSHID**  
+Of course he did.
+
+**HOOSHANG**  
+He said my thoughts were only weather. That I didn't have to fight them.
+
+*(Jamshid looks at him for a moment.)*
+
+**JAMSHID**  
 You'd better start from the beginning.
 
-(And Hooshang tells him everything — the office, the gift of the dash, the thoughts that came and went like weather, the shadow he had grown himself, and how it finally stopped. The night turns overhead as he talks, the fire burning low, until —)
+*(Hooshang tells him everything: the office, the gift of the dash, the thoughts that came and went like weather, and the shadow he grew himself and finally stopped feeding. The night turns overhead as he talks and the fire burns low, until...)*
 
-THREE — DAWN
+## THREE — DAWN
 
-(The sky has gone pale with morning.)
+*(The sky has gone pale with morning.)*
 
-HOOSHANG
+**HOOSHANG**  
 ...and then I woke up here.
 
-JAMSHID
+**JAMSHID**  
 What a dream.
 
-HOOSHANG
+**HOOSHANG**  
 Do you remember yours?
 
-JAMSHID
-Almost never. By the time I wake up, they're gone.
+**JAMSHID**  
+Hardly ever. By the time I wake up, they're gone.
 
-HOOSHANG
+**HOOSHANG**  
 This one felt like I'd lived it.
 
-JAMSHID
-No wonder you looked so tired.
+**JAMSHID**  
+No wonder you look so tired.
 
-(A pause.)
+*(A pause.)*
 
-HOOSHANG
+**HOOSHANG**  
 I'm glad you're here.
 
-JAMSHID
+**JAMSHID**  
 I'm glad you came down.
 
-(Another pause.)
+*(Another pause.)*
 
-JAMSHID
+**JAMSHID**  
 Next time you're old, come looking for me.
 
-(A school bell rings, far off.)
+*(Far off, a school bell rings.)*
 
-JAMSHID
+**JAMSHID**  
 That can't be the school bell.
 
-HOOSHANG
+**HOOSHANG**  
 We talked all night.
 
-(The bell rings again.)
+*(The bell rings again.)*
 
-JAMSHID
-Come over after school. We can finish talking.
+**JAMSHID**  
+Come by after school. We'll finish talking.
 
-(Jamshid runs off down the bank, jumps — and lands square on a magic carpet passing low over the water, which sails on without so much as slowing.)
+*(Jamshid runs off down the bank and jumps. He lands square on a magic carpet passing low over the water, and it doesn't even slow down.)*
 
-HOOSHANG
-That's how you get to school?
+**HOOSHANG**  
+*That's* how you get to school?
 
-JAMSHID
-How do you think I keep arriving before you?
+**JAMSHID**  
+Duh. Race you there!
 
-(The carpet rises and carries him off over the trees, out of sight.)
+*(The carpet rises over the trees and is gone.)*
 
-FOUR — THE WALL
+## FOUR — THE WALL
 
-(The carpet disappears over the trees. The SCHOOL BELL keeps ringing.)
+*(Afternoon behind the school. Jamshid waits by a long blank wall with a spray can. A badly drawn moustache decorates an advertisement.)*
 
-(Once. Twice. Again.)
-
-(Jamshid stands before a long white wall with a spray can in his hand.)
-
-Hooshang
+**HOOSHANG**
 Cousin joon!
 
-(Jamshid turns, grinning.)
+**JAMSHID**
+Grab a can. This wall's ours.
 
-JAMSHID
-You coming to paint, or are you planning to stare at the wall until we're thirty?
-
-HOOSHANG
-I'm coming.
-
-JAMSHID
-Good. We haven't committed the crime yet.
-
-(At their feet: three spray cans, a few empty bottles of beer. On the wall are their earlier masterpieces a girl's name (marjan) crossed out and rewritten twice A terrible moustache on a painted advertisement, 
-
-HOOSHANG
+**HOOSHANG**
 Your moustache is crooked.
 
-JAMSHID
-It's political commentary.
+**JAMSHID**
+Art takes risks.
 
-HOOSHANG
-On what?
+**JAMSHID**
+Your turn. Make it good.
 
-JAMSHID
-Moustaches.
+*(Painting break: return movement to the player. Press C near a can to pick it up, or C again to put it down. Walk along the wall, press X to start or stop spraying, and aim the paint with the arrows or joystick while spraying. Each can keeps its blue, red or gold paint. Paint in all three areas, stop spraying, then press DOWN beside Jamshid when ready. Hold Z/Y to skip the painting break; dialogue uses its usual X skip. The player can keep painting for as long as they like.)*
 
-(Hooshang laughs. For a moment there is nothing in the world except the two of them.)
+**HOOSHANG**
+We should go before dark.
 
-(Jamshid shakes another can.)
+**JAMSHID**
+One last thing. Rumi.
 
-JAMSHID
-Come on. One good one before we go.
+**HOOSHANG**
+Poetry? On our last wall?
 
-HOOSHANG
-My mother said home before dark.
+*(Hooshang paints the first Persian line as Jamshid recites.)*
 
-JAMSHID
-Fine. Something quick.
+**JAMSHID**
+"This world is a prison, and we are prisoners..."
 
-(He considers the wall, suddenly serious.)
-
-JAMSHID
-Write this.
-
-HOOSHANG
-What?
-
-JAMSHID
-Rumi.
-
-HOOSHANG
-We get one last wall and you want homework?
-
-JAMSHID
-Just write.
-
-(Hooshang begins painting in Persian. Jamshid speaks the words as they appear.)
-
-JAMSHID
-“This world is a prison, and we are prisoners...”
-
-HOOSHANG
+**HOOSHANG**
 Cheerful.
 
-JAMSHID
-Keep going.
+**JAMSHID**
+"Dig through the prison and—"
 
-(Hooshang moves to begin the second line.)
+*(A sharp whistle. An officer strides in: olive cap, polished boots, and a full beard streaked with grey. He is roughly twice Hooshang's height.)*
 
-JAMSHID
-“Dig through the prison and -”
+**OFFICER**
+Hey! What are you doing?!
 
-(A SHRILL WHISTLE.)
+*(Hooshang drops his can. CLACK.)*
 
-(The whole world stops.)
+**OFFICER**
+Who painted this?
 
-(A uniformed OFFICER (school principle) stands at the mouth of the alley. In Hooshang's memory he is almost comically severe: enormous moustache, polished boots, whistle much too large for his face.)
+*(Jamshid draws the cans towards himself.)*
 
-(Hooshang's hand opens.)
+**JAMSHID**
+Me.
 
-(The spray can drops.)
-
-(CLACK.)
-
-(For the first time, the sound does not belong to the warm cartoon world.)
-
-(The officer looks at the can. Then at the unfinished line on the wall. Then at Hooshang.)
-
-(Hooshang freezes.)
-
-(Jamshid looks at him.)
-
-(A beat.)
-
-(Jamshid quietly gathers the other spray cans with his foot and pulls them toward himself.)
-
-JAMSHID
-Mine.
-
-HOOSHANG
+**HOOSHANG**
 Jamshid—
 
-JAMSHID
+**JAMSHID**
 All of it.
 
-(The officer takes Jamshid by the arm.)
+**OFFICER**
+You're in serious trouble. Come with me.
 
-OFFICER/ PRINCIPAL
-You're coming with me! DETENTION! 
+**HOOSHANG**
+Wait!
 
-HOOSHANG
-Wait—
-
-(Jamshid looks back at him.)
-
-JAMSHID
+**JAMSHID**
 Go home, cousin joon.
 
-(Hooshang stares.)
+*(The officer marches Jamshid away. Both stop walking when they reach the end of the alley.)*
 
-HOOSHANG
-Detention?
+**HOOSHANG**
+How long will he be gone?
 
-(The officer walks Jamshid away.)
+*(The memory fades.)*
 
-(With every step, the officer becomes less real: boots too shiny, hat too tall, movements too stiff — until he is almost a wind-up toy soldier.)
+## FIVE — THE PALACE OF CORRECTIONS
 
-(Jamshid looks back once.)
+*(A ridiculous fortress rises where the neighbourhood used to be. It is half schoolhouse, half castle and half government office, and it is perfectly confident about having three halves.)*
 
-(The scene wipes itself away before Hooshang can hold onto the image.)
+*(A banner unrolls over the gate.)*
 
-FIVE — THE PALACE OF CORRECTIONS
+> **PALACE OF CORRECTIONS**  
+> NO RUNNING · NO SHOUTING · NO POETRY
 
-(A ridiculous fortress rises where the neighborhood had been: half schoolhouse, half castle, half government office — confidently containing three halves.)
+*(A little brass bell rings. A sign drops out of the sky.)*
 
-(A banner drops over the gate.)
+> **MAIN QUEST UPDATED: BREAK JAMSHID OUT!**  
+> KEYS: 0 / 4
 
-                    PALACE OF CORRECTIONS
-                    NO RUNNING
-                    NO SHOUTING
-                    NO POETRY
+*(The mind has done what minds do with something unbearable. It has turned it into something it can win.)*
 
-(A little brass bell rings.)
-
-(A sign falls from the sky.)
-
-                    MAIN QUEST UPDATED:
-                    BREAK JAMSHID OUT!
-
-(Beneath it, four empty keyholes appear.)
-
-                    KEYS: 0 / 4
-
-HOOSHANG
+**HOOSHANG**  
 Four keys.
 
-(A cheerful CHIME.)
+*(A cheerful CHIME.)*
 
-HOOSHANG
+**HOOSHANG**  
 Of course there are four keys.
 
-(The gate opens.)
+*(The gate swings open.)*
 
-SIX — THE FOUR KEYS
+## SIX — THE FOUR KEYS
 
-(Ari will design these later)
-
-                    KEY ACQUIRED!
-                    KEYS: 4 / 4
-
-                    ALL KEYS FOUND!
+*[Gameplay: the four key wings. Ari to design.]*
 
 
-HOOSHANG
+> **KEY ACQUIRED!**  
+> KEYS: 4 / 4 · ALL KEYS FOUND!
+
+**HOOSHANG**  
 I'm coming, cousin.
 
-ELEVEN — THE CELL
+## SEVEN — THE CELL
 
+*(A corridor lined with doors. Hooshang uses the first key.)*
 
+*(CLICK. The second. CLICK. The third. CLICK. The fourth. CLICK.)*
 
-(A corridor lined with doors.)
+*(The last door swings open. JAMSHID is sitting inside. He looks exactly as he did at the wall: not a day older, not hurt, not frightened.)*
 
-(Hooshang uses the first key.)
+**HOOSHANG**  
+Cousin joon!
 
-CLICK.
-
-(The second.)
-
-CLICK.
-
-(The third.)
-
-CLICK.
-
-(The fourth.)
-
-CLICK.
-
-(The final door swings open.)
-
-(JAMSHID is sitting inside.)
-
-(He looks exactly as he did at the wall. Not a day older. Not hurt. Not frightened.)
-
-HOOSHANG
-Cousin Joon!
-
-JAMSHID
+**JAMSHID**  
 Took you long enough.
 
-(Hooshang crosses the room and throws his arms around him.)
+*(Hooshang crosses the cell and throws his arms around him. Jamshid is surprised by how hard he holds on.)*
 
-(Jamshid is surprised by the force of it.)
+**HOOSHANG**  
+Come on. Let's go.
 
-HOOSHANG
-Come on lets go.
-
-JAMSHID
+**JAMSHID**  
 Where?
 
-HOOSHANG
+**HOOSHANG**  
 Home.
 
-JAMSHID
-Oh.
+**JAMSHID**  
+...Oh.
 
-HOOSHANG
-Your mother is going to kill both of us.
+**HOOSHANG**  
+Your mother is going to kill us both.
 
-JAMSHID
+**JAMSHID**  
 Probably just you.
 
-HOOSHANG
-Come on.
+*(Jamshid grins, and bolts.)*
 
-(Jamshid grins — and bolts.)
+## EIGHT — THE CHASE
 
-(He runs the way he ran as a boy: too fast, always looking back, daring Hooshang to keep up.)
+*(He runs the way he always ran: too fast, always looking back, daring Hooshang to keep up. He leads him out of the prison and into the bright dream-city, over rooftops, down alleys and along the edge of the pond. Every time Hooshang nearly catches him, Jamshid is already somewhere else.)*
 
-(A CHASE. Hooshang follows him out of the prison and into the bright dream-city — over rooftops, down alleys, along the edge of the pond. Jamshid is always a step ahead. Every time Hooshang nearly reaches him, Jamshid is already somewhere new.)
-
-HOOSHANG
+**HOOSHANG**  
 Slow down!
 
-JAMSHID
+**JAMSHID**  
 You slow down. You got old.
 
-HOOSHANG
-Whose fault is that?
+**HOOSHANG**  
+And whose fault is that?
 
-(Jamshid only laughs, and runs.)
+*(Jamshid only laughs, and runs.)*
 
-(Hooshang chases him around one last corner — and stops.)
+*(One last corner, and Hooshang stops. The painted wall is ahead of them. Jamshid has stopped too and is standing very still in front of it.)*
 
-(The painted wall from the beginning stands ahead of them.)
+> THIS WORLD IS A PRISON,  
+> AND WE ARE PRISONERS—
 
-(Jamshid has stopped too. He is standing very still in front of it.)
+*(The second line is still blank. It has been blank for fifty years.)*
 
-(The first line is still there.)
-
-                    THIS WORLD IS A PRISON,
-                    AND WE ARE PRISONERS—
-
-(The second line is still blank. It has been blank for forty years.)
-
-(Hooshang comes up beside him, breathing hard, still smiling.)
-
-HOOSHANG
+**HOOSHANG**  
+*(breathing hard, still smiling)*  
 We never finished it.
 
-JAMSHID
+**JAMSHID**  
 No.
 
-HOOSHANG
-We can finish it now. Come on — you always started. You start.
+**HOOSHANG**  
+Let's finish it now. You always started. You start.
 
-(Jamshid looks at the wall for a long time.)
+*(Jamshid looks at the wall for a long time.)*
 
-JAMSHID
+**JAMSHID**  
 It isn't my line to finish anymore, cousin joon.
 
-HOOSHANG
+**HOOSHANG**  
 What does that mean?
 
-(Jamshid doesn't answer.)
+*(Jamshid doesn't answer. A wind moves down the empty street. Somewhere far off, a school bell begins to ring. Jamshid turns toward it the way a person turns when someone calls their name.)*
 
-(A wind moves down the empty street. Somewhere far off, a school bell begins to ring.)
-
-(Jamshid turns toward the sound — the way a person turns when someone has called their name.)
-
-JAMSHID
+**JAMSHID**  
 They're waiting for me.
 
-HOOSHANG
-Who is? Jamshid — who's waiting?
+**HOOSHANG**  
+Who is? Jamshid, who's waiting?
 
-(Jamshid steps back from the wall, and away.)
+## NINE — THE CARPET
 
+*(A magic carpet glides around the corner and settles beside Jamshid as easily as a bus pulling up to the curb. Hooshang laughs with relief.)*
 
-THIRTEEN — THE CARPET
-
-(A magic carpet glides around the corner and settles beside Jamshid as naturally as a bus pulling to a curb.)
-
-(Hooshang laughs with relief.)
-
-HOOSHANG
+**HOOSHANG**  
 There it is.
 
-JAMSHID
+**JAMSHID**  
 There it is.
 
-HOOSHANG
-Come on. We'll take it back.
+**HOOSHANG**  
+Come on. We'll ride it back.
 
-(Jamshid steps onto the carpet.)
+*(Jamshid steps onto the carpet. Hooshang moves to follow.)*
 
-HOOSHANG
+**HOOSHANG**  
 Move over.
 
-(Jamshid doesn't.)
+*(Jamshid doesn't.)*
 
-HOOSHANG
+**HOOSHANG**  
 Jamshid.
 
-JAMSHID
+**JAMSHID**  
 You go home.
 
-HOOSHANG
+**HOOSHANG**  
 What?
 
-JAMSHID
+**JAMSHID**  
 Your mother said before dark.
 
-HOOSHANG
+**HOOSHANG**  
 It's morning.
 
-JAMSHID
+**JAMSHID**  
 Then you're very late.
 
-HOOSHANG
-Stop.
+**HOOSHANG**  
+Stop it.
 
-(Jamshid's smile softens.)
+*(Jamshid's smile softens.)*
 
-JAMSHID
+**JAMSHID**  
 Cousin joon—
 
-HOOSHANG
+**HOOSHANG**  
 We're going home.
 
-JAMSHID
+**JAMSHID**  
 You are.
 
-HOOSHANG
+**HOOSHANG**  
 I found all four keys.
 
-JAMSHID
+**JAMSHID**  
 I know.
 
-HOOSHANG
+**HOOSHANG**  
 So get off the carpet.
 
-(A pause.)
+*(A pause.)*
 
-JAMSHID
+**JAMSHID**  
 I can't.
 
-HOOSHANG
-What do you mean you can't?
+**HOOSHANG**  
+What do you mean, you can't?
 
-(The carpet begins to rise.)
+*(The carpet begins to rise.)*
 
-HOOSHANG
-No. No, no — Jamshid, get off.
+**HOOSHANG**  
+No. No, no. Jamshid, get off.
 
-(Hooshang grabs the edge of the carpet with both hands.)
+*(Hooshang grabs the edge of the carpet with both hands.)*
 
-HOOSHANG
-Get off!
+**HOOSHANG**  
+GET OFF!
 
-(The carpet climbs. Hooshang's feet leave the ground, and the dream-city sinks away beneath him.)
+*(The carpet climbs. Hooshang's feet leave the ground, and the dream-city sinks away beneath him.)*
 
-(Hooshang holds tighter.)
-
-HOOSHANG
+**HOOSHANG**  
 I'm not letting go.
 
-(The higher they rise, the thinner the dream becomes. The bright colors of the city begin to run, like paint in the rain.)
+*(The higher they rise, the thinner the dream gets. The city's colours start to run like paint in the rain. Then the city flickers.)*
 
-(The city flickers.)
+*(For one instant there is no carpet. Jamshid is in an alley, and an officer's hand is closing around his arm.)*
 
-(For one instant, Jamshid is not on a carpet. He is in an alley, and an officer is closing a hand around his arm.)
+*(Then the carpet again.)*
 
-(Then the carpet again.)
-
-HOOSHANG
+**HOOSHANG**  
 I can fix it.
 
-JAMSHID
+**JAMSHID**  
 You tried.
 
-HOOSHANG
-I can fix it!
+**HOOSHANG**  
+I CAN FIX IT!
 
-(Higher. The carpet flickers.)
+*(Another flicker. For one instant there is a corridor of doors that only open from the outside, and Jamshid is on the wrong side of one.)*
 
-(For one instant, a corridor. A long row of doors that open only from the outside. Jamshid on the wrong side of one of them.)
+*(Then the carpet again.)*
 
-(Then the carpet again.)
-
-HOOSHANG
+**HOOSHANG**  
 Tell me what I missed. Tell me which key.
 
-JAMSHID
+**JAMSHID**  
 Hooshang—
 
-HOOSHANG
+**HOOSHANG**  
 There has to be another key. There's always another key.
 
-(Jamshid looks at him — kindly, the way you look at someone you love who hasn't understood yet.)
+*(Jamshid looks at him kindly, the way you look at someone you love who hasn't understood yet.)*
 
-JAMSHID
+**JAMSHID**  
 There were never any keys, cousin joon.
 
-(The music stops.)
+*(The music stops. The colours drain out of the world and the dream-city is gone. All that is left is the carpet, still climbing, and the two of them, and the dark.)*
 
-(The colors drain out of the world. The dream-city is gone. There is only the carpet, still climbing, and the two of them, and the dark.)
+*(Hooshang is still holding on. The hands gripping the edge of the carpet are an old man's hands.)*
 
-(Hooshang is still holding on.)
-
-HOOSHANG
+**HOOSHANG**  
 Don't.
 
-(A flash — the real alley, long ago. A spray can on the ground. Two boys, seventeen.)
+*(A flash. The real alley, long ago. Two boys, seventeen. A spray can on the ground. This officer has no cartoon moustache and no whistle. He is just a man in a uniform with his hand on a boy's arm.)*
 
-OFFICER
-Who painted it?
+**OFFICER**  
+Whose is this?
 
-JAMSHID
+**JAMSHID**  
 Mine.
 
-(A flash — Jamshid being led away. He looks back over his shoulder, still not afraid.)
+**OFFICER**  
+You're going away for a long time.
 
-JAMSHID
+*(A flash. Jamshid being led away. He looks back over his shoulder, still not afraid.)*
+
+**JAMSHID**  
 Go home, cousin joon.
 
-(A flash — Jamshid's mother in her doorway, waiting for a son who does not come.)
+*(A flash. Jamshid's mother stands in her doorway. She is looking at Hooshang.)*
 
-JAMSHID'S MOTHER
+**JAMSHID'S MOTHER**  
 Where is my son?
 
-(A flash — a wall at night, taller than any wall should be, with the sky cut into little squares along the top of it. Somewhere behind it, a light that never goes out. Jamshid is on the far side, and the far side has no door.)
+*(A flash. A prison wall at night, taller than any wall should be, with the sky cut into little squares along its top. Behind it is a light that never goes out.)*
 
-(A flash.)
+*(A flash. The alley wall in the rain, with the first line running down the brick. The second line is still blank.)*
 
-(The wall from the alley. Rain has begun to wash the paint down.)
+*(Then the carpet again, still rising.)*
 
-                    THIS WORLD IS A PRISON,
-                    AND WE ARE PRISONERS—
-
-(The second line still unfinished.)
-
-(Back to the carpet, still rising.)
-
-HOOSHANG
+**HOOSHANG**  
 I should have said they were mine.
 
-JAMSHID
+**JAMSHID**  
 We both painted it.
 
-HOOSHANG
-I should have said something.
+**HOOSHANG**  
+I should have said *something*.
 
-JAMSHID
+**JAMSHID**  
 You were seventeen.
 
-HOOSHANG
+**HOOSHANG**  
 So were you.
 
-(A long silence.)
+*(A long silence.)*
 
-HOOSHANG
+**HOOSHANG**  
 You were supposed to come home.
 
-(Jamshid looks at him.)
-
-JAMSHID
+**JAMSHID**  
 I know.
 
-HOOSHANG
+**HOOSHANG**  
 I waited.
 
-JAMSHID
+**JAMSHID**  
 I know.
 
-HOOSHANG
-I left.
+**HOOSHANG**  
+Then I left.
 
-JAMSHID
+**JAMSHID**  
 I know.
 
-HOOSHANG
+**HOOSHANG**  
 I got old.
 
-(Jamshid smiles, almost amused.)
-
-JAMSHID
+**JAMSHID**  
+*(almost amused)*  
 I noticed.
 
-(Hooshang laughs through tears.)
+*(Hooshang laughs through his tears.)*
 
-HOOSHANG
-I wasted it.
+**HOOSHANG**  
+I wasted it. All that time.
 
-(Jamshid says nothing.)
+**JAMSHID**  
+You're wasting it now.
 
-HOOSHANG
-All that time.
+**HOOSHANG**  
+What?
 
-JAMSHID
-Is that why you came back?
+**JAMSHID**  
+Look.
 
-(Hooshang cannot answer.)
+*(He nods past Hooshang. Far below, at the edge of the dark, the sun is coming up. Hooshang doesn't turn to see it. He can't take his eyes off Jamshid.)*
 
-(The carpet begins, very gently, to pull away.)
+*(The carpet begins, very gently, to pull away.)*
 
-                    HOLD ON
+> HOLD ON
 
-(Hooshang tightens his grip.)
+*(Hooshang tightens his grip.)*
 
-JAMSHID
+**JAMSHID**  
 Please let go.
 
-(Hooshang looks at their hands.)
+*(Hooshang looks at their hands. The bright letters change.)*
 
-(The bright letters change.)
+> LET GO
 
-                    LET GO
-
-HOOSHANG
+**HOOSHANG**  
 No.
 
-JAMSHID
+**JAMSHID**  
 Hooshang.
 
-HOOSHANG
+**HOOSHANG**  
 If I let go, you leave.
 
-JAMSHID
+**JAMSHID**  
 I already left.
 
-(Hooshang breaks.)
+*(Hooshang breaks.)*
 
-HOOSHANG
+**HOOSHANG**  
 I'm sorry.
 
-JAMSHID
+**JAMSHID**  
 I know.
 
-(Hooshang slowly opens his hand.)
+*(Slowly, Hooshang opens his hand.)*
 
-FIFTEEN — THE SECOND LINE
+## TEN — THE FALL
 
-(The carpet rises.)
+*(The carpet rises. Hooshang falls.)*
 
-(Hooshang falls.)
+*(He doesn't flail. He falls the way a man falls when he has finally stopped holding on.)*
 
-(He does not flail. He falls the way a man falls who has finally stopped holding on.)
+*(Above him, Jamshid grows smaller against the pale morning sky: a boy on a carpet, seventeen forever. He raises one hand. It isn't a goodbye wave. It's the same lazy half-salute he used to give from across the water.)*
 
-(Above him, Jamshid grows smaller against the pale morning sky — a boy on a carpet, seventeen forever.)
+*(Then the dark, the prison and the whole invented kingdom fold shut like a book...)*
 
-(Jamshid raises one hand. Not a wave goodbye. The same lazy half-salute he used to give from across the water.)
+*(...and Hooshang hits WATER.)*
 
-(Then the dark, and the prison, and the whole invented kingdom fold shut like a book —)
+*(Silence. Green light. Reeds. Sunlight broken into gold coins on the surface far above him.)*
 
-(— and Hooshang hits WATER.)
+*(It is the pond. The same warm afternoon where all of this began.)*
 
-(Silence.)
+*(He sinks. He doesn't swim. For a long moment it would be very easy to keep sinking.)*
 
-(Green light. Reeds. Sunlight broken into gold coins on the surface far above him.)
+*(Then a soft gold light appears in the water beside him, unhurried and patient, exactly as it was in the office. It is RUMI.)*
 
-(It is the pond. THE pond. The same warm afternoon where all of this began.)
-
-(He sinks. He does not swim.)
-
-(A long moment in which it would be very easy to keep sinking.)
-
-(Then a soft gold light in the water beside him. Unhurried. Patient. Exactly as it was in the office.)
-
-(RUMI.)
-
-RUMI
+**RUMI**  
 Breathe, jaan.
 
-HOOSHANG
-(a stream of bubbles)
+**HOOSHANG**  
+*(a stream of bubbles)*  
 I don't want to.
 
-RUMI
+**RUMI**  
 I know. Breathe anyway.
 
-(Hooshang breaks the surface, gasping — an old man in a boy's pond.)
+## ELEVEN — THE BANK
 
-(He drags himself into the grass on the bank and lies there, soaked, shaking.)
+*(Hooshang breaks the surface, gasping, an old man in a boy's pond. He drags himself onto the grass and lies there, soaked and shaking.)*
 
-(On the far bank: a fishing rod, laid down in the reeds.)
+*(On the far bank, a fishing rod lies in the reeds. There is no boy.)*
 
-(No boy.)
+**HOOSHANG**  
+Where is he?
 
-HOOSHANG
-Where is he.
+*(Rumi rests on the water as easily as a leaf.)*
 
-(Rumi rests on the water as easily as a leaf.)
-
-RUMI
+**RUMI**  
 You know where he is.
 
-HOOSHANG
+**HOOSHANG**  
 Say it.
 
-RUMI
+**RUMI**  
 No, jaan.
 
-HOOSHANG
+**HOOSHANG**  
 SAY IT.
 
-(A long, gentle silence — the same unhurried silence he gave in the office.)
+*(A long, gentle silence, the same unhurried silence Rumi gave him in the office.)*
 
-RUMI
-Some doors are not mine to open. And you have carried this answer since you were seventeen. You have only never set it down long enough to look at it.
+**RUMI**  
+You have carried that answer for fifty years. You have just never set it down long enough to look at it.
 
-(Hooshang presses the heels of his hands into his eyes.)
+**HOOSHANG**  
+Then why bring me here? So I could watch it happen again, and still not stop it?
 
-HOOSHANG
-Then why bring me here? You walked me down through my whole life. The alley. The whistle. My hand opening. All the way to the bottom, so I could stand there and watch it happen again — and I still couldn't stop it.
+**RUMI**  
+No. You could not stop it.
 
-RUMI
-No. You could not.
-
-HOOSHANG
+**HOOSHANG**  
 Then what was it FOR?
 
-(His shout goes out across the water and comes back to him smaller.)
+*(His shout goes out across the water and comes back to him smaller.)*
 
-RUMI
-In the office, you asked what waited at the bottom of your building. Do you remember what I answered?
+**RUMI**  
+Not to change it, jaan. To see it.
 
-HOOSHANG
-...You said we'd find where the seed came from.
+**RUMI**  
+You asked me where the seed came from. There it is. A boy's hand opened, a can fell, and he said nothing.
 
-RUMI
-Yes.
+**RUMI**  
+And every night for fifty years, you watered it. Until it grew tall enough to wear your face.
 
-(Rumi looks across at the empty bank.)
+*(Hooshang's breath catches.)*
 
-RUMI
-There it is, jaan. A boy's hand opened. A can fell. And he said nothing.
-
-(A beat.)
-
-RUMI
-And every night for forty years you knelt over that small seed and watered it. Faithfully. Never missing one. Until it grew tall enough to shut out the sun and wear your own face.
-
-(Hooshang's breath catches.)
-
-HOOSHANG
+**HOOSHANG**  
 ...Darkshang.
 
-RUMI
+**RUMI**  
 Yes.
 
-(Silence. Water lapping at the reeds.)
+**HOOSHANG**  
+Then let it have me. He took my punishment, and I let him.
 
-HOOSHANG
-Then let it grow. Let it have me. He took my punishment. He gave me everything he had, and I stood there and let him.
+**RUMI**  
+In fifty years of paying him back, did one single day of it open one single door?
 
-RUMI
-And in forty years of paying him back — tell me — did one single day of it open one single door?
+*(Hooshang says nothing.)*
 
-(Hooshang says nothing.)
+**RUMI**  
+Guilt is a loyal dog, jaan. It follows you everywhere, and it fetches nothing.
 
-RUMI
-No. Guilt is a very loyal dog, jaan. It follows you everywhere, and it fetches nothing.
+*(Hooshang laughs, one wet, broken laugh. Then he is crying, properly, the way he has not let himself cry in fifty years. Rumi waits. He does not hurry it.)*
 
-(Hooshang laughs — one wet, broken laugh — and then he is crying, properly, the way he has not let himself in forty years.)
+*(In the mud at the water's edge, a single lotus has opened. Neither of them mentions it.)*
 
-(Rumi waits. He does not hurry it.)
-
-HOOSHANG
+**HOOSHANG**  
 I let go of him.
 
-RUMI
+**RUMI**  
 I saw.
 
-HOOSHANG
+**HOOSHANG**  
 It felt like dropping him.
 
-RUMI
-You did not drop him, jaan.
+**RUMI**  
+You did not drop him, jaan. He was never the one being held. You were.
 
-(A pause.)
+*(A pause.)*
 
-RUMI
-He was never the one being held. You were.
+**HOOSHANG**  
+It'll come back. The shadow.
 
-(Hooshang looks up at the empty sky for a long time.)
+**RUMI**  
+Some nights, yes.
 
-HOOSHANG
+**HOOSHANG**  
+Then what do I do?
+
+**RUMI**  
+Don't fight it. Hold it, the way you would hold a frightened boy.
+
+**RUMI**  
+Because that is all it ever was.
+
+*(Hooshang looks out across the water, at the empty place in the reeds.)*
+
+**HOOSHANG**  
+He used to fish right there.
+
+**RUMI**  
+Look at the water. Where did it come from?
+
+**HOOSHANG**  
+...Rain, I suppose.
+
+**RUMI**  
+And the rain?
+
+**HOOSHANG**  
+A cloud.
+
+**RUMI**  
+Did the cloud die?
+
+*(Hooshang doesn't answer. A ripple crosses the pond.)*
+
+**RUMI**  
+It became the rain, jaan. Look for him in what he became.
+
+**HOOSHANG**  
+Where?
+
+**RUMI**  
+Look at your hand.
+
+*(He looks at it. It is the hand that let the can fall, the hand that held on to the carpet, and the hand that let go.)*
+
+**HOOSHANG**  
 He never finished the line.
 
-RUMI
+**RUMI**  
 No. The whistle finished it for him.
 
-HOOSHANG
+**HOOSHANG**  
 Then it doesn't get finished.
 
-RUMI
+**RUMI**  
 Does it not?
 
-(Rumi's glow begins, very gently, to thin.)
+*(Very gently, Rumi's glow begins to thin.)*
 
-HOOSHANG
-Wait. Wait — where are you going? Just say the rest of it. It's your poem. You're RUMI. Say it, and I'll write it, and we can both go home.
+**HOOSHANG**  
+Wait. Where are you going? Just say the rest. It's your poem. You're *Rumi*.
 
-(Rumi smiles — the first time he has.)
+*(Rumi smiles, for the first time.)*
 
-RUMI
-It stopped being my poem the day a boy spent everything he had to put it on a wall.
+**RUMI**  
+You learned it in his voice, not mine. It is your line now.
 
-RUMI
-It is your line now, jaan. It has been waiting for you far longer than I have.
-
-HOOSHANG
+**HOOSHANG**  
 I don't know if I can.
 
-RUMI
+**RUMI**  
 You have already done the harder half.
 
-HOOSHANG
+**HOOSHANG**  
 Which half?
 
-RUMI
+**RUMI**  
 You opened your hand.
 
-(Rumi fades into the gold on the water, and is gone.)
+*(Rumi fades into the gold on the water and is gone.)*
 
-(Hooshang sits alone a long while.)
+*(Hooshang sits alone for a long while. Then he stands.)*
 
-(Then he stands.)
+## TWELVE — THE SECOND LINE
 
-(The alley. Morning. The wall where all of it happened.)
+*(The alley, in the morning. The wall where all of it happened. The first line is still there, waiting, fifty years patient.)*
 
-(The first line is still there, waiting. Forty years patient.)
+*(The spray can is on the ground exactly where it fell. Hooshang sets down his soaked coat and picks the can up.)*
 
-(The spray can is on the ground, exactly where it fell.)
+*(Fifty years ago, in this alley, his hand opened and this can dropped. This time his fingers close around it.)*
 
-(He picks it up.)
+*(He looks at the blank space under the first line. His hand is shaking.)*
 
-(Forty years ago, in this alley, his hand opened and this can dropped.)
+*(And from a long way off, across a pond and across fifty years:)*
 
-(This time, his fingers close around it.)
-
-(He looks at the blank space beneath the first line.)
-
-(His hand is shaking.)
-
-(And from somewhere a long way off — across a pond, across forty years —)
-
-JAMSHID
+**JAMSHID**  
+*(unseen)*  
 Keep going.
 
-(Hooshang paints.)
+*(Hooshang paints.)*
 
-                    DIG THROUGH THE PRISON
-                    AND SET YOURSELF FREE.
+> DIG THROUGH THE PRISON  
+> AND SET YOURSELF FREE.
 
-(He steps back.)
+*(He steps back. His hands are covered in paint. He doesn't wipe them.)*
 
-(His hands are covered in paint. He does not wipe them.)
+*(The first sunlight comes over the rooftops and reaches the wall. For a moment the whole verse is lit, both lines together, the boy's and the old man's, in the same handwriting.)*
 
-(The first sunlight comes over the rooftops and reaches the wall, and for a moment the whole verse is lit — both lines together, the boy's and the old man's, in the same handwriting.)
+*(Hooshang reads it aloud, quietly, the way you read something to someone who isn't there.)*
 
-(Hooshang reads it. All of it. Out loud, quietly, the way you read something to someone who isn't there.)
-
-HOOSHANG
+**HOOSHANG**  
 "This world is a prison, and we are prisoners. Dig through the prison, and set yourself free."
 
-(A long beat.)
+*(A long beat.)*
 
-HOOSHANG
+**HOOSHANG**  
 Took me long enough.
 
-(High above him, very small against the sun, the shape of a magic carpet crosses the sky.)
+*(High above him, very small against the sun, the shape of a magic carpet crosses the sky. Hooshang looks up and raises one hand in the same lazy half-salute, from across the water.)*
 
-(Hooshang looks up.)
+*(He doesn't chase it.)*
 
-(He raises one hand — the same lazy half-salute, from across the water.)
+*(Far off, a school bell rings.)*
 
-(He does not chase it.)
+*(There was a time he would have run, toward it or away from it. Now he stops. He breathes in. He breathes out.)*
 
-(He picks up his coat, and goes home.)
+**HOOSHANG**  
+...I'm home.
 
-END OF ACT TWO
+*(He picks up his coat and walks home slowly, in no hurry at all.)*
+
+**END OF ACT TWO**

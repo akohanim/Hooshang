@@ -6,6 +6,7 @@ uniform float clock = 0.0;
 uniform vec2 grid_origin = vec2(0.0);
 uniform float lobe_speed = 0.5;
 uniform float center_speed = 0.6;
+uniform float motion_variation = 0.0;
 
 float hash_cell(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -31,7 +32,11 @@ void fragment() {
 			if (occupied(c) > 0.5) {
 				vec2 p = pixel - (c + 0.5) * 8.0;
 				float seed = hash_cell(c + grid_origin) * 6.283185;
-				float d = tuft(p, clock * center_speed + seed, 3.5, seed);
+				float rate = mix(1.0, 0.65 + hash_cell(c + grid_origin + vec2(23.0, 71.0)) * 0.9, motion_variation);
+				float direction = mix(1.0, hash_cell(c + grid_origin + vec2(101.0, 3.0)) < 0.5 ? -1.0 : 1.0, motion_variation);
+				float local_clock = clock * rate * direction;
+				float breath = sin(clock * (0.8 + rate) + seed) * 0.22 * motion_variation;
+				float d = tuft(p, local_clock * center_speed + seed, 3.5 + breath, seed);
 				// Connect adjacent centres before outlining, so a strip is one mass.
 				if (occupied(c + vec2(1.0, 0.0)) > 0.5) {
 					vec2 bridge = abs(p - vec2(4.0, 0.0)) - vec2(4.0, 2.8);
@@ -53,9 +58,9 @@ void fragment() {
 						d = min(d, max(box.x, box.y));
 					}
 					vec2 q = p - direction * 1.5;
-					float r = seed + float(i) * 1.71 + clock * lobe_speed;
-					d = min(d, tuft(q, r, 2.5, seed));
-					d = min(d, tuft(q, -r, 2.3, seed + 2.0));
+					float r = seed + float(i) * 1.71 + local_clock * lobe_speed;
+					d = min(d, tuft(q, r, 2.5 + breath, seed));
+					d = min(d, tuft(q, -r, 2.3 + breath, seed + 2.0));
 				}
 				distance_to_dust = min(distance_to_dust, d);
 			}

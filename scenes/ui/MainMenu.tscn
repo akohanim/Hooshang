@@ -1,12 +1,18 @@
 [gd_scene format=3 uid="uid://w3weq6yy4uwj"]
 
 [ext_resource type="Script" uid="uid://dmsmmh1vf23u8" path="res://scenes/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="AudioStream" path="res://assets/music/menu_shur.ogg" id="2_music"]
 
 [node name="MainMenu" type="CanvasLayer" unique_id=501181757]
 layer = 110
 scale = Vector2(0.25, 0.25)
 transform = Transform2D(0.25, 0, 0, 0.25, 0, 0)
 script = ExtResource("1_menu")
+
+[node name="MenuMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_music")
+volume_db = -12.0
+bus = &"Music"
 
 [node name="Root" type="Control" parent="." unique_id=1601056121]
 layout_mode = 3

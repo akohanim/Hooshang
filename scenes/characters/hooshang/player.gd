@@ -293,6 +293,11 @@ var _spring_arc := false
 ## Horizontal push away from the wall on a wall jump. Above max_run_speed so
 ## the kick is felt even at full run.
 @export var wall_jump_speed_x := 170.0
+## px/s² of drag on whatever part of a wall-jump kick is still above
+## max_run_speed, while airborne. 0 (the adult) leaves the kick to his normal
+## air control. Act 2's child sets it: with no air deceleration at all
+## (air_decel_mult 0), an un-dragged kick just coasted on across the room.
+@export var wall_jump_drag := 0.0
 ## After a wall jump, air control is reduced for this long so you can't
 ## instantly steer back onto the same wall.
 @export var wall_jump_lock_time := 0.15
@@ -503,6 +508,10 @@ var facing := 1                 # 1 = right, -1 = left; used for neutral dashes
 ## Cutscene lock: physics keeps running (gravity settles the player) but all
 ## input reads as neutral. Dialogue/cinematics set this, not pause.
 var input_locked := false
+## Authored interactions can reserve buttons and the movement stick without
+## freezing physics or disabling the pause menu.
+var _interaction_buttons_reserved := false
+var _interaction_movement_reserved := false
 var dash_available := true      # one dash per airtime, refilled on landing
 ## Gravity multiplier for the current spring-launched arc; 1.0 = ordinary
 ## gravity. Set by bounce(), read by _apply_gravity, restored to 1.0 the moment
@@ -526,6 +535,7 @@ var dash_cooldown_timer := 0.0
 var freeze_timer := 0.0         # dash hitstop: physics is skipped while > 0
 var wall_lock_timer := 0.0      # reduced air control after wall jump
 var wall_jump_timer := 0.0      # how long the wall-jump kick animation still has to run
+var _wall_kicked := false       # airborne on a wall-jump kick (wall_jump_drag applies); cleared on landing
 var boost_timer := 0.0          # while > 0, handed-over momentum decays gently
 var jump_hold_timer := 0.0      # how much sustained thrust the held jump has left
 var invulnerable_timer := 0.0   # ignores hazard collision queries briefly after respawning
@@ -715,13 +725,18 @@ func _physics_process(delta: float) -> void:
 	# (ground, coyote, wall slide, wall coyote) and a fifth would forget.
 	if sliding():
 		jump_buffer_timer = 0.0
+	if _interaction_buttons_reserved:
+		jump_buffer_timer = 0.0
+		TouchControls.consume_jump()
+		TouchControls.consume_dash()
+		TouchControls.consume_glow()
 
 	var input_x := 0.0 if input_locked else _movement_input().x
 	if crouching():
 		input_x = 0.0
 	if input_x != 0.0 and state != State.LEDGE_MANTLE:
 		facing = 1 if input_x > 0.0 else -1
-	if not input_locked:
+	if not input_locked and not _interaction_buttons_reserved:
 		var touch_jump: bool = TouchControls.consume_jump()
 		if Input.is_action_just_pressed("jump") or touch_jump:
 			jump_buffer_timer = jump_buffer_time
@@ -810,6 +825,8 @@ func _state_ground(delta: float, input_x: float) -> void:
 func _state_air(delta: float, input_x: float) -> void:
 	var control := wall_jump_control_mult if wall_lock_timer > 0.0 else 1.0
 	_apply_run(delta, input_x, control)
+	if wall_jump_drag > 0.0 and _wall_kicked and wall_lock_timer <= 0.0 and absf(velocity.x) > max_run_speed:
+		velocity.x = move_toward(velocity.x, signf(velocity.x) * max_run_speed, wall_jump_drag * delta)
 	_apply_gravity(delta)
 	_apply_jump_hold()
 	if _try_buffered_jump():
@@ -1452,6 +1469,7 @@ func _do_wall_jump(from_wall_dir: int) -> void:
 	jump_buffer_timer = 0.0
 	wall_coyote_timer = 0.0
 	velocity = Vector2(-from_wall_dir * wall_jump_speed_x, -jump_speed)
+	_wall_kicked = true
 	jump_hold_timer = jump_hold_time
 	wall_lock_timer = wall_jump_lock_time
 	wall_jump_timer = wall_jump_anim_time
@@ -1468,6 +1486,7 @@ func movement_input() -> Vector2:
 
 
 func _movement_input() -> Vector2:
+	if _interaction_movement_reserved: return Vector2.ZERO
 	var raw := Vector2(
 		Input.get_action_raw_strength("move_right") - Input.get_action_raw_strength("move_left"),
 		Input.get_action_raw_strength("move_down") - Input.get_action_raw_strength("move_up")
@@ -1487,6 +1506,7 @@ func _movement_input() -> Vector2:
 
 
 func _can_dash() -> bool:
+	if _interaction_buttons_reserved: return false
 	if not has_dash:
 		return false  # ability not unlocked yet (see Level 1's Rumi scene)
 	if sliding():
@@ -1557,7 +1577,7 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 	# pressed against a wall is swimming, not sliding down it.
 	# A ladder also owns support: touching a floor edge must not slip him
 	# sideways or turn a secure grip into FALL while ladder_zone is still set.
-	if state in [State.SWIM, State.CLIMB]:
+	if swimming() or state == State.CLIMB:
 		return
 	# A bank is not always a FLOOR he lands on — swimming straight into a
 	# wall of brick at the water's own edge (no ledge, just a vertical face
@@ -1581,6 +1601,7 @@ func _post_move(was_on_floor: bool, input_x: float, incoming_vel_y: float) -> vo
 		return
 	if is_on_floor():
 		dash_available = true  # dash refreshes on landing
+		_wall_kicked = false
 		_spring_arc = false
 		_bounce_gravity_scale = 1.0  # a spring arc ends where he touches down
 		if state == State.FALL or state == State.JUMP or state == State.WALL_SLIDE:
@@ -2198,7 +2219,12 @@ func bounce(vy: float, gravity_scale := 1.0) -> void:
 	if state == State.DEAD:
 		return
 	_spring_arc = true
-	velocity.y = -absf(vy) * spring_impulse_scale
+	# The spring owns the whole launch. Carrying a dash's horizontal speed or
+	# letting its timer resume would turn this into a long diagonal dash.
+	velocity = Vector2(0.0, -absf(vy) * spring_impulse_scale)
+	dash_timer = 0.0
+	freeze_timer = 0.0
+	boost_timer = 0.0
 	_bounce_gravity_scale = maxf(gravity_scale, 0.01)
 	jump_hold_timer = 0.0
 	jump_buffer_timer = 0.0
@@ -2213,6 +2239,8 @@ func bounce_horizontal(speed: float, gravity_scale := 1.0) -> void:
 		return
 	_spring_arc = true
 	velocity = Vector2(speed * spring_impulse_scale, 0.0)
+	dash_timer = 0.0
+	freeze_timer = 0.0
 	boost_timer = boost_time
 	_bounce_gravity_scale = maxf(gravity_scale, 0.01)
 	jump_hold_timer = 0.0
@@ -2306,7 +2334,7 @@ func swimming() -> bool:
 ## (see _state_swim). The pond calls this the moment he overlaps it; this node
 ## only does the moving.
 func enter_swim(zone: Node) -> void:
-	if state == State.DEAD or swimming():
+	if state == State.DEAD or state == State.DASH or swimming():
 		return
 	# A slide carrying him straight into the water should not keep running
 	# once he is in it — the same reason enter_ladder arrives from states that
@@ -2430,6 +2458,16 @@ func hold(seconds: float) -> void:
 ## true is the one whose unfreeze() should run.
 var _frozen := false
 var _pre_freeze_locked := false
+
+
+func set_interaction_controls(reserve_buttons: bool, reserve_movement := false) -> void:
+	_interaction_buttons_reserved = reserve_buttons
+	_interaction_movement_reserved = reserve_buttons and reserve_movement
+	if reserve_buttons:
+		jump_buffer_timer = 0.0
+		_dash_input_timer = 0.0
+		_dash_input_dir = Vector2.ZERO
+	if _interaction_movement_reserved: velocity.x = 0.0
 
 
 func freeze() -> void:

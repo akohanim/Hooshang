@@ -18,8 +18,12 @@ var target := Vector2.ZERO
 var camera_bottom := 0
 var homes: Array[Vector2] = []
 var generation := 0
+## The script's chase is one scene played in two places: the banter on the run,
+## then the unfinished wall where Jamshid stops. This is where the wall starts.
+var at_wall := 0
 
 func _ready() -> void:
+	at_wall = TEXT.cue("chase", "We never finished it.")
 	room = get_parent()
 	world = room.get_parent()
 	while world != null and not world is LdtkWorld: world = world.get_parent()
@@ -52,10 +56,10 @@ func _physics_process(_delta: float) -> void:
 	if playing or moving or world._transitioning or world.player.input_locked: return
 	var x: float = world.player.global_position.x - room.global_position.x
 	if room.name == "Act_2_Level_16" and x >= 88 and world.player.is_on_floor() and not world.story_flags.get("chase_banter",false):
-		_conversation("chase_banter",9,12)
+		_conversation("chase_banter",0,at_wall)
 		return
 	if room.name == "Act_2_Level_19" and x >= 232 and world.player.is_on_floor() and not world.story_flags.get("wall_reunion",false):
-		_conversation("wall_reunion",12,19)
+		_conversation("wall_reunion",at_wall,TEXT.scenes.chase.size())
 		return
 	var entry_x: float = world.spawn_point_for(room).x-room.global_position.x
 	if x > entry_x+24 and index < guides.size()-1 and x >= guides[index].position.x-follow_distance:
@@ -104,7 +108,7 @@ func _conversation(flag: String, first: int, end: int) -> void:
 	world.player.camera.reset_smoothing()
 	for i in range(first,end):
 		if Dialogue.scene_skip_requested(self): break
-		var line: Dictionary = TEXT.scenes.cell[i]
+		var line: Dictionary = TEXT.scenes.chase[i]
 		var child: bool = line.speaker == "HOOSHANG"
 		await Dialogue.say(line.speaker.capitalize(),line.text,Color.WHITE,
 			Act2Beats.CHILD_FACES.get(line.get("face","neutral"),Act2Beats.CHILD_FACES.neutral) if child else Jamshid.portrait(line.get("face","friendly")),

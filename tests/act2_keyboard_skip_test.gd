@@ -8,7 +8,7 @@ func _ready() -> void:
 	await get_tree().create_timer(0.5).timeout
 	var world := Screen.current as LdtkWorld
 	var beats := world.get_node("Act2Beats") as Act2Beats
-	world.player.global_position = beats._speaker.global_position + Vector2(-30, -8)
+	world.player.global_position = beats._speaker.trigger_region.get_center()
 	for i in 180:
 		await get_tree().physics_frame
 		if Dialogue._active:

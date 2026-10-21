@@ -199,7 +199,7 @@ const EMOTE_LINES := {
 @export var blood_moon_glows: Array[NodePath] = []
 ## How long the turn takes. Tuned against the encounter's dialogue rather than
 ## chosen: it starts on the threshold, before the first line, and should still be
-## finishing as Rumi says "Don't let it absorb you."
+## finishing as Rumi says "Don't stop. Don't turn back to look at it."
 @export var blood_moon_seconds := 8.0
 
 @export_group("The end of the chase")
@@ -517,9 +517,8 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
-	#await _hooshang("...", "hesitant")
 	await _hooshang(
-		"Who are you? [p] I've worked in this office fifteen years. I've never seen you once.",
+		"Who are you?[p] I've worked in this office thirty years. I've never once seen you.",
 		"skeptical")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
@@ -530,20 +529,17 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# already running since he appeared.
 	await _hold(silence_time)
 
-	await _hooshang(
-		"Are you going to say something, or just stand there glowing at me...",
-		"annoyed")
+	await _hooshang("Are you going to say something, or what?", "annoyed")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
-	#await _hooshang("...", "vulnerable")
-	await _hooshang("...[p] I think I hit my head harder than I thought.", "vulnerable")
+	await _hooshang("...[p]I hit my head harder than I thought.", "vulnerable")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
 
 	await _hold(before_rumi_speaks)
-	await _rumi("You stand at the beginning of your most important journey, Hooshang jaan.", "warm_open")
+	await _rumi("I am Rumi, your spiritual guide.[p] You stand at the beginning of your most important journey, Hooshang jaan.", "warm_open")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
@@ -551,7 +547,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# typewriter down, but a line that types at its own rate reads as a different
 	# KIND of text rather than a quieter one — every line reveals at
 	# DialogueBox.chars_per_second now.
-	await _hooshang("A journey? I just wanted to make it to my car.", "skeptical")
+	await _hooshang("A journey? I just wanted to make it to my car.[p] I want to go home.", "skeptical")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
@@ -561,7 +557,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# which is what keeps the exposition a scene instead of a briefing. Every
 	# "[p]" is a breath held mid-line (DialogueBox.PAUSE_MARK) — stripped before
 	# it is drawn, so it costs the reader nothing and paces the delivery.
-	await _rumi("You will not reach the parking lot from here. This is not that building.[p] It is the one you carry inside you.", "serene")
+	await _rumi("You will not find your car from here. This is not that building.[p] It is the one you carry inside you.", "serene")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
@@ -569,33 +565,7 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
-	await _rumi("Your mind has built its own rooms, and you must go down through every one.", "serene")
-	if Dialogue.scene_skip_requested(self):
-		_finish_meeting_skip(player, trigger)
-		return
-	await _rumi("The office that swallowed your years.[p] Your childhood.[p] And beneath them the places and things you have never let go of.", "sorrowful")
-	if Dialogue.scene_skip_requested(self):
-		_finish_meeting_skip(player, trigger)
-		return
-	await _hooshang("And I'm supposed to just walk through my own head.", "unconvinced")
-	if Dialogue.scene_skip_requested(self):
-		_finish_meeting_skip(player, trigger)
-		return
-	# One thought per banner. These four were a single line, and at ~310
-	# characters it grew the box to eight rows and most of the screen — the
-	# banner is built to grow (DialogueBox._fit_banner) so nothing was clipped,
-	# it simply stopped reading as dialogue and started reading as a page. Every
-	# other line in this scene is under 110; these now are too.
-	await _rumi("Not walk through. You have done that your whole life.", "serene")
-	if Dialogue.scene_skip_requested(self):
-		_finish_meeting_skip(player, trigger)
-		return
-	await _rumi("To pass, you must meet what waits in each room.", "serene")
-	if Dialogue.scene_skip_requested(self):
-		_finish_meeting_skip(player, trigger)
-		return
-	#await _rumi("The grief you swallowed.[p] The dreams you set down \"for later.\"[p] The thoughts that still circle you in the dark.")
-	await _rumi("They are not memories, jaan. They are still alive.[p] And they will not let you by until you face them.", "urgent")
+	await _rumi("The office that swallowed your years.[p] Your childhood.[p] And under them, everything you never set down.", "sorrowful")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
@@ -603,11 +573,11 @@ func _play_meeting(player: Player, trigger: LdtkRumiTrigger) -> void:
 	# He asks for an extension, in the exact words he has used his whole life —
 	# and Rumi does not argue, he just repeats the word back. That is the beat
 	# the scene is built around, so nothing else happens on top of it.
-	await _hooshang("Look this really isn't a good time. I just lost my job.[p] I'll get to all that[p] ...Later.", "deflecting")
+	await _hooshang("Look, this really isn't a good time. I just lost my job.[p] I'll get to all that...[p] later.", "deflecting")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
-	await _rumi("...Later.[p] Yes, it's always later isn't it.", "wistful")
+	await _rumi("Later.[p] Yes. It is always later.", "wistful")
 	if Dialogue.scene_skip_requested(self):
 		_finish_meeting_skip(player, trigger)
 		return
@@ -651,21 +621,22 @@ func _play_music_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	player.look(1)  # he is always deeper into the room; face him
 	await _hold(arrival_pause)
 
-	await _hooshang("You show up right before the parts I'm going to hate, don't you?",
+	await _hooshang("You only show up right before the parts I'm going to hate, don't you?",
 		"annoyed")
 	# Rumi grants nothing here — the room itself is the gift, and what he
 	# hands over is permission to trust it.
-	await _rumi("The dark awaits you, you think you've lost your rhythm.[p] You haven't. It's only sleeping, here, in these tiles.", "serene")
+	await _rumi("You cannot fight the dark, jaan.[p] You can only make a light.", "serene")
 	# The actual RULE of the room, said out loud: all five pads, each once, IN
 	# ORDER, and the reward is the glow (scenes/props/note_tile.gd and
 	# scripts/note_sequence.gd). It is the only tutorial the puzzle gets — the
 	# stretch is unlit and there is nothing to read the mechanic off — so if
 	# the sequence rule ever changes, this line is part of the change.
-	await _rumi("Wake the notes in their order, one after the next, until they join into a melody.[p] Complete it, and its light will gather on you.[p] The exit will open, and light will enter through it.", "serene")
+	await _rumi("Your rhythm is not lost.[p] It is sleeping, here, in these tiles.", "serene")
+	await _rumi("Wake the notes in order, and let them become a song.", "serene")
 
 	# He answers with Rumi still standing there, same as the cubicle scene — the
 	# deadpan only lands if the person it is aimed at is still in the room.
-	await _hooshang("So I play the tune, I get a light.[p] ...Fine.", "flat")
+	await _hooshang("Play the tune, get a light.[p] Fine.", "flat")
 
 	if Dialogue.scene_skip_requested(self):
 		trigger.vanish_immediately()
@@ -684,14 +655,23 @@ func _play_level_v1_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	_dialogue_vside = DialogueBox.VSide.TOP
 	player.look(1)  # face the visitor appearing on the right
 
+	# He sees the cloud first and asks about it; Rumi turning up is the answer,
+	# the same shape as the tiles beat.
+	await _hooshang("What is that?", "wary")
+
 	# Rumi appears 24px to the right of the player.
 	var rumi_offset_x := player.global_position.x + 24.0 - trigger.global_position.x
 	await trigger.appear(rumi_offset_x)
 	trigger.breathe(true)
 
-	await _rumi("These are the thoughts you would rather not have, Hooshang jaan.", "serene")
-	await _rumi("You cannot strike them down.[p] There is nothing here to strike.", "serene")
-	await _rumi("Let it come, watch it travel,[p] and step where it is not.", "serene")
+	await _rumi("A thought you would rather not have.", "serene")
+	# His first instinct is to fight it. The whole act is about letting go of
+	# that instinct, so Rumi's answer starts here.
+	await _hooshang("How do I kill it?", "annoyed")
+	await _rumi("You don't.[p] There is nothing here to strike.", "serene")
+	await _rumi("Your mind is not a battlefield, jaan.[p] Fight a thought, and you only feed it.", "warm_open")
+	await _rumi("Your attention is a lamp, not a sword.[p] Don't swing it. Shine it.", "serene")
+	await _rumi("See where the thought goes.[p] Then step where it is not.", "serene")
 
 	trigger.breathe(false)
 	if Dialogue.scene_skip_requested(self):
@@ -713,10 +693,11 @@ func _play_level_v2_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await trigger.appear(rumi_offset_x)
 	trigger.breathe(true)
 
-	await _rumi("And these jaan, are the thoughts you like.", "warm_open")
-	await _hooshang("...These ones are going to kill me too, aren’t they?", "wary")
-	await _rumi("Examine them and you will find they are made of the same thing.", "wistful")
-	await _rumi("Craving is the heavier of the two.[p] Fear, at least, you already know you shouldn’t chase.", "serene")
+	await _rumi("And these are the thoughts you like.", "warm_open")
+	await _hooshang("...It's going to kill me too, isn't it?", "wary")
+	await _rumi("Look closely.[p] It is made of the same thing.", "wistful")
+	await _hooshang("But it's a good one.", "unconvinced")
+	await _rumi("That is the danger.[p] A fear you would never follow. This one, you would chase right off a ledge.", "serene")
 
 	trigger.breathe(false)
 	if Dialogue.scene_skip_requested(self):
@@ -739,9 +720,10 @@ func _play_level_v3_beat(player: Player, trigger: LdtkRumiTrigger) -> void:
 	await trigger.appear(rumi_offset_x)
 	trigger.breathe(true)
 
-	await _rumi("Now both. Watch how they travel.[p] One rises and falls. One crosses. One circles you in the dark.", "serene")
-	await _rumi("Do not sort them, jaan. Pleasant, unpleasant.[p] Both are only weather.", "warm_open")
-	await _rumi("Meet them the same way, and the way through opens on its own.", "serene")
+	await _hooshang("So which ones are on my side?", "skeptical")
+	await _rumi("You keep drawing battle lines.[p] Good thoughts against bad. There is no war here.", "serene")
+	await _rumi("Don't try to push the dark ones away.[p] Don't try to pull the bright ones close.", "warm_open")
+	await _rumi("Simply observe them as they pass, and you will see a path open.", "serene")
 
 	trigger.breathe(false)
 	if Dialogue.scene_skip_requested(self):
@@ -1044,25 +1026,48 @@ func _play_chase_end() -> void:
 	_rumi_trigger.breathe(true)
 	await _hold(arrival_pause)
 
-	await _rumi("No, jaan. A darkness grown this strong cannot be defeated overnight.[p] But [color=#ffd16b]stop watering it[/color], and it stops growing.", "serene")
+	await _rumi("No, jaan. A darkness this old is not defeated in one night.", "serene")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
+	await _rumi("But it stopped growing the moment you [color=#ffd16b]stopped feeding it[/color].", "serene")
 	if Dialogue.scene_skip_requested(self):
 		_handoff_act_two()
 		return
 	# The thesis of the whole Act, so it gets the one un-subtle beat in the
 	# scene: a slow pulse on "stop", not a shake — this is a realization
 	# settling in, not a shock.
-	await _hooshang("So I never had to defeat it. I just had to [pulse]stop[/pulse] feeding it.", "vulnerable")
+	await _hooshang("So I never had to beat it. I just had to [pulse]stop[/pulse] feeding it.", "vulnerable")
 	if Dialogue.scene_skip_requested(self):
 		_handoff_act_two()
 		return
 	# The three-part mantra gets a shared, gentle wave — one continuous motion
-	# across "let it come, let it stand, let it go" rather than three separate
+	# across "let it come, let it stay, let it go" rather than three separate
 	# effects, so it reads as one calm breath instead of a list.
-	await _rumi("Yes. The roots remain. It may green again someday, if ever you water it.[p] But you know the way of it now — you need only stop. [wave]Let the thought come, let it stand, let it go.[/wave] Do not water it with your fear, and it withers on its own.", "wistful")
+	await _rumi("Yes. The roots remain.[p] Be aware of it. [wave]Let it come. Let it stay. Let it go.[/wave][p] Everything is [color=#ffd16b]Impermanent[/color].", "wistful")
 	if Dialogue.scene_skip_requested(self):
 		_handoff_act_two()
 		return
-	await _rumi("Come. Let us see where this seed came from - [color=#ffd16b]its origin story[/color].", "warm_open")
+
+	# "(Hooshang looks around at the desk, the chair, the bare wall.)" — played.
+	player.look(-1)
+	await _hold(look_time)
+	player.look(1)
+	await _hold(look_time)
+	await _hooshang("My cubicle.[p] I ran all night and ended up right where I started.", "flat")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
+	await _rumi("Where else is there to arrive?", "warm_open")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
+	await _hold(arrival_pause)
+	await _hooshang("Where did it come from? The seed.", "hesitant")
+	if Dialogue.scene_skip_requested(self):
+		_handoff_act_two()
+		return
+	await _rumi("Come. Let us go and find [color=#ffd16b]its origin[/color].", "warm_open")
 	if Dialogue.scene_skip_requested(self):
 		_handoff_act_two()
 		return

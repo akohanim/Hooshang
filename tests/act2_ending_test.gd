@@ -21,6 +21,15 @@ func run_case(mode: String) -> void:
 	world.get_node("Act2Audio").cue_started.connect(func(cue): cues.append(cue))
 	var completions=[0]
 	ending.act_completed.connect(func():completions[0]+=1)
+	# "late_skip" holds X once each chapter reaches its closing stretch: the
+	# carpet's "Please let go.", the pond's "Wait. Where are you going?" (counted
+	# across the fall and the bank, which play as one conversation), and the
+	# lines after the painting.
+	var late_skip_at := {
+		"carpet": TEXT.cue("carpet","Please let go."),
+		"second_line": TEXT.scenes.fall.size()+TEXT.cue("bank","Wait. Where are you going?"),
+		"paint": 1,
+	}
 	var seen: Array[String]=[]
 	var last=""
 	var checked_pond=false
@@ -93,7 +102,7 @@ func run_case(mode: String) -> void:
 		if token!=last:
 			last=token
 			seen.append(Dialogue._page_raw)
-		var should_skip: bool=mode=="early_skip" or (mode=="late_skip" and ending.line_index >= {"carpet":50,"second_line":31,"paint":39}.get(ending.chapter,999))
+		var should_skip: bool=mode=="early_skip" or (mode=="late_skip" and ending.line_index >= late_skip_at.get(ending.chapter,999))
 		if should_skip:
 			Input.action_press("skip_dialogue")
 			Dialogue._process(Dialogue.skip_hold_time+.1)
@@ -127,14 +136,14 @@ func run_case(mode: String) -> void:
 		check(saw_partial_paint and gestures.has("paint") and gestures.has("pickup") and gestures.has("salute"), "full finale paints progressively, picks up props and salutes")
 		check(saw_carried_coat and gestures.has("pickup_coat"), "full finale picks up and visibly carries the coat home")
 		var expected: Array[String]=[]
-		for scene in ["carpet","second_line"]:
+		for scene in ["carpet","fall","bank","second_line"]:
 			for line in TEXT.scenes[scene]:
 				for page in Dialogue._paginate(line.text): expected.append(page)
 		if seen!=expected:
 			print("TEXT MISMATCH expected=",expected.size()," seen=",seen.size())
 			for i in mini(seen.size(),expected.size()):
 				if seen[i]!=expected[i]: print("FIRST DIFFERENCE ",i," got=",seen[i]," expected=",expected[i]); break
-		check(seen==expected,"all 98 author lines play in exact order")
+		check(seen==expected,"all %d author pages play in exact order"%expected.size())
 	SaveGame._pending={"world_state":world.save_state()}
 	LdtkWorld.debug_start_room=str(world.current_room.name)
 	world.queue_free()

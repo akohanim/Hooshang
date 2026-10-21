@@ -278,6 +278,28 @@ func _ready() -> void:
 	_check(churn == 0, "...and holds it without flickering out of SWIM  [%d state changes in 120 frames]"
 		% churn)
 
+	# A real floor under the pond can report is_on_floor() while he is still
+	# swimming. Holding down against it must not refill a spent air dash.
+	var pond_floor := StaticBody2D.new()
+	pond_floor.collision_layer = 1
+	var pond_floor_shape := CollisionShape2D.new()
+	pond_floor_shape.shape = RectangleShape2D.new()
+	pond_floor_shape.shape.size = Vector2(POND_SIZE.x - 16.0, 16.0)
+	pond_floor.add_child(pond_floor_shape)
+	pond_floor.position = POND_POS + Vector2(0.0, POND_SIZE.y * 0.5 + 8.0)
+	world.add_child(pond_floor)
+	await _settle(IN)
+	player.dash_available = false
+	Input.action_press("move_down")
+	await _frames(130)
+	Input.action_release("move_down")
+	_check(player.swimming() and player.is_on_floor(),
+		"the pond floor is contacted while still swimming  [y %.1f, floor %s, state %s]"
+			% [player.global_position.y, player.is_on_floor(), player.state_name()])
+	_check(not player.dash_available,
+		"touching the pond floor does not refill a spent dash")
+	_check(not await _tried_dash(), "dash stays disabled at the pond floor")
+
 	# --- dying inside it does not carry the swim into the next life ---
 	await _settle(IN)
 	_check(player.swimming(), "swimming once more, to die in it")

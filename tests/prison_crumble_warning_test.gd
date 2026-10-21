@@ -1,5 +1,5 @@
 extends Node
-## Staged landing, then natural contact/countdown/collapse. No warning-state grants.
+## Natural landing with a deterministic warning clock; no warning-state grants.
 var failures := 0
 func frames(n: int) -> void:
 	for i in n:await get_tree().physics_frame
@@ -14,7 +14,7 @@ func capture(label: String) -> void:
 	Screen.viewport.get_texture().get_image().save_png("res://output/prison_precision/warnings/"+label+".png")
 func _ready() -> void:
 	SaveGame.unbind()
-	LdtkWorld.debug_start_room="Prison_R03"
+	LdtkWorld.debug_start_room="Prison_R02"
 	Screen.load_scene("res://ldtk/Act2World.tscn")
 	await frames(20)
 	var world=Screen.current
@@ -27,10 +27,15 @@ func _ready() -> void:
 	var shelf=shelves[0]
 	var block=shelf._visual.get_child(0)
 	check(block.texture==CrumblingPlatform.FRAMES_CHILDHOOD[0],"intact shelf wears Act 2's crumble art")
+	# Exercise the complete warning cycle independently of this room's authored
+	# instant-drop timing. The lifecycle test preserves the real imported timing.
+	shelf.crumble_time=0.6
+	shelf.set_process(false) # Headless idle delta need not match physics frames.
 	world.player.respawn(shelf.global_position+Vector2(0,-22))
 	var seen: Array[int]=[]
 	for i in 120:
 		await frames(1)
+		shelf._process(1.0/60.0)
 		if shelf._falling:break
 		if not shelf._spent:continue
 		var frame=CrumblingPlatform.FRAMES_CHILDHOOD.find(block.texture)
@@ -40,15 +45,19 @@ func _ready() -> void:
 			await capture("warning_%d" % frame)
 	check(seen==[0,1,2],"contact progresses through all three warning stages")
 	check(shelf._falling and not shelf.get_collision_layer_value(1),"warning ends in real collapse")
+	world.set_physics_process(false)
+	world.player.set_physics_process(false)
 	await frames(30)
 	await capture("collapsed")
-	world.player.respawn(room.global_position+Vector2(40,154))
-	await frames(5)
-	Input.action_press("move_up")
-	await frames(4)
-	Input.action_release("move_up")
-	check(not shelf._spent and shelf.get_collision_layer_value(1),"lever restores collision")
-	check(block.texture==CrumblingPlatform.FRAMES_CHILDHOOD[0],"lever restores the intact Act 2 crumble artwork")
+	var gate=world.timed_reference(shelf.fields.get("Gate",""))
+	world.timers.start(str(gate.fields.get("PuzzleId","")))
+	check(shelf._falling and not shelf.get_collision_layer_value(1),"lever leaves the shelf collapsed")
+	world.player.die()
+	for i in 120:
+		await frames(1)
+		if world.player.state!=Player.State.DEAD and not shelf._falling:break
+	check(not shelf._spent and shelf.get_collision_layer_value(1),"respawn restores collision")
+	check(block.texture==CrumblingPlatform.FRAMES_CHILDHOOD[0],"respawn restores the intact Act 2 crumble artwork")
 	await capture("restored")
 	print("CRUMBLE WARNING: ",failures," failures; seen=",seen)
 	get_tree().quit(1 if failures else 0)

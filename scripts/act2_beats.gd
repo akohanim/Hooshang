@@ -126,6 +126,9 @@ func _ready() -> void:
 	_rod = _add_fishing_rod(jamshid)
 	_prepare_pond_fish(room, jamshid)
 	jamshid.defer_to_cutscene = true
+	jamshid.trigger_region = _pond_upper_right_trigger(room)
+	jamshid.trigger_region_enabled = true
+	jamshid.require_swimming_for_trigger = true
 	jamshid.triggered.connect(_on_jamshid_reached.bind(jamshid))
 	_encounter_origin = jamshid.global_position
 	var flags: Dictionary = _world.get("story_flags")
@@ -134,6 +137,32 @@ func _ready() -> void:
 		_restore_morning_scenery()
 	_world.room_changed.connect(_on_room_changed)
 	_on_room_changed(_world.current_room)
+
+
+## The last painted surface cells sit under the solid right bank. Hooshang's
+## body can only swim as far as the cell two columns before the painted edge;
+## beyond that he starts climbing out. Trigger in that last reachable cell,
+## at surface height, before the bank mantle takes him out of the water.
+func _pond_upper_right_trigger(room: Node2D) -> Rect2:
+	var water := room.get_node_or_null("Water") as TileMapLayer
+	if water == null:
+		push_warning("Act2Beats: encounter room has no painted Water layer.")
+		return Rect2()
+	var cells := water.get_used_cells()
+	if cells.is_empty():
+		push_warning("Act2Beats: encounter pond has no painted water cells.")
+		return Rect2()
+	var top_y := cells[0].y
+	for cell in cells:
+		top_y = mini(top_y, cell.y)
+	var right_x := -2147483648
+	for cell in cells:
+		if cell.y == top_y:
+			right_x = maxi(right_x, cell.x)
+	var center := water.to_global(water.map_to_local(Vector2i(right_x, top_y)))
+	var cell_size := float(water.tile_set.tile_size.x)
+	return Rect2(center.x - cell_size * 2.5, center.y - cell_size * 0.5,
+		cell_size, cell_size * 2.0)
 
 
 func _on_room_changed(room: Node2D) -> void:
@@ -196,6 +225,12 @@ func _apply_child_movement() -> void:
 	player.dash_end_speed = 64.0
 	player.air_accel_mult = 1.0
 	player.air_decel_mult = 0.0
+	# The adult's 170 px/s wall kick is 2.5x the child's run speed, and with no
+	# air deceleration it never bled off: an idle kick coasted ~295px, nearly a
+	# whole room. A gentler kick, dragged back down to a run, carries ~1/3 that
+	# and still climbs a two-wall shaft up to 6 cells wide.
+	player.wall_jump_speed_x = 110.0
+	player.wall_jump_drag = 360.0
 	# First airborne frame: -77/16 SNES px/frame, scaled by 0.5 at 60 Hz.
 	player.jump_speed = 144.375
 	player.use_jump_hold = false
@@ -252,7 +287,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _jamshid(jamshid, "You saw me yesterday.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("It feels like so much longer.", "vulnerable")
+	await _hooshang("It feels like a lot longer.", "vulnerable")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "Well, get out of the water. You're frightening dinner.", "joyful")
@@ -263,10 +298,25 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	if _finish_encounter_skip(jamshid):
 		return
 	player.cutscene_rest(false, 1)
-	await _hooshang("Are the fish biting today?", "happy")
+	await _hooshang("Are they biting?", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "They would if little kids stopped swimming through their house.", "joyful")
+	await _jamshid(jamshid, "They would be, if you stopped swimming through their house.", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
+	# "(Hooshang grabs for the line. Jamshid pulls it out of reach.)"
+	await _jamshid(jamshid, "Not like that. Chase a fish and it goes. Sit still and it comes to you.", "friendly")
+	if _finish_encounter_skip(jamshid):
+		return
+	await _hooshang("That's it? Just sit there?", "surprised")
+	if _finish_encounter_skip(jamshid):
+		return
+	await _jamshid(jamshid, "Sit. Watch the water. And stop wanting it so much. They can tell.", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
+	# "(Hooshang sits. For once in his life, he is still.)" Then the tug.
+	player.cutscene_rest(true, 1)
+	await _hold(1.2)
 	if _finish_encounter_skip(jamshid):
 		return
 	_splash(rod.global_position + Vector2(-36, -2))
@@ -285,26 +335,26 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _hooshang("Does my mother know we're here?", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Yes. She sent snacks.", "friendly")
+	await _jamshid(jamshid, "She sent snacks.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Did she send that pomegranate fruit roll up? Where is it!?", "neutral")
+	await _hooshang("Lavashak? The pomegranate one? Where is it?", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _jamshid(jamshid, "You were late.", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Jamshid", "annoyed")
+	await _hooshang("Jamshid!", "annoyed")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Fishing is hungry work. She also said to be home before dark...", "joyful")
+	await _jamshid(jamshid, "Fishing is hungry work. She also said be home before dark.", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
 	_ambience.blend(1.0, 0.0, nightfall_time)
 	_fade_stars(1.0, nightfall_time)
 	await _wait_scene_tween(_tween_sky(NIGHT, nightfall_time))
 	await _hold(0.7)
-	await _jamshid(jamshid, "You're quiet today.", "friendly")
+	await _jamshid(jamshid, "You're quiet tonight.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hooshang("I had a strange dream.", "vulnerable")
@@ -325,21 +375,29 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _jamshid(jamshid, "Good. Go on.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("I worked in an office. I didn't like it, but I stayed for years. Then I lost the job... and I felt lost, too.", "sad")
+	await _hooshang("I worked in an office for 20 years. I hated it. Then they let me go, and I didn't know who I was anymore.", "sad")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "What happened?", "worried")
+	await _jamshid(jamshid, "Then what?", "worried")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Rumi appeared.", "neutral")
+	await _hooshang("Rumi showed up.", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Rumi, the poet, from school?", "joyful")
+	await _jamshid(jamshid, "Rumi? The poet? From school?", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _hooshang("Yes. He taught me how to stay equanimous with my thoughts.", "happy")
+	await _hooshang("Yeah, that one. He glowed.", "happy")
 	if _finish_encounter_skip(jamshid):
 		return
+	await _jamshid(jamshid, "Of course he did.", "joyful")
+	if _finish_encounter_skip(jamshid):
+		return
+	await _hooshang("He said my thoughts were only weather. That I didn't have to fight them.", "neutral")
+	if _finish_encounter_skip(jamshid):
+		return
+	# "(Jamshid looks at him for a moment.)"
+	await _hold(0.7)
 	await _jamshid(jamshid, "You'd better start from the beginning.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
@@ -355,13 +413,13 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _hooshang("Do you remember yours?", "neutral")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "Almost never. By the time I wake up, they're gone.", "friendly")
+	await _jamshid(jamshid, "Hardly ever. By the time I wake up, they're gone.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hooshang("This one felt like I'd lived it.", "vulnerable")
 	if _finish_encounter_skip(jamshid):
 		return
-	await _jamshid(jamshid, "No wonder you looked so tired.", "worried")
+	await _jamshid(jamshid, "No wonder you look so tired.", "worried")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _hold(0.7)
@@ -384,7 +442,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	if _finish_encounter_skip(jamshid):
 		return
 	_school_bell()
-	await _jamshid(jamshid, "Come over after school. We can finish talking.", "friendly")
+	await _jamshid(jamshid, "Come by after school. We'll finish talking.", "friendly")
 	if _finish_encounter_skip(jamshid):
 		return
 	await _exit_jamshid(jamshid)
@@ -563,7 +621,7 @@ func _exit_jamshid(jamshid: JamshidNpc) -> void:
 	await _hooshang("That's how you get to school?", "surprised")
 	if Dialogue.scene_skip_requested(self):
 		return
-	await _jamshid(jamshid, "How do you think I keep arriving before you?", "joyful")
+	await _jamshid(jamshid, "Duh. Race you there!", "joyful")
 	if Dialogue.scene_skip_requested(self):
 		return
 	_play_cue(preload("res://assets/sfx/dash_swoosh.wav"), -16.0)
@@ -663,6 +721,19 @@ func _splash(at: Vector2) -> void:
 ## Deterministic metallic school bell. Fishing splashes are visual only.
 func _school_bell() -> void:
 	var audio := AudioStreamPlayer.new()
+	audio.stream = school_bell_stream()
+	add_child(audio)
+	audio.finished.connect(audio.queue_free)
+	audio.play()
+
+
+static var _bell_stream: AudioStreamWAV
+
+## The bell itself, synthesised once and shared: the dawn at the pond rings it,
+## and so does the very end of the Act, where Hooshang finally stops for it.
+static func school_bell_stream() -> AudioStreamWAV:
+	if _bell_stream != null:
+		return _bell_stream
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = 22050
@@ -674,10 +745,8 @@ func _school_bell() -> void:
 		var sample := (sin(TAU * 880 * t) + 0.45 * sin(TAU * 2341 * t)) * exp(-3.5 * t)
 		data.encode_s16(i * 2, int(sample * 7000 * minf(t * 100, 1.0)))
 	stream.data = data
-	audio.stream = stream
-	add_child(audio)
-	audio.finished.connect(audio.queue_free)
-	audio.play()
+	_bell_stream = stream
+	return stream
 
 
 func _play_cue(stream: AudioStream, volume: float) -> void:

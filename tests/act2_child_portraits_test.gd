@@ -26,7 +26,7 @@ func _ready() -> void:
 			check(face.get_size()==Vector2(512,512),key+" close-up square")
 			var spoken := ""
 			var script_speaker:String="HOOSHANG" if speaker=="childhooshang" else "JAMSHID"
-			for chapter in ["wall","palace","cell","carpet"]:
+			for chapter in ["wall","palace","cell","chase","carpet"]:
 				for line:Dictionary in SCRIPT.scenes[chapter]:
 					if line.speaker==script_speaker and line.get("face","")==emotion and line.text.length()>spoken.length():spoken=line.text
 			check(not spoken.is_empty(),key+" has an actual authored line")
@@ -60,7 +60,7 @@ func _ready() -> void:
 			while box._active:
 				box.line_finished.emit();await frames(3)
 			await frames(20)
-	for chapter in ["wall","palace","cell","carpet"]:
+	for chapter in ["wall","palace","cell","chase","carpet"]:
 		var used:Dictionary={}
 		for line:Dictionary in SCRIPT.scenes[chapter]:
 			if line.speaker not in ["HOOSHANG","JAMSHID"]:continue

@@ -47,6 +47,10 @@ func _scene_loaded(scene: Node) -> void:
 		if scene.is_ancestor_of(lemon):
 			ids[lemon.collect_id()] = true
 	available = ids.size()
+	# Five one-time fruit are won inside the prison TV rather than placed as
+	# Lemon nodes in the level. Count them in the Act II completion denominator.
+	if path == "res://ldtk/Act2World.tscn":
+		available += 5
 	_running = true
 
 func _lemons_changed(_total: int) -> void:

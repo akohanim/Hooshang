@@ -276,6 +276,7 @@ var _owns_player_freeze := false
 var _conversation_serial := 0
 var _conversation_allow_airborne := false
 var _skip_needs_release := false
+var _scene_skip_action: StringName = &"skip_dialogue"
 var _conversation_owner: Node
 var _hint_elapsed := 0.0
 ## Character index the reveal holds at, or -1 for none / already spent.
@@ -848,6 +849,11 @@ func _sentences(text: String) -> Array[String]:
 		while stop + 1 < text.length() and text[stop + 1] in ".?!":
 			stop += 1
 		var run := text.substr(i, stop - i + 1)
+		# A breath written straight after the punctuation ("here.[p] Then") still
+		# ends the sentence, and stays with the words it follows. Without this
+		# every such line lost its sentence breaks and paged mid-clause.
+		if text.substr(stop + 1, PAUSE_MARK.length()) == PAUSE_MARK:
+			stop += PAUSE_MARK.length()
 		# A real ending is followed by a space or by nothing at all — otherwise it
 		# is a decimal point or an abbreviation, and no break belongs there.
 		if run.count(".") < 2 and (stop + 1 >= text.length() or text[stop + 1] == " "):
@@ -1212,6 +1218,7 @@ func _process(delta: float) -> void:
 ## Every conversation is skippable, including openings, tutorials and greetings.
 ## No length threshold or caller opt-out: the same hold works everywhere.
 func begin_conversation(owner: Node, player: Player = null, allow_airborne := false) -> void:
+	_scene_skip_action = &"skip_dialogue"
 	_release_conversation_player()
 	_conversation_allow_airborne = allow_airborne
 	_conversation_owner = owner
@@ -1225,6 +1232,7 @@ func begin_conversation(owner: Node, player: Player = null, allow_airborne := fa
 
 
 func end_conversation() -> void:
+	_scene_skip_action = &"skip_dialogue"
 	_conversation_allow_airborne = false
 	_touch_skip_finger = -1
 	_touch_gesture.reset()
@@ -1235,6 +1243,23 @@ func end_conversation() -> void:
 	_skip_requested = false
 	_skip_held_time = 0.0
 	skip_progress.value = 0.0
+
+
+## Keep the scene's skip scope while an authored interaction returns movement.
+func release_player_for_interaction(owner: Node, skip_action: StringName = &"skip_dialogue") -> void:
+	if owner == _conversation_owner and not _active:
+		_scene_skip_action = skip_action
+		_skip_held_time = 0.0
+		_skip_needs_release = Input.is_action_pressed(skip_action)
+		_release_conversation_player()
+
+
+func hold_player_after_interaction(owner: Node, player: Player) -> void:
+	if owner == _conversation_owner:
+		_scene_skip_action = &"skip_dialogue"
+		_skip_held_time = 0.0
+		_skip_needs_release = Input.is_action_pressed(_scene_skip_action)
+		_hold_conversation_player(player)
 
 
 ## One owner for every dialogue physics hold. Input locking alone does not
@@ -1310,7 +1335,7 @@ func _input(event: InputEvent) -> void:
 	# Polling misses release/press pairs between rendered frames, and the first
 	# fresh press after focus returns. Listen before GUI handling so either
 	# event re-arms a deliberate hold; echo events must never do so.
-	if event.is_action("skip_dialogue") and not event.is_echo():
+	if event.is_action(_scene_skip_action) and not event.is_echo():
 		_skip_needs_release = false
 		if not event.is_pressed():
 			_skip_held_time = 0.0
@@ -1319,7 +1344,7 @@ func _input(event: InputEvent) -> void:
 func _tick_skip_hold(delta: float) -> void:
 	if _conversation_owner != null and not is_instance_valid(_conversation_owner):
 		end_conversation()
-	if not (Input.is_action_pressed("skip_dialogue") or _touch_skip_finger >= 0):
+	if not (Input.is_action_pressed(_scene_skip_action) or _touch_skip_finger >= 0):
 		_skip_held_time = 0.0
 		_skip_needs_release = false
 	elif (_active or is_instance_valid(_conversation_owner)) and _conversation_skippable and not _skip_needs_release and not _skip_requested:
@@ -1366,7 +1391,7 @@ func _update_control_hints() -> void:
 		key = "X / □"
 		confirm = "A / ×"
 	else:
-		for event in InputMap.action_get_events("skip_dialogue"):
+		for event in InputMap.action_get_events(_scene_skip_action):
 			if event is InputEventKey:
 				key = OS.get_keycode_string(event.physical_keycode if event.physical_keycode else event.keycode)
 				break
@@ -1437,7 +1462,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if gesture.has("tap"):
 			_touch_confirm()
 		return
-	if event.is_action("skip_dialogue"):
+	if event.is_action(_scene_skip_action):
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_echo():

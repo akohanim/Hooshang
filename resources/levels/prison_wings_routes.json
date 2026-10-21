@@ -1,0 +1,2384 @@
+{
+ "Prison_Hub#R01": [
+  {
+   "from": [
+    148,
+    376
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 236,
+    "y": 376,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    236,
+    376
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 352,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    352
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 328,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    328
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 304,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    304
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 280,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    280
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 256,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    256
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 232,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    232
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 208,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    276,
+    208
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 316,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    308,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "ul",
+    "u"
+   ],
+   "to": {
+    "x": 276,
+    "y": 160,
+    "tol": 10
+   },
+   "steer": 276
+  },
+  {
+   "from": [
+    276,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_R01"
+   },
+   "steer": -4
+  }
+ ],
+ "Prison_R01": [
+  {
+   "from": [
+    292,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 212,
+    "y": 144,
+    "tol": 12
+   }
+  },
+  {
+   "from": [
+    212,
+    144
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 148,
+    "y": 136,
+    "tol": 12
+   },
+   "hurry": true
+  },
+  {
+   "from": [
+    148,
+    136
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 84,
+    "y": 144,
+    "tol": 12
+   },
+   "wait": 210,
+   "wait_at": 0,
+   "hurry": true
+  },
+  {
+   "from": [
+    84,
+    144
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 28,
+    "y": 160,
+    "tol": 12
+   },
+   "hurry": true
+  },
+  {
+   "from": [
+    28,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_R02"
+   },
+   "steer": -4
+  }
+ ],
+ "Prison_R02": [
+  {
+   "from": [
+    292,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 260,
+    "y": 160,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    260,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 136,
+    "tol": 8
+   },
+   "timer": "red_kitchen"
+  },
+  {
+   "from": [
+    220,
+    136
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 172,
+    "y": 112,
+    "tol": 8
+   },
+   "timer": "red_kitchen",
+   "hurry": true
+  },
+  {
+   "from": [
+    172,
+    112
+   ],
+   "moves": [
+    "walk",
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 148,
+    "y": 184,
+    "tol": 12
+   },
+   "steer": 148,
+   "wait": 315,
+   "timer": "red_kitchen"
+  },
+  {
+   "from": [
+    148,
+    184
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_R03"
+   },
+   "steer": 92,
+   "timer": "red_kitchen"
+  }
+ ],
+ "Prison_R03": [
+  {
+   "from": [
+    92,
+    40
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 156,
+    "y": 48,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    156,
+    48
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 196,
+    "y": 48,
+    "tol": 8
+   },
+   "hurry": true
+  },
+  {
+   "from": [
+    196,
+    48
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 284,
+    "y": 96,
+    "tol": 18
+   },
+   "hurry": true
+  },
+  {
+   "from": [
+    284,
+    96
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 52,
+    "y": 152,
+    "tol": 14
+   },
+   "wait": 270,
+   "steer": 52
+  },
+  {
+   "from": [
+    60,
+    152
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 116,
+    "y": 160,
+    "tol": 10
+   }
+  },
+  {
+   "from": [
+    124,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 172,
+    "y": 160,
+    "tol": 10
+   }
+  },
+  {
+   "from": [
+    180,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 228,
+    "y": 160,
+    "tol": 10
+   },
+   "hurry": true
+  },
+  {
+   "from": [
+    236,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "key": "Red"
+   },
+   "wait": 270,
+   "steer": 292
+  },
+  {
+   "from": [
+    292,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_R04"
+   },
+   "steer": 324
+  }
+ ],
+ "Prison_R04": [
+  {
+   "from": [
+    28,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Hub"
+   },
+   "steer": 324
+  }
+ ],
+ "Prison_Hub#G01": [
+  {
+   "from": [
+    276,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 132,
+    "y": 160,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    132,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 100,
+    "y": 136,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    92,
+    136
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 52,
+    "y": 112,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    60,
+    112
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 100,
+    "y": 88,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    92,
+    88
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 52,
+    "y": 64,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    60,
+    64
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 100,
+    "y": 40,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    100,
+    40
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_G01"
+   },
+   "steer": 100
+  }
+ ],
+ "Prison_G01": [
+  {
+   "from": [
+    68,
+    184
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 28,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    28,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 76,
+    "y": 72,
+    "tol": 8
+   },
+   "wall": true
+  },
+  {
+   "from": [
+    92,
+    72
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 172,
+    "y": 72,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    172,
+    72
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 252,
+    "y": 112,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    252,
+    112
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_G02"
+   },
+   "wall": true,
+   "steer": 236
+  }
+ ],
+ "Prison_G02": [
+  {
+   "from": [
+    276,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 212,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    212,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "l",
+    "ul"
+   ],
+   "to": {
+    "x": 132,
+    "y": 160,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    124,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 68,
+    "y": 184,
+    "tol": 12
+   }
+  },
+  {
+   "from": [
+    68,
+    184
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 28,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    28,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 68,
+    "y": 96,
+    "tol": 8
+   },
+   "wall": true
+  },
+  {
+   "from": [
+    76,
+    96
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r",
+    "ur"
+   ],
+   "to": {
+    "x": 116,
+    "y": 80,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    124,
+    80
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r",
+    "ur"
+   ],
+   "to": {
+    "x": 204,
+    "y": 56,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    204,
+    56
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 284,
+    "y": 64,
+    "tol": 16
+   }
+  },
+  {
+   "from": [
+    284,
+    64
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_G03"
+   },
+   "steer": 324
+  }
+ ],
+ "Prison_G03": [
+  {
+   "from": [
+    28,
+    64
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 76,
+    "y": 64,
+    "tol": 6
+   }
+  },
+  {
+   "from": [
+    76,
+    64
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r",
+    "dr"
+   ],
+   "to": {
+    "x": 172,
+    "y": 80,
+    "tol": 10
+   }
+  },
+  {
+   "from": [
+    172,
+    80
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 140,
+    "y": 120,
+    "tol": 8
+   },
+   "steer": 140,
+   "hurry": true
+  },
+  {
+   "from": [
+    140,
+    120
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 196,
+    "y": 184,
+    "tol": 12
+   },
+   "steer": 196
+  },
+  {
+   "from": [
+    204,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "key": "Green"
+   },
+   "steer": 292
+  },
+  {
+   "from": [
+    292,
+    184
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_G04"
+   },
+   "steer": 252
+  }
+ ],
+ "Prison_G04": [
+  {
+   "from": [
+    252,
+    32
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 204,
+    "y": 56,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    188,
+    56
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 148,
+    "y": 80,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    164,
+    80
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 204,
+    "y": 104,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    188,
+    104
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 148,
+    "y": 128,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    164,
+    128
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 204,
+    "y": 152,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    188,
+    152
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 132,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    132,
+    184
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Hub"
+   },
+   "steer": 100
+  }
+ ],
+ "Prison_Hub#B01": [
+  {
+   "from": [
+    148,
+    376
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 236,
+    "y": 376,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    236,
+    376
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 352,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    352
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 328,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    328
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 304,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    276,
+    304
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_B01"
+   },
+   "steer": 420
+  }
+ ],
+ "Prison_B01": [
+  {
+   "from": [
+    100,
+    40
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "swim": true,
+    "x": 68,
+    "tol": 40
+   },
+   "steer": 36
+  },
+  {
+  "from": [
+   116,
+   128
+  ],
+  "moves": [
+   "kick"
+  ],
+   "dash": [
+    "ur",
+    "u",
+    "r"
+   ],
+   "to": {
+    "x": 156,
+    "y": 104,
+    "tol": 10
+   },
+   "steer": 156
+  },
+  {
+   "from": [
+    156,
+    104
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "swim": true,
+    "x": 220,
+    "tol": 40
+   }
+  },
+  {
+   "from": [
+    204,
+    144
+   ],
+   "moves": [
+    "dive"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_B02"
+   },
+   "steer": 204
+  }
+ ],
+ "Prison_B02": [
+  {
+   "from": [
+    204,
+    40
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "swim": true,
+    "x": 244,
+    "tol": 24
+   },
+   "steer": 244
+  },
+  {
+   "from": [
+    220,
+    136
+   ],
+   "moves": [
+    "dive"
+   ],
+   "dash": [],
+   "to": {
+    "swim": true,
+    "x": 124,
+    "tol": 24
+   },
+   "steer": 124,
+   "wait": 315
+  },
+  {
+   "from": [
+    116,
+    128
+   ],
+   "moves": [
+    "kick"
+   ],
+   "dash": [
+    "ul",
+    "u"
+   ],
+   "to": {
+    "swim": true,
+    "x": 44,
+    "tol": 32
+   },
+   "steer": 36,
+   "wait": 377
+  },
+  {
+   "from": [
+    44,
+    136
+   ],
+   "moves": [
+    "swim"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_B03"
+   },
+   "steer": -12
+  }
+ ],
+ "Prison_B03": [
+  {
+   "from": [
+    276,
+    136
+   ],
+   "moves": [
+    "kick"
+   ],
+   "dash": [
+    "u",
+    "ul",
+    "l"
+   ],
+   "to": {
+    "x": 252,
+    "y": 104,
+    "tol": 14
+   },
+   "steer": 252,
+   "steer_air": true
+  },
+  {
+   "from": [
+    244,
+    104
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "l"
+   ],
+   "to": {
+    "swim": true,
+    "x": 164,
+    "tol": 20
+   },
+   "hurry": true
+  },
+  {
+   "from": [
+    172,
+    112
+   ],
+   "moves": [
+    "kick"
+   ],
+   "dash": [
+    "ul",
+    "l",
+    "u"
+   ],
+   "to": {
+    "x": 108,
+    "y": 96,
+    "tol": 10
+   },
+   "steer": 108
+  },
+  {
+   "from": [
+    100,
+    96
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "l",
+    "ul"
+   ],
+   "to": {
+    "x": 36,
+    "y": 72,
+    "tol": 12
+   },
+   "wait": 210
+  },
+  {
+   "from": [
+    52,
+    72
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "u",
+    "ur"
+   ],
+   "to": {
+    "x": 92,
+    "y": 48,
+    "tol": 16
+   },
+   "steer": 92
+  },
+  {
+   "from": [
+    92,
+    48
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "key": "Blue"
+   },
+   "steer": 132
+  },
+  {
+   "from": [
+    116,
+    48
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "u",
+    "ul"
+   ],
+   "to": {
+    "portal": "Prison_B04"
+   },
+   "steer": 100
+  }
+ ],
+ "Prison_B04": [
+  {
+   "from": [
+    76,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 44,
+    "y": 160,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    60,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 132,
+    "y": 136,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    124,
+    136
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 44,
+    "y": 112,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    60,
+    112
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 132,
+    "y": 88,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    124,
+    88
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 44,
+    "y": 64,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    44,
+    64
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 92,
+    "y": 40,
+    "tol": 12
+   },
+   "steer": 92
+  },
+  {
+   "from": [
+    100,
+    40
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "u"
+   ],
+   "to": {
+    "portal": "Prison_Hub"
+   },
+   "steer": 100
+  }
+ ],
+ "Prison_Hub#Y01": [
+  {
+   "from": [
+    324,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "ur",
+    "u"
+   ],
+   "to": {
+    "x": 356,
+    "y": 160,
+    "tol": 10
+   },
+   "steer": 356
+  },
+  {
+   "from": [
+    356,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Y01"
+   },
+   "steer": 652
+  }
+ ],
+ "Prison_Y01": [
+  {
+   "from": [
+    28,
+    160
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 140,
+    "y": 88,
+    "tol": 16
+   },
+   "steer_first": 80.0
+  },
+  {
+   "from": [
+    148,
+    88
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 284,
+    "y": 160,
+    "tol": 16
+   },
+   "steer_first": 224.0
+  },
+  {
+   "from": [
+    284,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Y02"
+   },
+   "steer": 324
+  }
+ ],
+ "Prison_Y02": [
+  {
+   "from": [
+    20,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 44,
+    "y": 160,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    44,
+    160
+   ],
+   "moves": [
+    "walk",
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 132,
+    "y": 48,
+    "tol": 12
+   },
+   "wall": true,
+   "timer": "gold_hall"
+  },
+  {
+   "from": [
+    140,
+    48
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 188,
+    "y": 56,
+    "tol": 8
+   },
+   "timer": "gold_hall"
+  },
+  {
+   "from": [
+    188,
+    56
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 252,
+    "y": 64,
+    "tol": 12
+   },
+   "wait": 189,
+   "wait_at": 2,
+   "timer": "gold_hall",
+   "hurry": true
+  },
+  {
+   "from": [
+    260,
+    64
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 300,
+    "y": 184,
+    "tol": 12
+   },
+   "steer": 300,
+   "timer": "gold_hall"
+  },
+  {
+   "from": [
+    300,
+    184
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Y03"
+   },
+   "steer": 252,
+   "timer": "gold_hall"
+  }
+ ],
+ "Prison_Y03": [
+  {
+   "from": [
+    252,
+    32
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "swim": true,
+    "x": 212,
+    "tol": 24
+   },
+   "steer": 204,
+   "wait": 210
+  },
+  {
+   "from": [
+    220,
+    136
+   ],
+   "moves": [
+    "kick"
+   ],
+   "dash": [
+    "ul",
+    "l"
+   ],
+   "to": {
+    "x": 156,
+    "y": 120,
+    "tol": 10
+   },
+   "steer": 156
+  },
+  {
+   "from": [
+    156,
+    120
+   ],
+   "moves": [
+    "walk",
+    "run"
+   ],
+   "dash": [],
+   "to": {
+    "x": 68,
+    "y": 64,
+    "tol": 14
+   },
+   "wall": true,
+   "steer_first": 120.0,
+   "hurry": true
+  },
+  {
+   "from": [
+    60,
+    64
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 36,
+    "y": 96,
+    "tol": 10
+   },
+   "steer": 36
+  },
+  {
+   "from": [
+    36,
+    96
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "key": "Gold"
+   },
+   "steer": 12,
+   "wait": 189,
+   "wait_at": 3,
+   "hurry": true
+  },
+  {
+   "from": [
+    20,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Y04"
+   },
+   "steer": -4
+  }
+ ],
+ "Prison_Y04": [
+  {
+   "from": [
+    292,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Hub"
+   },
+   "steer": -4
+  }
+ ],
+ "Prison_Hub#fromR04": [
+  {
+   "from": [
+    36,
+    352
+   ],
+   "moves": [
+    "jump",
+    "walk"
+   ],
+   "dash": [
+    "r"
+   ],
+   "to": {
+    "x": 148,
+    "y": 376,
+    "tol": 12
+   }
+  },
+  {
+   "from": [
+    148,
+    376
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 236,
+    "y": 376,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    236,
+    376
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 352,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    352
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 328,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    328
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 304,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    304
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 280,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    280
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 256,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    256
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 232,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    232
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 208,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    276,
+    208
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 316,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    308,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "ul",
+    "u"
+   ],
+   "to": {
+    "x": 276,
+    "y": 160,
+    "tol": 10
+   },
+   "steer": 276
+  }
+ ],
+ "Prison_Hub#fromY04": [
+  {
+   "from": [
+    604,
+    352
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 452,
+    "y": 376,
+    "tol": 10
+   },
+   "steer": 452
+  },
+  {
+   "from": [
+    452,
+    376
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 396,
+    "y": 352,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    396,
+    352
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 444,
+    "y": 328,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    444,
+    328
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 396,
+    "y": 304,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    396,
+    304
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 444,
+    "y": 280,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    444,
+    280
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 396,
+    "y": 256,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    396,
+    256
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 444,
+    "y": 232,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    444,
+    232
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 396,
+    "y": 208,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    388,
+    208
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 348,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    324,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "ur",
+    "u"
+   ],
+   "to": {
+    "x": 356,
+    "y": 160,
+    "tol": 10
+   },
+   "steer": 356
+  }
+ ],
+ "Prison_Hub#fromG04": [
+  {
+   "from": [
+    420,
+    40
+   ],
+   "moves": [
+    "walk",
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 372,
+    "y": 64,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    380,
+    64
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 420,
+    "y": 88,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    420,
+    88
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 372,
+    "y": 112,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    380,
+    112
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 420,
+    "y": 136,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    420,
+    136
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 460,
+    "y": 160,
+    "tol": 10
+   },
+   "steer": 460
+  },
+  {
+   "from": [
+    460,
+    160
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "portal": "Prison_Y01"
+   },
+   "steer": 652
+  }
+ ],
+ "Prison_Hub#fromB04": [
+  {
+   "from": [
+    124,
+    376
+   ],
+   "moves": [
+    "walk"
+   ],
+   "dash": [],
+   "to": {
+    "x": 236,
+    "y": 376,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    236,
+    376
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 352,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    352
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 328,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    328
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 304,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    304
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 280,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    280
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 256,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    268,
+    256
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 220,
+    "y": 232,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    220,
+    232
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 268,
+    "y": 208,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    276,
+    208
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [],
+   "to": {
+    "x": 316,
+    "y": 184,
+    "tol": 8
+   }
+  },
+  {
+   "from": [
+    308,
+    184
+   ],
+   "moves": [
+    "jump"
+   ],
+   "dash": [
+    "ul",
+    "u"
+   ],
+   "to": {
+    "x": 276,
+    "y": 160,
+    "tol": 10
+   },
+   "steer": 276
+  }
+ ]
+}

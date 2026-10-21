@@ -28,12 +28,8 @@ extends TileMapLayer
 ## `material` (a TileMapLayer is one CanvasItem, so unlike Pond's many small
 ## Sprite2D tiles there is no per-child `use_parent_material` to set up).
 ##
-## NO FISH HERE, DELIBERATELY — unlike Pond, which scatters a few. Painted
-## water is meant for irregular, often small or branching shapes (this is
-## also the layer with no floor of its own, just whatever is directly below
-## the lowest painted row), and a per-region fish scatter here read as
-## cluttered/arbitrary in a way it does not in a Pond's own clean box. Fish
-## are still purely Pond's thing — see scenes/props/zones/pond.gd.
+## WaterLifeEffects adds floor algae, contained fish and waterfalls, with
+## optional WaterLife brushes in LDtk. See docs/water-authoring.md.
 ##
 ## The player never queries this layer directly — scripts/ldtk_world.gd does
 ## that (see its `_in_water_tile()`), the same way it already owns the
@@ -127,6 +123,8 @@ func _ready() -> void:
 		else:
 			set_cell(coord, cell.source_id, Vector2i(cell.col, 0), cell.alt)
 	set_process(not _cells.is_empty())
+	if get_node_or_null("WaterLifeEffects") == null:
+		add_child(preload("res://scenes/props/water_life/WaterLife.tscn").instantiate())
 
 
 func _process(delta: float) -> void:

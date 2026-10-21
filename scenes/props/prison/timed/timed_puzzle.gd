@@ -11,6 +11,9 @@ var gate: Node2D
 var puzzle_id := ""
 var _physically_open := false
 var _plate_pressed := false
+var _touching := false
+## Brief brightening when the lever is thrown, so the pull reads on screen.
+var _pull_flash := 0.0
 @onready var barrier: CollisionShape2D = $Barrier/Shape
 
 func _ready() -> void:
@@ -35,8 +38,11 @@ func bind(world: Node) -> void:
 func refresh() -> void:
 	queue_redraw()
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if mission==null or not is_instance_valid(mission.player): return
+	if _pull_flash > 0.0:
+		_pull_flash = maxf(0.0, _pull_flash - delta)
+		modulate = Color(1.6, 1.5, 1.0) if _pull_flash > 0.0 else Color.WHITE
 	if kind in ["TimedGate","TimedShutter"]:
 		# A shutter already open may defer closure; an initially closed gate
 		# never opens just because someone is pushing against its collider.
@@ -48,6 +54,7 @@ func _physics_process(_delta: float) -> void:
 		return
 	if gate==null or get_parent().get_parent()!=mission.current_room or mission._transitioning or mission.player.input_locked or mission.player.state==Player.State.DEAD:
 		_plate_pressed = false
+		_touching = false
 		return
 	if kind=="PressurePlate":
 		var foot: Vector2 = mission.player.global_position + Vector2(0,Player.HALF_HEIGHT-1)
@@ -55,10 +62,19 @@ func _physics_process(_delta: float) -> void:
 		if _plate_pressed and mission.timers.hold(puzzle_id): mission.get_node("Act2Audio").play_cue(&"Lock")
 		queue_redraw()
 		return
-	if not Rect2(global_position-Vector2(9,8),Vector2(18,16)).intersects(mission.player.hitbox_rect()): return
+	var touching := Rect2(global_position-Vector2(9,8),Vector2(18,16)).intersects(mission.player.hitbox_rect())
+	var arrived := touching and not _touching
+	_touching = touching
+	if not touching: return
 	if kind=="TimedLever":
-		if mission.player.is_on_floor() and Input.is_action_just_pressed("move_up"):
-			if mission.timers.start(puzzle_id,bool(fields.get("CanBank",true))): mission.get_node("Act2Audio").play_cue(&"Lock")
+		# Walking INTO the lever throws it — nothing on screen ever asked for
+		# Up, so players read an Up-only lever as broken. Up still re-throws it
+		# while standing there. Edge-triggered, so resting on it does not keep
+		# restarting the countdown.
+		if arrived or (mission.player.is_on_floor() and Input.is_action_just_pressed("move_up")):
+			if mission.timers.start(puzzle_id,bool(fields.get("CanBank",true))):
+				mission.get_node("Act2Audio").play_cue(&"Lock")
+				_pull_flash = 0.25
 	elif kind=="TimedRelay" and mission.timers.bank(puzzle_id):
 		mission.get_node("Act2Audio").play_cue(&"Key")
 		SaveGame.save_now()

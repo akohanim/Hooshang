@@ -14,8 +14,8 @@ extends Node2D
 ##  2. WaterLayer itself, built on a bare TileMapLayer with a TileSet
 ##     constructed in code from the real sheet (no LDtk round trip either):
 ##     a cell two rows under an opening gets retargeted to the deep tile, a
-##     shimmering cell's frame actually advances, and — unlike Pond — no fish
-##     get spawned at all.
+##     shimmering cell's frame actually advances, and thin water fragments
+##     remain too small for ambient fish.
 ##
 ## Run:  godot --headless res://tests/water_tile_test.tscn
 
@@ -58,6 +58,8 @@ func _world_integration() -> void:
 	if layer == null:
 		return
 	_check("collision disabled (pass-through)", not layer.collision_enabled)
+	var dressing := room.get_node_or_null("WaterLife") as TileMapLayer
+	_check("WaterLife imports as a non-colliding paint layer", dressing != null and not dressing.collision_enabled)
 	_check("ldtk_world cached the water layer", _world._water_layer == layer)
 
 	var player := _world.player
@@ -173,9 +175,9 @@ func _layer_unit() -> void:
 			% layer.get_cell_alternative_tile(Vector2i(0, 0)),
 		layer.get_cell_alternative_tile(Vector2i(0, 0)) == 0)
 
-	# Unlike Pond, painted water spawns no fish at all — see WaterLayer's own
-	# class doc for why.
-	_check("painted water spawns no fish",
+	# Thin shafts and isolated cells must stay free of fish. Broad pools and
+	# manual brushes are covered by water_life_test.gd.
+	_check("narrow water fragments spawn no fish",
 		layer.get_children().filter(func(c): return c is Fish).is_empty())
 
 

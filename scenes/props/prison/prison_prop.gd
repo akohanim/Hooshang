@@ -40,11 +40,11 @@ func _ready() -> void:
 		sprite.texture = preload("res://ldtk/art/prison/door_closed.png")
 		sprite.scale = prop_size / Vector2(32,40)
 		(barrier.shape as RectangleShape2D).size = prop_size
-		if prop_size.x > prop_size.y:
-			# Close a vertical shaft flush with the upper room's floor. A locked
-			# return must not let the player fall into an unescapable deep pocket.
-			(barrier.shape as RectangleShape2D).size.y = 64
-			$Barrier.position.y = -4 if position.y < 32 else 4
+		# A hatch door (wider than tall) is exactly the cell it is drawn in, at
+		# the seam. It used to hang 64px down past it, which reached 32px into the
+		# NEIGHBOURING room as an invisible block: it pinned anyone standing on
+		# the hub step under a locked hatch. A one-cell plug leaves at most a
+		# one-cell dip on the far side, which is never a pocket he cannot leave.
 		barrier.disabled = false
 	elif kind == "Patrol":
 		# Water tiles must not tint away a lethal patrol's established outline.

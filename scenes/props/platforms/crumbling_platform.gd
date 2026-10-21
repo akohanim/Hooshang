@@ -3,7 +3,7 @@ class_name CrumblingPlatform
 extends Platform
 ## Loose, cracked 8px chunks. A footfall starts individual block jitter,
 ## then collision drops and pieces fall independently. A dashed outline stays
-## until player respawn or level reset. Room changes preserve collapsed state.
+## until player respawn or level reset. Act 2 also restores the room on re-entry.
 ##
 ## Each Act has its own sheet (tools/gen_crumble_blocks.py), drawn to stand
 ## apart from that Act's scaffolding; `palette` picks one, and AUTO reads the
@@ -48,6 +48,11 @@ enum Palette { AUTO, OFFICE, CHILDHOOD, PSYCHEDELIC }
 @export var fall_distance := 40.0
 ## Brief one-pixel slips stay visible at native scale; pauses keep them subtle.
 @export var shudder := 1.0
+## Seconds after falling before it rebuilds itself, Celeste-style. 0 (the
+## default everywhere it was already used) = only a respawn or room reset brings
+## it back. Never rebuilds around a player standing in its space.
+@export var respawn_time := 0.0
+var _respawn_timer := 0.0
 
 ## The damage frames in use, resolved from `palette` on every rebuild.
 var _sheet: Array = FRAMES
@@ -68,6 +73,10 @@ var _fall_tween: Tween
 
 func _ready() -> void:
 	super()
+	# Override older packed prison scenes that serialized a 2.5-second timer.
+	# Act 2's collapsed platforms return only on respawn or a fresh room visit.
+	if not Engine.is_editor_hint() and _world_palette() == Palette.CHILDHOOD:
+		respawn_time = 0.0
 	add_to_group("crumbling")
 	set_process(not Engine.is_editor_hint())
 
@@ -192,6 +201,10 @@ func _standing_on(who: Player) -> bool:
 
 func _process(delta: float) -> void:
 	if _falling:
+		if respawn_time > 0.0 and not Engine.is_editor_hint():
+			_respawn_timer += delta
+			if _respawn_timer >= respawn_time and not _player_in_space():
+				reset()
 		return
 	# A cinematic owns the rider's movement; don't remove their support while
 	# they cannot respond. Resume the same countdown when control returns.
@@ -290,8 +303,16 @@ func give_way(after := 0.0) -> void:
 	_timer = maxf(crumble_time - maxf(after, 0.0), 0.0)
 
 
+func _player_in_space() -> bool:
+	var box := Rect2(global_position - size * 0.5, size).grow(1.0)
+	for who in get_tree().get_nodes_in_group("player"):
+		if who is Player and box.intersects((who as Player).hitbox_rect()): return true
+	return false
+
+
 ## Put it back exactly as it was placed.
 func reset() -> void:
+	_respawn_timer = 0.0
 	# The fall tween FIRST. It owns position and alpha for fall_time seconds, so
 	# a reset that only assigns them is overwritten on the next frame and the
 	# platform sinks away again while solid — which is how this was caught: the

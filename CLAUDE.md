@@ -1088,6 +1088,13 @@ organized per-character before this pass and needed no change.
   the debug picker still lists everything and is on the menu in EXPORTED builds
   too (the `OS.is_debug_build()` gate was removed — it hid the row from the
   itch.io build, which is the one most people play).
+  **EXPLORE CHAPTERS -> a chapter is a WORLD MAP** (`scenes/ui/world_map.gd`)
+  beside the room list: every room drawn where LDtk puts it, the selected one
+  lit and centred, hover/click/tap to pick, drag to pan, wheel to zoom, and an
+  overview inset to jump across the Act. It reads `resources/menu/rooms.json`,
+  NOT the worlds — **re-run `python3 tools/build_menu_catalog.py` after moving,
+  adding or repainting any room**, or the map shows the old layout
+  (`chapter_browser_test` fails on a moved room).
   `PauseMenu.tscn` is the `Pause` autoload — Escape / Start / Select opens it,
   the same button closes it, and it is the ONLY node set to
   `PROCESS_MODE_ALWAYS`, so `get_tree().paused` freezes everything else exactly
@@ -1400,6 +1407,96 @@ organized per-character before this pass and needed no change.
   every room's real-input routes (see `resources/levels/ACT2_SKY_GARDENS.md`):
   `act2_routes_test` replays the main lines, `-- --rewards` the every-lemon
   lines. Headless: `Godot --headless --path . res://tests/act2_feel_measure.tscn`
+- `tools/build_prison_wings.py` — the prison hub and its four key wings
+  (`Prison_Hub`, `Prison_{R,G,B,Y}01..04`) are DRAWN in this script, not in
+  LDtk: it rewrites those 17 levels' `Collision` IntGrid, bakes both auto-layers
+  (`Tiles`, `PrisonMasonry`) and places every entity, touching nothing else in
+  `hooshang_act2.ldtk`. Edit the room there and re-run it (LDtk closed), then
+  re-import; `--doc` regenerates `docs/prison_wings_v3.md` (ASCII map + intended
+  move chain per room) from the same data, so the plan cannot drift from the
+  build. Hand edits to those levels in LDtk are overwritten on the next run.
+  Prison water REFILLS the dash on entry (`prison_world.gd`, Celeste's rule) —
+  the flooded wing's pool -> dash -> pool chains depend on it.
+  General platforms are Act 2's SCAFFOLDING (`Room.scaffold`: physics on the
+  prison `Collision` grid, art baked from the `Collisions` layer's scaffolding
+  brush, masonry skipped underneath); one-ways only where hopping UP THROUGH a
+  floor is the point (the G04/B04 hatch landings). Each room also carries a
+  ROUTE (`Room.step`) written to `resources/levels/prison_wings_routes.json`,
+  and `Godot --headless --path . --fixed-fps 60 res://tests/prison_wings_routes_test.tscn`
+  (add room names after `--` for a subset, `--trace` to print every attempt)
+  PROVES each room with real input: it searches jump lengths, dash
+  timings/directions, wall-kicks and thought-phase waits for every step,
+  insists on inputs that still work ±3px off the start (else FRAGILE), then
+  replays them back to back from the entrance so crumbles, lever/plate
+  countdowns and thought phases are met the way a player meets them. Change a
+  room -> rerun it. Backdrops: `tools/gen_prison_backdrops.py` paints one
+  interior per room into `assets/backdrop/prison/`, hung behind the room by
+  `prison_room.gd`. Levers throw on CONTACT (Up still works) — Up-only read as
+  broken. Prison crumbling stones rebuild 2.5s after falling
+  (`CrumblingPlatform.respawn_time`, 0 = old behaviour everywhere else).
+  Prison water follows the same dash rule as the rest of the game: swimming
+  blocks dash, and touching the submerged floor does not refill it. The
+  flooded routes use a swim kick followed by an airborne dash once he clears
+  the surface; `prison_wings_routes_test.gd` replays those moves from entrance
+  to goal.
+- **HOOSHANG 64** — the hub's old console + box TV (`scenes/props/prison/
+  retro_tv.gd`, placed by `PrisonWorld._add_retro_tv()`): the TV shows the
+  game's title screen live; Up at it pushes a Camera2D into the 32x24 screen
+  until it fills the view, then hands the picture to a full-window overlay
+  (160x120 at 1.5x of the design space = whole output pixels, `crt.gdshader`
+  scanlines). Esc/Start, a cleared course or a game over runs the move back.
+  The game itself is `scenes/minigame/retro_game.gd` — a complete small retro
+  platformer (variable jump, dash = run, star blocks, stomps, checkpoint,
+  lives/time/score, goal flag, synthesised square-wave blips), ORIGINAL art
+  from `tools/gen_retro_tv.py`. Its flat limited palette is the deliberate
+  exception to "not 8-bit": it is a game inside the game. The TV stands on its
+  own scaffold stage right of the east stair (cols 60-73, row 32).
+  **SUPER SIMORGH** is the hub's second machine — an old PC on a desk over a
+  Persian rug, on a matching stage left of the central stair (cols 8-21, row
+  32). Same `RetroTV` prop (`art`/`screen`/`game` set by
+  `PrisonWorld._add_minigames()`), so the push-in, CRT overlay and exit are
+  shared. The game (`scenes/minigame/simorgh_game.gd`) is a ONE-MINUTE
+  horror run dressed as a bright, psychedelic Persian platformer. It OPENS
+  in third person (`Mode.INTRO`, 4.8s, letterboxed, Jump skips): the camera
+  faces Hooshang breathing in the bright corridor
+  (`assets/minigame/simorgh/hooshang_sheet.png`, cut from the PixelLab
+  rotations/idle frames by `tools/gen_simorgh_hooshang.py` — front, side and
+  back cells, picked by where the camera stands relative to his facing), and
+  DARKSHANG flickers in far behind him, shape-shifting. Hooshang turns to look,
+  turns to run, and the camera swings round him into his eyes; from there it
+  is first person. The camera is `view_pos`/`view_angle`, which is the player
+  except in the opening. He follows down the corridor (paced 2.7 -> 4.3 cells/s
+  against your 4.6 run, leashed to stay close), swelling and shape-shifting —
+  his purple-rimmed cloud dissolving pixel by pixel into Hooshang's own
+  silhouette from `assets/characters/darkshang/darkshang.png` (row 1, the
+  frames with eyes) and back. The dark spreads ahead of him: black veins
+  through the tiles, colour draining, the sky dying to a red eclipse, fog
+  closing in, mihrab niches opening into eyes, his tendrils growing in from
+  the screen edges. It thickens with time, with his closeness AND with your
+  progress, so the last stretch is near-black around the lit arches of the
+  way out. Reach them: escaped ("for now"). Fall behind, stand still, or let
+  the minute run out: consumed (tendrils close, his face, a shriek).
+  Lights push him back 1.2 cells, a star block's burst 3; a pit costs a
+  second in the dark. Scares: random single-frame faces as he nears, a
+  stinger when you turn round to look at him, light flickers that leave only
+  eyes lit, a heartbeat that quickens with him, and a title screen that
+  shows "DARKSHANG IS WAITING" for a frame every few seconds. Everything is
+  `simorgh.gdshader` at 160x120 pixel art (heightfield ray-march; `dark`,
+  `dark_x`, `prox`, `morph`, `scare`, `consume`, `flicker` drive him), with
+  the oil-lamp HUD burning down the minute. Audio from
+  `tools/gen_simorgh_audio.py`: santur music in Dastgah-e Shur that slows
+  and detunes as he comes (`pitch_scale`), plus heartbeat, drone, whisper,
+  stinger and shriek. Balance check (autopilot, lateral steering cheated):
+  a perfect runner escapes at ~27s with him ~7 cells behind; a walker is
+  caught at ~25s; standing still, ~3s after the chase starts (timings
+  include the opening).
+- **Act 2's child wall jump** is softer than the adult's: `wall_jump_speed_x`
+  110 and `wall_jump_drag` 360 (`Act2Beats._apply_child_movement`). With no
+  air deceleration, the adult 170 px/s kick coasted ~295px — nearly a room;
+  now ~125px, and two-wall shafts up to 6 cells still climb (~21px a kick).
+  The drag starts after the kick's control lock and only bleeds speed ABOVE
+  his run speed. `tests/act2_routes_test` had the same 20 failures before and
+  after this change (pre-existing, not caused by it).
 - `tools/ldtk_to_8px.py` — the one-shot 16px -> 8px grid migration, kept for the
   record because it documents what the conversion had to get right. It
   REGENERATES the auto-layer tiles rather than leaving that to LDtk (they live
@@ -1689,6 +1786,16 @@ test rather than being noticed months later in play.
   player, so he is the other side.
 - **One portrait state per line.** Beats name a state (`"annoyed"`), not a file,
   so re-cutting the portrait sheet never touches the dialogue.
+- **Syncing the author's script** (`Hooshang - The Script.md`, kept outside the
+  repo). ACT TWO: paste its `# ACT TWO` section into
+  `docs/story/act2_author_script.md` and run `python3 tools/compile_act2_script.py`
+  — each `## NUMBER — TITLE` heading maps to a scene key (its `HEADINGS`), faces
+  come from `resources/dialogue/act2_portrait_directions.json` (matched on exact
+  text, so a reworded line needs its entry reworded), and staging between lines
+  is anchored on a line's opening words with `Act2Script.cue()`, never an index.
+  ACT ONE, and Act Two's pond/campfire/dawn, are written in code:
+  `scripts/act1_beats.gd`, `scenes/props/chase/darkshang_trigger.gd` (the shadow
+  reveal), `scripts/dash_tutorial.gd` (the gift) and `scripts/act2_beats.gd`.
 - **A trigger's written SCRIPT is read by one parser, `scripts/dialogue_script.gd`
   (`DialogueScript`).** One spoken line per line of text; a leading `(state)`
   and an uppercase speaker heading (`RUMI — `, `JAMSHID — `) are read and
@@ -1830,4 +1937,3 @@ test rather than being noticed months later in play.
   and a future grid change should not either — level geometry is built against
   the pixels, and the cell count is just how it reads on the current grid.
 - Checkpoints are silent Area2Ds; death is instant respawn, no penalty.
-

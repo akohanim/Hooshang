@@ -1,7 +1,9 @@
 class_name ThoughtHazardLayer
 extends TileMapLayer
-## Runtime driver for the paintable ThoughtHazards tiles (see STYLE_GUIDE.md
-## §9). Attached at import time (ldtk_level_post_import.gd) to every
+## Runtime driver for the paintable ThoughtHazards tiles (STYLE_GUIDE.md §9).
+## Act 2's dark brush renders moving tufts, breathing and irregular eyes through
+## ThoughtDust in Godot. Other sheets retain the six-frame driver below.
+## Attached at import time (ldtk_level_post_import.gd) to every
 ## ThoughtHazards TileMapLayer, the same way LdtkDoor and LdtkRumiTrigger are
 ## swapped onto their nodes — a script attached at import time survives being
 ## packed into the saved .scn; a signal CONNECTED at import time does not,
@@ -51,9 +53,31 @@ class _Cell:
 
 
 var _cells: Array[_Cell] = []
+var _procedural_dust: Node2D
+var _dust_layout: Array[Vector2i] = []
+var _procedural_mode := false
+var _animation_started := false
 
 
 func _ready() -> void:
+	initialize_animation()
+
+
+## Also called when upgrading an already-imported prison layer at runtime.
+func initialize_animation() -> void:
+	if _animation_started:
+		return
+	_animation_started = true
+	# Act Two's dark brush uses Godot's procedural dust renderer. The IntGrid
+	# stays the collision/authoring source; only its presentation is replaced.
+	# Select at runtime so already-imported rooms pick up the renderer too.
+	if _uses_act2_thought_art():
+		_procedural_mode = true
+		self_modulate.a = 0.0
+		changed.connect(_refresh_procedural_dust)
+		_refresh_procedural_dust()
+		set_process(true)
+		return
 	for coord in get_used_cells():
 		var cell := _Cell.new()
 		cell.coord = coord
@@ -70,7 +94,42 @@ func _ready() -> void:
 	set_process(not _cells.is_empty())
 
 
+func _uses_act2_thought_art() -> bool:
+	if tile_set == null:
+		return false
+	for coord in get_used_cells():
+		var source := tile_set.get_source(get_cell_source_id(coord)) as TileSetAtlasSource
+		return source != null and source.texture.resource_path.ends_with("/act2_thought_tiles.png")
+	# An empty brush can be painted later. InkThoughtHazards shares this TileSet
+	# but retains its own artwork and six-frame driver.
+	return name == "ThoughtHazards" and tile_set.resource_path.contains("hooshang_act2")
+
+
+func _refresh_procedural_dust() -> void:
+	var layout := get_used_cells()
+	if layout == _dust_layout:
+		return
+	_dust_layout = layout
+	if is_instance_valid(_procedural_dust):
+		_procedural_dust.queue_free()
+		_procedural_dust = null
+	if layout.is_empty():
+		return
+	_procedural_dust = load("res://scenes/props/hazards/thought_dust/ThoughtDust.tscn").instantiate()
+	_procedural_dust.motion_variation = 1.0
+	_procedural_dust.lobe_speed = 0.65
+	_procedural_dust.center_speed = 0.8
+	add_child(_procedural_dust)
+	_procedural_dust.configure(self)
+
+
 func _process(delta: float) -> void:
+	if _procedural_mode:
+		# TileMapLayer.changed does not reliably fire for runtime cell edits.
+		# Comparing the layout also catches set_cell/erase_cell/clear; the GPU
+		# mask is rebuilt only when that layout actually differs.
+		_refresh_procedural_dust()
+		return
 	for cell in _cells:
 		cell.clock += delta * cell.speed
 		var frame := int(floor((cell.clock + cell.phase) / FRAME_TIME)) % FRAMES

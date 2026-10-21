@@ -20,7 +20,7 @@ func register_puzzle(id: String, duration: float) -> bool:
 
 func start(id: String, can_bank := true) -> bool:
 	if not _durations.has(id): return false
-	# A solved room stays solved, but its lever still restores temporary footing.
+	# A solved room stays solved, but linked mechanisms still receive the press.
 	lever_used.emit(id)
 	if solved(id): return false
 	_remaining[id] = _durations[id]

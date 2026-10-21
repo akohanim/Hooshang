@@ -7,373 +7,357 @@ scenes = {
     {
       "speaker": "JAMSHID",
       "text": "Cousin joon!",
-      "source_line": 9
+      "source_line": 13
     },
     {
       "speaker": "HOOSHANG",
       "text": "Jamshid! It's so good to see you!",
-      "source_line": 12
+      "source_line": 16
     },
     {
       "speaker": "JAMSHID",
       "text": "You saw me yesterday.",
-      "source_line": 15
+      "source_line": 19
     },
     {
       "speaker": "HOOSHANG",
-      "text": "It feels like so much longer.",
-      "source_line": 18
+      "text": "It feels like a lot longer.",
+      "source_line": 22
     },
     {
       "speaker": "JAMSHID",
       "text": "Well, get out of the water. You're frightening dinner.",
-      "source_line": 21
+      "source_line": 25
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Are the fish biting today?",
-      "source_line": 26
+      "text": "Are they biting?",
+      "source_line": 30
     },
     {
       "speaker": "JAMSHID",
-      "text": "They would if little kids stopped swimming through their house.",
-      "source_line": 29
+      "text": "They would be, if you stopped swimming through their house.",
+      "source_line": 33
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Not like that. Chase a fish and it goes. Sit still and it comes to you.",
+      "source_line": 38
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "That's it? Just sit there?",
+      "source_line": 41
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Sit. Watch the water. And stop wanting it so much. They can tell.",
+      "source_line": 44
     },
     {
       "speaker": "JAMSHID",
       "text": "Finally!!",
-      "source_line": 34
+      "source_line": 51
     }
   ],
   "campfire": [
     {
       "speaker": "HOOSHANG",
       "text": "Does my mother know we're here?",
-      "source_line": 43
+      "source_line": 60
     },
     {
       "speaker": "JAMSHID",
-      "text": "Yes. She sent snacks.",
-      "source_line": 46
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "Did she send that pomegranate fruit roll up? Where is it!?",
-      "source_line": 49
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "You were late.",
-      "source_line": 52
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "Jamshid",
-      "source_line": 55
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Fishing is hungry work. She also said to be home before dark...",
-      "source_line": 58
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "You're quiet today.",
+      "text": "She sent snacks.",
       "source_line": 63
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I had a strange dream.",
+      "text": "Lavashak? The pomegranate one? Where is it?",
       "source_line": 66
     },
     {
       "speaker": "JAMSHID",
-      "text": "Tell me.",
+      "text": "You were late.",
       "source_line": 69
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I was old.",
+      "text": "Jamshid!",
       "source_line": 72
     },
     {
       "speaker": "JAMSHID",
-      "text": "Did you have a moustache?",
+      "text": "Fishing is hungry work. She also said be home before dark.",
       "source_line": 75
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "You're quiet tonight.",
+      "source_line": 80
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I had a strange dream.",
+      "source_line": 83
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Tell me.",
+      "source_line": 86
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I was old.",
+      "source_line": 89
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Did you have a moustache?",
+      "source_line": 92
     },
     {
       "speaker": "HOOSHANG",
       "text": "Yes.",
-      "source_line": 78
+      "source_line": 95
     },
     {
       "speaker": "JAMSHID",
       "text": "Good. Go on.",
-      "source_line": 81
+      "source_line": 98
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I worked in an office. I didn't like it, but I stayed for years. Then I lost the job... and I felt lost, too.",
-      "source_line": 84
+      "text": "I worked in an office for 20 years. I hated it. Then they let me go, and I didn't know who I was anymore.",
+      "source_line": 101
     },
     {
       "speaker": "JAMSHID",
-      "text": "What happened?",
-      "source_line": 87
+      "text": "Then what?",
+      "source_line": 104
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Rumi appeared.",
-      "source_line": 90
+      "text": "Rumi showed up.",
+      "source_line": 107
     },
     {
       "speaker": "JAMSHID",
-      "text": "Rumi, the poet, from school?",
-      "source_line": 93
+      "text": "Rumi? The poet? From school?",
+      "source_line": 110
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Yes. He taught me how to stay equanimous with my thoughts.",
-      "source_line": 96
+      "text": "Yeah, that one. He glowed.",
+      "source_line": 113
+    },
+    {
+      "speaker": "JAMSHID",
+      "text": "Of course he did.",
+      "source_line": 116
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "He said my thoughts were only weather. That I didn't have to fight them.",
+      "source_line": 119
     },
     {
       "speaker": "JAMSHID",
       "text": "You'd better start from the beginning.",
-      "source_line": 99
+      "source_line": 124
     }
   ],
   "dawn": [
     {
       "speaker": "HOOSHANG",
       "text": "...and then I woke up here.",
-      "source_line": 108
+      "source_line": 133
     },
     {
       "speaker": "JAMSHID",
       "text": "What a dream.",
-      "source_line": 111
+      "source_line": 136
     },
     {
       "speaker": "HOOSHANG",
       "text": "Do you remember yours?",
-      "source_line": 114
+      "source_line": 139
     },
     {
       "speaker": "JAMSHID",
-      "text": "Almost never. By the time I wake up, they're gone.",
-      "source_line": 117
+      "text": "Hardly ever. By the time I wake up, they're gone.",
+      "source_line": 142
     },
     {
       "speaker": "HOOSHANG",
       "text": "This one felt like I'd lived it.",
-      "source_line": 120
+      "source_line": 145
     },
     {
       "speaker": "JAMSHID",
-      "text": "No wonder you looked so tired.",
-      "source_line": 123
+      "text": "No wonder you look so tired.",
+      "source_line": 148
     },
     {
       "speaker": "HOOSHANG",
       "text": "I'm glad you're here.",
-      "source_line": 128
+      "source_line": 153
     },
     {
       "speaker": "JAMSHID",
       "text": "I'm glad you came down.",
-      "source_line": 131
+      "source_line": 156
     },
     {
       "speaker": "JAMSHID",
       "text": "Next time you're old, come looking for me.",
-      "source_line": 136
+      "source_line": 161
     },
     {
       "speaker": "JAMSHID",
       "text": "That can't be the school bell.",
-      "source_line": 141
+      "source_line": 166
     },
     {
       "speaker": "HOOSHANG",
       "text": "We talked all night.",
-      "source_line": 144
+      "source_line": 169
     },
     {
       "speaker": "JAMSHID",
-      "text": "Come over after school. We can finish talking.",
-      "source_line": 149
+      "text": "Come by after school. We'll finish talking.",
+      "source_line": 174
     },
     {
       "speaker": "HOOSHANG",
       "text": "That's how you get to school?",
-      "source_line": 154
+      "source_line": 179
     },
     {
       "speaker": "JAMSHID",
-      "text": "How do you think I keep arriving before you?",
-      "source_line": 157
+      "text": "Duh. Race you there!",
+      "source_line": 182
     }
   ],
   "wall": [
     {
       "speaker": "HOOSHANG",
       "text": "Cousin joon!",
-      "source_line": 170,
+      "source_line": 191,
       "face": "happy"
     },
     {
       "speaker": "JAMSHID",
-      "text": "You coming to paint, or are you planning to stare at the wall until we're thirty?",
-      "source_line": 175,
-      "face": "joyful"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "I'm coming.",
-      "source_line": 178,
-      "face": "happy"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Good. We haven't committed the crime yet.",
-      "source_line": 181,
+      "text": "Grab a can. This wall's ours.",
+      "source_line": 194,
       "face": "joyful"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Your moustache is crooked.",
-      "source_line": 186,
+      "source_line": 197,
       "face": "happy"
     },
     {
       "speaker": "JAMSHID",
-      "text": "It's political commentary.",
-      "source_line": 189,
-      "face": "joyful"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "On what?",
-      "source_line": 192,
-      "face": "surprised"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Moustaches.",
-      "source_line": 195,
+      "text": "Art takes risks.",
+      "source_line": 200,
       "face": "joyful"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Come on. One good one before we go.",
-      "source_line": 202,
+      "text": "Your turn. Make it good.",
+      "source_line": 203,
       "face": "excited"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "My mother said home before dark.",
-      "source_line": 205,
+      "text": "We should go before dark.",
+      "source_line": 208,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Fine. Something quick.",
-      "source_line": 208,
-      "face": "friendly"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Write this.",
-      "source_line": 213,
+      "text": "One last thing. Rumi.",
+      "source_line": 211,
       "face": "determined"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "What?",
-      "source_line": 216,
-      "face": "surprised"
+      "text": "Poetry? On our last wall?",
+      "source_line": 214,
+      "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Rumi.",
+      "text": "\"This world is a prison, and we are prisoners...\"",
       "source_line": 219,
       "face": "determined"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "We get one last wall and you want homework?",
+      "text": "Cheerful.",
       "source_line": 222,
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Just write.",
+      "text": "\"Dig through the prison and—\"",
       "source_line": 225,
       "face": "determined"
     },
     {
-      "speaker": "JAMSHID",
-      "text": "“This world is a prison, and we are prisoners...”",
+      "speaker": "OFFICER",
+      "text": "Hey! What are you doing?!",
       "source_line": 230,
-      "face": "determined"
+      "face": "alarmed"
     },
     {
-      "speaker": "HOOSHANG",
-      "text": "Cheerful.",
-      "source_line": 233,
-      "face": "annoyed"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Keep going.",
-      "source_line": 236,
-      "face": "determined"
+      "speaker": "OFFICER",
+      "text": "Who painted this?",
+      "source_line": 235,
+      "face": "stern"
     },
     {
       "speaker": "JAMSHID",
-      "text": "“Dig through the prison and -”",
-      "source_line": 241,
-      "face": "determined"
-    },
-    {
-      "speaker": "JAMSHID",
-      "text": "Mine.",
-      "source_line": 268,
+      "text": "Me.",
+      "source_line": 240,
       "face": "determined"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Jamshid—",
-      "source_line": 271,
+      "source_line": 243,
       "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
       "text": "All of it.",
-      "source_line": 274,
+      "source_line": 246,
       "face": "determined"
     },
     {
       "speaker": "OFFICER",
-      "text": "You're coming with me! DETENTION!",
-      "source_line": 279
+      "text": "You're in serious trouble. Come with me.",
+      "source_line": 249,
+      "face": "angry"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Wait—",
-      "source_line": 282,
+      "text": "Wait!",
+      "source_line": 252,
       "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
       "text": "Go home, cousin joon.",
-      "source_line": 287,
+      "source_line": 255,
       "face": "worried"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Detention?",
-      "source_line": 292,
+      "text": "How long will he be gone?",
+      "source_line": 260,
       "face": "vulnerable"
     }
   ],
@@ -381,13 +365,13 @@ scenes = {
     {
       "speaker": "HOOSHANG",
       "text": "Four keys.",
-      "source_line": 325,
+      "source_line": 281,
       "face": "surprised"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Of course there are four keys.",
-      "source_line": 330,
+      "source_line": 286,
       "face": "annoyed"
     }
   ],
@@ -395,122 +379,118 @@ scenes = {
     {
       "speaker": "HOOSHANG",
       "text": "I'm coming, cousin.",
-      "source_line": 345
+      "source_line": 299
     }
   ],
   "cell": [
     {
       "speaker": "HOOSHANG",
-      "text": "Cousin Joon!",
-      "source_line": 376,
+      "text": "Cousin joon!",
+      "source_line": 310,
       "face": "happy"
     },
     {
       "speaker": "JAMSHID",
       "text": "Took you long enough.",
-      "source_line": 379,
+      "source_line": 313,
       "face": "joyful"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Come on lets go.",
-      "source_line": 386,
+      "text": "Come on. Let's go.",
+      "source_line": 318,
       "face": "happy"
     },
     {
       "speaker": "JAMSHID",
       "text": "Where?",
-      "source_line": 389,
+      "source_line": 321,
       "face": "worried"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Home.",
-      "source_line": 392,
+      "source_line": 324,
       "face": "happy"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Oh.",
-      "source_line": 395,
+      "text": "...Oh.",
+      "source_line": 327,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Your mother is going to kill both of us.",
-      "source_line": 398,
+      "text": "Your mother is going to kill us both.",
+      "source_line": 330,
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
       "text": "Probably just you.",
-      "source_line": 401,
+      "source_line": 333,
       "face": "joyful"
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "Come on.",
-      "source_line": 404,
-      "face": "happy"
-    },
+    }
+  ],
+  "chase": [
     {
       "speaker": "HOOSHANG",
       "text": "Slow down!",
-      "source_line": 413,
+      "source_line": 342,
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
       "text": "You slow down. You got old.",
-      "source_line": 416,
+      "source_line": 345,
       "face": "joyful"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Whose fault is that?",
-      "source_line": 419,
+      "text": "And whose fault is that?",
+      "source_line": 348,
       "face": "annoyed"
     },
     {
       "speaker": "HOOSHANG",
       "text": "We never finished it.",
-      "source_line": 439,
-      "face": "vulnerable"
+      "source_line": 361,
+      "face": "happy"
     },
     {
       "speaker": "JAMSHID",
       "text": "No.",
-      "source_line": 442,
+      "source_line": 364,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "We can finish it now. Come on — you always started. You start.",
-      "source_line": 445,
+      "text": "Let's finish it now. You always started. You start.",
+      "source_line": 367,
       "face": "happy"
     },
     {
       "speaker": "JAMSHID",
       "text": "It isn't my line to finish anymore, cousin joon.",
-      "source_line": 450,
+      "source_line": 372,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "What does that mean?",
-      "source_line": 453,
+      "source_line": 375,
       "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
       "text": "They're waiting for me.",
-      "source_line": 462,
+      "source_line": 380,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Who is? Jamshid — who's waiting?",
-      "source_line": 465,
+      "text": "Who is? Jamshid, who's waiting?",
+      "source_line": 383,
       "face": "vulnerable"
     }
   ],
@@ -518,549 +498,619 @@ scenes = {
     {
       "speaker": "HOOSHANG",
       "text": "There it is.",
-      "source_line": 477,
-      "face": "neutral"
+      "source_line": 390,
+      "face": "happy"
     },
     {
       "speaker": "JAMSHID",
       "text": "There it is.",
-      "source_line": 480,
+      "source_line": 393,
       "face": "friendly"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Come on. We'll take it back.",
-      "source_line": 483,
+      "text": "Come on. We'll ride it back.",
+      "source_line": 396,
       "face": "happy"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Move over.",
-      "source_line": 488,
+      "source_line": 401,
       "face": "happy"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Jamshid.",
-      "source_line": 493,
+      "source_line": 406,
       "face": "neutral"
     },
     {
       "speaker": "JAMSHID",
       "text": "You go home.",
-      "source_line": 496,
+      "source_line": 409,
       "face": "worried"
     },
     {
       "speaker": "HOOSHANG",
       "text": "What?",
-      "source_line": 499,
+      "source_line": 412,
       "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
       "text": "Your mother said before dark.",
-      "source_line": 502,
+      "source_line": 415,
       "face": "friendly"
     },
     {
       "speaker": "HOOSHANG",
       "text": "It's morning.",
-      "source_line": 505,
+      "source_line": 418,
       "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
       "text": "Then you're very late.",
-      "source_line": 508,
+      "source_line": 421,
       "face": "joyful"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Stop.",
-      "source_line": 511,
+      "text": "Stop it.",
+      "source_line": 424,
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
       "text": "Cousin joon—",
-      "source_line": 516,
+      "source_line": 429,
       "face": "worried"
     },
     {
       "speaker": "HOOSHANG",
       "text": "We're going home.",
-      "source_line": 519,
+      "source_line": 432,
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
       "text": "You are.",
-      "source_line": 522,
+      "source_line": 435,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I found all four keys.",
-      "source_line": 525,
+      "source_line": 438,
       "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
       "text": "I know.",
-      "source_line": 528,
+      "source_line": 441,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "So get off the carpet.",
-      "source_line": 531,
+      "source_line": 444,
       "face": "annoyed"
     },
     {
       "speaker": "JAMSHID",
       "text": "I can't.",
-      "source_line": 536,
+      "source_line": 449,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "What do you mean you can't?",
-      "source_line": 539,
+      "text": "What do you mean, you can't?",
+      "source_line": 452,
       "face": "surprised"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "No. No, no — Jamshid, get off.",
-      "source_line": 544,
+      "text": "No. No, no. Jamshid, get off.",
+      "source_line": 457,
       "face": "vulnerable"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Get off!",
-      "source_line": 549,
+      "text": "GET OFF!",
+      "source_line": 462,
       "face": "annoyed"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I'm not letting go.",
-      "source_line": 556,
+      "source_line": 467,
       "face": "vulnerable"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I can fix it.",
-      "source_line": 567,
+      "source_line": 476,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
       "text": "You tried.",
-      "source_line": 570,
+      "source_line": 479,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I can fix it!",
-      "source_line": 573,
+      "text": "I CAN FIX IT!",
+      "source_line": 482,
       "face": "annoyed"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Tell me what I missed. Tell me which key.",
-      "source_line": 582,
+      "source_line": 489,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
       "text": "Hooshang—",
-      "source_line": 585,
+      "source_line": 492,
       "face": "worried"
     },
     {
       "speaker": "HOOSHANG",
       "text": "There has to be another key. There's always another key.",
-      "source_line": 588,
+      "source_line": 495,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
       "text": "There were never any keys, cousin joon.",
-      "source_line": 593,
+      "source_line": 500,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "Don't.",
-      "source_line": 602,
+      "source_line": 507,
       "face": "sad"
     },
     {
       "speaker": "OFFICER",
-      "text": "Who painted it?",
-      "source_line": 607
+      "text": "Whose is this?",
+      "source_line": 512
     },
     {
       "speaker": "JAMSHID",
       "text": "Mine.",
-      "source_line": 610,
+      "source_line": 515,
       "face": "determined"
+    },
+    {
+      "speaker": "OFFICER",
+      "text": "You're going away for a long time.",
+      "source_line": 518
     },
     {
       "speaker": "JAMSHID",
       "text": "Go home, cousin joon.",
-      "source_line": 615,
-      "face": "worried"
+      "source_line": 523,
+      "face": "friendly"
     },
     {
       "speaker": "JAMSHID'S MOTHER",
       "text": "Where is my son?",
-      "source_line": 620
+      "source_line": 528
     },
     {
       "speaker": "HOOSHANG",
       "text": "I should have said they were mine.",
-      "source_line": 636,
+      "source_line": 537,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
       "text": "We both painted it.",
-      "source_line": 639,
+      "source_line": 540,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I should have said something.",
-      "source_line": 642,
+      "source_line": 543,
       "face": "sad"
     },
     {
       "speaker": "JAMSHID",
       "text": "You were seventeen.",
-      "source_line": 645,
+      "source_line": 546,
       "face": "friendly"
     },
     {
       "speaker": "HOOSHANG",
       "text": "So were you.",
-      "source_line": 648,
+      "source_line": 549,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "You were supposed to come home.",
-      "source_line": 653,
+      "source_line": 554,
       "face": "sad"
     },
     {
       "speaker": "JAMSHID",
       "text": "I know.",
-      "source_line": 658,
+      "source_line": 557,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I waited.",
-      "source_line": 661,
+      "source_line": 560,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
       "text": "I know.",
-      "source_line": 664,
+      "source_line": 563,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I left.",
-      "source_line": 667,
+      "text": "Then I left.",
+      "source_line": 566,
       "face": "sad"
     },
     {
       "speaker": "JAMSHID",
       "text": "I know.",
-      "source_line": 670,
+      "source_line": 569,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I got old.",
-      "source_line": 673,
+      "source_line": 572,
       "face": "sad"
     },
     {
       "speaker": "JAMSHID",
       "text": "I noticed.",
-      "source_line": 678,
+      "source_line": 576,
       "face": "joyful"
     },
     {
       "speaker": "HOOSHANG",
-      "text": "I wasted it.",
-      "source_line": 683,
+      "text": "I wasted it. All that time.",
+      "source_line": 581,
       "face": "vulnerable"
     },
     {
+      "speaker": "JAMSHID",
+      "text": "You're wasting it now.",
+      "source_line": 584,
+      "face": "friendly"
+    },
+    {
       "speaker": "HOOSHANG",
-      "text": "All that time.",
-      "source_line": 688,
-      "face": "sad"
+      "text": "What?",
+      "source_line": 587,
+      "face": "surprised"
     },
     {
       "speaker": "JAMSHID",
-      "text": "Is that why you came back?",
-      "source_line": 691,
-      "face": "worried"
+      "text": "Look.",
+      "source_line": 590,
+      "face": "friendly"
     },
     {
       "speaker": "JAMSHID",
       "text": "Please let go.",
-      "source_line": 702,
+      "source_line": 601,
       "face": "friendly"
     },
     {
       "speaker": "HOOSHANG",
       "text": "No.",
-      "source_line": 711,
+      "source_line": 608,
       "face": "sad"
     },
     {
       "speaker": "JAMSHID",
       "text": "Hooshang.",
-      "source_line": 714,
+      "source_line": 611,
       "face": "friendly"
     },
     {
       "speaker": "HOOSHANG",
       "text": "If I let go, you leave.",
-      "source_line": 717,
+      "source_line": 614,
       "face": "vulnerable"
     },
     {
       "speaker": "JAMSHID",
       "text": "I already left.",
-      "source_line": 720,
+      "source_line": 617,
       "face": "sad"
     },
     {
       "speaker": "HOOSHANG",
       "text": "I'm sorry.",
-      "source_line": 725,
+      "source_line": 622,
       "face": "sad"
     },
     {
       "speaker": "JAMSHID",
       "text": "I know.",
-      "source_line": 728,
+      "source_line": 625,
       "face": "friendly"
     }
   ],
-  "second_line": [
+  "fall": [
     {
       "speaker": "RUMI",
       "text": "Breathe, jaan.",
-      "source_line": 763
+      "source_line": 650
     },
     {
       "speaker": "HOOSHANG",
       "text": "I don't want to.",
-      "source_line": 767
+      "source_line": 654
     },
     {
       "speaker": "RUMI",
       "text": "I know. Breathe anyway.",
-      "source_line": 770
-    },
+      "source_line": 657
+    }
+  ],
+  "bank": [
     {
       "speaker": "HOOSHANG",
-      "text": "Where is he.",
-      "source_line": 781
+      "text": "Where is he?",
+      "source_line": 666
     },
     {
       "speaker": "RUMI",
       "text": "You know where he is.",
-      "source_line": 786
+      "source_line": 671
     },
     {
       "speaker": "HOOSHANG",
       "text": "Say it.",
-      "source_line": 789
+      "source_line": 674
     },
     {
       "speaker": "RUMI",
       "text": "No, jaan.",
-      "source_line": 792
+      "source_line": 677
     },
     {
       "speaker": "HOOSHANG",
       "text": "SAY IT.",
-      "source_line": 795
+      "source_line": 680
     },
     {
       "speaker": "RUMI",
-      "text": "Some doors are not mine to open. And you have carried this answer since you were seventeen. You have only never set it down long enough to look at it.",
-      "source_line": 800
+      "text": "You have carried that answer for fifty years. You have just never set it down long enough to look at it.",
+      "source_line": 685
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Then why bring me here? You walked me down through my whole life. The alley. The whistle. My hand opening. All the way to the bottom, so I could stand there and watch it happen again — and I still couldn't stop it.",
-      "source_line": 805
+      "text": "Then why bring me here? So I could watch it happen again, and still not stop it?",
+      "source_line": 688
     },
     {
       "speaker": "RUMI",
-      "text": "No. You could not.",
-      "source_line": 808
+      "text": "No. You could not stop it.",
+      "source_line": 691
     },
     {
       "speaker": "HOOSHANG",
       "text": "Then what was it FOR?",
-      "source_line": 811
+      "source_line": 694
     },
     {
       "speaker": "RUMI",
-      "text": "In the office, you asked what waited at the bottom of your building. Do you remember what I answered?",
-      "source_line": 816
-    },
-    {
-      "speaker": "HOOSHANG",
-      "text": "...You said we'd find where the seed came from.",
-      "source_line": 819
+      "text": "Not to change it, jaan. To see it.",
+      "source_line": 699
     },
     {
       "speaker": "RUMI",
-      "text": "Yes.",
-      "source_line": 822
+      "text": "You asked me where the seed came from. There it is. A boy's hand opened, a can fell, and he said nothing.",
+      "source_line": 702
     },
     {
       "speaker": "RUMI",
-      "text": "There it is, jaan. A boy's hand opened. A can fell. And he said nothing.",
-      "source_line": 827
-    },
-    {
-      "speaker": "RUMI",
-      "text": "And every night for forty years you knelt over that small seed and watered it. Faithfully. Never missing one. Until it grew tall enough to shut out the sun and wear your own face.",
-      "source_line": 832
+      "text": "And every night for fifty years, you watered it. Until it grew tall enough to wear your face.",
+      "source_line": 705
     },
     {
       "speaker": "HOOSHANG",
       "text": "...Darkshang.",
-      "source_line": 837
+      "source_line": 710
     },
     {
       "speaker": "RUMI",
       "text": "Yes.",
-      "source_line": 840
+      "source_line": 713
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Then let it grow. Let it have me. He took my punishment. He gave me everything he had, and I stood there and let him.",
-      "source_line": 845
+      "text": "Then let it have me. He took my punishment, and I let him.",
+      "source_line": 716
     },
     {
       "speaker": "RUMI",
-      "text": "And in forty years of paying him back — tell me — did one single day of it open one single door?",
-      "source_line": 848
+      "text": "In fifty years of paying him back, did one single day of it open one single door?",
+      "source_line": 719
     },
     {
       "speaker": "RUMI",
-      "text": "No. Guilt is a very loyal dog, jaan. It follows you everywhere, and it fetches nothing.",
-      "source_line": 853
+      "text": "Guilt is a loyal dog, jaan. It follows you everywhere, and it fetches nothing.",
+      "source_line": 724
     },
     {
       "speaker": "HOOSHANG",
       "text": "I let go of him.",
-      "source_line": 860
+      "source_line": 731
     },
     {
       "speaker": "RUMI",
       "text": "I saw.",
-      "source_line": 863
+      "source_line": 734
     },
     {
       "speaker": "HOOSHANG",
       "text": "It felt like dropping him.",
-      "source_line": 866
+      "source_line": 737
     },
     {
       "speaker": "RUMI",
-      "text": "You did not drop him, jaan.",
-      "source_line": 869
+      "text": "You did not drop him, jaan. He was never the one being held. You were.",
+      "source_line": 740
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "It'll come back. The shadow.",
+      "source_line": 745
     },
     {
       "speaker": "RUMI",
-      "text": "He was never the one being held. You were.",
-      "source_line": 874
+      "text": "Some nights, yes.",
+      "source_line": 748
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Then what do I do?",
+      "source_line": 751
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Don't fight it. Hold it, the way you would hold a frightened boy.",
+      "source_line": 754
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Because that is all it ever was.",
+      "source_line": 757
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "He used to fish right there.",
+      "source_line": 762
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Look at the water. Where did it come from?",
+      "source_line": 765
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "...Rain, I suppose.",
+      "source_line": 768
+    },
+    {
+      "speaker": "RUMI",
+      "text": "And the rain?",
+      "source_line": 771
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "A cloud.",
+      "source_line": 774
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Did the cloud die?",
+      "source_line": 777
+    },
+    {
+      "speaker": "RUMI",
+      "text": "It became the rain, jaan. Look for him in what he became.",
+      "source_line": 782
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Where?",
+      "source_line": 785
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Look at your hand.",
+      "source_line": 788
     },
     {
       "speaker": "HOOSHANG",
       "text": "He never finished the line.",
-      "source_line": 879
+      "source_line": 793
     },
     {
       "speaker": "RUMI",
       "text": "No. The whistle finished it for him.",
-      "source_line": 882
+      "source_line": 796
     },
     {
       "speaker": "HOOSHANG",
       "text": "Then it doesn't get finished.",
-      "source_line": 885
+      "source_line": 799
     },
     {
       "speaker": "RUMI",
       "text": "Does it not?",
-      "source_line": 888
+      "source_line": 802
     },
     {
       "speaker": "HOOSHANG",
-      "text": "Wait. Wait — where are you going? Just say the rest of it. It's your poem. You're RUMI. Say it, and I'll write it, and we can both go home.",
-      "source_line": 893
+      "text": "Wait. Where are you going? Just say the rest. It's your poem. You're Rumi.",
+      "source_line": 807
     },
     {
       "speaker": "RUMI",
-      "text": "It stopped being my poem the day a boy spent everything he had to put it on a wall.",
-      "source_line": 898
-    },
-    {
-      "speaker": "RUMI",
-      "text": "It is your line now, jaan. It has been waiting for you far longer than I have.",
-      "source_line": 901
+      "text": "You learned it in his voice, not mine. It is your line now.",
+      "source_line": 812
     },
     {
       "speaker": "HOOSHANG",
       "text": "I don't know if I can.",
-      "source_line": 904
+      "source_line": 815
     },
     {
       "speaker": "RUMI",
       "text": "You have already done the harder half.",
-      "source_line": 907
+      "source_line": 818
     },
     {
       "speaker": "HOOSHANG",
       "text": "Which half?",
-      "source_line": 910
+      "source_line": 821
     },
     {
       "speaker": "RUMI",
       "text": "You opened your hand.",
-      "source_line": 913
-    },
+      "source_line": 824
+    }
+  ],
+  "second_line": [
     {
       "speaker": "JAMSHID",
       "text": "Keep going.",
-      "source_line": 940
+      "source_line": 844
     },
     {
       "speaker": "HOOSHANG",
       "text": "\"This world is a prison, and we are prisoners. Dig through the prison, and set yourself free.\"",
-      "source_line": 956
+      "source_line": 858
     },
     {
       "speaker": "HOOSHANG",
       "text": "Took me long enough.",
-      "source_line": 961
+      "source_line": 863
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "...I'm home.",
+      "source_line": 874
     }
   ]
 }

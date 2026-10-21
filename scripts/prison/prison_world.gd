@@ -23,11 +23,23 @@ func _ready() -> void:
 	super._ready()
 	for room in rooms:
 		if not is_prison(room): continue
+		# Older prison imports skipped the common thought-layer setup. Upgrade
+		# those cached layers on load as well as fixing future imports.
+		for brush in ["ThoughtHazards", "InkThoughtHazards"]:
+			var thought := room.get_node_or_null(brush) as TileMapLayer
+			if thought != null and thought.get_script() == null:
+				thought.set_script(preload("res://scripts/ldtk_thought_hazard_layer.gd"))
+				thought.collision_enabled = false
+				var material := CanvasItemMaterial.new()
+				material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+				thought.material = material
+				thought.initialize_animation()
 		for prop in room.get_node("Entities").get_children():
 			if prop.has_method("bind"):
 				props.append(prop)
 				if prop.kind == "Cage": _cage = prop
 	for prop in props: prop.bind(self)
+	_add_minigames()
 	_build_portals()
 	for room in rooms:
 		if is_prison(room): room.get_node("PrisonGeometry").world = self
@@ -46,6 +58,65 @@ func _ready() -> void:
 				_checkpoint = _safe_landing(current_room,saved)
 				player.global_position = _checkpoint
 	if rescued: _position_rescued_actor()
+
+## Hooshang's old console and box TV, on the hub's lower floor by the door he
+## comes in through (scenes/props/prison/retro_tv.gd).
+## The hub's two old machines, each on its own scaffold stage that
+## tools/build_prison_wings.py lays for it (row 32): THE OTHER SIDE on the box TV
+## right of the east stair (cols 60-73), SIMORGH on the PC left of the central
+## stair (cols 8-21). Positions are the props' bottom-left, centred on a stage.
+func _add_minigames() -> void:
+	for room in rooms:
+		if str(room.name) != "Prison_Hub": continue
+		var reward_count := clampi(int(story_flags.get("mirror_reward_count", 0)), 0, 5)
+		if not bool(story_flags.get("mirror_game_cleared", false)) or reward_count < 5:
+			var tv := RetroTV.new()
+			tv.name = "RetroTV"
+			tv.world = self
+			tv.game = preload("res://scenes/minigame/mirror_game.gd").new()
+			tv.completion_callback = _on_mirror_game_finished
+			tv.position = Vector2(498, 256)
+			room.add_child(tv)
+			if bool(story_flags.get("mirror_game_cleared", false)):
+				tv.complete_reward.call_deferred()
+		var pc := RetroTV.new()
+		pc.name = "SimorghPC"
+		pc.world = self
+		pc.art = preload("res://assets/props/retro_tv/pc.png")
+		pc.screen = Rect2(10, 8, 32, 24)
+		pc.game = SimorghGame.new()
+		pc.position = Vector2(84, 256)
+		room.add_child(pc)
+
+func _on_mirror_game_finished(tv: RetroTV) -> void:
+	story_flags["mirror_game_cleared"] = true
+	SaveGame.save_now()
+	var player_target: Player = player
+	for i in range(clampi(int(story_flags.get("mirror_reward_count", 0)), 0, 5), 5):
+		var fruit := preload("res://scenes/minigame/reward_lemon.gd").new() as Node2D
+		fruit.name = "MirrorRewardLemon"
+		fruit.scale = Vector2(0.55, 0.55)
+		fruit.top_level = true
+		fruit.z_index = 30
+		tv.add_child(fruit)
+		var source: Vector2 = tv.screen_center()
+		var destination: Vector2 = player_target.global_position + Vector2(0, -8)
+		var control: Vector2 = source.lerp(destination, 0.5) + Vector2(0, -22 - i * 2)
+		fruit.global_position = source
+		var flight := create_tween().set_parallel()
+		flight.tween_method(func(t: float) -> void:
+			if is_instance_valid(fruit):
+				fruit.global_position = source.lerp(control, t).lerp(control.lerp(destination, t), t),
+			0.0, 1.0, 0.48).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		flight.tween_property(fruit, "scale", Vector2(1.35, 1.35), 0.48)
+		flight.tween_property(fruit, "rotation", TAU, 0.48)
+		await flight.finished
+		fruit.queue_free()
+		Collectibles.collect("res://ldtk/Act2World.tscn@mirror_game_%d" % i, 1, player_target)
+		story_flags["mirror_reward_count"] = i + 1
+		SaveGame.save_now()
+		await get_tree().create_timer(0.13).timeout
+
 
 func is_prison(room: Node) -> bool:
 	return room != null and str(room.name).begins_with("Prison_")
@@ -67,15 +138,18 @@ func _arm_return(from_room: Node2D) -> void:
 	super._arm_return(from_room)
 
 func _enter_room(room: Node2D, snap: bool) -> void:
+	var fresh_visit := room != current_room
 	circuits.reset_attempts()
 	timers.reset_attempts()
 	super._enter_room(room,snap)
+	# This world owns all of Act 2, including the gardens. Restore only the
+	# room being entered; refreshing the current room is not a new attempt.
+	if fresh_visit:
+		for platform in get_tree().get_nodes_in_group("crumbling"):
+			if platform is CrumblingPlatform and room.is_ancestor_of(platform):
+				platform.reset()
 	if is_prison(room):
 		_portal_armed.clear()
-		# Untimed musical routes use the existing crumble stones. Revisiting
-		# their room must restore the route even without a linked lever.
-		for entity in room.get_node("Entities").get_children():
-			if entity is CrumblingPlatform: entity.reset()
 		_clear_return()
 		player.has_dash = true
 		for prop in props:
@@ -294,7 +368,9 @@ func _physics_process(delta: float) -> void:
 	timers.tick(delta)
 	_portal_cooldown = maxf(0,_portal_cooldown-delta)
 	var geo: Node = current_room.get_node("PrisonGeometry")
-	if geo.hazard_overlaps(player.hitbox_rect()):
+	# Prison rooms own their water and portal update, so they do not call the
+	# base physics loop. Check both paintable thought brushes here as well.
+	if geo.hazard_overlaps(player.hitbox_rect()) or (_in_thought_tile() and not player.has_thought_immunity()):
 		player.die()
 		return
 	var wet: bool = geo.has_water_at(player.global_position)
@@ -302,7 +378,8 @@ func _physics_process(delta: float) -> void:
 		var box := player.hitbox_rect().grow(-1)
 		wet = wet or geo.has_water_at(box.position) or geo.has_water_at(box.end)
 	if wet:
-		if not player.swimming(): player.enter_swim(self)
+		if not player.swimming():
+			player.enter_swim(self)
 	else: player.exit_swim(self)
 	for portal in portals:
 		if portal.from != current_room: continue

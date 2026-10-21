@@ -187,6 +187,12 @@ func _check_thought_tiles() -> void:
 		layer.set_cell(cell, source_id, Vector2i(0, 0))
 		_check(act2_world._in_thought_tile(),
 			"a painted cell on Act 2's own sheet is still detected as a hazard")
+		var origin := layer.to_global(layer.map_to_local(cell))
+		for offset: Vector2 in [Vector2(0, -9), Vector2(0, 9), Vector2(-7.5, 0), Vector2(7.5, 0)]:
+			act2_player.global_position = origin + offset
+			_check(act2_world._in_thought_tile(),
+				"regular thought paint catches body-edge contact: %s" % offset)
+		act2_player.global_position = origin
 		act2_world._physics_process(1.0 / 60.0)
 		_check(act2_player.state == Player.State.DEAD,
 			"...and still kills on the next physics tick")

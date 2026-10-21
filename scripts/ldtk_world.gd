@@ -854,20 +854,20 @@ func _physics_process(_delta: float) -> void:
 
 
 func _in_thought_tile() -> bool:
-	# Ink tiles replace spike volumes: a foot/head overlap must count, not
-	# only the centre. Preserve the original ThoughtHazards centre contract.
-	if _ink_thought_layer != null:
-		var box := player.hitbox_rect().grow(-0.01)
-		var first := _ink_thought_layer.local_to_map(_ink_thought_layer.to_local(box.position))
-		var last := _ink_thought_layer.local_to_map(_ink_thought_layer.to_local(box.end))
+	# Both brushes are lethal on body contact, including a foot on a floor strip
+	# or a head grazing a ceiling strip. Shrink by a sliver so touching an exact
+	# cell boundary without entering it stays safe.
+	var box := player.hitbox_rect().grow(-0.01)
+	for layer: TileMapLayer in [_ink_thought_layer, _thought_layer]:
+		if layer == null:
+			continue
+		var first := layer.local_to_map(layer.to_local(box.position))
+		var last := layer.local_to_map(layer.to_local(box.end))
 		for y in range(first.y, last.y + 1):
 			for x in range(first.x, last.x + 1):
-				if _ink_thought_layer.get_cell_source_id(Vector2i(x, y)) != -1:
+				if layer.get_cell_source_id(Vector2i(x, y)) != -1:
 					return true
-	if _thought_layer == null:
-		return false
-	var cell := _thought_layer.local_to_map(_thought_layer.to_local(player.global_position))
-	return _thought_layer.get_cell_source_id(cell) != -1
+	return false
 
 
 ## Is he in painted water? Asked with HYSTERESIS, deliberately: getting IN

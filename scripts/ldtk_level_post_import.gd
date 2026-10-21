@@ -147,6 +147,10 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 				if source is TileSetAtlasSource and source.texture.resource_path == "res://ldtk/art/thought_tiles.png":
 					layer.set_script(preload("res://scripts/ldtk_dust_hazard_layer.gd"))
 					break
+		elif layer.name == "WaterLife":
+			layer.collision_enabled = false
+			for nested in layer.find_children("*", "TileMapLayer", true, false):
+				nested.collision_enabled = false
 		elif layer.name == WATER_LAYER:
 			layer.collision_enabled = false
 			layer.set_script(WATER_LAYER_SCRIPT)

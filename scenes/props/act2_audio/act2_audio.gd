@@ -6,6 +6,9 @@ func play_cue(cue: StringName) -> void:
 	if voice == null: return
 	voice.play()
 	cue_started.emit(cue)
+func stop_cue(cue: StringName) -> void:
+	var voice := get_node_or_null(NodePath(cue)) as AudioStreamPlayer
+	if voice != null: voice.stop()
 func stop_cinematics() -> void:
 	$Spray.stop()
 	$Splash.stop()

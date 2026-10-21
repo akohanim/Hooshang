@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/school_wall/wall_painting.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/props/school_wall/spray_can.png" id="2"]
+[ext_resource type="Font" path="res://assets/fonts/pixel5x7.fnt" id="3"]
+
+[node name="WallPainting" type="Node2D"]
+visible = false
+script = ExtResource("1")
+
+[node name="BlueCan" type="Sprite2D" parent="."]
+position = Vector2(44, -4)
+texture = ExtResource("2")
+modulate = Color(0.5, 0.8, 1, 1)
+
+[node name="RedCan" type="Sprite2D" parent="."]
+position = Vector2(104, -4)
+texture = ExtResource("2")
+modulate = Color(1, 0.55, 0.5, 1)
+
+[node name="GoldCan" type="Sprite2D" parent="."]
+position = Vector2(164, -4)
+texture = ExtResource("2")
+modulate = Color(1, 0.85, 0.4, 1)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Panel" type="ColorRect" parent="HUD"]
+visible = false
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 315.0
+offset_bottom = 39.0
+mouse_filter = 2
+color = Color(0.09, 0.08, 0.07, 0.9)
+
+[node name="Hint" type="Label" parent="HUD/Panel"]
+offset_left = 6.0
+offset_top = 3.0
+offset_right = 304.0
+offset_bottom = 31.0
+theme_override_fonts/font = ExtResource("3")
+theme_override_font_sizes/font_size = 7
+theme_override_constants/line_spacing = 0
+theme_override_colors/font_color = Color(1, 0.91, 0.7, 1)
+horizontal_alignment = 1
