@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/act3/sea_world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://ldtk/hooshang_act3.ldtk" id="2_ldtk"]
@@ -11,6 +11,7 @@
 [ext_resource type="AudioStream" path="res://assets/music/sea_trench.ogg" id="9_trench"]
 [ext_resource type="AudioStream" path="res://assets/music/sea_floor.ogg" id="10_floor"]
 [ext_resource type="AudioStream" path="res://assets/music/sea_dawn.ogg" id="11_dawn"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_chase.ogg" id="12_chase"]
 
 [node name="Act3World" type="Node2D"]
 script = ExtResource("1_world")
@@ -42,5 +43,6 @@ reef = ExtResource("8_reef")
 trench = ExtResource("9_trench")
 floor_cue = ExtResource("10_floor")
 dawn = ExtResource("11_dawn")
+chase_cue = ExtResource("12_chase")
 volume_db = -10.0
 bus = &"Music"

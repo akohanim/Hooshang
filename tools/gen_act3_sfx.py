@@ -4,6 +4,11 @@
   bubble.wav   an air bubble popping: a quick upward chirp on a breath of noise
   jelly.wav    a jellyfish bell: a soft, rubbery boing, pitch sagging back
   memory.wav   a memory touched: two glass notes from the act's theme (A, F)
+  roar.wav     the tiger: a rasping, falling roar (THE TIGER, THE VINE)
+  growl.wav    the tiger below: a low rumble
+  gnaw.wav     a mouse's teeth on the vine: a quick dry scrape
+  bite.wav     the lemon bitten: a wet crunch
+  creak.wav    the vine taking his weight
 
 Synthesised and deterministic, like tools/gen_act3_sea_music.py.
 
@@ -58,9 +63,70 @@ def memory():
     return out
 
 
+def lowpass(x, cutoff):
+    a = np.exp(-2 * np.pi * cutoff / SR)
+    y = np.zeros_like(x)
+    acc = 0.0
+    for i, v in enumerate(x):
+        acc = (1 - a) * v + a * acc
+        y[i] = acc
+    return y
+
+
+def roar():
+    """Noise shaped by a pulsing, falling growl: the rasp comes from the pulses."""
+    n = int(1.6 * SR)
+    t = np.arange(n) / SR
+    f0 = 140 * (1 + 0.5 * np.exp(-t * 2.5)) * (1 - 0.25 * t / t[-1])
+    pulse = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * np.cumsum(f0) / SR))
+    noise = lowpass(RNG.standard_normal(n), 1400)
+    voice = np.sin(2 * np.pi * np.cumsum(f0 * 0.5) / SR)
+    env = np.minimum(1, t * 6) * np.exp(-np.maximum(0, t - 0.5) * 2.4)
+    return (noise * pulse * 1.4 + voice * 0.5) * env
+
+
+def growl():
+    n = int(1.2 * SR)
+    t = np.arange(n) / SR
+    f0 = 62 * (1 + 0.06 * np.sin(2 * np.pi * 3 * t))
+    pulse = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * np.cumsum(f0) / SR))
+    noise = lowpass(RNG.standard_normal(n), 500)
+    env = np.minimum(1, t * 4) * np.minimum(1, (t[-1] - t) * 4)
+    return noise * pulse * env
+
+
+def gnaw():
+    n = int(0.09 * SR)
+    t = np.arange(n) / SR
+    clicks = np.zeros(n)
+    for at in (0.0, 0.03, 0.06):
+        i = int(at * SR)
+        k = int(0.012 * SR)
+        clicks[i:i + k] += RNG.standard_normal(k) * np.exp(-np.arange(k) / SR * 400)
+    return clicks
+
+
+def bite():
+    n = int(0.35 * SR)
+    t = np.arange(n) / SR
+    crunch = RNG.standard_normal(n) * np.exp(-t * 18) * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 37 * t)))
+    juice = lowpass(RNG.standard_normal(n), 2500) * np.exp(-np.maximum(0, t - 0.05) * 12) * 0.4
+    return lowpass(crunch, 3500) + juice
+
+
+def creak():
+    n = int(0.6 * SR)
+    t = np.arange(n) / SR
+    f = 230 + 60 * np.sin(2 * np.pi * 1.5 * t)
+    pulse = (np.sin(2 * np.pi * np.cumsum(f) / SR) > 0.6).astype(float)
+    return lowpass(pulse * RNG.uniform(0.5, 1.0, n), 1800) * np.minimum(1, t * 10) * np.exp(-t * 3)
+
+
 if __name__ == '__main__':
     OUT.mkdir(parents=True, exist_ok=True)
     write('bubble.wav', bubble())
     write('jelly.wav', jelly())
     write('memory.wav', memory())
+    for name, fn in (('roar', roar), ('growl', growl), ('gnaw', gnaw), ('bite', bite), ('creak', creak)):
+        write(name + '.wav', fn())
     print('wrote', ', '.join(p.name for p in sorted(OUT.glob('*.wav'))))

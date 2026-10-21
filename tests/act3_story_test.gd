@@ -8,7 +8,9 @@ extends Node
 ##
 ## Checked along the way: the opening plays on a fresh arrival, Rumi's gift
 ## grants the Dive, the dark floor is dark, the stillness finale passes only
-## while he is still, and the ending reaches the act's results.
+## while he is still, the real sea no longer ends the act, the tiger chases him
+## from behind, the vine scene has its second tiger and its two mice, and the
+## act ends on the vine at the results.
 ##
 ## Headless:  Godot --headless --path . --fixed-fps 60 res://tests/act3_story_test.tscn
 
@@ -84,11 +86,26 @@ func _ready() -> void:
 	await until_room("Act3_Level_25", 1200)
 	player.respawn(mark("Act3_Level_25", "Water") + Vector2(2, -6))
 	await until_flag("sea", 2400)
+	check(_results_screen() == null, "the real sea no longer ends the act: he walks on")
+
+	# THE WAY HOME: the tiger steps out of the tall grass behind him...
+	await enter("Act3_Level_28")
+	player.respawn(room("Act3_Level_28").global_position + Vector2(13 * 8 + 6, 15 * 8 - Player.HALF_HEIGHT))
+	await until_flag("tiger", 1800)
+	var tiger := world.get_node_or_null("Tiger") as ChaseTiger
+	check(tiger != null and tiger.chasing, "the tiger chases him once it has roared")
+	check(tiger != null and tiger.global_position.x < player.global_position.x, "...from behind him")
+	# ...and he runs to the edge, falls, and hangs from the vine.
+	await enter("Act3_Level_31")
+	player.respawn(mark("Act3_Level_31", "Edge") + Vector2(2, -2))
+	await until_flag("vine", 4800)
+	check(room("Act3_Level_31").get_node_or_null("TigerBelow") != null, "a second tiger waits below")
+	check(room("Act3_Level_31").get_node_or_null("MouseBlack") != null
+		and room("Act3_Level_31").get_node_or_null("MouseWhite") != null, "a black mouse and a white one gnaw the vine")
+	check(player.visual.animation in [&"hang_content", &"hang_eat"], "he ends on the vine, the lemon eaten")
 	var results := false
 	for i in 600:
-		for child in get_tree().root.get_children():
-			if child.get_script() != null and str(child.get_script().resource_path).ends_with("act_results.gd"):
-				results = true
+		results = _results_screen() != null
 		if results:
 			break
 		await frames(1)
@@ -98,6 +115,13 @@ func _ready() -> void:
 
 
 # -------------------------------------------------------------- helpers ----
+
+func _results_screen() -> Node:
+	for child in get_tree().root.get_children():
+		if child.get_script() != null and str(child.get_script().resource_path).ends_with("act_results.gd"):
+			return child
+	return null
+
 
 func room(name: String) -> Node2D:
 	for r in world.rooms:

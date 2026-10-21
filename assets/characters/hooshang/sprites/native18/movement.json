@@ -727,6 +727,69 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
     "sourceSize": { "w": 18, "h": 18 },
     "duration": 40
+   },
+   {
+    "filename": "hooshang_18px_movement 81.aseprite",
+    "frame": { "x": 1458, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 400
+   },
+   {
+    "filename": "hooshang_18px_movement 82.aseprite",
+    "frame": { "x": 1476, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 400
+   },
+   {
+    "filename": "hooshang_18px_movement 83.aseprite",
+    "frame": { "x": 1494, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 400
+   },
+   {
+    "filename": "hooshang_18px_movement 84.aseprite",
+    "frame": { "x": 1512, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 400
+   },
+   {
+    "filename": "hooshang_18px_movement 85.aseprite",
+    "frame": { "x": 1530, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 260
+   },
+   {
+    "filename": "hooshang_18px_movement 86.aseprite",
+    "frame": { "x": 1548, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 260
+   },
+   {
+    "filename": "hooshang_18px_movement 87.aseprite",
+    "frame": { "x": 1566, "y": 0, "w": 18, "h": 18 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 18 },
+    "sourceSize": { "w": 18, "h": 18 },
+    "duration": 400
    }
  ],
  "meta": {
@@ -734,7 +797,7 @@
   "version": "1.3.18.5-dev",
   "image": "movement.png",
   "format": "RGBA8888",
-  "size": { "w": 1458, "h": 18 },
+  "size": { "w": 1584, "h": 18 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 5, "direction": "forward", "color": "#000000ff" },
@@ -752,7 +815,13 @@
    { "name": "swim", "from": 59, "to": 64, "direction": "forward", "color": "#000000ff" },
    { "name": "swim_idle", "from": 65, "to": 68, "direction": "forward", "color": "#000000ff" },
    { "name": "exit_water", "from": 69, "to": 74, "direction": "forward", "color": "#000000ff" },
-   { "name": "ledge_climb", "from": 75, "to": 80, "direction": "forward", "color": "#000000ff" }
+   { "name": "ledge_climb", "from": 75, "to": 87, "direction": "forward", "color": "#000000ff" },
+   { "name": "hang", "from": 81, "to": 87, "direction": "forward", "color": "#000000ff" },
+   { "name": "hang_look_down", "from": 82, "to": 87, "direction": "forward", "color": "#000000ff" },
+   { "name": "hang_look_up", "from": 83, "to": 87, "direction": "forward", "color": "#000000ff" },
+   { "name": "hang_reach", "from": 84, "to": 87, "direction": "forward", "color": "#000000ff" },
+   { "name": "hang_eat", "from": 85, "to": 87, "direction": "forward", "color": "#000000ff" },
+   { "name": "hang_content", "from": 87, "to": 87, "direction": "forward", "color": "#000000ff" }
   ]
  }
 }

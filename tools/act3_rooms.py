@@ -940,14 +940,161 @@ r.decor_density = 0.0
 
 r = room('Act3_Level_25', 'The Real Sea', 6, (7100, 0), [
     LID,
-] + [SKY] * 14 + ['x..P' + '.' * 35 + 'x'] + [
-    'gggggggggggggggg.......................x',
-    'gggggggggggggggggggggg.................x',
-    'gggggggggggggggggggggggggggg...........x',
-    'gggggggggggggggggggggggggggggggggg.....x',
+] + [SKY] * 12 + ['x' + '.' * 39] * 2 + ['x..P' + '.' * 36] + [
+    # Open on the right since the way home: after the wave he walks on along
+    # the shore (THE WAY HOME, SCRIPT.md).
+    'gggggggggggggggg........................',
+    'gggggggggggggggggggggg..................',
+    'gggggggggggggggggggggggggggg............',
+    'gggggggggggggggggggggggggggggggggg......',
     'g' * 40, 'g' * 40, 'g' * 40, 'g' * 40,
 ], horizon=96, fixed_depth=0.0)
 r.mode = 'sunrise'
 r.mark('Shoes', 12, 15)
 r.mark('Water', 25, 16)
 r.decor_density = 0.0
+r.chain = ['down the sand to the water', 'the wave', 'on along the shore']
+r.step((3, 16), {'portal': 'Act3_Level_26'}, ('walk',), steer=41)
+
+
+# ======================================================== VI · THE WAY HOME ===
+# He thinks he made it out. The land after the sea, in natural colour: two rooms
+# of nothing but morning, then the tiger, the chase, and the vine (SCRIPT.md
+# ELEVEN to THIRTEEN). Drawn from ground-height profiles: every column is open
+# above its height and earth below it.
+
+EARTH = (0.36, 0.25, 0.17)
+GRASS = (0.56, 0.74, 0.30)
+
+
+def land(profile, open_left, open_right, h=24, rock_from=None, walls=True):
+    """Rows from a per-column ground height. `open_left`/`open_right` are the
+    (first, last) rows left open in the side walls for the portals; the rest of
+    each side is an invisible wall up to the ground. Below `rock_from` (a row)
+    the ground is rock rather than earth."""
+    assert len(profile) == 40, len(profile)
+    rows = ['x' * 40]
+    for y in range(1, h):
+        row = []
+        for c in range(40):
+            if y >= profile[c]:
+                row.append('#' if rock_from is not None and y >= rock_from else 'g')
+            elif walls and c == 0 and not open_left[0] <= y <= open_left[1]:
+                row.append('x')
+            elif walls and c == 39 and not open_right[0] <= y <= open_right[1]:
+                row.append('x')
+            else:
+                row.append('.')
+        rows.append(''.join(row))
+    return rows
+
+
+def land_room(name, title, x, rows, backdrop, h=24):
+    r = room(name, title, 7, (x, 0), rows, horizon=-1, fixed_depth=0.0)
+    r.mode = 'land'
+    r.terrain_fill, r.terrain_line = EARTH, GRASS
+    r.backdrop = 'res://assets/act3/land/%s.png' % backdrop
+    r.decor_density = 0.0
+    return r
+
+
+# Over the dunes: sand gives way to grass, the sea behind him.
+r = land_room('Act3_Level_26', 'The Shore Road', 7420, land(
+    [20] * 10 + [19] * 6 + [18] * 6 + [19] * 3 + [17] * 6 + [16] * 4 + [14] * 5,
+    (13, 19), (8, 13)), 'shore_road')
+r.terrain_fill, r.terrain_line = (0.62, 0.48, 0.30), GRASS
+r.chain = ['up off the beach', 'over the dunes', 'onto the coast path']
+r.step((2, 20), (8, 20), ('walk',))
+r.step((8, 20), (11, 19))
+r.step((11, 19), (14, 19), ('walk',))
+r.step((14, 19), (17, 18))
+r.step((17, 18), (20, 18), ('walk',))
+r.step((20, 18), (23, 19), ('walk',))
+r.step((23, 19), (26, 17))
+r.step((26, 17), (30, 17), ('walk',))
+r.step((30, 17), (32, 16))
+r.step((32, 16), (34, 16), ('walk',))
+r.step((34, 16), (36, 14))
+r.step((36, 14), {'portal': 'Act3_Level_27'}, ('walk',), steer=41)
+
+# The high meadow: long grass, poppies, one lemon tree on the brow of the hill.
+r = land_room('Act3_Level_27', 'The High Meadow', 7740, land(
+    [14] * 8 + [13] * 6 + [12] * 8 + [13] * 6 + [14] * 6 + [15] * 6,
+    (8, 13), (9, 14)), 'high_meadow')
+r.chain = ['up the meadow', 'past the lemon tree', 'down toward the tall grass']
+r.step((2, 14), (6, 14), ('walk',))
+r.step((6, 14), (9, 13))
+r.step((9, 13), (12, 13), ('walk',))
+r.step((12, 13), (15, 12))
+r.step((15, 12), {'portal': 'Act3_Level_28'}, ('walk',), steer=41)
+
+# The tall grass. The tiger steps out behind him (Act3Beats, scene "tiger").
+r = land_room('Act3_Level_28', 'The Tall Grass', 8060, land(
+    [15] * 14 + [16] * 8 + [15] * 6 + [16] * 12,
+    (9, 14), (10, 15)), 'tall_grass')
+r.mark('Tiger', 4, 14)
+r.chain = ['into the tall grass', 'the tiger', 'run']
+r.step((2, 15), (17, 16), ('walk',))
+r.step((17, 16), (20, 16), ('walk',))
+r.step((20, 16), (23, 15))
+r.step((23, 15), {'portal': 'Act3_Level_29'}, ('walk',), steer=41)
+
+# The wood: a fallen log to hop, a ditch, roots. Never stop.
+r = land_room('Act3_Level_29', 'The Wood', 8380, land(
+    [16] * 10 + [15] * 2 + [16] * 8 + [20] * 3 + [16] * 5 + [15] * 6 + [16] * 6,
+    (10, 15), (10, 15)), 'wood')
+r.terrain_fill = (0.27, 0.19, 0.14)
+r.chain = ['over the log', 'over the ditch', 'up the roots', 'on']
+r.step((2, 16), (8, 16), ('walk',))
+r.step((8, 16), (13, 16))
+r.step((13, 16), (19, 16), ('walk',))
+r.step((19, 16), (24, 16))
+r.step((24, 16), (27, 16), ('walk',))
+r.step((27, 16), (30, 15))
+r.step((30, 15), {'portal': 'Act3_Level_30'}, ('walk',), steer=41)
+
+# The rocks: boulders on the headland, a crevice, the sea far below.
+r = land_room('Act3_Level_30', 'The Rocks', 8700, land(
+    [16] * 6 + [14] * 4 + [16] * 4 + [13] * 3 + [16] * 5 + [21] * 3 + [16] * 4 + [15] * 4 + [14] * 7,
+    (10, 15), (8, 13)), 'rocks')
+r.terrain_fill, r.terrain_line = (0.42, 0.40, 0.38), (0.62, 0.70, 0.40)
+r.chain = ['up the first boulder', 'over the tall one', 'over the crevice', 'up to the edge of the land']
+r.step((2, 16), (4, 16), ('walk',))
+r.step((4, 16), (7, 14))
+r.step((7, 14), (12, 16), ('walk',))
+r.step((12, 16), (15, 13))
+r.step((15, 13), (21, 16), ('walk',))
+r.step((21, 16), (26, 16))
+r.step((26, 16), (28, 16), ('walk',))
+r.step((28, 16), (30, 15))
+r.step((30, 15), (32, 15), ('walk',))
+r.step((32, 15), (34, 14))
+r.step((34, 14), {'portal': 'Act3_Level_31'}, ('walk',), steer=41)
+
+# The edge. Two screens tall: the cliff top he runs along, the face he hangs
+# from, the valley floor where the second tiger waits. The fall and the vine are
+# staged (Act3Beats, scene "vine"); the markers place them.
+edge = land([14] * 8 + [13] * 3 + [14] * 14 + [44] * 12 + [10] * 3, (8, 13), (0, 0), h=48, rock_from=18)
+# Below its grassy top the cliff is PAINTED (tools/gen_act3_land_backdrops.py,
+# edge()): strata, cracks, moss, the crack the mice live in. So the body is
+# invisible solid here, collision unchanged, and so is the ravine's far wall.
+for y in range(16, 48):
+    row = list(edge[y])
+    for x in range(40):
+        if row[x] in 'g#' and not (y in (44, 45) and 25 <= x <= 36):
+            row[x] = 'x'
+    edge[y] = ''.join(row)
+edge[44] = edge[44][:25] + 'g' * 12 + edge[44][37:]   # the valley floor is grass
+edge[45] = edge[45][:25] + 'g' * 12 + edge[45][37:]
+r = land_room('Act3_Level_31', 'The Edge', 9020, edge, 'edge', h=48)
+r.terrain_fill, r.terrain_line = (0.45, 0.40, 0.36), (0.60, 0.72, 0.36)   # a rock face, grass on top
+r.mark('Edge', 21, 13)
+r.mark('VineRoot', 25, 16)
+r.mark('Hang', 25, 27)
+r.mark('Lemon', 23, 27)
+r.mark('TigerAbove', 22, 13)
+r.mark('TigerBelow', 31, 43)
+r.chain = ['along the cliff top', 'the land runs out']
+r.step((2, 14), (6, 14), ('walk',))
+r.step((6, 14), (9, 13))
+r.step((9, 13), (19, 14), ('walk',))

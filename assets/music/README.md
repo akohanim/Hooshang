@@ -89,3 +89,6 @@ floor cue plays once per arrival, and the office at dawn is silent.
 Act III's three small sound effects — `bubble`, `jelly`, `memory` — are made by
 `python3 tools/gen_act3_sfx.py` into `assets/audio/act3/` and registered in
 `systems/sfx.gd`'s `ACT3_CUES`.
+- `sea_chase.ogg` — THE TIGER: a tombak pattern at 152 BPM under a running santur
+  ostinato in Shur, a ney crying the theme's opening every four bars. Plays from the
+  tiger's roar to the edge (`Act3Music.chase()`); the vine is silence (`rest()`).

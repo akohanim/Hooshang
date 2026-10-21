@@ -29,6 +29,8 @@ import tempfile
 import wave
 from pathlib import Path
 
+import sys
+
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -457,12 +459,56 @@ def dawn():
     return master(reverb(buf, 0.4, 3.6, 6500), -2.0)
 
 
+def tombak(vel=1.0, low=True):
+    """A goblet-drum stroke: a pitched thump ('tom', centre) or a bright edge ('bak')."""
+    n = int(0.3 * SR)
+    t = np.arange(n) / SR
+    f = (78 if low else 210) * (1.0 - 0.35 * np.clip(t / 0.12, 0, 1))
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * (14 if low else 32))
+    skin = lowpass(RNG.standard_normal(n), 900 if low else 4200) * np.exp(-t * (55 if low else 80))
+    return (body * (1.0 if low else 0.45) + skin * (0.35 if low else 0.6)) * vel
+
+
+def chase():
+    """THE TIGER (SCRIPT.md TWELVE): run. A tombak pattern at 152 BPM under a
+    running santur ostinato in Shur, the koron pulled tight; a ney cries the
+    opening of the theme every four bars, a step higher each time."""
+    beat = 60 / 152
+    bars = 16
+    dur = bars * 4 * beat
+    buf = silence(dur)
+    mix_in(buf, drone(D3 - 12, dur, 1.1), 0, 0.9)
+    pattern = [('tom', 1.0), (None, 0), ('bak', 0.6), ('bak', 0.5), ('tom', 0.9), ('bak', 0.6), (None, 0), ('bak', 0.7)]
+    for b in range(bars):
+        for k, (stroke, v) in enumerate(pattern):
+            if stroke is None:
+                continue
+            at = b * 4 * beat + k * beat / 2
+            mix_in(buf, tombak(v * (0.8 + 0.2 * (b % 4) / 3), stroke == 'tom'), at, 0.9, -0.1 if stroke == 'tom' else 0.15)
+    run = ['D', 'Ek', 'F', 'Ek', 'D', 'C', 'D', 'Ek']
+    for k in range(bars * 16):
+        name = run[k % len(run)]
+        octave = -2 if name == 'C' else -1
+        mix_in(buf, santur(note(SHUR, name, octave), 0.45, 0.32 + 0.12 * ((k // 16) % 4) / 3), k * beat / 4, 1.0,
+               pan=0.3 if k % 2 else -0.3)
+    cry = [('A', 0, 2), ('G', 0, 1), ('F', 0, 1), ('Ek', 0, 4)]
+    for i, b in enumerate(range(0, bars, 4)):
+        lift = [0, 0, 2, 3][i % 4]
+        play_phrase(buf, [(n, o, d) for n, o, d in cry], SHUR, b * 4 * beat, beat,
+                    lambda m, d, lift=lift: ney(m + lift, d, 0.8), 0.7, 1, 0.1, hold=0.9)
+    buf = fold(buf, dur, True)
+    return master(reverb(buf, 0.22, 2.0, 3600), -1.5)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    if '--chase' in sys.argv:
+        write_ogg('sea_chase.ogg', chase(), True)
+        return
     for name, fn, loop in (('sea_shore.ogg', shore, True), ('sea_deep.ogg', deep, True),
                            ('sea_wreck.ogg', wreck, True), ('sea_reef.ogg', reef, True),
                            ('sea_trench.ogg', trench, True), ('sea_floor.ogg', floor, False),
-                           ('sea_dawn.ogg', dawn, True)):
+                           ('sea_dawn.ogg', dawn, True), ('sea_chase.ogg', chase, True)):
         write_ogg(name, fn(), loop)
 
 

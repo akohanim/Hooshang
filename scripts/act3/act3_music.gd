@@ -12,11 +12,14 @@ extends AudioStreamPlayer
 ##           the floor, the pond, the ascent   floor (once), then silence
 ##   epilogue the office at dawn  silence (a tube hums in the room)
 ##           the real sea      dawn
+##   the way home  the shore road, the meadow, the tall grass   dawn
+##           the tiger: from its roar to the edge   chase (Act3Beats calls chase())
+##           the vine   silence (Act3Beats calls rest())
 ##
 ## Silence is a CLIP ("rest"), not a volume fade: LdtkWorld owns volume_db for
 ## dialogue ducking (see Act2Music for the same rule).
 
-enum Cue { SHORE, DEEP, WRECK, REEF, TRENCH, FLOOR, DAWN, REST }
+enum Cue { SHORE, DEEP, WRECK, REEF, TRENCH, FLOOR, DAWN, CHASE, REST }
 
 @export var shore: AudioStream
 @export var deep: AudioStream
@@ -25,6 +28,7 @@ enum Cue { SHORE, DEEP, WRECK, REEF, TRENCH, FLOOR, DAWN, REST }
 @export var trench: AudioStream
 @export var floor_cue: AudioStream
 @export var dawn: AudioStream
+@export var chase_cue: AudioStream
 ## Crossfade, in seconds, for every cue change.
 @export var fade_seconds := 3.0
 
@@ -34,13 +38,13 @@ var _floor_played := false
 
 
 func _ready() -> void:
-	var clips := [shore, deep, wreck, reef, trench, floor_cue, dawn]
+	var clips := [shore, deep, wreck, reef, trench, floor_cue, dawn, chase_cue]
 	for c in clips:
 		if c == null:
 			return
 	_interactive = AudioStreamInteractive.new()
 	_interactive.clip_count = clips.size() + 1
-	var names := [&"shore", &"deep", &"wreck", &"reef", &"trench", &"floor", &"dawn"]
+	var names := [&"shore", &"deep", &"wreck", &"reef", &"trench", &"floor", &"dawn", &"chase"]
 	for i in clips.size():
 		var clip: AudioStream = clips[i]
 		if clip is AudioStreamOggVorbis:
@@ -102,9 +106,21 @@ static func cue_for(room: Node2D) -> int:
 		return Cue.TRENCH
 	if n <= 23:
 		return Cue.FLOOR
-	if n == 25:
+	if n == 24:
+		return Cue.REST
+	if n <= 28:
 		return Cue.DAWN
-	return Cue.REST
+	return Cue.CHASE
+
+
+## The tiger has roared: run (Act3Beats).
+func chase() -> void:
+	_switch(Cue.CHASE)
+
+
+## The edge has given way: nothing but the wind and the vine (Act3Beats).
+func rest() -> void:
+	_switch(Cue.REST)
 
 
 func _on_room_changed(room: Node2D) -> void:

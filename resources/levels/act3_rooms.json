@@ -180,5 +180,113 @@
   "fixed_depth": 0.0,
   "horizon": 96,
   "mode": "sunrise"
+ },
+ "Act3_Level_26": {
+  "title": "The Shore Road",
+  "chapter": 7,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "land",
+  "terrain_fill": [
+   0.62,
+   0.48,
+   0.3
+  ],
+  "terrain_line": [
+   0.56,
+   0.74,
+   0.3
+  ],
+  "backdrop": "res://assets/act3/land/shore_road.png"
+ },
+ "Act3_Level_27": {
+  "title": "The High Meadow",
+  "chapter": 7,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "land",
+  "terrain_fill": [
+   0.36,
+   0.25,
+   0.17
+  ],
+  "terrain_line": [
+   0.56,
+   0.74,
+   0.3
+  ],
+  "backdrop": "res://assets/act3/land/high_meadow.png"
+ },
+ "Act3_Level_28": {
+  "title": "The Tall Grass",
+  "chapter": 7,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "land",
+  "terrain_fill": [
+   0.36,
+   0.25,
+   0.17
+  ],
+  "terrain_line": [
+   0.56,
+   0.74,
+   0.3
+  ],
+  "backdrop": "res://assets/act3/land/tall_grass.png"
+ },
+ "Act3_Level_29": {
+  "title": "The Wood",
+  "chapter": 7,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "land",
+  "terrain_fill": [
+   0.27,
+   0.19,
+   0.14
+  ],
+  "terrain_line": [
+   0.56,
+   0.74,
+   0.3
+  ],
+  "backdrop": "res://assets/act3/land/wood.png"
+ },
+ "Act3_Level_30": {
+  "title": "The Rocks",
+  "chapter": 7,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "land",
+  "terrain_fill": [
+   0.42,
+   0.4,
+   0.38
+  ],
+  "terrain_line": [
+   0.62,
+   0.7,
+   0.4
+  ],
+  "backdrop": "res://assets/act3/land/rocks.png"
+ },
+ "Act3_Level_31": {
+  "title": "The Edge",
+  "chapter": 7,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "land",
+  "terrain_fill": [
+   0.45,
+   0.4,
+   0.36
+  ],
+  "terrain_line": [
+   0.6,
+   0.72,
+   0.36
+  ],
+  "backdrop": "res://assets/act3/land/edge.png"
  }
 }

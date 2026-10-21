@@ -84,7 +84,12 @@ class Room:
         self.chain = []
         self.notes = []
         self.decor_density = 1.0
-        self.mode = ''       # '' sea, 'sunrise' the real sea, 'dawn' the office
+        self.mode = ''       # '' sea, 'sunrise' the real sea, 'dawn' the office, 'land' the way home
+        # 'land' rooms: terrain colours (fill, line as 0-1 RGB) and a painted
+        # backdrop (res:// path, tools/gen_act3_land_backdrops.py).
+        self.terrain_fill = None
+        self.terrain_line = None
+        self.backdrop = ''
         self.width_problems = [f'{name}: row {y} is {len(row)} wide, not {self.w}'
                                for y, row in enumerate(rows) if len(row) != self.w]
 
@@ -574,8 +579,15 @@ def build(rooms, check_only=False):
         out_levels.append(level)
     project['levels'] = out_levels
     PATH.write_text(update(text, project))
-    meta = {r.name: {'title': r.title, 'chapter': r.chapter, 'fixed_depth': r.fixed_depth,
-                     'horizon': r.horizon, 'mode': r.mode} for r in rooms}
+    meta = {}
+    for r in rooms:
+        meta[r.name] = {'title': r.title, 'chapter': r.chapter, 'fixed_depth': r.fixed_depth,
+                        'horizon': r.horizon, 'mode': r.mode}
+        if r.terrain_fill:
+            meta[r.name]['terrain_fill'] = list(r.terrain_fill)
+            meta[r.name]['terrain_line'] = list(r.terrain_line)
+        if r.backdrop:
+            meta[r.name]['backdrop'] = r.backdrop
     ROOMS_JSON.write_text(json.dumps(meta, indent=1) + '\n')
     routes = {r.name: r.route for r in rooms if r.route}
     ROUTES_JSON.write_text(json.dumps(routes, indent=1) + '\n')

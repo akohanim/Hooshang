@@ -502,6 +502,11 @@ func play_through(routes: Dictionary, plans: Dictionary, names: Array) -> void:
 		if not plans.has(name):
 			check(false, "PLAYTHROUGH: %s has no proven route to play" % name)
 			return
+		# The ascent and the office are story, not platforming: played as the
+		# bridge from the pond to the real sea.
+		if name == "Act3_Level_25" and str(world.current_room.name) != name:
+			if not await play_bridge():
+				return
 		if not await until_control("arriving in %s" % name):
 			return
 		if str(world.current_room.name) != name:
@@ -523,12 +528,15 @@ func play_through(routes: Dictionary, plans: Dictionary, names: Array) -> void:
 		print("  PLAYED %s -> %s %s" % [name, world.current_room.name, scenes if not scenes.is_empty() else ""])
 		# Every scene set in this room has played by the time he leaves it.
 		for scene: String in Act3Beats.SCENES:
-			if Act3Beats.SCENES[scene] == name:
+			if Act3Beats.SCENES[scene] == name and scene != "vine":
 				check(bool(world.story.get("scene:" + scene, false)),
 					"PLAYTHROUGH: %s's scene '%s' played before he left the room" % [name, scene])
 		if name == "Act3_Level_4":
 			check(player.has_swim_dash, "PLAYTHROUGH: he leaves the gift's room with the Dive")
-	await play_ending()
+		if name == "Act3_Level_28":
+			check(world.get_node_or_null("Tiger") is ChaseTiger and (world.get_node("Tiger") as ChaseTiger).chasing,
+				"PLAYTHROUGH: the tiger is on him as he leaves the tall grass")
+	await play_finale()
 
 
 ## One room's found inputs, from wherever the last portal put him.
@@ -634,11 +642,11 @@ func _nearest_step(steps: Array) -> int:
 
 ## The last three rooms are the story's: up through the white, out of the
 ## office door, down the beach into the water — then the results and the title.
-func play_ending() -> void:
-	print("  ending: in %s, waiting for control" % world.current_room.name)
+func play_bridge() -> bool:
+	print("  bridge: in %s, waiting for control" % world.current_room.name)
 	if not await until_control("the ascent"):
-		return
-	print("  ending: swimming up the ascent")
+		return false
+	print("  bridge: swimming up the ascent")
 	check(str(world.current_room.name) == "Act3_Level_23", "PLAYTHROUGH: the pond's portal leads to the ascent")
 	for i in 900:
 		if bool(world.story.get("scene:ascent", false)) or str(world.current_room.name) != "Act3_Level_23":
@@ -647,17 +655,23 @@ func play_ending() -> void:
 		await frames(1)
 	release()
 	check(bool(world.story.get("scene:ascent", false)), "PLAYTHROUGH: swimming up the ascent starts its scene")
-	print("  ending: ascent started, waiting for the office")
+	print("  bridge: ascent started, waiting for the office")
 	if not await until_flag("office", 3600):
-		return
-	print("  ending: in the office, walking to the door")
+		return false
+	print("  bridge: in the office, walking to the door")
 	check(str(world.current_room.name) == "Act3_Level_24", "PLAYTHROUGH: the ascent wakes him in the office")
 	if not await walk_right_until(func(): return str(world.current_room.name) == "Act3_Level_25", "the office door"):
+		return false
+	print("  bridge: at the real sea")
+	return true
+
+
+## The edge: run off it into THE VINE, which plays itself out to the act's end.
+func play_finale() -> void:
+	print("  finale: in %s, on to the edge" % world.current_room.name)
+	if not await walk_right_until(func(): return bool(world.story.get("scene:vine", false)), "the vine", 9000):
 		return
-	print("  ending: in the parking lot / real sea, walking to the water")
-	if not await walk_right_until(func(): return bool(world.story.get("scene:sea", false)), "the real sea"):
-		return
-	print("  ending: the sea scene played, waiting for the results")
+	print("  finale: the vine played, waiting for the results")
 	# The results screen pauses the tree, this node with it. A player's presses
 	# still reach it; this node has to keep running to make them.
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -678,7 +692,7 @@ func play_ending() -> void:
 	# THIS node at the end of the frame, so the report is made from inside the
 	# signal, before that happens.
 	results.continued.connect(func():
-		print("  PLAYED the ending: ascent, office, real sea, results, on to the title")
+		print("  PLAYED the finale: the edge, the vine, results, on to the title")
 		print("ACT3_ROUTES: %d failures, %d fragile steps, %d trials" % [failures, fragile, trials])
 		get_tree().quit(0 if failures == 0 else 1))
 	for k in 4:
@@ -691,8 +705,8 @@ func play_ending() -> void:
 	check(false, "PLAYTHROUGH: the results screen lets him leave for the title")
 
 
-func walk_right_until(done: Callable, what: String) -> bool:
-	for i in 3600:
+func walk_right_until(done: Callable, what: String, max_frames := 3600) -> bool:
+	for i in max_frames:
 		if done.call():
 			release()
 			return true

@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=83 format=3 uid="uid://caq57j1uwt3s5"]
+[gd_resource type="SpriteFrames" load_steps=90 format=3 uid="uid://caq57j1uwt3s5"]
 
 [ext_resource type="Texture2D" uid="uid://ds27rvxswwpdn" path="res://assets/characters/hooshang/sprites/native18/movement.png" id="sheet"]
 
@@ -407,6 +407,41 @@ atlas = ExtResource("sheet")
 region = Rect2(1440, 0, 18, 18)
 filter_clip = true
 
+[sub_resource type="AtlasTexture" id="frame_81"]
+atlas = ExtResource("sheet")
+region = Rect2(1458, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_82"]
+atlas = ExtResource("sheet")
+region = Rect2(1476, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_83"]
+atlas = ExtResource("sheet")
+region = Rect2(1494, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_84"]
+atlas = ExtResource("sheet")
+region = Rect2(1512, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_85"]
+atlas = ExtResource("sheet")
+region = Rect2(1530, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_86"]
+atlas = ExtResource("sheet")
+region = Rect2(1548, 0, 18, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_87"]
+atlas = ExtResource("sheet")
+region = Rect2(1566, 0, 18, 18)
+filter_clip = true
+
 [resource]
 animations = [{"frames": [{"duration": 180.0, "texture": SubResource("frame_0")}, {"duration": 180.0, "texture": SubResource("frame_1")}, {"duration": 180.0, "texture": SubResource("frame_2")}, {"duration": 180.0, "texture": SubResource("frame_3")}, {"duration": 180.0, "texture": SubResource("frame_4")}, {"duration": 180.0, "texture": SubResource("frame_5")}], "loop": true, "name": &"idle", "speed": 1000.0},
 {"frames": [{"duration": 90.0, "texture": SubResource("frame_6")}, {"duration": 90.0, "texture": SubResource("frame_7")}, {"duration": 90.0, "texture": SubResource("frame_8")}, {"duration": 90.0, "texture": SubResource("frame_9")}, {"duration": 90.0, "texture": SubResource("frame_10")}, {"duration": 90.0, "texture": SubResource("frame_11")}, {"duration": 90.0, "texture": SubResource("frame_12")}, {"duration": 90.0, "texture": SubResource("frame_13")}], "loop": true, "name": &"run", "speed": 1600.0},
@@ -423,7 +458,13 @@ animations = [{"frames": [{"duration": 180.0, "texture": SubResource("frame_0")}
 {"frames": [{"duration": 66.0, "texture": SubResource("frame_59")}, {"duration": 66.0, "texture": SubResource("frame_60")}, {"duration": 66.0, "texture": SubResource("frame_61")}, {"duration": 66.0, "texture": SubResource("frame_62")}, {"duration": 66.0, "texture": SubResource("frame_63")}, {"duration": 66.0, "texture": SubResource("frame_64")}], "loop": true, "name": &"swim", "speed": 1000.0},
 {"frames": [{"duration": 220.0, "texture": SubResource("frame_65")}, {"duration": 220.0, "texture": SubResource("frame_66")}, {"duration": 220.0, "texture": SubResource("frame_67")}, {"duration": 220.0, "texture": SubResource("frame_68")}], "loop": true, "name": &"swim_idle", "speed": 1000.0},
 {"frames": [{"duration": 100.0, "texture": SubResource("frame_69")}, {"duration": 100.0, "texture": SubResource("frame_70")}, {"duration": 100.0, "texture": SubResource("frame_71")}, {"duration": 100.0, "texture": SubResource("frame_72")}, {"duration": 100.0, "texture": SubResource("frame_73")}, {"duration": 100.0, "texture": SubResource("frame_74")}], "loop": false, "name": &"exit_water", "speed": 1000.0},
-{"frames": [{"duration": 40.0, "texture": SubResource("frame_75")}, {"duration": 40.0, "texture": SubResource("frame_76")}, {"duration": 40.0, "texture": SubResource("frame_77")}, {"duration": 40.0, "texture": SubResource("frame_78")}, {"duration": 40.0, "texture": SubResource("frame_79")}, {"duration": 40.0, "texture": SubResource("frame_80")}], "loop": false, "name": &"ledge_climb", "speed": 1000.0},
+{"frames": [{"duration": 40.0, "texture": SubResource("frame_75")}, {"duration": 40.0, "texture": SubResource("frame_76")}, {"duration": 40.0, "texture": SubResource("frame_77")}, {"duration": 40.0, "texture": SubResource("frame_78")}, {"duration": 40.0, "texture": SubResource("frame_79")}, {"duration": 40.0, "texture": SubResource("frame_80")}, {"duration": 400.0, "texture": SubResource("frame_81")}, {"duration": 400.0, "texture": SubResource("frame_82")}, {"duration": 400.0, "texture": SubResource("frame_83")}, {"duration": 400.0, "texture": SubResource("frame_84")}, {"duration": 260.0, "texture": SubResource("frame_85")}, {"duration": 260.0, "texture": SubResource("frame_86")}, {"duration": 400.0, "texture": SubResource("frame_87")}], "loop": false, "name": &"ledge_climb", "speed": 1000.0},
+{"frames": [{"duration": 400.0, "texture": SubResource("frame_81")}, {"duration": 400.0, "texture": SubResource("frame_82")}, {"duration": 400.0, "texture": SubResource("frame_83")}, {"duration": 400.0, "texture": SubResource("frame_84")}, {"duration": 260.0, "texture": SubResource("frame_85")}, {"duration": 260.0, "texture": SubResource("frame_86")}, {"duration": 400.0, "texture": SubResource("frame_87")}], "loop": false, "name": &"hang", "speed": 1000.0},
+{"frames": [{"duration": 400.0, "texture": SubResource("frame_82")}, {"duration": 400.0, "texture": SubResource("frame_83")}, {"duration": 400.0, "texture": SubResource("frame_84")}, {"duration": 260.0, "texture": SubResource("frame_85")}, {"duration": 260.0, "texture": SubResource("frame_86")}, {"duration": 400.0, "texture": SubResource("frame_87")}], "loop": false, "name": &"hang_look_down", "speed": 1000.0},
+{"frames": [{"duration": 400.0, "texture": SubResource("frame_83")}, {"duration": 400.0, "texture": SubResource("frame_84")}, {"duration": 260.0, "texture": SubResource("frame_85")}, {"duration": 260.0, "texture": SubResource("frame_86")}, {"duration": 400.0, "texture": SubResource("frame_87")}], "loop": false, "name": &"hang_look_up", "speed": 1000.0},
+{"frames": [{"duration": 400.0, "texture": SubResource("frame_84")}, {"duration": 260.0, "texture": SubResource("frame_85")}, {"duration": 260.0, "texture": SubResource("frame_86")}, {"duration": 400.0, "texture": SubResource("frame_87")}], "loop": false, "name": &"hang_reach", "speed": 1000.0},
+{"frames": [{"duration": 260.0, "texture": SubResource("frame_85")}, {"duration": 260.0, "texture": SubResource("frame_86")}, {"duration": 400.0, "texture": SubResource("frame_87")}], "loop": true, "name": &"hang_eat", "speed": 1000.0},
+{"frames": [{"duration": 400.0, "texture": SubResource("frame_87")}], "loop": false, "name": &"hang_content", "speed": 1000.0},
 {"frames": [{"duration": 30.0, "texture": SubResource("frame_14")}, {"duration": 30.0, "texture": SubResource("frame_15")}], "loop": false, "name": &"takeoff", "speed": 1000.0},
 {"frames": [{"duration": 60.0, "texture": SubResource("frame_16")}, {"duration": 60.0, "texture": SubResource("frame_17")}, {"duration": 60.0, "texture": SubResource("frame_18")}, {"duration": 60.0, "texture": SubResource("frame_19")}], "loop": false, "name": &"rise", "speed": 1000.0},
 {"frames": [{"duration": 100.0, "texture": SubResource("frame_20")}], "loop": false, "name": &"apex", "speed": 1000.0},

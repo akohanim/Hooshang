@@ -21,6 +21,10 @@ const PROMPT_SCENE := preload("res://scenes/ui/InputPrompt.tscn")
 const DARK_SHADER := preload("res://assets/shaders/act3_dark.gdshader")
 const CARPET_TEXTURE := preload("res://assets/props/magic_carpet/ride.png")
 const MEMORY_SHEET := preload("res://assets/act3/sea/memories.png")
+const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
+const VINE_SHEET := preload("res://assets/act3/vine/vine.png")
+const MICE_SHEET := preload("res://assets/act3/vine/mice.png")
+const LEMON_SHEET := preload("res://assets/act3/vine/lemon.png")
 
 ## Scenes in play order: name -> the room it belongs to. A cold open marks
 ## every scene whose room comes before the start room as already seen.
@@ -29,7 +33,7 @@ const SCENES := {
 	"currents": "Act3_Level_6", "lobby": "Act3_Level_9", "dark": "Act3_Level_12",
 	"kept": "Act3_Level_13", "reef": "Act3_Level_14", "edge": "Act3_Level_18",
 	"floor": "Act3_Level_21", "pond": "Act3_Level_22", "ascent": "Act3_Level_23",
-	"office": "Act3_Level_24", "sea": "Act3_Level_25",
+	"office": "Act3_Level_24", "sea": "Act3_Level_25", "tiger": "Act3_Level_28", "vine": "Act3_Level_31",
 }
 
 var _world: SeaWorld
@@ -50,6 +54,13 @@ var _door_watch := false
 var _sea_watch := false
 var _dive_prompt: InputPrompt
 var _ending_card := false
+## THE WAY HOME: the tiger chasing him (null until it steps out of the grass),
+## and the props of THE VINE once the edge room is reached.
+var _tiger: ChaseTiger
+var _tiger_watch := false
+var _edge_watch := false
+var _vine: Sprite2D
+var _lemon: Sprite2D
 
 
 func _ready() -> void:
@@ -134,7 +145,16 @@ func _on_room_changed(room: Node2D) -> void:
 			else:
 				_door_watch = true
 		"Act3_Level_25":
-			_play_sea.call_deferred(room)
+			if not played("sea"):
+				_play_sea.call_deferred(room)
+	_tiger_watch = name == "Act3_Level_28" and not played("tiger")
+	_edge_watch = name == "Act3_Level_31" and not played("vine")
+	if name == "Act3_Level_31":
+		_dress_edge(room)
+	# Mid-chase (a save, a cold open, or simply the next room): the tiger is on him.
+	if name in ["Act3_Level_28", "Act3_Level_29", "Act3_Level_30", "Act3_Level_31"] \
+			and played("tiger") and not played("vine") and _tiger == null:
+		_release_tiger.call_deferred(true)
 
 
 func _process(_delta: float) -> void:
@@ -171,6 +191,14 @@ func _process(_delta: float) -> void:
 		if player.global_position.x >= water.x and player.is_on_floor():
 			_sea_watch = false
 			_play_last_wave()
+	if _tiger_watch and not _busy and player.is_on_floor() \
+			and player.global_position.x >= _world.current_room.global_position.x + 13 * 8:
+		_tiger_watch = false
+		_play_tiger(_world.current_room)
+	if _edge_watch and not _busy and player.is_on_floor() \
+			and player.global_position.x >= _mark_pos(_world.current_room, "Edge").x:
+		_edge_watch = false
+		_play_vine(_world.current_room)
 	if _dive_prompt != null and is_instance_valid(_dive_prompt):
 		_dive_prompt.global_position = player.global_position + Vector2(0, -20 - _dive_prompt.lift)
 		if player.diving():
@@ -766,13 +794,286 @@ func _play_last_wave() -> void:
 	await cross.finished
 	carpet.queue_free()
 	await _hold(1.4)
-	await _fade_to(1.0, 2.4)
+	# He thinks he made it out. He walks on along the shore (THE WAY HOME).
+	_mark("sea")
+	player.unfreeze()
+	_busy = false
+
+
+# -------------------------------------------------------- THE WAY HOME ---
+
+## TWELVE — THE TIGER. The tall grass stops moving; it steps out behind him.
+func _play_tiger(room: Node2D) -> void:
+	_busy = true
+	var player := _world.player
+	player.freeze()
+	player.cutscene_rest(false, 1)
+	await _hold(0.9)
+	var at := _mark_pos(room, "Tiger") + Vector2(0, 4)
+	_tiger = ChaseTiger.new()
+	_tiger.name = "Tiger"
+	_world.add_child(_tiger)
+	_tiger.global_position = at + Vector2(-10, 6)
+	_tiger.visual.modulate.a = 0.0
+	_tiger.visual.play(&"walk")
+	var out := create_tween().set_parallel()
+	out.tween_property(_tiger.visual, "modulate:a", 1.0, 0.8)
+	out.tween_property(_tiger, "global_position", at, 1.2).set_trans(Tween.TRANS_SINE)
+	Sfx.play(&"growl")
+	await _hold(0.5)
+	player.visual.flip_h = true
+	await _emote(player, EmoteBubble.Kind.EXCLAIM)
+	# The bubble can outlast the walk out; a finished tween never signals again.
+	if out.is_running():
+		await out.finished
+	_tiger.visual.pause()
+	await _hold(0.6)
+	Dialogue.begin_conversation(self, player)
+	await _hooshang("...No.", "shocked")
+	Dialogue.end_conversation()
+	player.freeze()
+	_tiger.visual.play(&"roar")
+	Sfx.play(&"roar")
+	player.shake(1.6, 0.5)
+	_music_cue("chase")
+	await _hold(1.0)
+	player.visual.flip_h = false
+	_mark("tiger")
+	_release_tiger(false)
+	player.unfreeze()
+	_busy = false
+
+
+## Set the tiger on him: just behind, a run-up laid down on his own path.
+func _release_tiger(fresh: bool) -> void:
+	var player := _world.player
+	if _tiger == null:
+		_tiger = ChaseTiger.new()
+		_tiger.name = "Tiger"
+		_world.add_child(_tiger)
+	if fresh:
+		_tiger.global_position = player.global_position + Vector2(-72, Player.HALF_HEIGHT)
+		_music_cue("chase")
+	_tiger.chase(player)
+
+
+## The edge room's props, in place before he gets there: the vine on the cliff
+## face, and the lemon growing out of the rock beside it.
+func _dress_edge(room: Node2D) -> void:
+	if _vine != null and is_instance_valid(_vine):
+		return
+	var root := _mark_pos(room, "VineRoot") - Vector2(0, 4)
+	_vine = Sprite2D.new()
+	_vine.name = "Vine"
+	_vine.texture = VINE_SHEET
+	_vine.hframes = 3
+	_vine.centered = false
+	_vine.offset = Vector2(-7, 0)
+	_vine.z_index = 3
+	room.add_child(_vine)
+	_vine.global_position = root
+	_lemon = Sprite2D.new()
+	_lemon.name = "Lemon"
+	_lemon.texture = LEMON_SHEET
+	_lemon.hframes = 4
+	_lemon.z_index = 3
+	room.add_child(_lemon)
+	_lemon.global_position = _mark_pos(room, "Lemon")
+
+
+## THIRTEEN — THE VINE. The land gives way; a vine; a tiger below, a tiger
+## above, two mice at the root; and a lemon within reach of his hand.
+func _play_vine(room: Node2D) -> void:
+	_busy = true
+	var player := _world.player
+	player.freeze()
+	if _tiger != null:
+		_tiger.stop()
+	_music_cue("rest")
+	_dress_edge(room)
+	# The edge gives way under him.
+	var edge := _mark_pos(room, "Edge")
+	Sfx.play(&"crumble_break")
+	player.shake(1.8, 0.4)
+	_crumble(room, edge + Vector2(8, 6))
+	player.visual.flip_h = false
+	player.visual.play(&"fall")
+	var hang := _vine.global_position + Vector2(0, 72 + 11)
+	var drop := create_tween()
+	drop.tween_property(player, "global_position", Vector2(hang.x, player.global_position.y + 4), 0.28) \
+		.set_trans(Tween.TRANS_SINE)
+	drop.tween_property(player, "global_position", hang, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	# The tiger comes on to the edge and stops there.
+	if _tiger != null:
+		_tiger.visual.flip_h = false
+		_tiger.visual.play(&"run")
+		var stand := _mark_pos(room, "TigerAbove") + Vector2(0, 4)
+		create_tween().tween_property(_tiger, "global_position", stand, 0.9)
+	await drop.finished
+	# He catches the vine.
+	player.visual.play(&"hang")
+	player.visual.flip_h = true
+	Sfx.play(&"creak")
+	player.shake(1.2, 0.3)
+	var sway := create_tween().set_loops()
+	sway.tween_property(_vine, "rotation", 0.03, 1.1).set_trans(Tween.TRANS_SINE)
+	sway.tween_property(_vine, "rotation", -0.03, 1.1).set_trans(Tween.TRANS_SINE)
+	await _hold(1.2)
+	if _tiger != null:
+		_tiger.visual.play(&"look_down")
+	# He looks down: far below, another tiger, looking up at him.
+	var below := ChaseTiger.new()
+	below.name = "TigerBelow"
+	room.add_child(below)
+	var floor_at := _mark_pos(room, "TigerBelow") + Vector2(0, 4)
+	below.global_position = floor_at
+	below.visual.play(&"walk")
+	var pace := create_tween().set_loops()
+	pace.tween_callback(below.visual.set.bind("flip_h", false))
+	pace.tween_property(below, "global_position:x", floor_at.x + 26, 2.2)
+	pace.tween_callback(below.visual.set.bind("flip_h", true))
+	pace.tween_property(below, "global_position:x", floor_at.x - 22, 3.4)
+	pace.tween_callback(below.visual.set.bind("flip_h", false))
+	pace.tween_property(below, "global_position:x", floor_at.x, 1.4)
+	player.visual.play(&"hang_look_down")
+	await _hold(0.8)
+	var room_rect := _world.room_rect(room)
+	await _pan_camera(room_rect.end.y - 92.0, 1.8)
+	await _hold(0.8)
+	pace.kill()
+	below.visual.flip_h = false
+	below.visual.play(&"look_up")
+	Sfx.play(&"growl")
+	await _hold(1.8)
+	# He looks up: the first is still there, at the edge, looking down.
+	player.visual.play(&"hang_look_up")
+	await _pan_camera(room_rect.position.y + 92.0, 2.0)
+	if _tiger != null:
+		_tiger.visual.play(&"roar")
+		Sfx.play(&"roar")
+		await _hold(1.0)
+		_tiger.visual.play(&"look_down")
+	await _hold(1.0)
+	await _pan_camera(player.global_position.y - 20.0, 1.4)
+	# Two mice, one black and one white, come out to the root and gnaw.
+	await _mice(room)
+	_vine.frame = 1
+	await _emote(player, EmoteBubble.Kind.ELLIPSIS)
+	await _hold(1.0)
+	# And there, within reach of his hand: a lemon.
+	player.visual.play(&"hang")
+	await _emote(player, EmoteBubble.Kind.EXCLAIM)
+	Dialogue.begin_conversation(self, player, true)
+	await _hooshang("All those lemons.", "dazed")
+	await _hooshang("I never ate a single one.", "vulnerable")
+	Dialogue.end_conversation()
+	player.freeze()
+	player.visual.play(&"hang_reach")
+	await _hold(0.5)
+	var take := create_tween()
+	take.tween_property(_lemon, "global_position", player.global_position + Vector2(-8, -1), 0.5)
+	await take.finished
+	_lemon.visible = false
+	player.visual.play(&"hang_eat")
+	for i in 3:
+		Sfx.play(&"bite")
+		await _hold(0.9)
+	_vine.frame = 2
+	player.visual.play(&"hang_content")
+	await _hold(1.2)
+	Dialogue.begin_conversation(self, player, true)
+	await _hooshang("...Oh. That's good.", "happy")
+	Dialogue.end_conversation()
+	player.freeze()
+	player.visual.play(&"hang_content")
+	await _hold(2.4)
+	_fade.color = Color(0, 0, 0, 0)
+	await _fade_to(1.0, 3.0)
 	await _show_card("END OF ACT THREE", "")
 	await _show_card("THE END", "")
-	_mark("sea")
+	_mark("vine")
 	Game.completed = true
 	SaveGame.save_now()
 	_finish_act()
+
+
+## Chunks of the cliff top falling away into the ravine.
+func _crumble(room: Node2D, at: Vector2) -> void:
+	for i in 9:
+		var chunk := ColorRect.new()
+		chunk.color = Color(0.45, 0.40, 0.36) if i % 3 else Color(0.56, 0.74, 0.30)
+		chunk.size = Vector2(2 + i % 3, 2 + (i * 7) % 3)
+		chunk.z_index = 3
+		room.add_child(chunk)
+		chunk.global_position = at + Vector2(randf_range(-10, 10), randf_range(-3, 3))
+		var fall := create_tween().set_parallel()
+		fall.tween_property(chunk, "global_position:y", chunk.global_position.y + 260, randf_range(1.2, 1.8)) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		fall.tween_property(chunk, "global_position:x", chunk.global_position.x + randf_range(4, 18), 1.4)
+		fall.chain().tween_callback(chunk.queue_free)
+
+
+## The black mouse and the white one come out of the crack at the root of the
+## vine and set to it, the vine trembling as they gnaw.
+func _mice(room: Node2D) -> void:
+	var root := _vine.global_position
+	var pair: Array[Sprite2D] = []
+	for row in 2:
+		var mouse := Sprite2D.new()
+		mouse.name = "Mouse" + ("Black" if row == 0 else "White")
+		mouse.texture = MICE_SHEET
+		mouse.hframes = 3
+		mouse.vframes = 2
+		mouse.frame = row * 3
+		mouse.z_index = 4
+		mouse.flip_h = row == 1
+		room.add_child(mouse)
+		mouse.global_position = root + Vector2(-14 if row == 0 else 14, 3)
+		pair.append(mouse)
+		var walk := create_tween()
+		walk.tween_property(mouse, "global_position:x", root.x + (-4 if row == 0 else 4), 1.1)
+	await _hold(1.3)
+	var gnaw := create_tween().set_loops()
+	gnaw.tween_callback(func():
+		for row in 2:
+			if is_instance_valid(pair[row]):
+				pair[row].frame = row * 3 + (pair[row].frame + 1) % 3
+		Sfx.play(&"gnaw")
+		if is_instance_valid(_vine):
+			_vine.position.x += 1.0 if randf() < 0.5 else -1.0
+	)
+	gnaw.tween_interval(0.16)
+	gnaw.tween_callback(func():
+		if is_instance_valid(_vine):
+			_vine.position.x = roundf(_vine.position.x)
+	)
+	gnaw.tween_interval(0.12)
+	await _hold(2.0)
+
+
+## Move the camera's centre to world y `centre_y`. Camera2D.offset ignores the
+## camera's limits, so the pan is measured from where the camera is actually
+## looking, and the callers keep it inside the room.
+func _pan_camera(centre_y: float, seconds: float) -> void:
+	var cam := _world.player.camera
+	var now := cam.get_screen_center_position().y - cam.offset.y
+	var t := create_tween()
+	t.tween_property(cam, "offset:y", centre_y - now, seconds).set_trans(Tween.TRANS_SINE)
+	await t.finished
+
+
+func _emote(over: Node2D, kind: EmoteBubble.Kind) -> void:
+	var bubble: EmoteBubble = EMOTE_SCENE.instantiate()
+	over.add_child(bubble)
+	bubble.position = Vector2(0.0, -16.0)
+	await bubble.play(kind)
+	bubble.queue_free()
+
+
+func _music_cue(cue: String) -> void:
+	var music := _world.get_node_or_null("Music")
+	if music != null and music.has_method(cue):
+		music.call(cue)
 
 
 func _finish_act() -> void:

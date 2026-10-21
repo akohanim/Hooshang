@@ -20,6 +20,13 @@ static func apply(level: LDTKLevel) -> LDTKLevel:
 	level.set_meta("title", str(meta.get("title", "")))
 	level.set_meta("chapter", int(meta.get("chapter", 0)))
 	level.set_meta("mode", str(meta.get("mode", "")))
+	# The way home ('land' rooms): their own terrain colours and painted backdrop.
+	for key in ["terrain_fill", "terrain_line"]:
+		if meta.has(key):
+			var c: Array = meta[key]
+			level.set_meta(key, Vector3(float(c[0]), float(c[1]), float(c[2])))
+	if meta.has("backdrop"):
+		level.set_meta("backdrop", str(meta["backdrop"]))
 	var entities := level.get_node("Entities") as LDTKEntityLayer
 	for data: Dictionary in entities.entities:
 		var node := _build(data, str(level.name))

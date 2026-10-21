@@ -14,7 +14,7 @@ ART = ROOT / 'assets/characters/hooshang/sprites/native18'
 SOURCE = ROOT / 'assets/characters/hooshang/aseprite/hooshang_18px_movement.aseprite'
 # Gameplay cadence tuning; source Aseprite frame durations remain editable.
 PLAYBACK_MULTIPLIERS = {'run': 1.6}
-LOOPS = {'idle', 'run', 'climb', 'climb_down', 'climb_idle', 'fall', 'wall_slide', 'swim', 'swim_idle'}
+LOOPS = {'idle', 'run', 'climb', 'climb_down', 'climb_idle', 'fall', 'wall_slide', 'swim', 'swim_idle', 'hang_eat'}
 
 
 def build(export=True):

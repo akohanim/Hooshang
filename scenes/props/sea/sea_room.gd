@@ -129,6 +129,18 @@ func _material(shader: Shader) -> ShaderMaterial:
 
 
 func _build_backdrop() -> void:
+	# A 'land' room (the way home) hangs its own painting instead of the sea.
+	var painted := str(get_parent().get_meta("backdrop", ""))
+	if painted != "" and ResourceLoader.exists(painted):
+		var art := Sprite2D.new()
+		art.name = "LandBackdrop"
+		art.texture = load(painted)
+		art.centered = false
+		art.z_as_relative = false
+		art.z_index = -8
+		art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		add_child(art)
+		return
 	backdrop = ColorRect.new()
 	backdrop.name = "SeaBackdrop"
 	backdrop.size = Vector2(size_cells * 8)
@@ -152,6 +164,10 @@ func _tint_terrain(layer: TileMapLayer) -> void:
 	if mode == "sunrise":
 		(layer.material as ShaderMaterial).set_shader_parameter("fixed_fill", Vector3(0.78, 0.6, 0.38))
 		(layer.material as ShaderMaterial).set_shader_parameter("fixed_line", Vector3(1.0, 0.9, 0.7))
+	var level := get_parent()
+	if level.has_meta("terrain_fill"):
+		(layer.material as ShaderMaterial).set_shader_parameter("fixed_fill", level.get_meta("terrain_fill"))
+		(layer.material as ShaderMaterial).set_shader_parameter("fixed_line", level.get_meta("terrain_line"))
 	for extra in ["Background", "Foreground"]:
 		var other := get_parent().get_node_or_null(extra) as TileMapLayer
 		if other != null:

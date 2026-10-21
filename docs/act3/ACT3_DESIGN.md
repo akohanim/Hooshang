@@ -80,7 +80,7 @@ read in the water exactly as in the air.
 
 ## Chapters and rooms
 
-26 rooms, `Act3_Level_0`..`Act3_Level_25` (identifiers are play order). Rooms are
+32 rooms, `Act3_Level_0`..`Act3_Level_31` (identifiers are play order). Rooms are
 joined by EDGE APERTURES — an opening in one room's wall that meets an opening in
 its neighbour's becomes a two-way portal (the prison's system, rebuilt for the sea
 in `scripts/act3/sea_world.gd`). That is what lets the act go DOWN: most chapters
@@ -121,7 +121,20 @@ end by dropping through the floor into the room below.
 22. **The Pond at the Bottom of the Sea** — Jamshid, fishing. The pearl. The bell.
 23. **The Ascent** — up through the white.
 24. **The Office at Dawn** — he wakes on the carpet; the way to the car.
-25. **The Real Sea** — sunrise, every colour; he walks into the water.
+25. **The Real Sea** — sunrise, every colour; he walks into the water. He thinks
+    he made it out.
+
+### VI · THE WAY HOME (natural colour, painted)
+The zen parable of the tiger and the strawberry, with a lemon. All game he
+gathered lemons and never ate one.
+26. **The Shore Road** — over the dunes, the sea glittering behind him.
+27. **The High Meadow** — poppies, blue mountains, one lemon tree on the brow.
+28. **The Tall Grass** — a tiger steps out behind him. "...No." It roars. Run.
+29. **The Wood** — over the log, over the ditch, never stopping.
+30. **The Rocks** — the headland; the sea far below; the land running out.
+31. **The Edge** — the ground gives way; a vine. A tiger below, a tiger above, a
+    black mouse and a white one gnawing the vine — and a lemon within reach. He
+    eats it. "...Oh. That's good." END OF ACT THREE.
 
 ## Sound
 

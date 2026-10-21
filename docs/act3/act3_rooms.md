@@ -996,16 +996,235 @@ See `docs/act3/ACT3_DESIGN.md` for the act. Legend: `#` rock, `g` seabed, `s` pi
 10 x......................................x
 11 x......................................x
 12 x......................................x
-13 x......................................x
-14 x......................................x
-15 x..P...................................x
-16 gggggggggggggggg.......................x
-17 gggggggggggggggggggggg.................x
-18 gggggggggggggggggggggggggggg...........x
-19 gggggggggggggggggggggggggggggggggg.....x
+13 x.......................................
+14 x.......................................
+15 x..P....................................
+16 gggggggggggggggg........................
+17 gggggggggggggggggggggg..................
+18 gggggggggggggggggggggggggggg............
+19 gggggggggggggggggggggggggggggggggg......
 20 gggggggggggggggggggggggggggggggggggggggg
 21 gggggggggggggggggggggggggggggggggggggggg
 22 gggggggggggggggggggggggggggggggggggggggg
 23 gggggggggggggggggggggggggggggggggggggggg
 ```
 
+- route: down the sand to the water → the wave → on along the shore
+
+## 7
+
+### Act3_Level_26 — The Shore Road
+
+```
+   0         1         2         3         
+ 0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 1 x......................................x
+ 2 x......................................x
+ 3 x......................................x
+ 4 x......................................x
+ 5 x......................................x
+ 6 x......................................x
+ 7 x......................................x
+ 8 x.......................................
+ 9 x.......................................
+10 x.......................................
+11 x.......................................
+12 x.......................................
+13 ........................................
+14 ...................................ggggg
+15 ...................................ggggg
+16 ...............................ggggggggg
+17 .........................ggggggggggggggg
+18 ................gggggg...ggggggggggggggg
+19 ..........gggggggggggggggggggggggggggggg
+20 gggggggggggggggggggggggggggggggggggggggg
+21 gggggggggggggggggggggggggggggggggggggggg
+22 gggggggggggggggggggggggggggggggggggggggg
+23 gggggggggggggggggggggggggggggggggggggggg
+```
+
+- route: up off the beach → over the dunes → onto the coast path
+
+### Act3_Level_27 — The High Meadow
+
+```
+   0         1         2         3         
+ 0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 1 x......................................x
+ 2 x......................................x
+ 3 x......................................x
+ 4 x......................................x
+ 5 x......................................x
+ 6 x......................................x
+ 7 x......................................x
+ 8 .......................................x
+ 9 ........................................
+10 ........................................
+11 ........................................
+12 ..............gggggggg..................
+13 ........gggggggggggggggggggg............
+14 gggggggggggggggggggggggggggggggggg......
+15 gggggggggggggggggggggggggggggggggggggggg
+16 gggggggggggggggggggggggggggggggggggggggg
+17 gggggggggggggggggggggggggggggggggggggggg
+18 gggggggggggggggggggggggggggggggggggggggg
+19 gggggggggggggggggggggggggggggggggggggggg
+20 gggggggggggggggggggggggggggggggggggggggg
+21 gggggggggggggggggggggggggggggggggggggggg
+22 gggggggggggggggggggggggggggggggggggggggg
+23 gggggggggggggggggggggggggggggggggggggggg
+```
+
+- route: up the meadow → past the lemon tree → down toward the tall grass
+
+### Act3_Level_28 — The Tall Grass
+
+```
+   0         1         2         3         
+ 0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 1 x......................................x
+ 2 x......................................x
+ 3 x......................................x
+ 4 x......................................x
+ 5 x......................................x
+ 6 x......................................x
+ 7 x......................................x
+ 8 x......................................x
+ 9 .......................................x
+10 ........................................
+11 ........................................
+12 ........................................
+13 ........................................
+14 ........................................
+15 gggggggggggggg........gggggg............
+16 gggggggggggggggggggggggggggggggggggggggg
+17 gggggggggggggggggggggggggggggggggggggggg
+18 gggggggggggggggggggggggggggggggggggggggg
+19 gggggggggggggggggggggggggggggggggggggggg
+20 gggggggggggggggggggggggggggggggggggggggg
+21 gggggggggggggggggggggggggggggggggggggggg
+22 gggggggggggggggggggggggggggggggggggggggg
+23 gggggggggggggggggggggggggggggggggggggggg
+```
+
+- route: into the tall grass → the tiger → run
+
+### Act3_Level_29 — The Wood
+
+```
+   0         1         2         3         
+ 0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 1 x......................................x
+ 2 x......................................x
+ 3 x......................................x
+ 4 x......................................x
+ 5 x......................................x
+ 6 x......................................x
+ 7 x......................................x
+ 8 x......................................x
+ 9 x......................................x
+10 ........................................
+11 ........................................
+12 ........................................
+13 ........................................
+14 ........................................
+15 ..........gg................gggggg......
+16 gggggggggggggggggggg...ggggggggggggggggg
+17 gggggggggggggggggggg...ggggggggggggggggg
+18 gggggggggggggggggggg...ggggggggggggggggg
+19 gggggggggggggggggggg...ggggggggggggggggg
+20 gggggggggggggggggggggggggggggggggggggggg
+21 gggggggggggggggggggggggggggggggggggggggg
+22 gggggggggggggggggggggggggggggggggggggggg
+23 gggggggggggggggggggggggggggggggggggggggg
+```
+
+- route: over the log → over the ditch → up the roots → on
+
+### Act3_Level_30 — The Rocks
+
+```
+   0         1         2         3         
+ 0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 1 x......................................x
+ 2 x......................................x
+ 3 x......................................x
+ 4 x......................................x
+ 5 x......................................x
+ 6 x......................................x
+ 7 x......................................x
+ 8 x.......................................
+ 9 x.......................................
+10 ........................................
+11 ........................................
+12 ........................................
+13 ..............ggg.......................
+14 ......gggg....ggg................ggggggg
+15 ......gggg....ggg............ggggggggggg
+16 gggggggggggggggggggggg...ggggggggggggggg
+17 gggggggggggggggggggggg...ggggggggggggggg
+18 gggggggggggggggggggggg...ggggggggggggggg
+19 gggggggggggggggggggggg...ggggggggggggggg
+20 gggggggggggggggggggggg...ggggggggggggggg
+21 gggggggggggggggggggggggggggggggggggggggg
+22 gggggggggggggggggggggggggggggggggggggggg
+23 gggggggggggggggggggggggggggggggggggggggg
+```
+
+- route: up the first boulder → over the tall one → over the crevice → up to the edge of the land
+
+### Act3_Level_31 — The Edge
+
+```
+   0         1         2         3         
+ 0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 1 x......................................x
+ 2 x......................................x
+ 3 x......................................x
+ 4 x......................................x
+ 5 x......................................x
+ 6 x......................................x
+ 7 x......................................x
+ 8 .......................................x
+ 9 .......................................x
+10 .....................................ggg
+11 .....................................ggg
+12 .....................................ggg
+13 ........ggg..........................ggg
+14 ggggggggggggggggggggggggg............ggg
+15 ggggggggggggggggggggggggg............ggg
+16 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+17 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+18 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+19 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+20 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+21 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+22 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+23 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+24 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+25 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+26 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+27 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+28 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+29 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+30 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+31 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+32 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+33 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+34 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+35 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+36 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+37 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+38 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+39 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+40 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+41 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+42 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+43 xxxxxxxxxxxxxxxxxxxxxxxxx............xxx
+44 xxxxxxxxxxxxxxxxxxxxxxxxxggggggggggggxxx
+45 xxxxxxxxxxxxxxxxxxxxxxxxxggggggggggggxxx
+46 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+47 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- route: along the cliff top → the land runs out

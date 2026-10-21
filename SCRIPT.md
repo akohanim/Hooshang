@@ -1454,6 +1454,52 @@ TEN — THE REAL SEA
 
 (Hooshang lifts his hand. Not to hold on. Just to wave.)
 
+(He stays until the water is warm. Then he picks up his shoes, puts them on, and walks along the shore toward home.)
+
+ELEVEN — THE WAY HOME
+
+(The shore road. Dunes and sea grass, wildflowers in the sand, the sea glittering behind him. Gulls. Then the path climbs to a high meadow above the water: long grass, poppies, the morning lying gold across the hills, and one lemon tree standing on its own.)
+
+(Nothing chases him. Nothing speaks. He walks.)
+
+TWELVE — THE TIGER
+
+(The meadow runs into tall grass. The grass stops moving in the wind.)
+
+(It parts. A TIGER steps out onto the path, between him and the way he came. It looks at him. He looks at it.)
+
+HOOSHANG
+...No.
+
+(The tiger roars. HOOSHANG runs.)
+
+(Through the wood, over the rocks, the tiger always a breath behind him — until the land runs out.)
+
+THIRTEEN — THE VINE
+
+(The edge of a cliff. The ground gives way under him and he falls — and catches a vine growing out of the rock, and hangs there.)
+
+(He looks down. Far below, a SECOND TIGER paces at the foot of the cliff, looking up at him, hungry.)
+
+(He looks up. The first tiger is at the edge, looking down.)
+
+(Beside the root of the vine, two mice come out of a crack in the rock: one BLACK, one WHITE. They begin to gnaw at the vine.)
+
+(And there, growing out of the cliff within reach of his hand: a lemon.)
+
+HOOSHANG
+All those lemons.
+
+HOOSHANG
+I never ate a single one.
+
+(He picks it. He eats it.)
+
+(The mice gnaw. The tigers wait. HOOSHANG closes his eyes.)
+
+HOOSHANG
+...Oh. That's good.
+
 END OF ACT THREE
 
 THE END

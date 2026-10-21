@@ -1849,6 +1849,25 @@ going toward the light**: the act opens in the approved monochrome line art
   results and the title. Flags in `SeaWorld.story["scene:<name>"]`; a room
   opened cold counts earlier scenes as seen and gets the Dive past room 4. A
   world with the `no_beats` meta runs none of it (the route proof, captures).
+- **THE WAY HOME** (rooms 25-31, SCRIPT.md TEN to THIRTEEN): the real sea no
+  longer ends the act. He walks on along the shore (26 the shore road, 27 the
+  high meadow) in a `land` mode: the room's terrain is tinted earth and grass
+  from its own `terrain_fill`/`terrain_line`, and its backdrop is a PAINTING
+  (`tools/gen_act3_land_backdrops.py` -> `assets/act3/land/`, planted along
+  the room's real ground line). In 28 a tiger steps out of the tall grass
+  behind him (`ChaseTiger`, `scenes/props/sea/chase_tiger.gd`, art from
+  `tools/gen_tiger.py` -> `assets/characters/tiger/tiger.aseprite`): a
+  DELAYED ECHO of his path on Darkshang's `PlayerPositionBuffer`, one second
+  behind, so it catches only a man who stops. `clear_and_seed`'s `trail_dir`
+  is where he came FROM (LEFT here); passing his heading puts the tiger in
+  front of him. 31 is the edge, two screens tall: the land gives way, he
+  catches a vine (`assets/act3/vine/`, `tools/gen_vine_scene.py`), the camera
+  pans down to a second tiger and up to the first, a black and a white mouse
+  gnaw the vine, and he eats the lemon (`hang*` clips, `tools/build_adult_vine.lua`).
+  The cliff body below its grassy top is invisible solid (`x`) with the rock
+  face PAINTED in the backdrop. Pans use `Camera2D.offset`, which ignores the
+  camera's limits, so `Act3Beats._pan_camera` measures from the room. Chase
+  music: `sea_chase.ogg`; sounds roar/growl/gnaw/bite/creak (`gen_act3_sfx.py`).
 - **Act II hands off to Act III**: Act II's end card -> results -> `Act3World`
   (`act2_ending.gd`'s `_handoff_act_three`, which clears a stale
   `debug_start_room`). Saves in Act III show room NAMES (`SaveGame.room_label`).
