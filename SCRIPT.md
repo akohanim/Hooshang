@@ -1,5 +1,5 @@
 HOOSHANG  
-a play in two acts
+a play in three acts
 
 Adapted from the video game Hooshang  
 (dialogue and story only — the platforming and puzzles that carry them  
@@ -14,7 +14,7 @@ JAMSHID — Hooshang's cousin, a boy, met again in the memory of a summer in Ira
 
 SETTING
 
-Act One takes place entirely inside a dim, endless corporate office — which is revealed, room by room, to be a landscape built out of Hooshang's own mind. Act Two is a warm, sun-drenched memory of a childhood pond in Iran.
+Act One takes place entirely inside a dim, endless corporate office — which is revealed, room by room, to be a landscape built out of Hooshang's own mind. Act Two is a warm, sun-drenched memory of a childhood pond in Iran. Act Three is the sea beneath both of them — black and white at its surface, and brighter the deeper it goes.
 
 \==========================================================  
 ACT ONE — THE OFFICE  
@@ -1090,6 +1090,370 @@ FIFTEEN — THE SECOND LINE
 
 END OF ACT TWO
 
-A NOTE ON WHAT COMES NEXT
 
-This is where the game's story stands today. A third act is sketched in the project files — a luminous, sunlit ocean that brightens the deeper Hooshang goes — but it has not yet been written. Where it takes him is not yet known, even to the people making it.  
+                    ACT III · THE SEA
+
+==========================================================
+ACT THREE — THE SEA
+==========================================================
+
+ONE — THE TIDE
+
+(The wall from the alley. The second line, still wet.)
+
+(The paint begins to run. Not down — outward. Every stroke loosens into a line of white that ripples, until the whole wall is water standing upright. Then it is not standing at all. It falls, gently, and becomes a sea.)
+
+(Black and white. A shore drawn in single white lines, a sea of them beyond it. HOOSHANG — an old man again, in his cardigan — lies at the edge of the water. He sits up. He looks at his hands.)
+
+HOOSHANG
+...Old again.
+
+HOOSHANG
+I liked being seventeen. My knees liked it more.
+
+(At the water's edge, the only colour anywhere: a little gold. RUMI.)
+
+RUMI
+You let go of his hand.
+
+HOOSHANG
+Is that what that was.
+
+RUMI
+You held it for fifty years, jaan. Your arm must be tired.
+
+HOOSHANG
+All of me is tired.
+
+HOOSHANG
+Where is this?
+
+RUMI
+Beneath the office. Beneath the pond. This is the water all of it was floating on.
+
+HOOSHANG
+It's very... black and white.
+
+RUMI
+You have only seen the top of it.
+
+(He looks out at the sea. Hooshang follows his look.)
+
+HOOSHANG
+You want me to go in there.
+
+RUMI
+Down. All the way down.
+
+HOOSHANG
+I'm an old man. I swim like a filing cabinet.
+
+RUMI
+The sea does not ask a man his age. Only what he is carrying.
+
+HOOSHANG
+And if he is carrying a great deal?
+
+RUMI
+Then he will sink quickly. That part is easy. Keep your eyes open.
+
+(Rumi walks into the water without a ripple, and is gone.)
+
+TWO — THE GIFT
+
+(Under the surface. The first colour in the world: a deep, dark blue, the colour of a held breath.)
+
+(RUMI is waiting in the water as if it were a garden.)
+
+RUMI
+You are swimming like a man filling out a form.
+
+HOOSHANG
+I am swimming like a man who is about to drown.
+
+RUMI
+You cannot drown here, jaan. This is the one place you never could.
+
+RUMI
+Do not fight the sea. Lean the way you want to go, and let it carry you.
+
+(Light passes between them, as it did once in the office.)
+
+(Hooshang leans — and the sea carries him.)
+
+THREE — CURRENTS
+
+(Rivers run through the deep: long, invisible currents. One takes him.)
+
+HOOSHANG
+It's dragging me!
+
+RUMI
+It is going somewhere. You are only finding out where.
+
+FOUR — THE DROWNED OFFICE
+
+(A shape out of the blue: an office building, lying on the sea floor. Cubicles. Filing cabinets. Fluorescent tubes still flickering, under all that water.)
+
+HOOSHANG
+You have got to be joking.
+
+RUMI
+You brought it with you.
+
+HOOSHANG
+I didn't bring it. I left it. They let me go.
+
+RUMI
+You left the building, jaan. That is not the same thing.
+
+(Things float in the flooded rooms. Hooshang finds them one by one.)
+
+(A brass name plate.)
+
+HOOSHANG
+Fifteen years at the same desk. They spelled my name wrong on this for six of them. I never said anything.
+
+(A photograph: two boys by a pond.)
+
+HOOSHANG
+We had the same haircut. His mother cut both. Badly.
+
+(An aeroplane ticket, never used. TEHRAN.)
+
+HOOSHANG
+I had the ticket. I packed. I sat by the door with my coat on, all night.
+
+HOOSHANG
+In the morning I took my coat off.
+
+(A letter, never sent.)
+
+HOOSHANG
+"Dear Khaleh. I don't know how to begin this." I began it nine times.
+
+(In the dark of the lowest floor, something moves between the desks. DARKSHANG — small now, a shadow drifting, watching.)
+
+HOOSHANG
+It's back.
+
+RUMI
+It never left. It lives where you live.
+
+RUMI
+Do not feed it. And do not run from it. Not yet.
+
+(At the bottom of the lift shaft, half buried in silt: a spray can, rusted through. Hooshang picks it up. He puts it down again. He says nothing.)
+
+RUMI
+Every one of these you carried down here yourself.
+
+HOOSHANG
+I kept everything.
+
+RUMI
+Everything except the years.
+
+HOOSHANG
+...That's the part that's going to hurt, isn't it.
+
+RUMI
+It already does. You have only been standing very still, so as not to notice.
+
+FIVE — THE REEF OF LANTERNS
+
+(Below the wreck, the sea begins to glow. Coral like lamps. Fish like sparks. Jellyfish drifting like slow thoughts, lit from inside.)
+
+HOOSHANG
+It's getting brighter.
+
+RUMI
+Yes.
+
+HOOSHANG
+It's supposed to get darker the deeper you go. Everyone knows that.
+
+RUMI
+Everyone knows a great many things about seas they have never been in.
+
+RUMI
+Thoughts again — you know these. Step where they are not.
+
+RUMI
+Though these, jaan, you may also land on.
+
+(At the edge of the reef the floor falls away: a trench, going down into light so bright it is nearly white.)
+
+RUMI
+From here, you go alone.
+
+HOOSHANG
+You always say that right before the parts I'm going to hate.
+
+RUMI
+I always mean it.
+
+(Rumi's light softens into the light of the sea, and there is no telling them apart.)
+
+SIX — THE TRENCH
+
+(Wordless. HOOSHANG dives. Above him the dark gathers — DARKSHANG, grown vast again, pouring down the trench after him like ink. The deeper Hooshang goes, the brighter the water. The brighter the water, the darker the thing behind him.)
+
+SEVEN — THE FLOOR OF THE SEA
+
+(The bottom. Sand like gold dust. Light from everywhere and nowhere. No surface above — only a soft white glow.)
+
+(DARKSHANG reaches the bottom too. It stops, a little way off.)
+
+HOOSHANG
+Rumi?
+
+(Silence.)
+
+HOOSHANG
+...Of course.
+
+(Small dark thoughts lift off the shadow like spores and fill the water. There is nowhere they are not. Hooshang turns to run. The floor of the sea goes on forever in every direction.)
+
+(He stops.)
+
+HOOSHANG
+Let it come.
+
+HOOSHANG
+Let it stand.
+
+(He stands. The thoughts reach him — and pass through him, and each one goes out like a candle as it does.)
+
+(The shadow comes close. It is enormous. Then it is smaller. It is the size of a man. It is exactly the shape of Hooshang.)
+
+(He looks at it for a long time.)
+
+HOOSHANG
+You were only ever trying to keep me safe.
+
+(The shadow says nothing. It has never said anything.)
+
+HOOSHANG
+I know. You did a terrible job.
+
+(He holds out his hand — the one that let Jamshid go.)
+
+(The shadow takes it, and folds down onto the sand at his feet: an ordinary shadow, the kind a man casts when he is standing in the light.)
+
+HOOSHANG
+Let it go.
+
+EIGHT — THE POND AT THE BOTTOM OF THE SEA
+
+(Further on, impossibly: a pond in the floor of the sea. Water inside the water, still and warm, with reeds around it. On the bank a boy sits with a fishing line. JAMSHID, ten years old.)
+
+JAMSHID
+Cousin joon.
+
+HOOSHANG
+You told me to come looking for you.
+
+JAMSHID
+I said next time you're old.
+
+HOOSHANG
+I'm old.
+
+JAMSHID
+You took your time.
+
+HOOSHANG
+Are they biting?
+
+JAMSHID
+They would if old men stopped swimming through their house.
+
+(Hooshang laughs. He sits down on the bank beside him.)
+
+(They fish. Neither says anything for a long time. It is the best conversation either of them has ever had.)
+
+HOOSHANG
+I wasted it, Jamshid. I was so afraid of everything. I sat at one desk for fifteen years so that nothing could ever happen to me again.
+
+JAMSHID
+Did it work?
+
+HOOSHANG
+No.
+
+JAMSHID
+Then you weren't wasting it. You were waiting.
+
+HOOSHANG
+For what?
+
+JAMSHID
+For you to come down.
+
+(The line tugs.)
+
+JAMSHID
+Finally!
+
+(He reels in. Not a fish: a pearl, glowing. He looks at it, then holds it out.)
+
+JAMSHID
+Here. This one's yours.
+
+HOOSHANG
+What is it?
+
+JAMSHID
+The rest of it.
+
+HOOSHANG
+The rest of what?
+
+JAMSHID
+Your time. Don't spend it all at a desk.
+
+(Far above, through all that water, a school bell rings.)
+
+HOOSHANG
+That's yours.
+
+JAMSHID
+Not this time.
+
+(He nudges him with his shoulder.)
+
+JAMSHID
+Go home, cousin joon.
+
+(And this time, Hooshang goes.)
+
+NINE — THE SURFACE
+
+(He rises. The light goes with him, then ahead of him, and then he is through it —)
+
+(Black. A fluorescent tube flickers. The office, at dawn: grey, ordinary, real. HOOSHANG lies on the carpet beside his desk, a cardboard box of his things spilled beside him. He sits up and touches his head.)
+
+HOOSHANG
+...Harder than I thought.
+
+(Among the spilled things: the photograph of two boys by a pond. He puts it in his pocket. He leaves the box where it is.)
+
+(He walks out through the office — past the cubicles, the water cooler, the long dark corridor — to the door, and through it.)
+
+(A parking lot. His car, the only one left.)
+
+HOOSHANG
+Made it.
+
+TEN — THE REAL SEA
+
+(Sunrise over the real sea: every colour there is. HOOSHANG stands on the sand with his shoes in his hand. He sets them down. He walks into the water until it is over his feet, and stands there, his shadow long on the sand behind him.)
+
+(Far out over the water, for just a moment, the shape of a magic carpet crosses the sun.)
+
+(Hooshang lifts his hand. Not to hold on. Just to wave.)
+
+END OF ACT THREE
+
+THE END

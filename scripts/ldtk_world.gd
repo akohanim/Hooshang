@@ -207,6 +207,7 @@ func _ready() -> void:
 	add_child(_world)
 
 	rooms = rooms_in(_world)
+	_prepare_rooms()
 	_scatter_moss()
 
 	if draw_room_backdrops:
@@ -259,6 +260,13 @@ func _ready() -> void:
 	# no bug in the re-route itself would ever be reachable to test.
 	if _way_back.has(_start_room().name):
 		_arm_return(_room_before(_start_room()))
+
+
+## A subclass's chance to finish building its rooms before anything else reads
+## them. SeaWorld uses it to redo Act III's import step when an import left it
+## out.
+func _prepare_rooms() -> void:
+	pass
 
 
 # --- Moss scatter -------------------------------------------------------------
@@ -504,6 +512,9 @@ const INSERTED_ROOMS := {
 ## editor CLOSED to remove them properly, then this entry can go.
 const SHELVED_ROOMS: Array[String] = [
 	"Level_V11", "Level_V12", "Level_V13", "Level_V14",
+	# Act III's two early sketch rooms, kept in hooshang_act3.ldtk for the
+	# record but out of the route (tools/build_act3_world.py renamed them).
+	"Act3_Sketch_A", "Act3_Sketch_B",
 ]
 
 ## The number in a room's identifier — the 16 in `Level_16` — or an

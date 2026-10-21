@@ -39,6 +39,13 @@ const CUES := {
 	&"darkshang_gather": [1, -9.0, 0.0],
 	&"darkshang_lunge": [1, -8.0, 0.0],
 }
+## Act III's own synthesised cues (tools/gen_act3_sfx.py), same spec shape.
+const ACT3_DIR := "res://assets/audio/act3/"
+const ACT3_CUES := {
+	&"bubble": [1, -16.0, 0.08],
+	&"jelly": [1, -14.0, 0.06],
+	&"memory": [1, -12.0, 0.0],
+}
 const POOL := 8
 
 var _streams := {}
@@ -63,6 +70,10 @@ func _ready() -> void:
 			if stream != null:
 				list.append(stream)
 		_streams[cue] = list
+	for cue: StringName in ACT3_CUES:
+		var path: String = ACT3_DIR + "%s.wav" % cue
+		var stream := load(path) as AudioStream if ResourceLoader.exists(path) else null
+		_streams[cue] = [stream] if stream != null else []
 	# Loaded as an imported JSON resource (as VoiceBlips loads its manifest):
 	# raw FileAccess on res:// is not guaranteed to survive an export.
 	var res := load(DIR + "surfaces.json") as JSON if ResourceLoader.exists(DIR + "surfaces.json") else null
@@ -89,7 +100,7 @@ func play(cue: StringName, gain_db := 0.0) -> void:
 	_last[cue] = index
 	var p := _players[_next]
 	_next = (_next + 1) % _players.size()
-	var spec: Array = CUES[cue]
+	var spec: Array = CUES[cue] if CUES.has(cue) else ACT3_CUES[cue]
 	p.stream = list[index]
 	p.volume_db = float(spec[1]) + gain_db
 	p.pitch_scale = 1.0 + randf_range(-float(spec[2]), float(spec[2]))

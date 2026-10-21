@@ -356,6 +356,35 @@ so the two agree now. The tiles are still placeholder art.
   whole bars at 100 BPM (and the prison theme its 16 bars at 60), the coda
   playing once per arrival, rest()/resume()
   around the Jamshid night encounter, and the Music bus + dialogue duck hookup.
+- `Godot --headless --path . --fixed-fps 60 res://tests/act3_routes_test.tscn`
+  — proves every Act III room with REAL INPUT (routes drawn in
+  `tools/act3_rooms.py`, written to `resources/levels/act3_routes.json`): it
+  SEARCHES each step (jump holds, air-dash and Dive directions/timings, Dive
+  chains, start delays against moving hazards) and then REPLAYS the found
+  inputs back to back from the room's start. Sea moves: `swim` (2D steering
+  through waypoints), `divechain` (Dive toward the next waypoint whenever it is
+  back — bubble and bell chains), `float` (bob, then Dive/dash). Subset: `--
+  Act3_Level_5 [--trace]`. Last full run: 23 rooms, 0 failures, 0 fragile.
+  It holds STATION while waiting (a current drifts an idle swimmer), and steps
+  into a portal get a waypoint past the seam automatically.
+  `-- --playthrough` adds the PLAYER's test: after the search, one fresh run
+  with the story on, from the shore to the results and the title, crossing
+  into every room only through its portal (skip held through dialogue, a death
+  resumes from the step nearest the checkpoint and tries the step's next
+  searched input, as a player tries again differently), and every scene must
+  fire in its own room. `--cache` reuses the inputs an earlier run found
+  (`user://act3_route_plans.json`, keyed to the routes file's md5) and skips
+  the 3-minute search; `--from Act3_Level_N` starts the play-through there.
+- `Godot --headless --path . --fixed-fps 60 res://tests/act3_story_test.tscn`
+  — Act III's story end to end WITH beats: every scene in SCRIPT.md's ACT
+  THREE is reached the way a player reaches it and must bank its
+  `SeaWorld.story` flag (conversations held through with `skip_dialogue`): the
+  opening, all six Rumi scenes, the Dive granted, the dark floor dark, the
+  stillness finale, the pond, the ascent into the office, the real sea, and the
+  act's results screen.
+- `Godot --path . res://tests/act3_shot.tscn -- Act3_Level_17 ...` — capture
+  harness (windowed, not pass/fail): photographs whole Act III rooms (two
+  frames for a tall one) into `user://act3_shots/`, beats off.
 - `Godot --headless --path . res://tests/sfx_test.tscn` — the `Sfx` autoload
   (`systems/sfx.gd`, ElevenLabs cues in `assets/audio/elevenlabs_v2/`): every
   cue's variations load, footsteps play ONLY on Act 1 scaffolding (read off
@@ -1744,6 +1773,89 @@ organized per-character before this pass and needed no change.
   INVENTED HERE: they are exactly `scripts/act1_beats.gd`'s `FACES` /
   `RUMI_FACES` keys (minus the aliases that point at another state's
   painting), so a state that already has a portrait gets a voice for free.
+
+## Act III — the sea
+
+Design and story: `docs/act3/ACT3_DESIGN.md`, `SCRIPT.md`'s ACT THREE. Rooms
+(generated maps + intended moves): `docs/act3/act3_rooms.md`. **Going down is
+going toward the light**: the act opens in the approved monochrome line art
+(`assets/act3/README.md`) and colour floods in with DEPTH until the floor is gold.
+
+- **The rooms are DRAWN in `tools/act3_rooms.py`** (character grids + a few
+  calls for currents, paths, memories) and written by `python3
+  tools/build_act3_world.py` (`--check` validates and prints maps): the semantic
+  `Collision` IntGrid (1 solid, 2 one-way, 4 WATER — value 4 was Act I's
+  UnderworldTrigger and is renamed), the visible `Collisions` auto-layer in the
+  existing brick/Grass/Scaffolding brushes (baked with LDtk's own rules, so the
+  rooms stay editable), every entity (it adds the sea's entity defs if missing),
+  `resources/levels/act3_rooms.json` (title/chapter/mode per room, read by the
+  import) and `act3_routes.json`. Hand edits to those 26 levels in LDtk are
+  overwritten on the next run. LDtk and the Godot editor must be closed.
+  The old sketch rooms are kept as `Act3_Sketch_A/B`, in `SHELVED_ROOMS`.
+- **Rooms join by their EDGES** (`scripts/act3/sea_world.gd`, `SeaWorld`): an
+  opening in a room's border that meets an opening in its neighbour's is a
+  two-way portal — the prison's system, rebuilt for the sea so neither Act can
+  break the other. Crossing FREEZES him for the slide and hands back his exact
+  velocity (a jump across a seam keeps its arc); the room's checkpoint settles
+  where he first stands or swims. `build_act3_world.py --check` reports any
+  border opening that meets rock, nothing, or mismatched water.
+- **Each room's look is built at runtime by `SeaRoom`** (`scenes/props/sea/`,
+  added by `scripts/act3/sea_import.gd` from `ldtk_level_post_import.gd`):
+  collision from the semantic grid, the backdrop (`act3_backdrop.gdshader`:
+  the shore's horizon of wave-dashes, dithered light shafts that rise from
+  BELOW in the trench, marine snow), the terrain recolour, the water overlay
+  (`act3_water.gdshader`: waterline only where AIR sits on water, refraction
+  only near a surface) and one-way planks. All colour is a function of WORLD y
+  (`scripts/act3/sea_palette.gd`), never of the room, so seams are invisible
+  and a slide changes colour as it goes. Epilogue rooms carry a `mode`
+  (`dawn`: the office; `sunrise`: the real sea, natural colour).
+- **A ceiling is not a surface.** `SeaRoom.surface_y_at` reports a waterline
+  only where open air is above the water; under rock it is "deep" (-INF). The
+  first version treated every overhang's underside as a waterline, so buoyancy
+  sprang him toward cave roofs and every dive ran at two-thirds speed.
+- **Player additions** (all off outside Act III): `has_swim_dash` — the DIVE,
+  dash underwater, one per breath (refilled at the surface, on landing, by an
+  `AirBubble` or a jellyfish bell via `refill_swim_dash()`); a Dive up through a
+  surface is a BREACH (`swim_breach_speed`, held like a full jump, no climb-out
+  grace); `set_current()/clear_current()` for `SeaCurrent` zones (folded into
+  the stroke target, water only); `deep_buoyancy` (Act III sets ~0 so he hangs
+  where he stops in water with no surface). `SeaWorld.apply_sea_movement` sets
+  the sea's faster swim; the water also refills the air dash. His
+  `PresenceLight` is switched off (it blows the bright sea out to a halo).
+- **New props** (`scenes/props/sea/`): `SeaCurrent` (rect polled against his
+  hitbox; a column draws bubbles), `AirBubble`, `Jellyfish` (a DarkThought:
+  same paths and reset sweep; bell bounces + refills, tentacles kill),
+  `SeaMemory` (the things he kept: touch, he remembers, it rises and goes out;
+  saved in `SeaWorld.memories`), `InkFlood` (Darkshang down the trench; waits
+  until he commits, like Act I's shadow), `SeaDecor` (line-art dressing through
+  the depth shader), `VerseWall` (the opening), `StillThought` (the finale:
+  passes through him if he is still, stings if he moves).
+- **Two design rules the route proof taught**: one Dive crosses a current at
+  most 5 cells wide (55px including his width); a room that NEEDS the Dive has a
+  refill on its approach (surface, bubble or bell) or a wasted Dive is a
+  soft-lock. Chase rooms (the trench) cross each lane bubble to bubble.
+- **Story**: `scripts/act3/act3_beats.gd` (`Act3Beats`) — the opening, Rumi's
+  six scenes (it claims every Act III `RumiTrigger` with `defer_to_cutscene`),
+  the memories' follow-ups, the dark floor (`act3_dark.gdshader`), the
+  stillness finale and the shadow folding into his own shadow, Jamshid at the
+  pond, the ascent, the office at dawn and the real sea, then the act's
+  results and the title. Flags in `SeaWorld.story["scene:<name>"]`; a room
+  opened cold counts earlier scenes as seen and gets the Dive past room 4. A
+  world with the `no_beats` meta runs none of it (the route proof, captures).
+- **Act II hands off to Act III**: Act II's end card -> results -> `Act3World`
+  (`act2_ending.gd`'s `_handoff_act_three`, which clears a stale
+  `debug_start_room`). Saves in Act III show room NAMES (`SaveGame.room_label`).
+- **Score**: `scripts/act3/act3_music.gd`, cues from
+  `tools/gen_act3_sea_music.py` (see `assets/music/README.md`).
+- **Importing while the editor is open**: this session's imports were made in
+  a scratch copy of the project (the user's editor held this one) and the
+  results copied back. Restart the editor before playing Act III so its own
+  import uses the new post-import hook.
+  **An editor left open re-imports Act III WITHOUT the sea step**: it uses the
+  hook it loaded at startup, the rooms come out with no `SeaRoom` (so no water,
+  no colour, no portals, and he cannot leave room 1), and it reports nothing.
+  `SeaWorld._prepare_rooms()` redoes `sea_import.apply()` at load for any room
+  missing it and warns, so play still works; restart the editor to fix the files.
 
 ## Dialogue rules
 

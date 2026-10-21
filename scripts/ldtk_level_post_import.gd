@@ -165,6 +165,10 @@ func post_import(level: LDTKLevel) -> LDTKLevel:
 		if layer.name == GEOMETRY_LAYER:
 			preload("res://scripts/terrain_variation.gd").apply(layer)
 			_light_panels(level, layer)
+	# Act III: the sea's own geometry, water, colour and props, on top of the
+	# generic pass above (scripts/act3/sea_import.gd).
+	if str(level.name).begins_with("Act3_"):
+		return preload("res://scripts/act3/sea_import.gd").apply(level)
 	return level
 
 

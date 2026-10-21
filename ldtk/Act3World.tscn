@@ -1,11 +1,21 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=12 format=3]
 
-[ext_resource type="Script" uid="uid://dl0ws0vqhwxlc" path="res://scripts/ldtk_world.gd" id="1_world"]
+[ext_resource type="Script" path="res://scripts/act3/sea_world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://ldtk/hooshang_act3.ldtk" id="2_ldtk"]
+[ext_resource type="Script" path="res://scripts/act3/act3_beats.gd" id="3_beats"]
+[ext_resource type="Script" path="res://scripts/act3/act3_music.gd" id="4_music"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_shore.ogg" id="5_shore"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_deep.ogg" id="6_deep"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_wreck.ogg" id="7_wreck"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_reef.ogg" id="8_reef"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_trench.ogg" id="9_trench"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_floor.ogg" id="10_floor"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_dawn.ogg" id="11_dawn"]
 
 [node name="Act3World" type="Node2D"]
 script = ExtResource("1_world")
 world_scene = ExtResource("2_ldtk")
+draw_room_backdrops = false
 room_backdrop_texture = null
 room_backdrop_color = Color(0, 0, 0, 1)
 
@@ -18,4 +28,19 @@ color = Color(1, 1, 1, 1)
 
 [node name="Lights" type="Node2D" parent="."]
 
+[node name="Act3Beats" type="Node" parent="."]
+script = ExtResource("3_beats")
+
 [node name="EditorPreview" parent="." instance=ExtResource("2_ldtk")]
+
+[node name="Music" type="AudioStreamPlayer" parent="."]
+script = ExtResource("4_music")
+shore = ExtResource("5_shore")
+deep = ExtResource("6_deep")
+wreck = ExtResource("7_wreck")
+reef = ExtResource("8_reef")
+trench = ExtResource("9_trench")
+floor_cue = ExtResource("10_floor")
+dawn = ExtResource("11_dawn")
+volume_db = -10.0
+bus = &"Music"

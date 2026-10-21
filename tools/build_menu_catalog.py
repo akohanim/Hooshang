@@ -88,6 +88,14 @@ def main() -> None:
     for recipe in ["act2_precision", "act2_expansion", "act2_final_trials"]:
         for r in json.loads((ROOT / f"resources/levels/{recipe}.json").read_text()):
             names[r["name"]] = r
+    # Act III's titles and chapters come from the same table that draws its
+    # rooms (tools/build_act3_world.py -> resources/levels/act3_rooms.json).
+    chapters = {1: "I · THE INK SHORE", 2: "II · THE SHALLOWS", 3: "III · THE DROWNED OFFICE",
+                4: "IV · THE REEF OF LANTERNS", 5: "V · THE FLOOR OF LIGHT", 6: "EPILOGUE"}
+    act3_path = ROOT / "resources/levels/act3_rooms.json"
+    if act3_path.exists():
+        for room_id, meta in json.loads(act3_path.read_text()).items():
+            names[room_id] = {"title": meta["title"], "idea": chapters.get(meta["chapter"], "")}
     acts = []
     for act in range(1, 4):
         project = json.loads((ROOT / f"ldtk/hooshang_act{act}.ldtk").read_text())
@@ -97,6 +105,8 @@ def main() -> None:
                 value_names[(layer["identifier"], v["value"])] = v.get("identifier") or ""
         rooms = []
         for level in project["levels"]:
+            if level["identifier"].startswith("Act3_Sketch_"):
+                continue  # kept in the project, shelved out of the route
             room = build_room(level, value_names)
             recipe = names.get(level["identifier"], {})
             room["title"] = recipe.get("title", "")

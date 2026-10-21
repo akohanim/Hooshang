@@ -63,3 +63,27 @@ LDtk. Do not leave either editor holding stale project data while rebuilding.
 
 Verify: `Godot --headless --path . res://tests/act3_art_test.tscn`.
 Connected paint regression: `python3 tools/test_act3_connected_terrain.py`.
+
+# Act III — the sea (built 2026-10)
+
+The monochrome brushes above are now the SURFACE of Act III, exactly as
+directed, and the act is a descent: colour floods in with depth until the sea
+floor is gold. Design: `docs/act3/ACT3_DESIGN.md`. Rooms: `docs/act3/act3_rooms.md`
+(generated). Everything here is recoloured by world depth through
+`scripts/act3/sea_palette.gd`'s ramps — the terrain's black and white become
+that depth's fill and line in `assets/shaders/act3_depth_tint.gdshader`.
+
+- `sea/jellyfish.png` — 4 frames, 16x20: pale bell (bounces, refills), red
+  tentacles (lethal). `sea/air_bubble.png` — 4 frames, 16x16.
+- `sea/memories.png` — 16x16 each: name plate, photograph, ticket, letter,
+  spray can, pearl (the things he kept, Chapter III).
+- `sea/decor.png` — 96x72 sheet of 8px cells, WHITE LINE ON BLACK with grey for
+  shading, so the depth shader recolours it like the terrain: kelp, reed,
+  sea-grass, coral, fan, rock, shell, desk, cabinet, partition, chair, tube,
+  whale rib and skull, anchor, lantern, pier post (`SeaDecor.KINDS` has the map).
+- `hero.png` — the chapter browser's Act III card (a capture of Whale Fall).
+
+Rebuild the sheets with `python3 tools/gen_act3_sea_art.py`. The rooms are drawn
+in `tools/act3_rooms.py` and written by `python3 tools/build_act3_world.py`
+(LDtk and the Godot editor closed); the two old sketch rooms are kept in the
+project as `Act3_Sketch_A/B`, shelved.

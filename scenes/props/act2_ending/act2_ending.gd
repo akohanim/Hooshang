@@ -379,4 +379,32 @@ func _unhandled_input(event: InputEvent) -> void:
 		# title-menu item in the same input dispatch.
 		get_viewport().set_input_as_handled()
 		get_tree().root.set_input_as_handled()
-		MainMenu.open(get_tree())
+		_handoff_act_three()
+
+
+## The act's results, then on into Act III — the same hand-off Act I makes into
+## this one (Act1Beats._handoff_act_two). Falls back to the title screen if the
+## sea is not there.
+const ACT_THREE := "res://ldtk/Act3World.tscn"
+var _results_open := false
+
+func _handoff_act_three() -> void:
+	if _results_open:
+		return
+	_results_open = true
+	_shown = false
+	var results := preload("res://scenes/ui/ActResults.tscn").instantiate()
+	results.stats = ActStats.finish()
+	get_tree().root.add_child(results)
+	await results.continued
+	Dialogue.end_conversation()
+	results.queue_free()
+	SaveGame.save_now()
+	var tree := get_tree()
+	if ResourceLoader.exists(ACT_THREE):
+		# A resumed Act II save may have left a start room behind; the sea
+		# begins at its shore.
+		LdtkWorld.debug_start_room = ""
+		Screen.load_scene.bind(ACT_THREE).call_deferred()
+		return
+	MainMenu.open.bind(tree).call_deferred()

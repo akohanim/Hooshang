@@ -1,0 +1,184 @@
+{
+ "Act3_Level_0": {
+  "title": "The Tide",
+  "chapter": 1,
+  "fixed_depth": -1.0,
+  "horizon": 76,
+  "mode": ""
+ },
+ "Act3_Level_1": {
+  "title": "Tide Pools",
+  "chapter": 1,
+  "fixed_depth": -1.0,
+  "horizon": 76,
+  "mode": ""
+ },
+ "Act3_Level_2": {
+  "title": "The Pier",
+  "chapter": 1,
+  "fixed_depth": -1.0,
+  "horizon": 76,
+  "mode": ""
+ },
+ "Act3_Level_3": {
+  "title": "The Shelf",
+  "chapter": 1,
+  "fixed_depth": -1.0,
+  "horizon": 76,
+  "mode": ""
+ },
+ "Act3_Level_4": {
+  "title": "The Gift",
+  "chapter": 2,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_5": {
+  "title": "Kelp",
+  "chapter": 2,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_6": {
+  "title": "Currents",
+  "chapter": 2,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_7": {
+  "title": "Air Pockets",
+  "chapter": 2,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_8": {
+  "title": "The Drop-off",
+  "chapter": 2,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_9": {
+  "title": "The Lobby",
+  "chapter": 3,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_10": {
+  "title": "Cubicles",
+  "chapter": 3,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_11": {
+  "title": "The Flooded Stair",
+  "chapter": 3,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_12": {
+  "title": "The Dark Floor",
+  "chapter": 3,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_13": {
+  "title": "The Lift Shaft",
+  "chapter": 3,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_14": {
+  "title": "First Light",
+  "chapter": 4,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_15": {
+  "title": "Lantern Coral",
+  "chapter": 4,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_16": {
+  "title": "Bubble Garden",
+  "chapter": 4,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_17": {
+  "title": "Whale Fall",
+  "chapter": 4,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_18": {
+  "title": "The Edge",
+  "chapter": 4,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_19": {
+  "title": "The Trench",
+  "chapter": 5,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_20": {
+  "title": "The Deep Trench",
+  "chapter": 5,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_21": {
+  "title": "The Floor of the Sea",
+  "chapter": 5,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_22": {
+  "title": "The Pond at the Bottom of the Sea",
+  "chapter": 5,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_23": {
+  "title": "The Ascent",
+  "chapter": 5,
+  "fixed_depth": -1.0,
+  "horizon": -1,
+  "mode": ""
+ },
+ "Act3_Level_24": {
+  "title": "The Office at Dawn",
+  "chapter": 6,
+  "fixed_depth": 0.0,
+  "horizon": -1,
+  "mode": "dawn"
+ },
+ "Act3_Level_25": {
+  "title": "The Real Sea",
+  "chapter": 6,
+  "fixed_depth": 0.0,
+  "horizon": 96,
+  "mode": "sunrise"
+ }
+}

@@ -105,6 +105,9 @@ func _after_rebuild() -> void:
 	for i in int(size.x / 8):
 		var block := Sprite2D.new()
 		block.texture = _sheet[0]
+		# Takes the panel's own material when it has one: Act III recolours its
+		# black-and-white chunks by depth (scenes/props/sea/sea_room.gd).
+		block.use_parent_material = true
 		block.region_enabled = true
 		block.region_rect = Rect2((i % 3) * 8, 0, 8, 8)
 		block.position = Vector2(i * 8 + 4, 4) - size * 0.5

@@ -403,6 +403,30 @@ var _spring_arc := false
 ## reads as taking, and it has to cover reach + his own height inside
 ## exit_water_anim_time or the beat ends before he is up.
 @export var exit_water_climb_speed := 80.0
+## Act III's gift, the DIVE: dash UNDERWATER. Off everywhere until Rumi hands
+## it over in Act3_Level_4 (act3_beats.gd) — the same ability-gate shape as
+## has_dash. One per breath: spent on use, back on surfacing, landing or an
+## AirBubble (see swim_dash_available).
+@export var has_swim_dash := false
+## Speed of the Dive, px/s. Several times swim_speed, so it is how a current is
+## crossed and how a gap between two jellyfish is shot rather than paddled.
+@export var swim_dash_speed := 215.0
+## How long the Dive owns him. Distance ~ swim_dash_speed * swim_dash_time.
+@export var swim_dash_time := 0.2
+## Speed kept along the Dive when it ends — water drag eats the rest over a few
+## frames via swim_accel, which is what makes it read as a stroke and not a
+## teleport.
+@export var swim_dash_end_speed := 95.0
+## Upward speed a Dive keeps when it carries him OUT through the surface — the
+## breach. Held flat for jump_hold_time like a full jump whether or not jump is
+## down (he committed to it underwater), so a breach clears about a jump and a
+## quarter above the waterline, with the air dash ready on top.
+@export var swim_breach_speed := 160.0
+## Rise speed in water with NO surface above it (a column that runs on into the
+## room overhead — Act III's deep rooms). Negative = the same swim_buoyancy as
+## everywhere else; Act III sets it near zero so he hangs where he stops,
+## which is what lets an underwater room be built for precision.
+@export var deep_buoyancy := -1.0
 
 @export_group("Ledge assist")
 ## Rescue a near miss only when the feet are at most one tile below the top.
@@ -667,6 +691,19 @@ var _swim_visual_angle := 0.0
 ## with everything else and ends up facing down for every direction,
 ## left included.
 var _swim_visual_flip := false
+## The Dive (has_swim_dash). Available again on surfacing, landing, a respawn,
+## an AirBubble or a jellyfish bell (refill_swim_dash()).
+var swim_dash_available := true
+var _swim_dash_timer := 0.0
+var _swim_dash_dir := Vector2.RIGHT
+## A breach sustains its rise for jump_hold_time without the button — see
+## swim_breach_speed. Cleared with the hold.
+var _breach_hold := false
+## Act III currents (scenes/props/sea/current.gd) currently pushing him, zone ->
+## flow in px/s. The zones poll their own overlap and report here, the same
+## split Pond/SlideZone use; only _state_swim reads it, so a current does
+## nothing to him out of the water.
+var _currents: Dictionary = {}
 
 # Adult frames are native 24px art at 1:1, with their feet pinned to the
 # bottom of the 9x12 hitbox. Each library supplies its scale and offset;
@@ -741,7 +778,9 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("jump") or touch_jump:
 			jump_buffer_timer = jump_buffer_time
 		var swipe: Vector2 = TouchControls.consume_dash()
-		if swipe != Vector2.ZERO and _try_dash(swipe):
+		if swipe != Vector2.ZERO and (_try_swim_dash(swipe) or _try_dash(swipe)):
+			return
+		if Input.is_action_just_pressed("dash") and _try_swim_dash(_movement_input()):
 			return
 		if Input.is_action_just_pressed("dash") and _can_dash():
 			_dash_input_dir = _movement_input()
@@ -803,6 +842,10 @@ func _tick_timers(delta: float) -> void:
 	wall_lock_timer = maxf(wall_lock_timer - delta, 0.0)
 	wall_jump_timer = maxf(wall_jump_timer - delta, 0.0)
 	jump_hold_timer = maxf(jump_hold_timer - delta, 0.0)
+	if jump_hold_timer <= 0.0:
+		_breach_hold = false
+	if not swimming():
+		swim_dash_available = true
 	if _lemon_glow_timer > 0.0:
 		_lemon_glow_timer = maxf(_lemon_glow_timer - delta, 0.0)
 		_apply_lemon_glow()
@@ -949,12 +992,33 @@ func _state_climb(delta: float, input_x: float) -> void:
 func _state_swim(delta: float, input_x: float) -> void:
 	var input_y := 0.0 if input_locked else _movement_input().y
 	_swim_paddling = input_x != 0.0 or input_y != 0.0
-	_tick_swim_orientation(delta, input_x, input_y)
-	velocity.x = move_toward(velocity.x, input_x * swim_speed, swim_accel * delta)
 	var surface := _swim_surface_y()
-	var target_y := clampf(input_y * swim_speed - _buoyant_rise(surface),
+	# A breath: floating with his head out refills the Dive.
+	if is_finite(surface) and global_position.y - surface <= swim_float_depth + 3.0:
+		swim_dash_available = true
+	# The Dive owns him outright for its length — no buoyancy, no stroke, no
+	# waterline cap (a Dive up through the surface is the breach, see
+	# _clear_swim), the same "committed" shape _state_dash has on land.
+	if _swim_dash_timer > 0.0:
+		_swim_dash_timer -= delta
+		velocity = _swim_dash_dir * swim_dash_speed
+		juice.dash_tick(delta)
+		_tick_swim_orientation(delta, _swim_dash_dir.x, _swim_dash_dir.y)
+		_swim_paddling = true
+		if _swim_dash_timer <= 0.0:
+			velocity = _swim_dash_dir * swim_dash_end_speed
+		return
+	_tick_swim_orientation(delta, input_x, input_y)
+	var flow := current_flow()
+	# A current is part of the water's own motion, so it moves the TARGET the
+	# stroke turns toward, and drags a little harder the stronger it runs —
+	# otherwise a strong river would take a second to pick him up.
+	var accel := swim_accel + flow.length() * 2.0
+	velocity.x = move_toward(velocity.x, input_x * swim_speed + flow.x, accel * delta)
+	var surface_target := clampf(input_y * swim_speed - _buoyant_rise(surface),
 		-(swim_speed + swim_buoyancy), swim_max_sink_speed)
-	velocity.y = move_toward(velocity.y, target_y, swim_accel * delta)
+	var target_y := surface_target + flow.y
+	velocity.y = move_toward(velocity.y, target_y, accel * delta)
 	# A STROKE cannot carry him out of the water — only the jump kick below
 	# can. Capped on VELOCITY rather than on the target above, because the
 	# target is only where velocity is HEADED: capping it still let a rise
@@ -1192,7 +1256,7 @@ func _can_stand_at(at: Vector2) -> bool:
 ## see _swim_surface_y for which zones can answer and which cannot.
 func _buoyant_rise(surface: float) -> float:
 	if not is_finite(surface):
-		return swim_buoyancy
+		return swim_buoyancy if deep_buoyancy < 0.0 else deep_buoyancy
 	var below := global_position.y - (surface + swim_float_depth)
 	return clampf(below * swim_float_spring, -swim_max_sink_speed, swim_buoyancy)
 
@@ -1401,6 +1465,9 @@ func _apply_jump_hold() -> void:
 			velocity.y *= jump_cut_multiplier
 		return
 	if jump_hold_timer <= 0.0:
+		return
+	if _breach_hold:
+		velocity.y = minf(velocity.y, -swim_breach_speed)
 		return
 	if input_locked or not (Input.is_action_pressed("jump") or TouchControls.jump_held()):
 		jump_hold_timer = 0.0
@@ -2008,8 +2075,10 @@ func _update_visual() -> void:
 			visual.rotation = 0.0 if visual.sprite_frames.get_meta("child_hooshang", false) else _swim_visual_angle
 	# Dash availability tint (our stand-in for Celeste's hair color):
 	# normal colors = dash ready, cool blue tint = dash spent.
+	# Under water the colour answers for the Dive instead, once he has it.
+	var ready := swim_dash_available if swimming() and has_swim_dash else dash_available
 	if state != State.DASH:
-		visual.modulate = Color.WHITE if dash_available else Color(0.6, 0.75, 1.0)
+		visual.modulate = Color.WHITE if ready else Color(0.6, 0.75, 1.0)
 
 
 ## Animation phases follow physical motion, including an upward dash ending in FALL.
@@ -2151,6 +2220,10 @@ func respawn(at: Vector2) -> void:
 	# solid ground) would misread as him climbing out of water rather than
 	# an ordinary respawn.
 	_exit_swim_grace_timer = 0.0
+	_swim_dash_timer = 0.0
+	swim_dash_available = true
+	_breach_hold = false
+	_currents.clear()
 	_ledge_elapsed = 0.0
 	_ledge_cooldown = 0.0
 	_mantle_dir = 0  # dying mid-climb must not carry the climb into the next life
@@ -2370,11 +2443,75 @@ func exit_swim(zone: Node) -> void:
 func _clear_swim() -> void:
 	swim_zone = null
 	if state == State.SWIM:
+		# A Dive up through the surface is a BREACH: a committed leap out of the
+		# water, not a drift into the air — and not a bank climb-out either, so
+		# no grace window (a breach beside a wall would otherwise play the
+		# climb-out clip in mid-air).
+		if _swim_dash_timer > 0.0 and _swim_dash_dir.y < -0.3:
+			_swim_dash_timer = 0.0
+			velocity = Vector2(_swim_dash_dir.x * max_run_speed * 1.25, -swim_breach_speed)
+			jump_hold_timer = jump_hold_time
+			_breach_hold = true
+			_exit_swim_grace_timer = 0.0
+			state = State.JUMP
+			Sfx.play(&"splash")
+			juice.on_jump()
+			return
+		_swim_dash_timer = 0.0
 		state = State.FALL
 		# Arms the grace window a landing within has to fall inside to read as
 		# a bank climb-out rather than an ordinary fall — see the timer's own
 		# doc for why this is a window and not a single frame.
 		_exit_swim_grace_timer = exit_water_grace_time
+
+
+## Start a Dive if he is swimming and has one. True when it started, so the
+## caller can stop looking for an ordinary dash (which swimming refuses anyway).
+func _try_swim_dash(direction: Vector2) -> bool:
+	if not swimming() or not has_swim_dash or not swim_dash_available:
+		return false
+	if input_locked or _interaction_buttons_reserved or state != State.SWIM or _swim_dash_timer > 0.0:
+		return false
+	var dir := direction if direction != Vector2.ZERO else Vector2(facing, 0)
+	_swim_dash_dir = dir.normalized()
+	_swim_dash_timer = swim_dash_time
+	swim_dash_available = false
+	velocity = _swim_dash_dir * swim_dash_speed
+	jump_buffer_timer = 0.0
+	juice.on_dash_start(_swim_dash_dir, false)
+	return true
+
+
+## An AirBubble or a jellyfish bell: the Dive and the dash, both back at once.
+func refill_swim_dash() -> void:
+	swim_dash_available = true
+	dash_available = true
+	dash_cooldown_timer = 0.0
+
+
+func diving() -> bool:
+	return _swim_dash_timer > 0.0
+
+
+## A Current reporting its flow while he overlaps it (or Vector2.ZERO to stop).
+func set_current(zone: Node, flow: Vector2) -> void:
+	if flow == Vector2.ZERO:
+		_currents.erase(zone)
+	else:
+		_currents[zone] = flow
+
+
+func clear_current(zone: Node) -> void:
+	_currents.erase(zone)
+
+
+## Every current pushing him right now, summed.
+func current_flow() -> Vector2:
+	var sum := Vector2.ZERO
+	for zone in _currents:
+		if is_instance_valid(zone):
+			sum += _currents[zone]
+	return sum
 
 
 # ------------------------------------------------------------- cosmetics ----
@@ -2490,7 +2627,15 @@ func cancel_dialogue_motion() -> void:
 	_dash_input_timer = 0.0
 	_dash_input_dir = Vector2.ZERO
 	jump_buffer_timer = 0.0
-	state = State.IDLE if is_on_floor() else State.FALL
+	# A swimmer stays swimming. FALL with a swim zone still held is a state
+	# nothing ever leaves: the water only calls enter_swim() when he is NOT
+	# swimming, so he sank through the sea in FALL. Act III's portals call this
+	# before every slide and the sea is one zone across rooms, so every crossing
+	# from water into water stranded him.
+	if swimming():
+		state = State.SWIM
+	else:
+		state = State.IDLE if is_on_floor() else State.FALL
 
 
 func dialogue_land_step(delta: float) -> bool:

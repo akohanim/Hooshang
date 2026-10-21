@@ -59,3 +59,33 @@ the node's volume. Check with `tests/act2_music_test.tscn`.
 `act2_music.gd`'s interactive stream (counted in its own 60 BPM).
 `darkshang_theme.ogg` is now Act 1's `chase_stream`. Both are generated, looped
 and levelled as described in `assets/audio/elevenlabs_v2/README.md`.
+
+# Act III score — "The Sea"
+
+Seven synthesised cues, all made by `python3 tools/gen_act3_sea_music.py`
+(numpy + ffmpeg, deterministic, no source recording — the voice-blip recipe).
+One theme in Dastgah-e Shur on D, with its true E koron (50 cents flat), travels
+the act the way the colour does (`docs/act3/ACT3_DESIGN.md`):
+
+| cue | plays | what it is |
+|---|---|---|
+| `sea_shore.ogg` | Ch I, loop | surf, and the theme in single santur notes with long silences — black and white |
+| `sea_deep.ogg` | Ch II, loop | a D drone opens; santur arpeggios; phrase A on a breathy ney |
+| `sea_wreck.ogg` | Ch III, loop | a flickering tube hum; the theme on a muffled, wobbling electric piano |
+| `sea_reef.ogg` | Ch IV, loop | glass bells, shimmering pads, the whole melody (phrases A + B) |
+| `sea_trench.ogg` | Ch V chase, loop | a heartbeat that keeps getting heavier, a D/E-flat santur tremolo, swells from below |
+| `sea_floor.ogg` | the floor, once | one held chord in the light, then the third arrives and the theme turns to Mahur (major) |
+| `sea_dawn.ogg` | the real sea, loop | the full theme in Mahur, warm |
+
+Instruments are additive/FM: a santur of doubled, slightly detuned inharmonic
+courses with a hammer click; a ney (sine + soft octave, blooming vibrato, breath
+noise); FM glass bells; detuned-saw pads; a convolution hall from decaying noise.
+Every loop is rendered with 6 s of tail that is folded back onto its head, so a
+note ringing past the seam keeps ringing into the next pass (measured seam
+jumps 0.001–0.013). `scripts/act3/act3_music.gd` (on `ldtk/Act3World.tscn`'s
+`Music`, Music bus, -10 dB) switches cue by chapter with 3 s crossfades; the
+floor cue plays once per arrival, and the office at dawn is silent.
+
+Act III's three small sound effects — `bubble`, `jelly`, `memory` — are made by
+`python3 tools/gen_act3_sfx.py` into `assets/audio/act3/` and registered in
+`systems/sfx.gd`'s `ACT3_CUES`.

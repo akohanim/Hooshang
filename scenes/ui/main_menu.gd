@@ -206,6 +206,8 @@ func show_root() -> void:
 	if latest >= 0:
 		if SaveGame.summary(latest).get("world", "") == "res://ldtk/Act2World.tscn":
 			subtitle.text = "ACT II  —  THE POND"
+		elif SaveGame.summary(latest).get("world", "") == "res://ldtk/Act3World.tscn":
+			subtitle.text = "ACT III  —  THE SEA"
 		built.append(_row("CONTINUE", _describe(latest, "SLOT %d" % (latest + 1)),
 			func() -> void: _start(func() -> void: SaveGame.resume(latest))))
 	built.append(_row("NEW GAME", "a fresh run, in a slot you pick",
@@ -759,7 +761,7 @@ func _fade_to(a: float) -> void:
 const CHAPTERS := [
 	{"name":"THE OFFICE", "subtitle":"I  /  BREAK THE ROUTINE", "note":"Fluorescent nights. Impossible deadlines. One way out.", "color":"b7bccd", "art":"res://assets/background/act1_office/level_1.png"},
 	{"name":"THE GARDENS OF MEMORY", "subtitle":"II  /  RETURN TO IRAN", "note":"Sunlit gardens, an old friendship, and four keys to freedom.", "color":"e6bb78", "art":"res://assets/backdrop/act2_sky/center.png"},
-	{"name":"BENEATH THE SURFACE", "subtitle":"III  /  INTO THE BLUE", "note":"Leave the noise behind. Find your rhythm in the depths.", "color":"76d6d5", "art":"res://assets/act3/showcase_room.png"}
+	{"name":"THE SEA", "subtitle":"III  /  DOWN INTO THE LIGHT", "note":"Black and white at the surface. Brighter the deeper you go.", "color":"76d6d5", "art":"res://assets/act3/hero.png"}
 ]
 
 func _build_explorer() -> void:

@@ -196,6 +196,8 @@ func summary(i: int) -> Dictionary:
 ## Act 2's branching school rooms need names, not the large integer used to
 ## sort their identifiers. Keep Act 1's existing menu numbering unchanged.
 func room_label(world_path: String, room: String) -> String:
+	if world_path == "res://ldtk/Act3World.tscn":
+		return _act3_title(room)
 	if world_path != "res://ldtk/Act2World.tscn":
 		return "ROOM %d" % (LdtkWorld.index_in_name(room) + 1)
 	if room == "Prison_Hub": return "ASSEMBLY HALL"
@@ -213,6 +215,22 @@ func room_label(world_path: String, room: String) -> String:
 	var index := LdtkWorld.index_in_name(room)
 	if index >= 0 and index <= 2100: return "ROOM %d" % (index / 100 + 1)
 	return room.replace("_", " ").to_upper()
+
+
+## Act III's rooms go by their names (THE LOBBY, THE TRENCH), read from the
+## table that draws them (tools/build_act3_world.py).
+var _act3_titles := {}
+
+func _act3_title(room: String) -> String:
+	if _act3_titles.is_empty():
+		var res := load("res://resources/levels/act3_rooms.json") as JSON \
+			if ResourceLoader.exists("res://resources/levels/act3_rooms.json") else null
+		if res != null and res.data is Dictionary:
+			_act3_titles = res.data
+	var meta: Variant = _act3_titles.get(room, {})
+	if meta is Dictionary and str(meta.get("title", "")) != "":
+		return str(meta["title"]).to_upper()
+	return "ROOM %d" % (LdtkWorld.index_in_name(room) / 100 + 1)
 
 
 ## The rooms a slot has actually stood in, in play order — what its level select
