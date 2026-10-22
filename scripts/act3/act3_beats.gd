@@ -23,7 +23,7 @@ const CARPET_TEXTURE := preload("res://assets/props/magic_carpet/ride.png")
 const MEMORY_SHEET := preload("res://assets/act3/sea/memories.png")
 const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
 const VINE_SHEET := preload("res://assets/act3/vine/vine.png")
-const MICE_SHEET := preload("res://assets/act3/vine/mice.png")
+const MOUSE_SCENE := preload("res://scenes/props/sea/VineMouse.tscn")
 const LEMON_SHEET := preload("res://assets/act3/vine/lemon.png")
 
 ## Scenes in play order: name -> the room it belongs to. A cold open marks
@@ -826,7 +826,7 @@ func _play_tiger(room: Node2D) -> void:
 	# The bubble can outlast the walk out; a finished tween never signals again.
 	if out.is_running():
 		await out.finished
-	_tiger.visual.pause()
+	_tiger.visual.play(&"idle")
 	await _hold(0.6)
 	Dialogue.begin_conversation(self, player)
 	await _hooshang("...No.", "shocked")
@@ -1035,48 +1035,42 @@ func _crumble(room: Node2D, at: Vector2) -> void:
 ## vine and set to it, the vine trembling as they gnaw.
 func _mice(room: Node2D) -> void:
 	var root := _vine.global_position
-	var pair: Array[Sprite2D] = []
+	var pair: Array[VineMouse] = []
 	for row in 2:
-		var mouse := Sprite2D.new()
+		var mouse := MOUSE_SCENE.instantiate() as VineMouse
 		mouse.name = "Mouse" + ("Black" if row == 0 else "White")
-		mouse.texture = MICE_SHEET
-		mouse.hframes = 3
-		mouse.vframes = 2
-		mouse.frame = row * 3
-		mouse.z_index = 4
-		mouse.flip_h = row == 1
+		mouse.white = row == 1
 		room.add_child(mouse)
-		mouse.global_position = root + Vector2(-14 if row == 0 else 14, 3)
+		mouse.global_position = root + Vector2(-18 if row == 0 else 18, 2)
 		pair.append(mouse)
 		var walk := create_tween()
-		walk.tween_property(mouse, "global_position:x", root.x + (-4 if row == 0 else 4), 1.1)
+		walk.tween_property(mouse, "global_position:x", root.x + (-6 if row == 0 else 6), 1.1)
 	await _hold(1.3)
+	for mouse in pair:
+		mouse.gnaw()
 	var gnaw := create_tween().set_loops()
 	gnaw.tween_callback(func():
-		for row in 2:
-			if is_instance_valid(pair[row]):
-				pair[row].frame = row * 3 + (pair[row].frame + 1) % 3
 		Sfx.play(&"gnaw")
 		if is_instance_valid(_vine):
-			_vine.position.x += 1.0 if randf() < 0.5 else -1.0
+			_vine.global_position.x = root.x + (1.0 if randf() < 0.5 else -1.0)
 	)
 	gnaw.tween_interval(0.16)
 	gnaw.tween_callback(func():
 		if is_instance_valid(_vine):
-			_vine.position.x = roundf(_vine.position.x)
+			_vine.global_position.x = root.x
 	)
 	gnaw.tween_interval(0.12)
 	await _hold(2.0)
 
 
-## Move the camera's centre to world y `centre_y`. Camera2D.offset ignores the
-## camera's limits, so the pan is measured from where the camera is actually
-## looking, and the callers keep it inside the room.
+## Pan within this room via the camera's position. Juice owns Camera2D.offset
+## for shake and writes it every tick, even at rest; tweening that same field
+## silently hid the lower tiger and clipped the mice off the top of the view.
 func _pan_camera(centre_y: float, seconds: float) -> void:
 	var cam := _world.player.camera
-	var now := cam.get_screen_center_position().y - cam.offset.y
+	var origin_y := cam.global_position.y - cam.position.y
 	var t := create_tween()
-	t.tween_property(cam, "offset:y", centre_y - now, seconds).set_trans(Tween.TRANS_SINE)
+	t.tween_property(cam, "position:y", centre_y - origin_y, seconds).set_trans(Tween.TRANS_SINE)
 	await t.finished
 
 

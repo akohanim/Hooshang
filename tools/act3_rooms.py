@@ -1041,7 +1041,7 @@ r.step((23, 15), {'portal': 'Act3_Level_29'}, ('walk',), steer=41)
 
 # The wood: a fallen log to hop, a ditch, roots. Never stop.
 r = land_room('Act3_Level_29', 'The Wood', 8380, land(
-    [16] * 10 + [15] * 2 + [16] * 8 + [20] * 3 + [16] * 5 + [15] * 6 + [16] * 6,
+    [16] * 10 + [15] * 2 + [16] * 8 + [17] * 3 + [16] * 5 + [15] * 6 + [16] * 6,
     (10, 15), (10, 15)), 'wood')
 r.terrain_fill = (0.27, 0.19, 0.14)
 r.chain = ['over the log', 'over the ditch', 'up the roots', 'on']
@@ -1055,7 +1055,7 @@ r.step((30, 15), {'portal': 'Act3_Level_30'}, ('walk',), steer=41)
 
 # The rocks: boulders on the headland, a crevice, the sea far below.
 r = land_room('Act3_Level_30', 'The Rocks', 8700, land(
-    [16] * 6 + [14] * 4 + [16] * 4 + [13] * 3 + [16] * 5 + [21] * 3 + [16] * 4 + [15] * 4 + [14] * 7,
+    [16] * 6 + [14] * 4 + [16] * 4 + [13] * 3 + [16] * 5 + [17] * 3 + [16] * 4 + [15] * 4 + [14] * 7,
     (10, 15), (8, 13)), 'rocks')
 r.terrain_fill, r.terrain_line = (0.42, 0.40, 0.38), (0.62, 0.70, 0.40)
 r.chain = ['up the first boulder', 'over the tall one', 'over the crevice', 'up to the edge of the land']

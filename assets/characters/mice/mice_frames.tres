@@ -1,0 +1,109 @@
+[gd_resource type="SpriteFrames" load_steps=22 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/mice/mice.png" id="sheet"]
+
+[sub_resource type="AtlasTexture" id="frame_0"]
+atlas = ExtResource("sheet")
+region = Rect2(0, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_1"]
+atlas = ExtResource("sheet")
+region = Rect2(14, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_2"]
+atlas = ExtResource("sheet")
+region = Rect2(28, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_3"]
+atlas = ExtResource("sheet")
+region = Rect2(42, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_4"]
+atlas = ExtResource("sheet")
+region = Rect2(56, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_5"]
+atlas = ExtResource("sheet")
+region = Rect2(70, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_6"]
+atlas = ExtResource("sheet")
+region = Rect2(84, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_7"]
+atlas = ExtResource("sheet")
+region = Rect2(98, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_8"]
+atlas = ExtResource("sheet")
+region = Rect2(112, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_9"]
+atlas = ExtResource("sheet")
+region = Rect2(126, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_10"]
+atlas = ExtResource("sheet")
+region = Rect2(140, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_11"]
+atlas = ExtResource("sheet")
+region = Rect2(154, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_12"]
+atlas = ExtResource("sheet")
+region = Rect2(168, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_13"]
+atlas = ExtResource("sheet")
+region = Rect2(182, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_14"]
+atlas = ExtResource("sheet")
+region = Rect2(196, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_15"]
+atlas = ExtResource("sheet")
+region = Rect2(210, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_16"]
+atlas = ExtResource("sheet")
+region = Rect2(224, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_17"]
+atlas = ExtResource("sheet")
+region = Rect2(238, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_18"]
+atlas = ExtResource("sheet")
+region = Rect2(252, 0, 14, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="frame_19"]
+atlas = ExtResource("sheet")
+region = Rect2(266, 0, 14, 8)
+filter_clip = true
+
+[resource]
+animations = [{"frames": [{"duration": 90.0, "texture": SubResource("frame_0")}, {"duration": 90.0, "texture": SubResource("frame_1")}, {"duration": 90.0, "texture": SubResource("frame_2")}, {"duration": 90.0, "texture": SubResource("frame_3")}], "loop": true, "name": &"black_walk", "speed": 1000.0},
+{"frames": [{"duration": 160.0, "texture": SubResource("frame_4")}, {"duration": 100.0, "texture": SubResource("frame_5")}, {"duration": 100.0, "texture": SubResource("frame_6")}, {"duration": 120.0, "texture": SubResource("frame_7")}, {"duration": 100.0, "texture": SubResource("frame_8")}, {"duration": 180.0, "texture": SubResource("frame_9")}], "loop": true, "name": &"black_gnaw", "speed": 1000.0},
+{"frames": [{"duration": 90.0, "texture": SubResource("frame_10")}, {"duration": 90.0, "texture": SubResource("frame_11")}, {"duration": 90.0, "texture": SubResource("frame_12")}, {"duration": 90.0, "texture": SubResource("frame_13")}], "loop": true, "name": &"white_walk", "speed": 1000.0},
+{"frames": [{"duration": 160.0, "texture": SubResource("frame_14")}, {"duration": 100.0, "texture": SubResource("frame_15")}, {"duration": 100.0, "texture": SubResource("frame_16")}, {"duration": 120.0, "texture": SubResource("frame_17")}, {"duration": 100.0, "texture": SubResource("frame_18")}, {"duration": 180.0, "texture": SubResource("frame_19")}], "loop": true, "name": &"white_gnaw", "speed": 1000.0}]

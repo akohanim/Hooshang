@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/props/sea/vine_mouse.gd" id="script"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/mice/mice_frames.tres" id="frames"]
+
+[node name="VineMouse" type="AnimatedSprite2D"]
+texture_filter = 1
+z_index = 4
+sprite_frames = ExtResource("frames")
+animation = &"black_walk"
+script = ExtResource("script")

@@ -46,6 +46,7 @@ func _ready() -> void:
 	mode = str(level.get_meta("mode", ""))
 	if horizon_y >= 0.0:
 		horizon_y += level.global_position.y
+	_shallow_chase_pits()
 	_build_physics()
 	_build_backdrop()
 	_tint_terrain(level.get_node_or_null("Collisions") as TileMapLayer)
@@ -53,6 +54,67 @@ func _ready() -> void:
 	_build_water()
 	z_index = 0
 	queue_redraw()
+
+
+## The two chase ditches used to be 32/40px deep in a 24px-wide slot: the
+## player could fall below the tiger's trail and wait there indefinitely.
+## Keep an 8px depression, with matching semantic and visible terrain. This
+## also repairs previously packed worlds without an LDtk/editor cache rebuild.
+func _shallow_chase_pits() -> void:
+	var patches := {
+		"Act3_Level_29": Rect2i(20, 17, 3, 3),
+		"Act3_Level_30": Rect2i(22, 17, 3, 4),
+	}
+	var name := str(get_parent().name)
+	if grid == null or not patches.has(name):
+		return
+	var patch: Rect2i = patches[name]
+	var terrain := get_parent().get_node_or_null("Collisions") as TileMapLayer
+	var semantic_source := grid.get_cell_source_id(Vector2i(patch.position.x - 1, patch.position.y))
+	if semantic_source == -1:
+		return
+	var changed := false
+	for y in range(patch.position.y, patch.end.y):
+		for x in range(patch.position.x, patch.end.x):
+			var cell := Vector2i(x, y)
+			if value_at(cell) == 0:
+				grid.set_cell(cell, semantic_source, Vector2i.ZERO)
+				changed = true
+	if not changed or terrain == null:
+		return
+	var source := terrain.get_cell_source_id(Vector2i(patch.position.x - 1, patch.position.y))
+	if source == -1:
+		return
+	# The existing connected Grass atlas has 47 normalized masks, in sorted
+	# order (tools/act3_connected_terrain.py). Reconnect the filled cells AND
+	# their neighbors, removing the former vertical lips and bottom grass line.
+	var masks: Array[int] = []
+	for raw in 256:
+		var normalized := _terrain_mask(raw)
+		if normalized not in masks:
+			masks.append(normalized)
+	masks.sort()
+	var neighbors := [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT,
+		Vector2i(-1, -1), Vector2i(1, -1), Vector2i(1, 1), Vector2i(-1, 1)]
+	for y in range(patch.position.y - 1, patch.end.y + 1):
+		for x in range(patch.position.x - 1, patch.end.x + 1):
+			var cell := Vector2i(x, y)
+			if value_at(cell) != 1:
+				continue
+			var mask := 0
+			for i in neighbors.size():
+				if value_at(cell + neighbors[i]) == 1:
+					mask |= 1 << i
+			var tile := 32 + 47 + masks.find(_terrain_mask(mask))
+			terrain.set_cell(cell, source, Vector2i(tile % 8, tile / 8))
+
+
+func _terrain_mask(raw: int) -> int:
+	var result := raw
+	for corner in [[4, 0, 3], [5, 0, 1], [6, 1, 2], [7, 2, 3]]:
+		if raw & (1 << corner[1]) == 0 or raw & (1 << corner[2]) == 0:
+			result &= ~(1 << corner[0])
+	return result
 
 
 func value_at(cell: Vector2i) -> int:

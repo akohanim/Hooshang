@@ -6,7 +6,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 85
+    "duration": 73
    },
    {
     "filename": "tiger 1.aseprite",
@@ -15,7 +15,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 85
+    "duration": 73
    },
    {
     "filename": "tiger 2.aseprite",
@@ -24,7 +24,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 85
+    "duration": 73
    },
    {
     "filename": "tiger 3.aseprite",
@@ -33,7 +33,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 85
+    "duration": 73
    },
    {
     "filename": "tiger 4.aseprite",
@@ -42,7 +42,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 150
+    "duration": 73
    },
    {
     "filename": "tiger 5.aseprite",
@@ -51,7 +51,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 150
+    "duration": 73
    },
    {
     "filename": "tiger 6.aseprite",
@@ -60,7 +60,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 150
+    "duration": 73
    },
    {
     "filename": "tiger 7.aseprite",
@@ -69,7 +69,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 150
+    "duration": 73
    },
    {
     "filename": "tiger 8.aseprite",
@@ -78,7 +78,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 220
+    "duration": 73
    },
    {
     "filename": "tiger 9.aseprite",
@@ -87,7 +87,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 220
+    "duration": 73
    },
    {
     "filename": "tiger 10.aseprite",
@@ -96,7 +96,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 600
+    "duration": 73
    },
    {
     "filename": "tiger 11.aseprite",
@@ -105,7 +105,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 600
+    "duration": 73
    },
    {
     "filename": "tiger 12.aseprite",
@@ -114,7 +114,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 600
+    "duration": 43
    },
    {
     "filename": "tiger 13.aseprite",
@@ -123,7 +123,295 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
     "sourceSize": { "w": 44, "h": 22 },
-    "duration": 600
+    "duration": 43
+   },
+   {
+    "filename": "tiger 14.aseprite",
+    "frame": { "x": 616, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 15.aseprite",
+    "frame": { "x": 660, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 16.aseprite",
+    "frame": { "x": 704, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 17.aseprite",
+    "frame": { "x": 748, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 18.aseprite",
+    "frame": { "x": 792, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 19.aseprite",
+    "frame": { "x": 836, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 20.aseprite",
+    "frame": { "x": 880, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 21.aseprite",
+    "frame": { "x": 924, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 22.aseprite",
+    "frame": { "x": 968, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 23.aseprite",
+    "frame": { "x": 1012, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 43
+   },
+   {
+    "filename": "tiger 24.aseprite",
+    "frame": { "x": 1056, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 240
+   },
+   {
+    "filename": "tiger 25.aseprite",
+    "frame": { "x": 1100, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 240
+   },
+   {
+    "filename": "tiger 26.aseprite",
+    "frame": { "x": 1144, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 240
+   },
+   {
+    "filename": "tiger 27.aseprite",
+    "frame": { "x": 1188, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 240
+   },
+   {
+    "filename": "tiger 28.aseprite",
+    "frame": { "x": 1232, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 130
+   },
+   {
+    "filename": "tiger 29.aseprite",
+    "frame": { "x": 1276, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 130
+   },
+   {
+    "filename": "tiger 30.aseprite",
+    "frame": { "x": 1320, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 130
+   },
+   {
+    "filename": "tiger 31.aseprite",
+    "frame": { "x": 1364, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 130
+   },
+   {
+    "filename": "tiger 32.aseprite",
+    "frame": { "x": 1408, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 130
+   },
+   {
+    "filename": "tiger 33.aseprite",
+    "frame": { "x": 1452, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 130
+   },
+   {
+    "filename": "tiger 34.aseprite",
+    "frame": { "x": 1496, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 35.aseprite",
+    "frame": { "x": 1540, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 36.aseprite",
+    "frame": { "x": 1584, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 37.aseprite",
+    "frame": { "x": 1628, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 38.aseprite",
+    "frame": { "x": 1672, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 39.aseprite",
+    "frame": { "x": 1716, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 40.aseprite",
+    "frame": { "x": 1760, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 41.aseprite",
+    "frame": { "x": 1804, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 300
+   },
+   {
+    "filename": "tiger 42.aseprite",
+    "frame": { "x": 1848, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 180
+   },
+   {
+    "filename": "tiger 43.aseprite",
+    "frame": { "x": 1892, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 180
+   },
+   {
+    "filename": "tiger 44.aseprite",
+    "frame": { "x": 1936, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 180
+   },
+   {
+    "filename": "tiger 45.aseprite",
+    "frame": { "x": 1980, "y": 0, "w": 44, "h": 22 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 44, "h": 22 },
+    "sourceSize": { "w": 44, "h": 22 },
+    "duration": 180
    }
  ],
  "meta": {
@@ -131,14 +419,16 @@
   "version": "1.3.18.5-dev",
   "image": "tiger.png",
   "format": "RGBA8888",
-  "size": { "w": 616, "h": 22 },
+  "size": { "w": 2024, "h": 22 },
   "scale": "1",
   "frameTags": [
-   { "name": "run", "from": 0, "to": 3, "direction": "forward", "color": "#000000ff" },
-   { "name": "walk", "from": 4, "to": 7, "direction": "forward", "color": "#000000ff" },
-   { "name": "roar", "from": 8, "to": 9, "direction": "forward", "color": "#000000ff" },
-   { "name": "look_down", "from": 10, "to": 11, "direction": "forward", "color": "#000000ff" },
-   { "name": "look_up", "from": 12, "to": 13, "direction": "forward", "color": "#000000ff" }
+   { "name": "walk", "from": 0, "to": 11, "direction": "forward", "color": "#000000ff" },
+   { "name": "run", "from": 12, "to": 23, "direction": "forward", "color": "#000000ff" },
+   { "name": "idle", "from": 24, "to": 27, "direction": "forward", "color": "#000000ff" },
+   { "name": "roar", "from": 28, "to": 33, "direction": "forward", "color": "#000000ff" },
+   { "name": "look_down", "from": 34, "to": 37, "direction": "forward", "color": "#000000ff" },
+   { "name": "look_up", "from": 38, "to": 41, "direction": "forward", "color": "#000000ff" },
+   { "name": "crouch", "from": 42, "to": 45, "direction": "forward", "color": "#000000ff" }
   ]
  }
 }

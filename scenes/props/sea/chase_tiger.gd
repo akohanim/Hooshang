@@ -2,7 +2,8 @@ class_name ChaseTiger
 extends Node2D
 ## The tiger of the way home (SCRIPT.md TWELVE): it steps out of the tall grass
 ## and runs Hooshang to the edge of the land. Its twin waits at the foot of the
-## cliff (THIRTEEN). Staged by Act3Beats; art from tools/gen_tiger.py.
+## cliff (THIRTEEN). Staged by Act3Beats; approved finale art in tiger.aseprite.
+## Re-export hand edits with tools/export_finale_cast.py.
 ##
 ## It is a PURSUER, not an echo. It used to replay his path a second behind him,
 ## Darkshang's way, and an echo is a recording, not a predator: it copied his
@@ -41,6 +42,8 @@ const FEET := Vector2(22, 21)
 @export var hold_distance := 16.0
 ## The jaws: a box just ahead of its shoulders, px.
 @export var catch_size := Vector2(10.0, 10.0)
+## Caps height changes along the route so stair lips do not pop the whole cat.
+@export var vertical_follow_speed := 140.0
 
 var chasing := false
 var visual: AnimatedSprite2D
@@ -52,6 +55,7 @@ var _x := 0.0
 var _player: Player
 var _hold_at := Vector2.INF
 var _was_dead := false
+var _last_visual_position := Vector2.INF
 
 static var _frames: SpriteFrames
 
@@ -104,10 +108,28 @@ func stop() -> void:
 	chasing = false
 
 
+## Story tweens also move tigers (walking from the grass, pacing below the
+## cliff). Match those steps to travel too, without changing the beat's pose.
+func _process(delta: float) -> void:
+	var previous := _last_visual_position
+	_last_visual_position = global_position
+	if chasing:
+		return
+	if visual.animation not in [&"walk", &"run"]:
+		visual.speed_scale = 1.0
+		return
+	if previous == Vector2.INF or delta <= 0.0:
+		return
+	var pace := absf(global_position.x - previous.x) / delta
+	var reference := 64.0 if visual.animation == &"run" else 24.0
+	visual.speed_scale = 0.0 if pace < 0.1 else clampf(pace / reference, 0.25, 1.65)
+
+
 ## A fresh start: the run-up laid behind him, and the hold set where he stands.
 func _reseed() -> void:
 	_lay_trail()
 	_hold_at = _player.global_position
+	global_position = Vector2(_x, height_at(_x) + Player.HALF_HEIGHT)
 
 
 ## A level run-up `start_gap` long ending where he stands, with the tiger at its
@@ -182,16 +204,30 @@ func _physics_process(delta: float) -> void:
 	var dir := signf(goal - _x)
 	_x += dir * step
 	var was := global_position
-	global_position = Vector2(_x, height_at(_x) + Player.HALF_HEIGHT)
+	var target_y := height_at(_x) + Player.HALF_HEIGHT
+	global_position = Vector2(_x, move_toward(global_position.y, target_y, vertical_follow_speed * delta))
 	var moved := (global_position - was) / maxf(delta, 1e-4)
 	if dir != 0.0:
 		visual.flip_h = dir < 0.0
-	var clip := &"run" if absf(moved.x) > 24.0 else &"walk"
-	if visual.animation != clip:
-		visual.play(clip)
-	visual.speed_scale = 1.0 if moved.length() > 4.0 else 0.0
+	_update_gait(absf(moved.x))
 	var reach := -1.0 if visual.flip_h else 1.0
 	var jaws := Rect2(global_position + Vector2(reach * 6.0 - catch_size.x * 0.5, -catch_size.y - 3.0), catch_size)
 	if jaws.intersects(_player.hitbox_rect()):
 		caught.emit()
 		_player.die()
+
+
+## Keep the foot cycle tied to travel; catch-up running takes faster strides.
+## Hysteresis and phase transfer avoid restarting the feet at a pace change.
+func _update_gait(horizontal_speed: float) -> void:
+	var running := horizontal_speed > 30.0 or (visual.animation == &"run" and horizontal_speed > 20.0)
+	var clip := &"idle" if horizontal_speed <= 4.0 else (&"run" if running else &"walk")
+	if visual.animation != clip:
+		var phase := 0.0
+		if visual.animation in [&"walk", &"run"] and clip != &"idle":
+			phase = (visual.frame + visual.frame_progress) / visual.sprite_frames.get_frame_count(visual.animation)
+		visual.play(clip)
+		if clip != &"idle":
+			var at := phase * visual.sprite_frames.get_frame_count(clip)
+			visual.set_frame_and_progress(int(at), fmod(at, 1.0))
+	visual.speed_scale = 1.0 if clip == &"idle" else clampf(horizontal_speed / (64.0 if running else 24.0), 0.5, 1.65)

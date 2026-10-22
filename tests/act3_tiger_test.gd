@@ -19,6 +19,7 @@ extends Node
 var world: SeaWorld
 var player: Player
 var failures := 0
+var _captures := {}
 
 
 func _ready() -> void:
@@ -33,6 +34,10 @@ func _ready() -> void:
 
 
 func open(room_name: String) -> void:
+	if is_instance_valid(world):
+		# Drain the previous retry's deferred overlap checks before replacing it.
+		world.player.set_physics_process(false)
+		await frames(6)
 	LdtkWorld.debug_start_room = room_name
 	world = load("res://ldtk/Act3World.tscn").instantiate()
 	Screen.set_scene(world)
@@ -70,6 +75,8 @@ func chase_checks() -> void:
 				away += 1
 		if died:
 			break
+		if leg[0] == "move_right":
+			await capture("chase")
 	release()
 	check(away == 0, "the tiger never moves away from him  [%d frames it did]" % away)
 	check(died, "turning round to face it gets him caught, not a tiger running off")
@@ -123,9 +130,28 @@ func vine_checks() -> void:
 	var eat_ok := true
 	var ate := false
 	var since := 0
+	var walked_mice := false
+	var chewed_black := {}
+	var chewed_white := {}
+	var mice_inward := true
+	var lower_tiger_shown := false
 	for i in 5400:
 		await frames(1)
 		since += 1
+		var black := world.current_room.get_node_or_null("MouseBlack") as VineMouse
+		var white := world.current_room.get_node_or_null("MouseWhite") as VineMouse
+		if black != null and white != null:
+			walked_mice = walked_mice or black.animation == &"black_walk"
+			if black.animation == &"black_gnaw" and white.animation == &"white_gnaw":
+				chewed_black[black.frame] = true
+				chewed_white[white.frame] = true
+				mice_inward = mice_inward and not black.flip_h and white.flip_h
+				await capture("vine_mice")
+		var below := world.current_room.get_node_or_null("TigerBelow") as ChaseTiger
+		if below != null and below.visual.animation == &"look_up":
+			var view := Rect2(player.camera.get_screen_center_position() - Vector2(160, 90), Vector2(320, 180))
+			lower_tiger_shown = lower_tiger_shown or view.has_point(below.global_position - Vector2(0, 10))
+			await capture("tiger_below")
 		var box: Node = Dialogue
 		var line := ""
 		if box.visible:
@@ -155,7 +181,22 @@ func vine_checks() -> void:
 	check(faced_away == 0, "facing the cliff and the lemon while he speaks  [%d frames]" % faced_away)
 	check(ate, "he eats the lemon")
 	check(eat_ok, "the first bite waits until \"I never ate a single one.\" has been read")
+	check(walked_mice, "both new mouse actors walk out before gnawing")
+	check(mice_inward, "mice face inward while gnawing")
+	check(lower_tiger_shown, "camera actually reveals the lower tiger during its upward look")
+	check(chewed_black.size() >= 3 and chewed_white.size() >= 3, "both mice animate through the final conversation")
 	check(bool(world.story.get("scene:vine", false)), "the scene plays out to the end of the act")
+	await capture("ending")
+
+
+func capture(label: String) -> void:
+	if not "--capture" in OS.get_cmdline_user_args() or _captures.has(label):
+		return
+	_captures[label] = true
+	await RenderingServer.frame_post_draw
+	var image := Screen.viewport.get_texture().get_image()
+	image.resize(1280, 720, Image.INTERPOLATE_NEAREST)
+	image.save_png("res://artifacts/act3_finale/%s.png" % label)
 
 
 func _tap(action: StringName, pressed: bool) -> void:

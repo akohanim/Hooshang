@@ -1,0 +1,29 @@
+# Act III finale cast — pixel draft v2
+
+Generated with built-in ImageGen on 2026-10-21, using gameplay_style_reference.png as the native gameplay style reference. This pass supersedes v1's illustrative direction: chunky square clusters, compact anatomy, dark outlines, stepped shading, warm natural-colour finale palette.
+
+- tigers_concept.png: walk, run, roar; look down, look up, crouch.
+- mice_concept.png: black mouse top, white mouse bottom; neutral, gnaw low, gnaw raised.
+- gameplay_style_reference.png: actual adult Hooshang idle, existing tiger poses and mouse sheet, enlarged through Aseprite for style comparison.
+
+These remain generated concept sheets, not pixel-exact production atlases. Output pixel grid and dimensions are not guaranteed by ImageGen; deliberate native-resolution authoring is still needed for the runtime 44×22 tiger and 9×6 mouse contracts. Existing runtime art is unchanged.
+
+## Tiger generation prompt
+
+Use case: stylized-concept
+Create a NEW TIGER PIXEL SPRITE POSE SHEET for this exact game, using the attached image as the authoritative STYLE AND PIXEL-DENSITY REFERENCE. The attached image shows adult Hooshang at 18x18, existing tigers at 44x22, and tiny mice, all enlarged with nearest-neighbour. The grey is only the reference display background; output TRANSPARENT.
+The previous draft had far too much fine illustration detail. Redraw completely as tiny hand-authored game pixels. Match the reference's chunky square pixel clusters, simple readable anatomy, one-logical-pixel dark brown outline, compact face, and stepped soft shading. Every visible mark must snap to ONE uniform coarse square pixel lattice, like a native 44x22 sprite enlarged with nearest-neighbour. Absolutely no thin lines, hair strokes, textured fur, anti-aliasing, smooth curved contours, subpixel detail, painterly shading or smooth gradients.
+Canvas design: a 192x96 LOGICAL PIXEL sheet, enlarged exactly 8 times to 1536x768 display pixels. Three columns by two rows; each logical cell 64x48. Each isolated tiger fits within a 44x22 logical pixel box centered in its cell. The logical pixels are large visibly square 8x8 display-pixel blocks. Transparent gutters, no grid lines, no text. Keep this small sprite scale rather than filling cells with detailed illustrations.
+Six poses of the SAME tiger, all strict side-view facing screen-right: top row walking, airborne running gallop, planted roaring; bottom row standing with head looking DOWN over a cliff, standing with head looking UP from below the cliff, tense low crouch. Draw only animals, no cliffs. Tail and paws fully inside each cell. Consistent tiger build and stripe markings.
+Modern detailed pixel art, soft shading through carefully chosen stepped colour ramps, dynamic lighting represented by a few pixel clusters, NOT 8-bit/NES. Respect the tiny reference's pixel economy rather than adding detail. Warm orange body, ochre shadows, amber back highlight, cream muzzle/belly/paws, dark brown-black stripes and outline. Roughly 12-16 intentional colours across the whole tiger. Four coherent legs, compact rounded ears, a curved striped tail. Wild, weighty, readable, naturally proportioned like the game's reference.
+Transparent alpha background, no baked checkerboard, no cast shadows, no scenery, no humans, no mice, no captions, no watermark. This must look like ACTUAL LOW-RES GAME SPRITES viewed enlarged, not a realistic tiger painting with a pixel filter.
+
+## Mice generation prompt
+
+Use case: stylized-concept
+Create a NEW BLACK AND WHITE MICE PIXEL SPRITE SHEET for the exact 2D game in the attached reference. The attached image is an authoritative reference of the native tiny game pixel style: adult Hooshang is 18x18, tigers 44x22 and the mice at upper right are 9x6, all nearest-neighbour enlarged. Match those chunky intentionally placed pixels and thick readable silhouettes.
+Previous draft was too detailed and illustrative. These are VERY SMALL mice for the final vine-gnawing scene. Make each mouse a native NINE BY SIX LOGICAL PIXEL sprite, then enlarge uniformly so every logical pixel is an obvious large perfect square. An entire mouse including curved tail must use at most 9x6 logical pixels, not dozens or hundreds. Body 4-5 logical pixels long, little ear one or two pixels, snout one pixel, eye one pixel, tail a short one-pixel-thick stepped shape. No whisker lines or fur strokes. Recognizable small mouse silhouette similar to reference; all anatomy stays connected.
+Layout: logical canvas 48x24 pixels, enlarged exactly 32 times to 1536x768 display pixels. Three columns by two rows, each logical cell 16x12, centered 9x6 mouse. Top row black mouse, bottom row white mouse. All facing screen-right in profile, no overlaps. Columns show three gnawing beats: neutral approach, nose lowered and forepaws forward to gnaw, nose lifted one logical pixel with a little ivory tooth cluster. Same body proportions, consistent tail and outline across the three beats. No vine needed.
+Modern pixel art, soft shading via two or three stepped shades, dynamic lighting through tiny highlight clusters, NOT 8-bit/NES; match the small reference's exact pixel density and deliberate simplified anatomy. Black mouse: charcoal-purple, muted slate highlight, near-black outline, tiny pink nose/ear. White mouse: ivory, warm grey shadow, dark brown outline, tiny muted pink nose/ear. Around 6 colours per mouse. Strong contrast, no gradient blending.
+Actual transparent alpha background; omit the grey reference background. No checkerboard, ground, shadow, labels, grid lines, scenery, humans, tigers, logos or watermark. Every edge follows the same coarse square grid. Absolutely no anti-aliased outlines, smooth curves, texture noise, photorealism, painterly detail or pixel-filtered high-resolution illustrations.
+
