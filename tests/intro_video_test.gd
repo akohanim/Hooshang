@@ -119,6 +119,8 @@ func _ready() -> void:
 		Input.parse_input_event(go)
 		await _hold(1.6)
 		_check(_intro_in_tree() == null, "a press dismisses the title card")
+		_check(Screen.loading, "the opening film hands off to the lemon loading card")
+		await _wait_loading()
 		_check(Screen.current != null,
 			"and the run starts  [%s]" % Screen.current)
 
@@ -134,6 +136,8 @@ func _ready() -> void:
 	await _frames(10)
 	_check(_intro_in_tree() == null,
 		"continuing a run does NOT play the film")
+	_check(Screen.loading, "continue uses the lemon card instead of the opening film")
+	await _wait_loading()
 	_check(Screen.current != null, "and it loads the world  [%s]" % Screen.current)
 
 	_wipe()
@@ -150,6 +154,13 @@ func _open_menu() -> void:
 	menu = load(MENU).instantiate()
 	get_tree().root.add_child(menu)
 	await _hold(0.4)
+
+
+func _wait_loading() -> void:
+	var deadline := Time.get_ticks_msec() + 15000
+	while Screen.loading and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+	_check(not Screen.loading, "the lemon card finishes loading")
 
 
 func _labels() -> Array:

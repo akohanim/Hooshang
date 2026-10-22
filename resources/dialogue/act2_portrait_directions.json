@@ -488,5 +488,271 @@
       "text": "I know.",
       "face": "friendly"
     }
+  ],
+  "fall": [
+    {
+      "speaker": "RUMI",
+      "text": "Breathe, jaan.",
+      "face": "sorrowful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I don't want to.",
+      "face": "flat"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "I know. Breathe anyway.",
+      "face": "serene"
+    }
+  ],
+  "bank": [
+    {
+      "speaker": "HOOSHANG",
+      "text": "Where is he?",
+      "face": "confused"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You know where he is.",
+      "face": "sorrowful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Say it.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "No, jaan.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "SAY IT.",
+      "face": "angry"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You have carried that answer for fifty years. You have just never set it down long enough to look at it.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Then why bring me here? So I could watch it happen again, and still not stop it?",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "No. You could not stop it.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Then what was it FOR?",
+      "face": "angry"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Not to change it, jaan. To see it.",
+      "face": "serene"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You asked me where the seed came from. There it is. A boy's hand opened, a can fell, and he said nothing.",
+      "face": "sorrowful"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "And every night for fifty years, you watered it. Until it grew tall enough to wear your face.",
+      "face": "sorrowful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "...Darkshang.",
+      "face": "shocked"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Yes.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Then let it have me. He took my punishment, and I let him.",
+      "face": "sad"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "In fifty years of paying him back, did one single day of it open one single door?",
+      "face": "sorrowful"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Guilt is a loyal dog, jaan. It follows you everywhere, and it fetches nothing.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I let go of him.",
+      "face": "sad"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "I saw.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "It felt like dropping him.",
+      "face": "sad"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You did not drop him, jaan. He was never the one being held. You were.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "It'll come back. The shadow.",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Some nights, yes.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Then what do I do?",
+      "face": "confused"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Don't fight it. Hold it, the way you would hold a frightened boy.",
+      "face": "serene"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Because that is all it ever was.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "He used to fish right there.",
+      "face": "sad"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Look at the water. Where did it come from?",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "...Rain, I suppose.",
+      "face": "hesitant"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "And the rain?",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "A cloud.",
+      "face": "neutral"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Did the cloud die?",
+      "face": "serene"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "It became the rain, jaan. Look for him in what he became.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Where?",
+      "face": "vulnerable"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Look at your hand.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "He never finished the line.",
+      "face": "sad"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "No. The whistle finished it for him.",
+      "face": "sorrowful"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Then it doesn't get finished.",
+      "face": "flat"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "Does it not?",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Wait. Where are you going? Just say the rest. It's your poem. You're Rumi.",
+      "face": "surprised"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You learned it in his voice, not mine. It is your line now.",
+      "face": "warm_open"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "I don't know if I can.",
+      "face": "hesitant"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You have already done the harder half.",
+      "face": "serene"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Which half?",
+      "face": "confused"
+    },
+    {
+      "speaker": "RUMI",
+      "text": "You opened your hand.",
+      "face": "warm_open"
+    }
+  ],
+  "second_line": [
+    {
+      "speaker": "JAMSHID",
+      "text": "Keep going.",
+      "face": "friendly"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "\"This world is a prison, and we are prisoners. Dig through the prison, and set yourself free.\"",
+      "face": "neutral"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "Took me long enough.",
+      "face": "happy"
+    },
+    {
+      "speaker": "HOOSHANG",
+      "text": "...I'm home.",
+      "face": "happy"
+    }
   ]
 }

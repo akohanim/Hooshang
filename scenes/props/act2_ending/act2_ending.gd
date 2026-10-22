@@ -5,6 +5,7 @@ const TEXT := preload("res://resources/dialogue/act2_author_script.tres")
 const ADULT := preload("res://assets/characters/hooshang/hooshang_frames.tres")
 const PLAYER := preload("res://scenes/characters/hooshang/Hooshang.tscn")
 const FAREWELL := preload("res://assets/characters/hooshang_child/act2_ending/farewell_frames.tres")
+const ADULT_FAREWELL := preload("res://assets/characters/hooshang/act2_ending/farewell_frames.tres")
 var releasing_hand := false
 var jamshid_saluting := false
 var _splash_on_arrival := false
@@ -106,11 +107,20 @@ func _say(line: Dictionary, adult := false) -> void:
 	if Dialogue.scene_skip_requested(self): return
 	var speaker: String = line.speaker
 	var face: Texture2D = null
-	if speaker == "HOOSHANG": face = Act1Beats.FACES.vulnerable if adult else Act2Beats.CHILD_FACES.get(line.get("face","neutral"),Act2Beats.CHILD_FACES.neutral)
+	if speaker == "HOOSHANG":
+		face = Act1Beats.FACES.get(line.get("face","vulnerable"),Act1Beats.FACES.vulnerable) if adult else Act2Beats.CHILD_FACES.get(line.get("face","neutral"),Act2Beats.CHILD_FACES.neutral)
 	elif speaker == "JAMSHID": face = Jamshid.portrait(line.get("face","sad"))
-	elif speaker == "RUMI": face = Act1Beats.RUMI_FACES.serene
+	elif speaker == "RUMI": face = Act1Beats.RUMI_FACES.get(line.get("face","serene"),Act1Beats.RUMI_FACES.serene)
 	await Dialogue.say(speaker.capitalize(),line.text,Color.WHITE if face != null else Color.TRANSPARENT,face,
-		DialogueBox.Side.LEFT if speaker=="HOOSHANG" else DialogueBox.Side.RIGHT,DialogueBox.VSide.BOTTOM)
+		_portrait_side(speaker),DialogueBox.VSide.BOTTOM)
+
+func _portrait_side(speaker: String) -> int:
+	# On the waking bank Hooshang is RIGHT of Rumi; underwater he is LEFT.
+	# Use their real positions, including the climb-out, rather than speaker IDs.
+	if chapter == "second_line" and $Rumi.visible and speaker in ["HOOSHANG","RUMI"]:
+		var player_left: bool = world.player.global_position.x < $Rumi.global_position.x
+		return DialogueBox.Side.LEFT if (speaker=="HOOSHANG") == player_left else DialogueBox.Side.RIGHT
+	return DialogueBox.Side.LEFT if speaker=="HOOSHANG" else DialogueBox.Side.RIGHT
 
 func _animate(node: Node, property: String, value: Variant, seconds: float) -> void:
 	if Dialogue.scene_skip_requested(self): return
@@ -140,10 +150,16 @@ func _carpet() -> void:
 	# "(Hooshang looks at their hands. The bright letters change.)" — his "No."
 	# is the very next line.
 	var let_go := hold_on + 1
+	var long_silence: int = TEXT.cue("carpet", "You were supposed to come home.")
 	for i in TEXT.scenes.carpet.size():
 		line_index = i
 		if Dialogue.scene_skip_requested(self): break
-		if i == boards: await _animate(guide,"global_position",mark+Vector2(0,-4),0.5)
+		if i == boards:
+			guide.face_left(false)
+			guide.play_pose("walk")
+			await _animate(guide,"global_position",mark+Vector2(0,-4),0.5)
+			guide.play_pose("idle")
+			guide.face_left(true)
 		if i == lifts:
 			stage.show()
 			$GroundCarpet.hide()
@@ -161,6 +177,13 @@ func _carpet() -> void:
 			# "There were never any keys." The music stops; the colour drains.
 			if world._music != null: world._music.stop()
 			await _animate($Cinema/Stage/Night,"color:a",1.0,0.7)
+			# The illusion breaks: the hands still holding on now belong to him
+			# as an old man. Jamshid remains the same boy above him.
+			var hanging: AnimatedSprite2D = $Cinema/Stage/Flight/Child
+			hanging.sprite_frames = ADULT_FAREWELL
+			hanging.scale = Vector2.ONE
+			hanging.offset = Vector2(0,-3)
+			hanging.play("hold")
 		if i == arrest: _show_memory("arrest")
 		if i == mother: _show_memory("mother")
 		if i == rain: await _flash_memory("rain",1.8)
@@ -169,7 +192,9 @@ func _carpet() -> void:
 			await _animate($Cinema/Stage/Morning,"modulate:a",0.35,0.8)
 			$Cinema/Stage/Prompt.text = "HOLD ON"
 		if i == let_go: $Cinema/Stage/Prompt.text = "LET GO"
-		await _say(TEXT.scenes.carpet[i])
+		if i == long_silence:
+			await _hold_beat(1.2)
+		await _say(TEXT.scenes.carpet[i],i>=drained)
 	if not Dialogue.scene_skip_requested(self):
 		$Cinema/Stage/Prompt.text = ""
 		await _animate($Cinema/Stage/Morning,"modulate:a",1.0,0.8)
@@ -239,7 +264,7 @@ func _become_adult() -> void:
 	world.player.visual.sprite_frames = ADULT
 	# Restore this instance's authored adult profile, never the shared prefab.
 	var defaults := PLAYER.instantiate()
-	for property in ["childhood_momentum","max_run_speed","ground_accel","ground_decel","dash_end_speed","air_accel_mult","air_decel_mult","jump_speed","use_jump_hold","jump_cut_multiplier","rise_gravity","fall_gravity","max_fall_speed","apex_threshold","spring_impulse_scale"]:
+	for property in ["childhood_momentum","max_run_speed","ground_accel","ground_decel","dash_end_speed","air_accel_mult","air_decel_mult","jump_speed","use_jump_hold","jump_cut_multiplier","rise_gravity","fall_gravity","max_fall_speed","apex_threshold","spring_impulse_scale","wall_jump_speed_x","wall_jump_drag"]:
 		world.player.set(property,defaults.get(property))
 	for property in ["jump_squash_scale","land_squash_scale","squash_ease_time"]:
 		world.player.juice.set(property,defaults.get_node("Juice").get(property))
@@ -259,21 +284,34 @@ func _pond() -> void:
 	var on_bank: int = TEXT.scenes.fall.size()
 	# "(Very gently, Rumi's glow begins to thin.)"
 	var thins: int = on_bank + TEXT.cue("bank", "Wait. Where are you going?")
+	var tears: int = on_bank + TEXT.cue("bank", "I let go of him.")
+	var shadow: int = on_bank + TEXT.cue("bank", "It'll come back.")
+	var water: int = on_bank + TEXT.cue("bank", "He used to fish right there.")
 	for i in lines.size():
 		line_index = i
 		if Dialogue.scene_skip_requested(self): break
 		if i == on_bank:
+			world.player.look(1)
+			world.player.visual.play("swim")
 			await _animate(world.player,"global_position",_mark(20,"Bank"),1.2)
 			$Rumi.global_position = _mark(20,"Rumi")
 			world.player.cutscene_rest(true,-1)
 		if i == thins: await _animate($Rumi,"modulate:a",0.5,0.8)
+		if i == tears: await _hold_beat(1.8)
+		if i in [shadow,water]: await _hold_beat(0.9)
 		await _say(lines[i],true)
 	await _animate($Rumi,"modulate:a",0.0,0.8)
 	$Rumi.hide()
+	await _hold_beat(1.2)
 	world.player.global_position = _mark(20,"Bank")
 	world.player.cutscene_rest(false,1)
 	world.set_story_checkpoint(_room(20),_mark(20,"Bank"))
 	_finish("pond_return")
+
+## Silent acting space, driven by the same interruptible tween as every scene.
+func _hold_beat(seconds: float) -> void:
+	_breath = 0.0
+	await _animate(self,"_breath",1.0,seconds)
 
 func _paint() -> void:
 	_begin("paint")
@@ -405,6 +443,6 @@ func _handoff_act_three() -> void:
 		# A resumed Act II save may have left a start room behind; the sea
 		# begins at its shore.
 		LdtkWorld.debug_start_room = ""
-		Screen.load_scene.bind(ACT_THREE).call_deferred()
+		Screen.load_scene_with_card.bind(ACT_THREE).call_deferred()
 		return
 	MainMenu.open.bind(tree).call_deferred()

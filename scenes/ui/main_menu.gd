@@ -209,7 +209,7 @@ func show_root() -> void:
 		elif SaveGame.summary(latest).get("world", "") == "res://ldtk/Act3World.tscn":
 			subtitle.text = "ACT III  —  THE SEA"
 		built.append(_row("CONTINUE", _describe(latest, "SLOT %d" % (latest + 1)),
-			func() -> void: _start(func() -> void: SaveGame.resume(latest))))
+			func() -> void: _start(func() -> void: SaveGame.resume(latest, true))))
 	built.append(_row("NEW GAME", "a fresh run, in a slot you pick",
 		func() -> void: _show_slots(SlotMode.NEW)))
 	if SaveGame.has_any():
@@ -258,7 +258,7 @@ func _slot_action(mode: int, i: int, used: bool) -> Callable:
 				return func() -> void: _show_confirm(i)
 			return func() -> void: _begin_new_run(i, false)
 		SlotMode.LOAD:
-			return func() -> void: _start(func() -> void: SaveGame.resume(i))
+			return func() -> void: _start(func() -> void: SaveGame.resume(i, true))
 		_:
 			return func() -> void: _show_levels(i)
 
@@ -294,7 +294,7 @@ func _begin_new_run(i: int, erase_first: bool) -> void:
 		if erase_first:
 			SaveGame.erase(i)
 		await IntroVideo.play_for(get_tree())
-		SaveGame.start_new(i))
+		SaveGame.start_new(i, true))
 
 
 func _show_levels(i: int) -> void:
@@ -309,7 +309,7 @@ func _show_levels(i: int) -> void:
 		# level: "ROOM 5 / Level_6" reads as an off-by-one bug report, and the
 		# thing a player needs told here is that this trip does not count.
 		built.append(_row(room_label, "practice run  —  nothing is saved",
-			func() -> void: _start(func() -> void: SaveGame.practice(i, room_name))))
+			func() -> void: _start(func() -> void: SaveGame.practice(i, room_name, true))))
 	if built.is_empty():
 		built.append(_row("— NOTHING REACHED YET —", "", Callable()))
 	_populate(built)
@@ -877,7 +877,7 @@ func _show_explore(act: int) -> void:
 	subtitle.text = "SELECT A ROOM  /  %d AVAILABLE" % _catalog[act].size()
 	var built: Array[Dictionary] = []
 	for room: Dictionary in _catalog[act]:
-		built.append(_row(room.title if room.title != "" else _room_title(room.id),room.idea if room.idea != "" else "REPLAY  /  Your save files stay untouched.",func() -> void: _start(func() -> void: SaveGame.replay_room(act+1,room.id))))
+		built.append(_row(room.title if room.title != "" else _room_title(room.id),room.idea if room.idea != "" else "REPLAY  /  Your save files stay untouched.",func() -> void: _start(func() -> void: SaveGame.replay_room(act+1,room.id,true))))
 	_map.set_world(act, _catalog[act], Color(CHAPTERS[act].color))
 	_populate(built)
 	_move(_room_cursors[act])

@@ -415,6 +415,19 @@ so the two agree now. The tiles are still placeholder art.
   imported room identities against each Act's LDtk source, enters Level_2 via
   Level_1's actual Exit Area, idles on the entrance floor, and dies/respawns
   without a second death or an unintended room change.
+- `Godot --headless --path . res://tests/prison_minigames_test.tscn` — the
+  hub machines' shared overlay (whole window pixels per game pixel at every
+  stretch x1-x12), the 5x7 font drawn only at its own size, and HOOSHANG 64 /
+  SUPER SIMORGH: checkpoint respawn safety, the end-staircase notch, the flag
+  walk-off on the ground, game over and being consumed returning to the
+  title, the control hints, the looping santur/drone, MUSIC: OFF, and every
+  cue ending in silence. Games are ticked by hand, so a 60s run costs nothing;
+  note a synthetic press stays "just pressed" for one extra frame in 4.6, which
+  the test's `_press` waits out. THE OTHER SIDE is `mirror_game_test.tscn`.
+  Captures (windowed, not pass/fail): `res://tests/minigame_shot.tscn -- <tag>`
+  photographs all three games into `output/minigames/<tag>/`, and
+  `--resolution 960x540 res://tests/minigame_overlay_shot.tscn -- <tag>`
+  measures the overlay's game-pixel widths in real window pixels
 - `Godot --headless --editor --path . --script res://tests/ldtk_import_isolation_test.gd`
   — imports two temporary projects sharing `Level_2` in both orders, then
   reloads their saved worlds from disk to prove neither overwrote the other.
@@ -1491,23 +1504,55 @@ organized per-character before this pass and needed no change.
   flooded routes use a swim kick followed by an airborne dash once he clears
   the surface; `prison_wings_routes_test.gd` replays those moves from entrance
   to goal.
-- **HOOSHANG 64** — the hub's old console + box TV (`scenes/props/prison/
-  retro_tv.gd`, placed by `PrisonWorld._add_retro_tv()`): the TV shows the
-  game's title screen live; Up at it pushes a Camera2D into the 32x24 screen
+- **The hub's machines** share one prop, `RetroTV` (`scenes/props/prison/
+  retro_tv.gd`, placed by `PrisonWorld._add_minigames()`): the screen shows
+  the game's title live; Up at it pushes a Camera2D into the 32x24 screen
   until it fills the view, then hands the picture to a full-window overlay
-  (160x120 at 1.5x of the design space = whole output pixels, `crt.gdshader`
-  scanlines). Esc/Start, a cleared course or a game over runs the move back.
-  The game itself is `scenes/minigame/retro_game.gd` — a complete small retro
-  platformer (variable jump, dash = run, star blocks, stomps, checkpoint,
-  lives/time/score, goal flag, synthesised square-wave blips), ORIGINAL art
-  from `tools/gen_retro_tv.py`. Its flat limited palette is the deliberate
-  exception to "not 8-bit": it is a game inside the game. The TV stands on its
-  own scaffold stage right of the east stair (cols 60-73, row 32).
-  **SUPER SIMORGH** is the hub's second machine — an old PC on a desk over a
+  with `crt.gdshader` scanlines. **The overlay is sized by
+  `RetroTV.picture_rect(stretch)`, not a fixed 1.5x**: the largest picture
+  at which every game pixel is the same WHOLE number of window pixels. 240x180
+  of the design space is only that at even stretch factors — at x9 (a
+  2880x1800 screen, or a 960x540 window on this Mac's Retina) game pixels came
+  out 13 and 14 window pixels wide by turns. It re-lays itself on a window
+  resize. Esc/Start, or a game's own `finished` (a cleared course, an
+  escape, the mirror clear), runs the move back; losing (a game over, being
+  consumed) goes back to that game's OWN title — one press of Jump to try
+  again — rather than out of the machine. Text in all three games is the 5x7
+  font at its own size 7, scaled only by a whole-number `draw_set_transform`
+  (`prison_minigames_test` lints every `draw_string`), and every leave hint
+  names ESC or START by `InputDevice` (`RetroTV.leave_key()`).
+- **THE OTHER SIDE** (`scenes/minigame/mirror_game.gd`) is what the box TV
+  runs — on its own scaffold stage right of the east stair (cols 60-73, row
+  32). Child Hooshang crosses five rooms to his adult self; touching a shard,
+  a chaser or the lit gate restarts only that room. Rooms 4-5 are first
+  person: Up walks on, Left/Right strafe, and the map's +y projects to the
+  RIGHT of the screen (it was mirrored, so the room slid the wrong way as you
+  strafed). The timed gate in rooms 3 and 5 runs ceiling to floor (it used to
+  stop on the start/goal line and could be walked round). A clear pays five
+  lemons out of the screen (`PrisonWorld._on_mirror_game_finished`, saved per
+  lemon) and the TV leaves the hub. `tests/mirror_game_test.tscn`.
+- **HOOSHANG 64** (`scenes/minigame/retro_game.gd`) is a complete small
+  retro platformer (variable jump, dash = run, star blocks, stomps,
+  checkpoint, lives/time/score, goal flag, synthesised square-wave blips),
+  ORIGINAL art from `tools/gen_retro_tv.py`. Its flat limited palette is the
+  deliberate exception to "not 8-bit": it is a game inside the game. **It is
+  deliberately not in the hub (the user's call, 2026-10-21) — keep it tested,
+  don't place it** — THE OTHER SIDE took the box TV, and
+  `RetroTV` only falls back to `RetroGame` when nothing set `game`. Kept
+  playable and tested: no enemy starts within `SAFE_RESPAWN` (96px) ahead of a
+  respawn (the col-92 checkpoint had one 32px off, which killed an idle player
+  in 1.15s); the gap between the end staircases is a 4-deep notch, not a
+  6-deep well a standing jump fell 1-2px short of; after the flag he hops off
+  the block and walks on the real ground (he used to slide off at the block's
+  height, 8px over the grass); every blip ends on a 6ms release.
+  **SUPER SIMORGH** is the hub's other machine — an old PC on a desk over a
   Persian rug, on a matching stage left of the central stair (cols 8-21, row
   32). Same `RetroTV` prop (`art`/`screen`/`game` set by
   `PrisonWorld._add_minigames()`), so the push-in, CRT overlay and exit are
-  shared. The game (`scenes/minigame/simorgh_game.gd`) is a ONE-MINUTE
+  shared. **It is first person, not a side-scroller: Up runs, Left/Right
+  TURN** — held Right, read as Mario, spins him into the wall while Darkshang
+  closes. The title has a line for it and the run says "HOLD UP TO RUN" until
+  he is 1.5 cells down the corridor. The game (`scenes/minigame/simorgh_game.gd`) is a ONE-MINUTE
   horror run dressed as a bright, psychedelic Persian platformer. It OPENS
   in third person (`Mode.INTRO`, 4.8s, letterboxed, Jump skips): the camera
   faces Hooshang breathing in the bright corridor
@@ -1538,10 +1583,15 @@ organized per-character before this pass and needed no change.
   the oil-lamp HUD burning down the minute. Audio from
   `tools/gen_simorgh_audio.py`: santur music in Dastgah-e Shur that slows
   and detunes as he comes (`pitch_scale`), plus heartbeat, drone, whisper,
-  stinger and shriek. Balance check (autopilot, lateral steering cheated):
-  a perfect runner escapes at ~27s with him ~7 cells behind; a walker is
-  caught at ~25s; standing still, ~3s after the chase starts (timings
-  include the opening).
+  stinger and shriek. The santur and the drone are seamless loops and LOOP
+  IN THE STREAM (`SimorghGame._looped()`; restarting them on `finished` left a
+  gap at every seam); the santur is music, so MUSIC: OFF silences it; every
+  one-shot ends on a 20ms fade (`TAIL_FADE` — jump and bump stopped mid-ring).
+  Consumed goes back to the title; Jump skips the CONSUMED card after 3.6s.
+  Balance check (autopilot, lateral steering cheated; re-measured
+  2026-10-20): a perfect runner escapes at 28.6s, him never closer than 7.7
+  cells; a walker is caught at 25.5s; standing still, 2.7s after the chase
+  starts (timings include the opening).
 - **Act 2's child wall jump** is softer than the adult's: `wall_jump_speed_x`
   110 and `wall_jump_drag` 360 (`Act2Beats._apply_child_movement`). With no
   air deceleration, the adult 170 px/s kick coasted ~295px — nearly a room;
@@ -1907,11 +1957,48 @@ going toward the light**: the act opens in the approved monochrome line art
   mostly over the rock, and the lemon's frames. Pans use `Camera2D.offset`, which ignores the
   camera's limits, so `Act3Beats._pan_camera` measures from the room. Chase
   music: `sea_chase.ogg`; sounds roar/growl/gnaw/bite/creak (`gen_act3_sfx.py`).
+- **The way home's backdrops are PLANES in depth** (`LandBackdrop`,
+  `scenes/props/sea/land_backdrop.gd`, built by `SeaRoom._build_backdrop` for
+  any room with `assets/act3/land/<room>/layers.json`; the flat `*.png` beside
+  those folders is only the fallback). `tools/gen_act3_land_backdrops.py` paints
+  each room as transparent layers plus a manifest: planes with a depth `p`
+  (0 sky .. 1 the room), clouds that drift, trees that sway from the root, the
+  grass (swayed per blade from `ground.png`), glints/shafts/waterfall, shadow
+  planes, birds and particles. **The planes HOLD STILL**, fixed to the room:
+  they first slid by depth (with him, sideways, in rooms whose camera never
+  pans; with the camera, in the tall edge), and on screen that read as the
+  mountains and the sea moving rather than as depth. The art is composed for the
+  camera at the top of the room. Each room's planes are CLIPPED to its rect:
+  their margins otherwise lay strips of the wood over the meadow. The wind is one
+  function (`act3_land_wind.gdshaderinc`) shared by trees, canopy and grass so a
+  gust crosses them all. The terrain's earth darkens with depth below a
+  SMOOTHED ground line (`act3_depth_tint`'s `earth_depth`; from each column's own
+  top a raised block came out a darker pillar). The edge's far wall is real solid
+  rock, so it hangs at p 1 OVER the terrain: on a plane of its own it slid off
+  the rock's visible top and read as a box stuck to it. Tigers carry a
+  `GroundShadow` (a ray down each frame, so it stays on the ground when they
+  leap). Re-run the painter after changing a land room's ground in
+  `tools/act3_rooms.py`. `tests/act3_land_backdrop_test.tscn`.
 - **Act II hands off to Act III**: Act II's end card -> results -> `Act3World`
   (`act2_ending.gd`'s `_handoff_act_three`, which clears a stale
   `debug_start_room`). Saves in Act III show room NAMES (`SaveGame.room_label`).
 - **Score**: `scripts/act3/act3_music.gd`, cues from
   `tools/gen_act3_sea_music.py` (see `assets/music/README.md`).
+  **From the real sea on, the score is ElevenLabs and follows the STORY**, not
+  the rooms: sunrise (25), the walk (26-27), the tall grass (28), silence on the
+  growl, the chase CUT in on the roar and cut out as the edge gives way, the
+  peril on the vine, and the lemon, a one-shot piece from the moment he picks it
+  that plays on through the paused results (`process_mode` ALWAYS). Once the
+  beats call `rest()`/`chase()`/`peril()`/`lemon()`, room changes no longer
+  pick the cue (a doorway mid-chase is not a cue). Each designed change is an
+  exact (from, to) transition in `Act3Music.TRANSITIONS`; Godot looks up an
+  exact pair, then (from, ANY), then (ANY, to), then (ANY, ANY), so never add a
+  (from, ANY) without checking what it shadows. ElevenLabs renders at an exact
+  BPM, but the mastering tool's onset tracker misread two of them (72.2 for 92,
+  64.85 for 60), and a loop cut in wrong "bars" drops the downbeat at the seam:
+  pin the tempo in `master_elevenlabs_music.py`'s `BPM`. Prompts, take choice,
+  levels and loop windows are all in `tools/gen_elevenlabs_music.py` and
+  `tools/master_elevenlabs_music.py`; `tests/act3_music_test.tscn`.
 - **Importing while the editor is open**: this session's imports were made in
   a scratch copy of the project (the user's editor held this one) and the
   results copied back. Restart the editor before playing Act III so its own
@@ -1957,48 +2044,11 @@ test rather than being noticed months later in play.
   voice blips all still index against the PLAIN rendered text
   (`DialogueBox._strip_tags`), never the raw BBCode source — see that method's
   doc for why a tag ahead of a `[p]` would otherwise shift the breath.
-- **The way home's backdrops are PLANES in depth** (`LandBackdrop`,
-  `scenes/props/sea/land_backdrop.gd`, built by `SeaRoom._build_backdrop` for
-  any room with `assets/act3/land/<room>/layers.json`; the flat `*.png` beside
-  those folders is only the fallback). `tools/gen_act3_land_backdrops.py` paints
-  each room as transparent layers plus a manifest: planes with a depth `p`
-  (0 sky .. 1 the room), clouds that drift, trees that sway from the root, the
-  grass (swayed per blade from `ground.png`), glints/shafts/waterfall, shadow
-  planes, birds and particles. **The planes HOLD STILL**, fixed to the room:
-  they first slid by depth (with him, sideways, in rooms whose camera never
-  pans; with the camera, in the tall edge), and on screen that read as the
-  mountains and the sea moving rather than as depth. The art is composed for the
-  camera at the top of the room. Each room's planes are CLIPPED to its rect:
-  their margins otherwise lay strips of the wood over the meadow. The wind is one
-  function (`act3_land_wind.gdshaderinc`) shared by trees, canopy and grass so a
-  gust crosses them all. The terrain's earth darkens with depth below a
-  SMOOTHED ground line (`act3_depth_tint`'s `earth_depth`; from each column's own
-  top a raised block came out a darker pillar). The edge's far wall is real solid
-  rock, so it hangs at p 1 OVER the terrain: on a plane of its own it slid off
-  the rock's visible top and read as a box stuck to it. Tigers carry a
-  `GroundShadow` (a ray down each frame, so it stays on the ground when they
-  leap). Re-run the painter after changing a land room's ground in
-  `tools/act3_rooms.py`. `tests/act3_land_backdrop_test.tscn`.
 - **A speaker's face sits on the side they are standing on.** Pass
   `DialogueBox.Side`; `LdtkRumiTrigger.portrait_side()` derives it from where the
   sprite actually is, so it cannot disagree with the screen. Hooshang is the
   player, so he is the other side.
 - **One portrait state per line.** Beats name a state (`"annoyed"`), not a file,
-  **From the real sea on, the score is ElevenLabs and follows the STORY**, not
-  the rooms: sunrise (25), the walk (26-27), the tall grass (28), silence on the
-  growl, the chase CUT in on the roar and cut out as the edge gives way, the
-  peril on the vine, and the lemon, a one-shot piece from the moment he picks it
-  that plays on through the paused results (`process_mode` ALWAYS). Once the
-  beats call `rest()`/`chase()`/`peril()`/`lemon()`, room changes no longer
-  pick the cue (a doorway mid-chase is not a cue). Each designed change is an
-  exact (from, to) transition in `Act3Music.TRANSITIONS`; Godot looks up an
-  exact pair, then (from, ANY), then (ANY, to), then (ANY, ANY), so never add a
-  (from, ANY) without checking what it shadows. ElevenLabs renders at an exact
-  BPM, but the mastering tool's onset tracker misread two of them (72.2 for 92,
-  64.85 for 60), and a loop cut in wrong "bars" drops the downbeat at the seam:
-  pin the tempo in `master_elevenlabs_music.py`'s `BPM`. Prompts, take choice,
-  levels and loop windows are all in `tools/gen_elevenlabs_music.py` and
-  `tools/master_elevenlabs_music.py`; `tests/act3_music_test.tscn`.
   so re-cutting the portrait sheet never touches the dialogue.
 - **Syncing the author's script** (`Hooshang - The Script.md`, kept outside the
   repo). ACT TWO: paste its `# ACT TWO` section into

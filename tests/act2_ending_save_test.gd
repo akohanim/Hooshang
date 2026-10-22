@@ -1,5 +1,5 @@
 extends Node
-## Disk-backed epilogue retry/resume and physical Enter back to the title.
+## Disk-backed epilogue retry/resume and physical Enter through results to Act III.
 var failures: Array[String]=[]
 func _ready() -> void:
 	var menu := preload("res://scenes/ui/MainMenu.tscn").instantiate()
@@ -58,11 +58,32 @@ func _ready() -> void:
 	event.pressed=false
 	Input.parse_input_event(event)
 	await frames(25)
-	check(Screen.current==null and menu.visible and SaveGame.slot==-1,"Enter returns to title and unbinds the save")
+	var results: Node=get_tree().root.get_node_or_null("ActResults")
+	check(results!=null and get_tree().paused,"Enter opens the act results before continuing")
+	if results!=null:
+		# Confirm once to finish the tally, then a fresh press to continue.
+		for press in 2:
+			press_enter(true)
+			await frames(2)
+			press_enter(false)
+			await frames(2)
+		await frames(35)
+		# Whole-world transitions keep the watercolor and its reading pause up.
+		var loading_deadline := Time.get_ticks_msec() + 10000
+		while Screen.loading and Time.get_ticks_msec() < loading_deadline:
+			await get_tree().process_frame
+		check(Screen.current!=null and Screen.current.scene_file_path=="res://ldtk/Act3World.tscn" and not get_tree().paused,"results continue into the sea with controls restored")
 	SaveGame.unbind()
 	SaveGame.erase(0)
 	print("ENDING SAVE: ","ALL PASS" if failures.is_empty() else failures)
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+func press_enter(pressed: bool) -> void:
+	var event:=InputEventKey.new()
+	event.physical_keycode=KEY_ENTER
+	event.keycode=KEY_ENTER
+	event.pressed=pressed
+	Input.parse_input_event(event)
 func skip_scene(ending: Node) -> void:
 	for i in 200:
 		await frames(1)

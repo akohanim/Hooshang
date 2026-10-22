@@ -32,6 +32,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'assets/minigame/simorgh'
 RATE = 22050
+TAIL_FADE = 0.02            # seconds of fade-out on every one-shot (see write)
 D4 = 293.66
 # Dastgah-e Shur on D, in semitones: D, E-koron, F, G, A, Bb, C, D, E-koron, F, G.
 SHUR = [0, 1.5, 3, 5, 7, 8, 10, 12, 13.5, 15, 17]
@@ -99,7 +100,15 @@ def riz(buf, at, dur, freq, wrap, rate=13.0, gain=0.3):
         i += 1
 
 
-def write(name, buf, peak=0.82):
+def write(name, buf, peak=0.82, loop=False):
+    """A one-shot ends on a short fade to silence: a cue shorter than the
+    notes in it (jump is 0.6s of 1.4s plucks) used to stop mid-ring, at about
+    a tenth of full scale — a click at the end of every jump. A loop must not
+    be faded; its end runs straight into its start."""
+    if not loop:
+        n = int(RATE * TAIL_FADE)
+        for i in range(n):
+            buf[len(buf) - 1 - i] *= i / n
     m = max(abs(v) for v in buf) or 1.0
     OUT.mkdir(parents=True, exist_ok=True)
     with wave.open(str(OUT / f'{name}.wav'), 'wb') as w:
@@ -139,7 +148,7 @@ def music():
         for i in range(len(buf)):
             s = i / RATE
             buf[i] += g * math.sin(2 * math.pi * f * s) * (0.7 + 0.3 * math.sin(2 * math.pi * sw * s))
-    write('music', buf, 0.7)
+    write('music', buf, 0.7, loop=True)
 
 
 def cue(name, events, length):
@@ -191,7 +200,7 @@ def drone():
         lph = rnd.random() * 2 * math.pi
         for i in range(n):
             buf[i] += g * math.sin(w * i + ph) * (0.65 + 0.35 * math.sin(lfo * i / RATE + lph))
-    write('drone', buf, 0.75)
+    write('drone', buf, 0.75, loop=True)
 
 
 def whisper():

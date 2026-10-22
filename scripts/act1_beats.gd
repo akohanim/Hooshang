@@ -1123,7 +1123,7 @@ func _handoff_act_two() -> void:
 	# one line later, which is the polite version of the failure.
 	var tree := get_tree()
 	if act_two_scene != "" and ResourceLoader.exists(act_two_scene):
-		Screen.load_scene.bind(act_two_scene).call_deferred()
+		Screen.load_scene_with_card.bind(act_two_scene).call_deferred()
 		return
 	# Nothing to go to yet. Bank the run and hand back to the title screen, which
 	# is exactly what the pause menu's QUIT does — a finished Act should leave the

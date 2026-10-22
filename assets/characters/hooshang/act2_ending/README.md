@@ -13,3 +13,9 @@ Painting and walking loop. The final hand tint comes from the existing poem's
 ink; head, body and movement silhouettes reuse the approved adult artwork.
 The folded coat uses that outfit's palette. Runtime choreography lives in
 `scenes/props/act2_ending/Act2Ending.tscn` and its adjacent scripts.
+
+`source/farewell.aseprite` is the separate native 18px adult hold, hand release,
+and quiet fall. It replaces the child's farewell double when the dream drains
+away, before the waking pond. Export saved edits with
+`python3 tools/export_child_farewell.py --adult`. The one-time construction
+recipe is `tools/build_adult_farewell.lua`; it never edits shared movement art.

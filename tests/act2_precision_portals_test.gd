@@ -18,7 +18,9 @@ func _ready() -> void:
 	world.get_node("CellReunion").free()
 	add_child(world)
 	await frames(12)
-	world.player.died.connect(func():deaths+=1)
+	world.player.died.connect(func():
+		deaths+=1
+		print("PORTAL DEATH ",world.current_room.name," at=",world.player.global_position-world.current_room.global_position," checkpoint=",world._checkpoint-world.current_room.global_position))
 	world.collected.assign(world.IDS)
 	world.inserted.assign(world.IDS)
 	world.rescued = true
@@ -45,6 +47,7 @@ func _ready() -> void:
 	var crossings:=0
 	for portal in world.portals:
 		crossings+=1
+		print("PORTAL ",portal.from.name," -> ",portal.to.name)
 		world._enter_room(portal.from,true)
 		world.player.respawn(world.spawn_point_for(portal.from))
 		world._portal_cooldown = 0.0
@@ -57,6 +60,7 @@ func _ready() -> void:
 		world.player.global_position = portal.center
 		world.player.velocity = Vector2.ZERO
 		await frames(65)
+		print("ARRIVAL ",world.current_room.name," at=",world.player.global_position-world.current_room.global_position," state=",world.player.state_name())
 		check(world.current_room == portal.to,"crossing %s -> %s" % [portal.from.name,portal.to.name])
 		check(world.room_rect(portal.to).encloses(world.player.hitbox_rect()),"arrival body clear of world boundary")
 		await frames(45)

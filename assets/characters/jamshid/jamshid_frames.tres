@@ -1,160 +1,10 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://dhlex6j6j0ats"]
 
-[ext_resource type="Texture2D" path="res://assets/characters/jamshid/sprites/child/movement.png" id="sheet"]
-
-[sub_resource type="AtlasTexture" id="f0"]
-atlas = ExtResource("sheet")
-region = Rect2(0, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f1"]
-atlas = ExtResource("sheet")
-region = Rect2(88, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f2"]
-atlas = ExtResource("sheet")
-region = Rect2(176, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f3"]
-atlas = ExtResource("sheet")
-region = Rect2(264, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f4"]
-atlas = ExtResource("sheet")
-region = Rect2(352, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f5"]
-atlas = ExtResource("sheet")
-region = Rect2(440, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f6"]
-atlas = ExtResource("sheet")
-region = Rect2(528, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f7"]
-atlas = ExtResource("sheet")
-region = Rect2(616, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f8"]
-atlas = ExtResource("sheet")
-region = Rect2(704, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f9"]
-atlas = ExtResource("sheet")
-region = Rect2(792, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f10"]
-atlas = ExtResource("sheet")
-region = Rect2(880, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f11"]
-atlas = ExtResource("sheet")
-region = Rect2(968, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f12"]
-atlas = ExtResource("sheet")
-region = Rect2(1056, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f13"]
-atlas = ExtResource("sheet")
-region = Rect2(1144, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f14"]
-atlas = ExtResource("sheet")
-region = Rect2(1232, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f15"]
-atlas = ExtResource("sheet")
-region = Rect2(1320, 0, 88, 88)
-filter_clip = true
+[ext_resource type="Texture2D" uid="uid://3biud3qocd0p" path="res://assets/characters/jamshid/sprites/child/movement.png" id="sheet"]
 
 [sub_resource type="AtlasTexture" id="f16"]
 atlas = ExtResource("sheet")
 region = Rect2(1408, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f17"]
-atlas = ExtResource("sheet")
-region = Rect2(1496, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f18"]
-atlas = ExtResource("sheet")
-region = Rect2(1584, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f19"]
-atlas = ExtResource("sheet")
-region = Rect2(1672, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f20"]
-atlas = ExtResource("sheet")
-region = Rect2(1760, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f21"]
-atlas = ExtResource("sheet")
-region = Rect2(1848, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f22"]
-atlas = ExtResource("sheet")
-region = Rect2(1936, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f23"]
-atlas = ExtResource("sheet")
-region = Rect2(2024, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f24"]
-atlas = ExtResource("sheet")
-region = Rect2(2112, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f25"]
-atlas = ExtResource("sheet")
-region = Rect2(2200, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f26"]
-atlas = ExtResource("sheet")
-region = Rect2(2288, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f27"]
-atlas = ExtResource("sheet")
-region = Rect2(2376, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f28"]
-atlas = ExtResource("sheet")
-region = Rect2(2464, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f29"]
-atlas = ExtResource("sheet")
-region = Rect2(2552, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f30"]
-atlas = ExtResource("sheet")
-region = Rect2(2640, 0, 88, 88)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="f31"]
@@ -202,34 +52,24 @@ atlas = ExtResource("sheet")
 region = Rect2(3432, 0, 88, 88)
 filter_clip = true
 
-[sub_resource type="AtlasTexture" id="f40"]
+[sub_resource type="AtlasTexture" id="f60"]
 atlas = ExtResource("sheet")
-region = Rect2(3520, 0, 88, 88)
+region = Rect2(5280, 0, 88, 88)
 filter_clip = true
 
-[sub_resource type="AtlasTexture" id="f41"]
+[sub_resource type="AtlasTexture" id="f23"]
 atlas = ExtResource("sheet")
-region = Rect2(3608, 0, 88, 88)
+region = Rect2(2024, 0, 88, 88)
 filter_clip = true
 
-[sub_resource type="AtlasTexture" id="f42"]
+[sub_resource type="AtlasTexture" id="f24"]
 atlas = ExtResource("sheet")
-region = Rect2(3696, 0, 88, 88)
+region = Rect2(2112, 0, 88, 88)
 filter_clip = true
 
-[sub_resource type="AtlasTexture" id="f43"]
+[sub_resource type="AtlasTexture" id="f25"]
 atlas = ExtResource("sheet")
-region = Rect2(3784, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f44"]
-atlas = ExtResource("sheet")
-region = Rect2(3872, 0, 88, 88)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="f45"]
-atlas = ExtResource("sheet")
-region = Rect2(3960, 0, 88, 88)
+region = Rect2(2200, 0, 88, 88)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="f46"]
@@ -262,6 +102,61 @@ atlas = ExtResource("sheet")
 region = Rect2(4488, 0, 88, 88)
 filter_clip = true
 
+[sub_resource type="AtlasTexture" id="f17"]
+atlas = ExtResource("sheet")
+region = Rect2(1496, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f18"]
+atlas = ExtResource("sheet")
+region = Rect2(1584, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f0"]
+atlas = ExtResource("sheet")
+region = Rect2(0, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f1"]
+atlas = ExtResource("sheet")
+region = Rect2(88, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f2"]
+atlas = ExtResource("sheet")
+region = Rect2(176, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f3"]
+atlas = ExtResource("sheet")
+region = Rect2(264, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f4"]
+atlas = ExtResource("sheet")
+region = Rect2(352, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f14"]
+atlas = ExtResource("sheet")
+region = Rect2(1232, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f15"]
+atlas = ExtResource("sheet")
+region = Rect2(1320, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f19"]
+atlas = ExtResource("sheet")
+region = Rect2(1672, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f20"]
+atlas = ExtResource("sheet")
+region = Rect2(1760, 0, 88, 88)
+filter_clip = true
+
 [sub_resource type="AtlasTexture" id="f52"]
 atlas = ExtResource("sheet")
 region = Rect2(4576, 0, 88, 88)
@@ -292,6 +187,31 @@ atlas = ExtResource("sheet")
 region = Rect2(5016, 0, 88, 88)
 filter_clip = true
 
+[sub_resource type="AtlasTexture" id="f21"]
+atlas = ExtResource("sheet")
+region = Rect2(1848, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f22"]
+atlas = ExtResource("sheet")
+region = Rect2(1936, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f13"]
+atlas = ExtResource("sheet")
+region = Rect2(1144, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f5"]
+atlas = ExtResource("sheet")
+region = Rect2(440, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f6"]
+atlas = ExtResource("sheet")
+region = Rect2(528, 0, 88, 88)
+filter_clip = true
+
 [sub_resource type="AtlasTexture" id="f58"]
 atlas = ExtResource("sheet")
 region = Rect2(5104, 0, 88, 88)
@@ -302,9 +222,79 @@ atlas = ExtResource("sheet")
 region = Rect2(5192, 0, 88, 88)
 filter_clip = true
 
-[sub_resource type="AtlasTexture" id="f60"]
+[sub_resource type="AtlasTexture" id="f9"]
 atlas = ExtResource("sheet")
-region = Rect2(5280, 0, 88, 88)
+region = Rect2(792, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f10"]
+atlas = ExtResource("sheet")
+region = Rect2(880, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f7"]
+atlas = ExtResource("sheet")
+region = Rect2(616, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f8"]
+atlas = ExtResource("sheet")
+region = Rect2(704, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f40"]
+atlas = ExtResource("sheet")
+region = Rect2(3520, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f41"]
+atlas = ExtResource("sheet")
+region = Rect2(3608, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f42"]
+atlas = ExtResource("sheet")
+region = Rect2(3696, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f43"]
+atlas = ExtResource("sheet")
+region = Rect2(3784, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f44"]
+atlas = ExtResource("sheet")
+region = Rect2(3872, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f45"]
+atlas = ExtResource("sheet")
+region = Rect2(3960, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f11"]
+atlas = ExtResource("sheet")
+region = Rect2(968, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f12"]
+atlas = ExtResource("sheet")
+region = Rect2(1056, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f28"]
+atlas = ExtResource("sheet")
+region = Rect2(2464, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f29"]
+atlas = ExtResource("sheet")
+region = Rect2(2552, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f30"]
+atlas = ExtResource("sheet")
+region = Rect2(2640, 0, 88, 88)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="f61"]
@@ -317,57 +307,365 @@ atlas = ExtResource("sheet")
 region = Rect2(5456, 0, 88, 88)
 filter_clip = true
 
+[sub_resource type="AtlasTexture" id="f26"]
+atlas = ExtResource("sheet")
+region = Rect2(2288, 0, 88, 88)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="f27"]
+atlas = ExtResource("sheet")
+region = Rect2(2376, 0, 88, 88)
+filter_clip = true
+
 [resource]
+animations = [{
+"frames": [{
+"duration": 0.1,
+"texture": SubResource("f16")
+}],
+"loop": false,
+"name": &"apex",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.12,
+"texture": SubResource("f31")
+}, {
+"duration": 0.08,
+"texture": SubResource("f32")
+}, {
+"duration": 0.12,
+"texture": SubResource("f33")
+}, {
+"duration": 0.08,
+"texture": SubResource("f34")
+}],
+"loop": true,
+"name": &"climb",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.12,
+"texture": SubResource("f35")
+}, {
+"duration": 0.08,
+"texture": SubResource("f36")
+}, {
+"duration": 0.12,
+"texture": SubResource("f37")
+}, {
+"duration": 0.08,
+"texture": SubResource("f38")
+}],
+"loop": true,
+"name": &"climb_down",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.4,
+"texture": SubResource("f39")
+}],
+"loop": false,
+"name": &"climb_idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.2,
+"texture": SubResource("f60")
+}],
+"loop": false,
+"name": &"crouch",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.035,
+"texture": SubResource("f23")
+}, {
+"duration": 0.055,
+"texture": SubResource("f24")
+}, {
+"duration": 0.06,
+"texture": SubResource("f25")
+}],
+"loop": false,
+"name": &"dash",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.07,
+"texture": SubResource("f46")
+}, {
+"duration": 0.07,
+"texture": SubResource("f47")
+}, {
+"duration": 0.09,
+"texture": SubResource("f48")
+}, {
+"duration": 0.09,
+"texture": SubResource("f49")
+}, {
+"duration": 0.08,
+"texture": SubResource("f50")
+}, {
+"duration": 0.1,
+"texture": SubResource("f51")
+}],
+"loop": false,
+"name": &"exit_water",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.08,
+"texture": SubResource("f17")
+}, {
+"duration": 0.14,
+"texture": SubResource("f18")
+}],
+"loop": false,
+"name": &"fall",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 2.4,
+"texture": SubResource("f0")
+}, {
+"duration": 0.065,
+"texture": SubResource("f1")
+}, {
+"duration": 0.085,
+"texture": SubResource("f2")
+}, {
+"duration": 0.065,
+"texture": SubResource("f3")
+}, {
+"duration": 0.85,
+"texture": SubResource("f4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.06,
+"texture": SubResource("f14")
+}, {
+"duration": 0.12,
+"texture": SubResource("f15")
+}],
+"loop": false,
+"name": &"jump",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.025,
+"texture": SubResource("f19")
+}, {
+"duration": 0.03,
+"texture": SubResource("f20")
+}],
+"loop": false,
+"name": &"land",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.04,
+"texture": SubResource("f52")
+}, {
+"duration": 0.04,
+"texture": SubResource("f53")
+}, {
+"duration": 0.04,
+"texture": SubResource("f54")
+}, {
+"duration": 0.04,
+"texture": SubResource("f55")
+}, {
+"duration": 0.04,
+"texture": SubResource("f56")
+}, {
+"duration": 0.04,
+"texture": SubResource("f57")
+}],
+"loop": false,
+"name": &"ledge_climb",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.03,
+"texture": SubResource("f21")
+}, {
+"duration": 0.035,
+"texture": SubResource("f22")
+}],
+"loop": false,
+"name": &"recover",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.12,
+"texture": SubResource("f13")
+}],
+"loop": false,
+"name": &"rise",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.1,
+"texture": SubResource("f5")
+}, {
+"duration": 0.1,
+"texture": SubResource("f6")
+}],
+"loop": true,
+"name": &"run",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.18,
+"texture": SubResource("f58")
+}, {
+"duration": 0.18,
+"texture": SubResource("f59")
+}],
+"loop": true,
+"name": &"sit",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.07,
+"texture": SubResource("f9")
+}, {
+"duration": 0.07,
+"texture": SubResource("f10")
+}],
+"loop": true,
+"name": &"skid",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.05,
+"texture": SubResource("f7")
+}, {
+"duration": 0.05,
+"texture": SubResource("f8")
+}],
+"loop": true,
+"name": &"sprint",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.066,
+"texture": SubResource("f40")
+}, {
+"duration": 0.066,
+"texture": SubResource("f41")
+}, {
+"duration": 0.066,
+"texture": SubResource("f42")
+}, {
+"duration": 0.2,
+"texture": SubResource("f43")
+}],
+"loop": true,
+"name": &"swim",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.4,
+"texture": SubResource("f44")
+}, {
+"duration": 0.4,
+"texture": SubResource("f45")
+}],
+"loop": true,
+"name": &"swim_idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.025,
+"texture": SubResource("f11")
+}, {
+"duration": 0.035,
+"texture": SubResource("f12")
+}],
+"loop": false,
+"name": &"takeoff",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.1,
+"texture": SubResource("f5")
+}, {
+"duration": 0.1,
+"texture": SubResource("f6")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.04,
+"texture": SubResource("f28")
+}, {
+"duration": 0.06,
+"texture": SubResource("f29")
+}, {
+"duration": 0.12,
+"texture": SubResource("f30")
+}],
+"loop": false,
+"name": &"wall_jump",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.12,
+"texture": SubResource("f61")
+}, {
+"duration": 0.18,
+"texture": SubResource("f62")
+}],
+"loop": false,
+"name": &"wall_land",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 0.18,
+"texture": SubResource("f26")
+}, {
+"duration": 0.18,
+"texture": SubResource("f27")
+}],
+"loop": true,
+"name": &"wall_slide",
+"speed": 1.0
+}]
 metadata/visual_scale = 0.375
 metadata/visual_offset = Vector2(0, -3)
 metadata/aseprite_source = "res://assets/characters/jamshid/aseprite/jamshid_child_movement.aseprite"
-metadata/sock_pixels = {"idle": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60)],
-"run": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56)],
-"sprint": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56)],
-"skid": [PackedVector2Array(46, 56, 32, 60), PackedVector2Array(45, 56, 32, 60)],
-"takeoff": [PackedVector2Array(39, 61, 44, 61), PackedVector2Array(34, 58, 51, 58)],
-"rise": [PackedVector2Array(34, 58, 51, 58)],
-"jump": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58)],
+metadata/sock_pixels = {
 "apex": [PackedVector2Array(34, 59, 51, 59)],
-"fall": [PackedVector2Array(34, 55, 53, 55), PackedVector2Array(34, 54, 53, 54)],
-"land": [PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 61, 44, 61)],
-"recover": [PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 60, 44, 60)],
-"dash": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(39, 60, 44, 60)],
-"wall_slide": [PackedVector2Array(46, 56, 32, 60), PackedVector2Array(46, 57, 32, 61)],
-"wall_jump": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58)],
 "climb": [PackedVector2Array(37, 56, 51, 60), PackedVector2Array(37, 55, 51, 59), PackedVector2Array(46, 56, 36, 60), PackedVector2Array(46, 55, 36, 59)],
 "climb_down": [PackedVector2Array(46, 55, 36, 59), PackedVector2Array(46, 56, 36, 60), PackedVector2Array(37, 55, 51, 59), PackedVector2Array(37, 56, 51, 60)],
 "climb_idle": [PackedVector2Array(37, 56, 51, 60)],
+"crouch": [PackedVector2Array(39, 60, 44, 60)],
+"dash": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(39, 60, 44, 60)],
+"exit_water": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56), PackedVector2Array(39, 60, 44, 60)],
+"fall": [PackedVector2Array(34, 55, 53, 55), PackedVector2Array(34, 54, 53, 54)],
+"idle": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60)],
+"jump": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58)],
+"land": [PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 61, 44, 61)],
+"ledge_climb": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56), PackedVector2Array(39, 60, 44, 60)],
+"recover": [PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 60, 44, 60)],
+"rise": [PackedVector2Array(34, 58, 51, 58)],
+"run": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56)],
+"sit": [PackedVector2Array(53, 58, 40, 59), PackedVector2Array(53, 58, 40, 59)],
+"skid": [PackedVector2Array(46, 56, 32, 60), PackedVector2Array(45, 56, 32, 60)],
+"sprint": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56)],
 "swim": [PackedVector2Array(46, 52, 32, 58), PackedVector2Array(34, 60, 36, 60), PackedVector2Array(34, 60, 36, 60), PackedVector2Array(51, 52, 32, 54)],
 "swim_idle": [PackedVector2Array(51, 52, 32, 54), PackedVector2Array(51, 52, 32, 54)],
-"exit_water": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56), PackedVector2Array(39, 60, 44, 60)],
-"ledge_climb": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(39, 61, 44, 61), PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56), PackedVector2Array(39, 60, 44, 60)],
-"sit": [PackedVector2Array(53, 58, 40, 59), PackedVector2Array(53, 58, 40, 59)],
-"crouch": [PackedVector2Array(39, 60, 44, 60)],
+"takeoff": [PackedVector2Array(39, 61, 44, 61), PackedVector2Array(34, 58, 51, 58)],
+"walk": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56)],
+"wall_jump": [PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58), PackedVector2Array(34, 58, 51, 58)],
 "wall_land": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(39, 60, 44, 60)],
-"walk": [PackedVector2Array(39, 60, 44, 60), PackedVector2Array(34, 56, 51, 56)]}
-animations = [{"frames": [{"duration": 2.400000, "texture": SubResource("f0")}, {"duration": 0.065000, "texture": SubResource("f1")}, {"duration": 0.085000, "texture": SubResource("f2")}, {"duration": 0.065000, "texture": SubResource("f3")}, {"duration": 0.850000, "texture": SubResource("f4")}], "loop": true, "name": &"idle", "speed": 1.0},
-{"frames": [{"duration": 0.100000, "texture": SubResource("f5")}, {"duration": 0.100000, "texture": SubResource("f6")}], "loop": true, "name": &"run", "speed": 1.0},
-{"frames": [{"duration": 0.050000, "texture": SubResource("f7")}, {"duration": 0.050000, "texture": SubResource("f8")}], "loop": true, "name": &"sprint", "speed": 1.0},
-{"frames": [{"duration": 0.070000, "texture": SubResource("f9")}, {"duration": 0.070000, "texture": SubResource("f10")}], "loop": true, "name": &"skid", "speed": 1.0},
-{"frames": [{"duration": 0.025000, "texture": SubResource("f11")}, {"duration": 0.035000, "texture": SubResource("f12")}], "loop": false, "name": &"takeoff", "speed": 1.0},
-{"frames": [{"duration": 0.120000, "texture": SubResource("f13")}], "loop": false, "name": &"rise", "speed": 1.0},
-{"frames": [{"duration": 0.060000, "texture": SubResource("f14")}, {"duration": 0.120000, "texture": SubResource("f15")}], "loop": false, "name": &"jump", "speed": 1.0},
-{"frames": [{"duration": 0.100000, "texture": SubResource("f16")}], "loop": false, "name": &"apex", "speed": 1.0},
-{"frames": [{"duration": 0.080000, "texture": SubResource("f17")}, {"duration": 0.140000, "texture": SubResource("f18")}], "loop": false, "name": &"fall", "speed": 1.0},
-{"frames": [{"duration": 0.025000, "texture": SubResource("f19")}, {"duration": 0.030000, "texture": SubResource("f20")}], "loop": false, "name": &"land", "speed": 1.0},
-{"frames": [{"duration": 0.030000, "texture": SubResource("f21")}, {"duration": 0.035000, "texture": SubResource("f22")}], "loop": false, "name": &"recover", "speed": 1.0},
-{"frames": [{"duration": 0.035000, "texture": SubResource("f23")}, {"duration": 0.055000, "texture": SubResource("f24")}, {"duration": 0.060000, "texture": SubResource("f25")}], "loop": false, "name": &"dash", "speed": 1.0},
-{"frames": [{"duration": 0.180000, "texture": SubResource("f26")}, {"duration": 0.180000, "texture": SubResource("f27")}], "loop": true, "name": &"wall_slide", "speed": 1.0},
-{"frames": [{"duration": 0.040000, "texture": SubResource("f28")}, {"duration": 0.060000, "texture": SubResource("f29")}, {"duration": 0.120000, "texture": SubResource("f30")}], "loop": false, "name": &"wall_jump", "speed": 1.0},
-{"frames": [{"duration": 0.120000, "texture": SubResource("f31")}, {"duration": 0.080000, "texture": SubResource("f32")}, {"duration": 0.120000, "texture": SubResource("f33")}, {"duration": 0.080000, "texture": SubResource("f34")}], "loop": true, "name": &"climb", "speed": 1.0},
-{"frames": [{"duration": 0.120000, "texture": SubResource("f35")}, {"duration": 0.080000, "texture": SubResource("f36")}, {"duration": 0.120000, "texture": SubResource("f37")}, {"duration": 0.080000, "texture": SubResource("f38")}], "loop": true, "name": &"climb_down", "speed": 1.0},
-{"frames": [{"duration": 0.400000, "texture": SubResource("f39")}], "loop": false, "name": &"climb_idle", "speed": 1.0},
-{"frames": [{"duration": 0.066000, "texture": SubResource("f40")}, {"duration": 0.066000, "texture": SubResource("f41")}, {"duration": 0.066000, "texture": SubResource("f42")}, {"duration": 0.200000, "texture": SubResource("f43")}], "loop": true, "name": &"swim", "speed": 1.0},
-{"frames": [{"duration": 0.400000, "texture": SubResource("f44")}, {"duration": 0.400000, "texture": SubResource("f45")}], "loop": true, "name": &"swim_idle", "speed": 1.0},
-{"frames": [{"duration": 0.070000, "texture": SubResource("f46")}, {"duration": 0.070000, "texture": SubResource("f47")}, {"duration": 0.090000, "texture": SubResource("f48")}, {"duration": 0.090000, "texture": SubResource("f49")}, {"duration": 0.080000, "texture": SubResource("f50")}, {"duration": 0.100000, "texture": SubResource("f51")}], "loop": false, "name": &"exit_water", "speed": 1.0},
-{"frames": [{"duration": 0.040000, "texture": SubResource("f52")}, {"duration": 0.040000, "texture": SubResource("f53")}, {"duration": 0.040000, "texture": SubResource("f54")}, {"duration": 0.040000, "texture": SubResource("f55")}, {"duration": 0.040000, "texture": SubResource("f56")}, {"duration": 0.040000, "texture": SubResource("f57")}], "loop": false, "name": &"ledge_climb", "speed": 1.0},
-{"frames": [{"duration": 0.180000, "texture": SubResource("f58")}, {"duration": 0.180000, "texture": SubResource("f59")}], "loop": true, "name": &"sit", "speed": 1.0},
-{"frames": [{"duration": 0.200000, "texture": SubResource("f60")}], "loop": false, "name": &"crouch", "speed": 1.0},
-{"frames": [{"duration": 0.120000, "texture": SubResource("f61")}, {"duration": 0.180000, "texture": SubResource("f62")}], "loop": false, "name": &"wall_land", "speed": 1.0},
-{"frames": [{"duration": 0.100000, "texture": SubResource("f5")}, {"duration": 0.100000, "texture": SubResource("f6")}], "loop": true, "name": &"walk", "speed": 1.0}]
+"wall_slide": [PackedVector2Array(46, 56, 32, 60), PackedVector2Array(46, 57, 32, 61)]
+}

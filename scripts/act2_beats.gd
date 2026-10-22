@@ -88,6 +88,7 @@ var _encounter_fire: Campfire
 var _departure_carpet: Sprite2D
 var _stars_tween: Tween
 var _scene_tweens: Array[Tween] = []
+var _exit_signs: Dictionary = {}
 
 
 func _ready() -> void:
@@ -257,6 +258,12 @@ func _on_jamshid_reached(_player: Player, jamshid: JamshidNpc) -> void:
 
 func _play_encounter(jamshid: JamshidNpc) -> void:
 	var player := _world.player
+	for exit in get_tree().get_nodes_in_group("exit"):
+		if _find_room(room_name).is_ancestor_of(exit):
+			var sign:=exit.get_node_or_null("ExitSign") as CanvasItem
+			if sign!=null:
+				_exit_signs[sign]=sign.visible
+				sign.hide()
 	_ambience = preload("res://scenes/props/ambience/EncounterAmbience.tscn").instantiate()
 	add_child(_ambience)
 	# The garden score steps aside: crickets and the fire carry the night.
@@ -293,6 +300,8 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 	await _jamshid(jamshid, "Well, get out of the water. You're frightening dinner.", "joyful")
 	if _finish_encounter_skip(jamshid):
 		return
+	player.look(1)
+	player.visual.play("exit_water")
 	await _tween_arc(player, jamshid.global_position + Vector2(-20, -24),
 		jamshid.global_position + Vector2(-12, -6), 0.9)
 	if _finish_encounter_skip(jamshid):
@@ -450,6 +459,7 @@ func _play_encounter(jamshid: JamshidNpc) -> void:
 		return
 	player.cutscene_rest(false, 1)
 	Dialogue.end_conversation()
+	_restore_exit_signs()
 	_ambience.finish()
 	_bank_morning()
 
@@ -492,8 +502,14 @@ func _finish_encounter_skip(jamshid: JamshidNpc) -> bool:
 	player.velocity = Vector2.ZERO
 	player.cutscene_rest(false, 1)
 	Dialogue.end_conversation()
+	_restore_exit_signs()
 	_bank_morning()
 	return true
+
+func _restore_exit_signs() -> void:
+	for sign in _exit_signs:
+		if is_instance_valid(sign): sign.visible=_exit_signs[sign]
+	_exit_signs.clear()
 
 
 func _night_timelapse(player: Player, actor: Jamshid, fish: Fish, fire: Campfire) -> void:

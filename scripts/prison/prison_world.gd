@@ -320,9 +320,27 @@ func _safe_landing(room: Node2D, preferred: Vector2) -> Vector2:
 			for dy in [-1,-2]:
 				if geo.value_at(cell+Vector2i(dx,dy)) in [1,3]: clear = false
 		if not clear or not room_rect(room).encloses(Rect2(candidate-Vector2(4.5,6),Vector2(9,12))): continue
+		# Collision's semantic grid does not contain the two newer paintable
+		# hazard brushes. A perfectly solid threshold can still be lethal.
+		# Use the same full body footprint as _in_thought_tile, in the DESTINATION
+		# room (current_room is still the source while resolving a crossing).
+		if _painted_landing_hazard(room,candidate): continue
 		var score := candidate.distance_squared_to(preferred)
 		if score < distance: best = candidate; distance = score
 	return spawn_point_for(room) if best == Vector2.INF else best
+
+func _painted_landing_hazard(room: Node2D, candidate: Vector2) -> bool:
+	var box:=Rect2(candidate-Vector2(Player.HALF_WIDTH,Player.HALF_HEIGHT),
+		Vector2(Player.HALF_WIDTH,Player.HALF_HEIGHT)*2.0).grow(-0.01)
+	for brush in ["ThoughtHazards","InkThoughtHazards"]:
+		var layer:=room.get_node_or_null(brush) as TileMapLayer
+		if layer==null: continue
+		var first:=layer.local_to_map(layer.to_local(box.position))
+		var last:=layer.local_to_map(layer.to_local(box.end))
+		for y in range(first.y,last.y+1):
+			for x in range(first.x,last.x+1):
+				if layer.get_cell_source_id(Vector2i(x,y))!=-1: return true
+	return false
 
 func _build_portals() -> void:
 	portals.clear()

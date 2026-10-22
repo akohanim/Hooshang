@@ -62,6 +62,10 @@ var token_camera: Camera2D
 ## The world scene currently loaded, or null. Mirrors get_tree().current_scene
 ## for anything running inside the sub-viewport.
 var current: Node
+## True only during a whole-world loading card, never a room slide or retry.
+var loading := false
+var loading_card: LemonLoadingCard
+const LOADING_CARD := preload("res://scenes/ui/loading/LemonLoadingCard.tscn")
 
 
 func _ready() -> void:
@@ -177,6 +181,49 @@ func _unhandled_input(event: InputEvent) -> void:
 ## landing inside the game viewport.
 func load_scene(path: String) -> Node:
 	return set_scene(load(path).instantiate())
+
+
+## Player-facing world loads: read the three-part lemon card while resources
+## load in the background, then build the world under its final fade. Direct
+## load_scene remains synchronous for developer scenes and low-level tests.
+func load_scene_with_card(path: String) -> Node:
+	if loading:
+		return current
+	if not ResourceLoader.exists(path, "PackedScene"):
+		push_warning("Screen: no scene at %s" % path)
+		return null
+	loading = true
+	loading_card = LOADING_CARD.instantiate() as LemonLoadingCard
+	get_tree().root.add_child(loading_card)
+	var was_paused := get_tree().paused
+	get_tree().paused = true
+	var error := ResourceLoader.load_threaded_request(path, "PackedScene")
+	if error != OK:
+		get_tree().paused = was_paused
+		loading_card.queue_free()
+		loading_card = null
+		loading = false
+		push_warning("Screen: failed to request %s" % path)
+		return null
+	var status := ResourceLoader.load_threaded_get_status(path)
+	while status == ResourceLoader.THREAD_LOAD_IN_PROGRESS or not loading_card.readable:
+		if status in [ResourceLoader.THREAD_LOAD_FAILED, ResourceLoader.THREAD_LOAD_INVALID_RESOURCE]:
+			break
+		await get_tree().process_frame
+		status = ResourceLoader.load_threaded_get_status(path)
+	var scene: Node = null
+	if status == ResourceLoader.THREAD_LOAD_LOADED:
+		var packed := ResourceLoader.load_threaded_get(path) as PackedScene
+		if packed != null:
+			scene = set_scene(packed.instantiate())
+	else:
+		push_warning("Screen: could not load %s" % path)
+	await loading_card.dismiss()
+	loading_card.queue_free()
+	loading_card = null
+	get_tree().paused = was_paused
+	loading = false
+	return scene
 
 
 func set_scene(scene: Node) -> Node:

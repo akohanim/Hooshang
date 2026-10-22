@@ -250,7 +250,7 @@ func unlocked_rooms(i: int) -> Array[String]:
 ## The wipe is deliberate and total: an empty `_pending` is what tells the world
 ## and the story script that there is nothing to restore, so the waking scene
 ## plays, the dash is taken away again, and no room remembers having fallen.
-func start_new(i: int) -> void:
+func start_new(i: int, show_loading: bool = false) -> void:
 	_bind(i)
 	_pending = {}
 	_visited = {}
@@ -262,20 +262,20 @@ func start_new(i: int) -> void:
 	ActStats.reset()
 	Game.current_index = 0
 	Game.completed = false
-	_enter_world(FIRST_WORLD, "")
+	_enter_world(FIRST_WORLD, "", show_loading)
 
 
 ## Pick a run back up. Returns false — and changes nothing — if the slot is
 ## empty or unreadable, so a menu can offer it and be refused rather than having
 ## to check first and race itself.
-func resume(i: int) -> bool:
+func resume(i: int, show_loading: bool = false) -> bool:
 	var payload := read(i)
 	if payload.is_empty():
 		return false
 	_bind(i)
 	_apply(payload)
 	var world_state: Dictionary = payload.get("world_state", {})
-	_enter_world(str(payload.get("world", FIRST_WORLD)), str(world_state.get("room", "")))
+	_enter_world(str(payload.get("world", FIRST_WORLD)), str(world_state.get("room", "")), show_loading)
 	return true
 
 
@@ -286,13 +286,13 @@ func resume(i: int) -> bool:
 ## abilities is not the room the player remembers. What it does NOT do is bind
 ## the slot, so nothing written on this trip goes anywhere: dying, collecting and
 ## walking on all count for the session and for nothing else.
-func practice(i: int, room: String) -> bool:
+func practice(i: int, room: String, show_loading: bool = false) -> bool:
 	var payload := read(i)
 	if payload.is_empty():
 		return false
 	_apply(payload)
 	_bind(-1)
-	_enter_world(str(payload.get("world", FIRST_WORLD)), room)
+	_enter_world(str(payload.get("world", FIRST_WORLD)), room, show_loading)
 	return true
 
 
@@ -429,9 +429,12 @@ func _apply(payload: Dictionary) -> void:
 ## than through the pulled state, so there is exactly one answer to "which room
 ## does this world open in" — and the level select, which wants a room the save
 ## does not name, does not need a second one.
-func _enter_world(path: String, room: String) -> void:
+func _enter_world(path: String, room: String, show_loading: bool = false) -> void:
 	LdtkWorld.debug_start_room = room
-	Screen.load_scene(path)
+	if show_loading:
+		Screen.load_scene_with_card(path)
+	else:
+		Screen.load_scene(path)
 
 
 func _gather() -> Dictionary:
@@ -548,7 +551,7 @@ func _shift_conveyor_room_names(value: Variant) -> Variant:
 
 
 ## Unrestricted, save-free replay from the chapter browser.
-func replay_room(act: int, room: String) -> void:
+func replay_room(act: int, room: String, show_loading: bool = false) -> void:
 	if act == 1:
 		open_finished(room)
 		return
@@ -560,4 +563,4 @@ func replay_room(act: int, room: String) -> void:
 	ActStats.reset()
 	Game.completed = false
 	_pending = {"world_state": {"has_dash": true}}
-	_enter_world("res://ldtk/Act%dWorld.tscn" % act, room)
+	_enter_world("res://ldtk/Act%dWorld.tscn" % act, room, show_loading)

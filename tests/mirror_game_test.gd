@@ -6,9 +6,10 @@ func check(ok: bool, label: String) -> void:
 	print("  PASS " if ok else "  FAIL ", label)
 	if not ok: failures += 1
 
-func static_route_exists(game: Node) -> bool:
+func static_route_exists(game: Node, gate_closed := false) -> bool:
 	# A coarse player-centre search proves the authored geometry does not seal
-	# any stage. Moving threats can be dodged or waited out.
+	# any stage. Moving threats can be dodged or waited out. With `gate_closed`
+	# the timed gate counts as a wall: no route then means it has to be timed.
 	var frontier: Array[Vector2i] = [Vector2i(17, 89)]
 	var seen := {frontier[0]: true}
 	var head := 0
@@ -20,6 +21,7 @@ func static_route_exists(game: Node) -> bool:
 			var next: Vector2i = here + direction
 			if next.x < 8 or next.x > 152 or next.y < 21 or next.y > 105 or seen.has(next): continue
 			if game._hits_wall(Vector2(next)): continue
+			if gate_closed and bool(game.STAGES[game.stage].pulse) and game._pulse_rect().grow(2).has_point(Vector2(next)): continue
 			var safe := true
 			for shard: Vector2 in game.STAGES[game.stage].shards:
 				if Vector2(next).distance_to(shard) < 7.0: safe = false
@@ -43,6 +45,13 @@ func _ready() -> void:
 		check(game._first_person() == (level >= 3), "stage %d uses the intended camera" % (level + 1))
 		check(not game._hits_wall(MirrorGame.START), "stage %d has a safe start" % (level + 1))
 		check(static_route_exists(game), "stage %d has a traversable route through its walls and fixed shards" % (level + 1))
+		if bool(game.STAGES[level].pulse):
+			check(not static_route_exists(game, true), "stage %d's timed gate cannot be walked round (it stopped 3px above the start/goal line)" % (level + 1))
+			game.reflection = Vector2(123, 100)
+			game.stage_clock = 2.0
+			game._tick_stage(0.0)
+			check(game.deaths == level + 1, "stage %d's gate is lethal down at floor level while lit" % (level + 1))
+			game.deaths = level
 		game.reflection = game.STAGES[level].shards[0]
 		game._tick_stage(0.0)
 		check(game.deaths == level + 1 and game.stage == level, "stage %d hazard retries locally" % (level + 1))
@@ -51,6 +60,22 @@ func _ready() -> void:
 		if level < 4: check(game.mode == MirrorGame.Mode.BETWEEN, "stage %d leads to an interlude" % (level + 1))
 		game.mode = MirrorGame.Mode.STAGE
 	game.stage = 3
+	game._reset_stage()
+	game.reflection = Vector2(40, 60)
+	check(game._project(Vector2(70, 70)).x > 80.0 and game._project(Vector2(70, 50)).x < 80.0,
+		"first person: what is on his right (+y) is drawn on the right of the screen")
+	var ahead := Vector2(70, 60)
+	var before_x: float = game._project(ahead).x
+	Input.action_press("move_right")
+	game.mode = MirrorGame.Mode.STAGE
+	for i in 10: game._tick_stage(1.0 / 60.0)
+	Input.action_release("move_right")
+	check(game.reflection.y > 60.0 and game._project(ahead).x < before_x,
+		"first person: strafing right slides what is ahead LEFT on screen (it slid right, mirrored)")
+	game.mode = MirrorGame.Mode.STAGE
+	check(MirrorGame.text_width(MirrorGame.FP_HINT) <= MirrorGame.W - 4, "first-person controls fit the screen (\"STRAFE\" was cut to \"STRAF\")")
+	check(game.title_hint().contains("LEAVE") and MirrorGame.text_width(game.title_hint()) <= 140.0,
+		"the title says how to leave, inside its panel")
 	Input.action_press("move_up")
 	check(game._movement_axis().x > 0.0 and game._movement_axis().y == 0.0, "first-person Up advances toward adult Hooshang")
 	Input.action_release("move_up")

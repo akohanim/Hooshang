@@ -7,9 +7,10 @@ extends Node2D
 ## Playing is a camera move, not a scene change: a Camera2D takes over from
 ## the player's at exactly what the screen is showing, pushes in until the
 ## TV's 32x24 screen fills the view, and only THEN hands the picture to a
-## full-window overlay that shows the game's own 160x120 viewport at a whole
-## multiple (crisp, with a CRT scanline pass). Leaving (Esc/Start, a cleared
-## course, or a game over) runs the same move backwards.
+## full-window overlay that shows the game's own 160x120 viewport with every
+## game pixel a whole number of WINDOW pixels (crisp, with a CRT scanline
+## pass; see picture_rect). Leaving (Esc/Start, or a game's own `finished`)
+## runs the same move backwards.
 ##
 ## The same prop is the hub's OTHER machine too: set `art`, `screen` and `game`
 ## before adding it (PrisonWorld._add_minigames puts the old PC running
@@ -36,6 +37,8 @@ var _viewport: SubViewport
 var _screen: Sprite2D
 var _cam: Camera2D
 var _overlay: CanvasLayer
+var _picture: TextureRect
+var _crt: ColorRect
 var _playing := false
 var _busy := false
 ## A game may finish with an in-world reward sequence after the pull-out.
@@ -103,19 +106,14 @@ func _draw() -> void:
 	draw_string(FONT, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color("fff2c9"))
 
 
-## A game that can draw sharper up close (SUPER SIMORGH) gets its full size
-## for the push-in and play, and drops back to the screen's own when the
-## camera has pulled out — across the hall it is only ever 32x24.
-func _set_game_size(size: Vector2i) -> void:
-	if not game.has_method("set_resolution"): return
-	_viewport.size = size
-	game.set_resolution(size)
-	_screen.scale = screen.size / Vector2(size)
+## The key that leaves a game, as the device he is using names it — for the
+## games' own on-screen hints.
+static func leave_key() -> String:
+	return "START" if InputDevice.is_controller() else "ESC"
 
 
 func _play() -> void:
 	_busy = true
-	if game.has_method("hi_res"): _set_game_size(game.hi_res())
 	var p: Player = world.player
 	p.input_locked = true
 	p.velocity = Vector2.ZERO
@@ -177,7 +175,6 @@ func _leave(keep_locked := false) -> void:
 	await tween.finished
 	p.camera.make_current()
 	_cam.queue_free()
-	_set_game_size(Vector2i(RetroGame.W, RetroGame.H))
 	_duck_music(false)
 	if not keep_locked:
 		p.input_locked = false
@@ -185,8 +182,8 @@ func _leave(keep_locked := false) -> void:
 
 
 ## Full-window presentation once the push-in has filled the view with the
-## screen: the game's 160x120 at 1.5x of the 320x180 design space, which the
-## window's integer stretch turns into whole output pixels.
+## screen: the game's 160x120, as large as picture_rect allows, under a CRT
+## scanline pass. Laid out again whenever the window changes size.
 func _show_overlay() -> void:
 	_overlay = CanvasLayer.new()
 	_overlay.layer = 105
@@ -194,35 +191,49 @@ func _show_overlay() -> void:
 	black.color = Color.BLACK
 	black.size = Vector2(Screen.GAME_SIZE)
 	_overlay.add_child(black)
-	var smooth: bool = game.has_method("is_smooth") and game.is_smooth()
-	var pic := TextureRect.new()
-	pic.texture = _viewport.get_texture()
-	pic.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if smooth else CanvasItem.TEXTURE_FILTER_NEAREST
-	pic.stretch_mode = TextureRect.STRETCH_SCALE
-	# Without this a TextureRect is never smaller than its texture, and a
-	# hi-res game (480x360) would overflow the 240x180 frame.
-	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	var size := Vector2(240, 180)
-	pic.size = size
-	pic.position = (Vector2(Screen.GAME_SIZE) - size) * 0.5
-	_overlay.add_child(pic)
-	if smooth:
-		get_tree().root.add_child(_overlay)
-		return
-	var crt := ColorRect.new()
-	crt.position = pic.position
-	crt.size = size
-	crt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_picture = TextureRect.new()
+	_picture.texture = _viewport.get_texture()
+	_picture.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_picture.stretch_mode = TextureRect.STRETCH_SCALE
+	# Without this a TextureRect is never smaller than its texture.
+	_picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_overlay.add_child(_picture)
+	_crt = ColorRect.new()
+	_crt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var mat := ShaderMaterial.new()
 	mat.shader = preload("res://scenes/props/prison/crt.gdshader")
-	crt.material = mat
-	_overlay.add_child(crt)
+	_crt.material = mat
+	_overlay.add_child(_crt)
 	get_tree().root.add_child(_overlay)
-	_overlay.visible = true
+	get_tree().root.size_changed.connect(_layout_overlay)
+	_layout_overlay()
+
+
+func _layout_overlay() -> void:
+	if _overlay == null: return
+	var rect := picture_rect(get_tree().root.get_final_transform().get_scale().x)
+	for c: Control in [_picture, _crt]:
+		c.position = rect.position
+		c.size = rect.size
+
+
+## Where the game picture goes in the 320x180 design space when the window
+## stretches that space by `scale`: the largest size at which every game pixel
+## is the same WHOLE number of window pixels, centred on a whole window pixel.
+## A fixed 1.5x (240x180) only managed that at even stretch factors — at x9 (a
+## 2880x1800 screen, or a 960x540 window on Retina) game pixels came out 13
+## and 14 window pixels wide by turns.
+static func picture_rect(scale: float) -> Rect2:
+	var k := maxf(roundf(scale), 1.0)
+	var pic := Vector2(RetroGame.W, RetroGame.H)
+	var whole := floorf(minf(Screen.GAME_SIZE.x * k / pic.x, Screen.GAME_SIZE.y * k / pic.y))
+	var at := ((Vector2(Screen.GAME_SIZE) * k - pic * whole) * 0.5).floor()
+	return Rect2(at / k, pic * whole / k)
 
 
 func _hide_overlay() -> void:
 	if _overlay != null:
+		get_tree().root.size_changed.disconnect(_layout_overlay)
 		_overlay.queue_free()
 		_overlay = null
 

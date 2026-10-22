@@ -2,6 +2,10 @@ class_name MirrorGame
 extends Node2D
 ## Child Hooshang crosses the fractured mirror toward his adult self. The last
 ## two rooms are seen through the child's eyes. Contact restarts only that room.
+##
+## Text is the 5x7 pixel font at its own size or a whole multiple of it
+## (_text's `scale`): drawn at 8 or 9 it came out with strokes one and two
+## pixels thick in the same word.
 signal exit_requested
 signal finished
 
@@ -14,6 +18,8 @@ const START := Vector2(17, 89)
 const GOAL := Vector2(143, 89)
 const SPEED := 52.0
 const STAGE_NAMES := ["THE GLASS", "MOVING SHARDS", "FALSE DOORS", "THE PURSUER", "THE OTHER SIDE"]
+## The first-person rooms' reminder of the controls, along the bottom.
+const FP_HINT := "UP GO  LEFT/RIGHT STRAFE"
 const STAGES := [
 	{"walls":[Rect2(64,20,7,46)], "shards":[Vector2(79,88)], "movers":[], "chasers":0, "pulse":false},
 	{"walls":[Rect2(51,71,7,37),Rect2(105,20,7,46)], "shards":[Vector2(79,43)], "movers":[Vector2(64,53),Vector2(99,87)], "chasers":0, "pulse":false},
@@ -156,8 +162,11 @@ func _mover(i: int) -> Vector2:
 func _pulse_on() -> bool:
 	return fposmod(stage_clock, 3.0) >= 1.55
 
+## The timed gate, ceiling to floor. It used to stop at y 89 — the line the
+## start and the goal both sit on — so stepping three pixels lower walked
+## round it and it never had to be timed at all.
 func _pulse_rect() -> Rect2:
-	return Rect2(121, 24, 4, 65)
+	return Rect2(121, 20, 4, 88)
 
 func _die() -> void:
 	deaths += 1
@@ -188,16 +197,17 @@ func _draw() -> void:
 		_draw_person(Vector2(80, 79), true)
 		draw_rect(Rect2(9, 91, 142, 28), Color("140d2b", 0.93))
 		draw_rect(Rect2(9, 91, 142, 28), Color("d8b9ef", 0.75), false, 1)
-		_text("THE OTHER SIDE", Vector2(25, 17), Color("ffe4ac"), 9)
-		_text("MOVE TO THE LIGHT", Vector2(32, 102), Color("ded0ff"), 7)
-		_text("JUMP TO ENTER", Vector2(44, 114), Color("fff2d2"), 7)
+		_text_center("- THE -", 10, Color("ffe4ac"))
+		_text_center("OTHER SIDE", 27, Color("ffe4ac"), 2)
+		_text_center("MOVE TO THE LIGHT", 103, Color("ded0ff"))
+		_text_center(title_hint(), 114, Color("fff2d2"))
 		return
 	if mode == Mode.MIRROR:
 		_draw_mirror(Vector2(80, 62), 30.0)
 		var split := minf(mode_time / 2.0, 1.0)
 		_draw_person(Vector2(80 - split * 24, 82), true)
 		_draw_person(Vector2(80 + split * 24, 82), false)
-		_text("FIND YOUR FUTURE SELF", Vector2(24, 111), Color("ffe4ac"), 8)
+		_text_center("FIND YOUR FUTURE SELF", 111, Color("ffe4ac"))
 		return
 	if _first_person():
 		_draw_first_person()
@@ -206,14 +216,15 @@ func _draw() -> void:
 	if mode == Mode.BETWEEN:
 		draw_rect(Rect2(13, 45, 134, 31), Color("130d2c", 0.94))
 		draw_rect(Rect2(13, 45, 134, 31), Color("e7c5ff"), false, 1.0)
-		_text(STAGE_NAMES[stage], Vector2(22, 64), Color("ffe4ac"), 8)
+		_text_center("%d / 5" % (stage + 1), 57, Color("c9b6e6"))
+		_text_center(STAGE_NAMES[stage], 69, Color("ffe4ac"))
 	elif mode == Mode.REUNION:
 		draw_rect(Rect2(17, 43, 126, 37), Color("130d2c", 0.95))
-		_text("I'M HERE.", Vector2(45, 59), Color("ffe4ac"), 9)
-		_text("5 LEMONS FOUND", Vector2(29, 73), Color("fff0c5"), 7)
+		_text_center("I'M HERE.", 64, Color("ffe4ac"), 2)
+		_text_center("5 LEMONS FOUND", 75, Color("fff0c5"))
 	if hit_flash > 0.0:
 		draw_rect(Rect2(0, 0, W, H), Color("f77baa", hit_flash * 0.46))
-		_text("TRY AGAIN", Vector2(49, 61), Color("fff4df"), 8)
+		_text_center("TRY AGAIN", 63, Color("fff4df"))
 
 func _draw_arches() -> void:
 	# Tile mosaic and fine gold ornament keep the dream tied to Act II.
@@ -269,10 +280,10 @@ func _draw_stage() -> void:
 	for i in 5:
 		var c := Color("f6d49d") if i <= stage else Color("5b4a6e")
 		draw_circle(Vector2(12 + i * 10, 8), 2.5, c)
-	_text("%d / 5" % (stage + 1), Vector2(130, 11), Color("fff0d2"), 7)
+	_text("%d / 5" % (stage + 1), Vector2(130, 11), Color("fff0d2"))
 	if mode == Mode.STAGE and stage_clock < 2.3:
 		draw_rect(Rect2(17, 18, 126, 11), Color("160e2c", 0.82))
-		_text(STAGE_NAMES[stage], Vector2(25, 26), Color("ffe4ac"), 7)
+		_text_center(STAGE_NAMES[stage], 26, Color("ffe4ac"))
 
 ## Perspective camera fixed to child Hooshang's eyes. The same authoritative
 ## stage geometry drives collision and drawing; the player sprite is absent.
@@ -322,24 +333,28 @@ func _draw_first_person() -> void:
 	draw_rect(Rect2(0, 0, W, 16), Color("160e2c", 0.95))
 	for i in 5:
 		draw_circle(Vector2(12 + i * 10, 8), 2.5, Color("f6d49d") if i <= stage else Color("5b4a6e"))
-	_text("%d / 5" % (stage + 1), Vector2(130, 11), Color("fff0d2"), 7)
+	_text("%d / 5" % (stage + 1), Vector2(130, 11), Color("fff0d2"))
 	draw_rect(Rect2(0, 108, W, 12), Color("160e2c", 0.9))
-	_text("UP: GO  LEFT/RIGHT: STRAFE", Vector2(11, 116), Color("ffe9c6"), 7)
+	_text_center(FP_HINT, 116, Color("ffe9c6"))
 	if mode == Mode.STAGE and stage_clock < 2.3:
 		draw_rect(Rect2(26, 19, 108, 11), Color("160e2c", 0.84))
-		_text(STAGE_NAMES[stage], Vector2(32, 27), Color("ffe4ac"), 7)
+		_text_center(STAGE_NAMES[stage], 27, Color("ffe4ac"))
 
 func _perspective_scale(depth: float) -> float:
 	return 75.0 / maxf(12.0, depth + 12.0)
 
+## Looking down +x, the map's +y is his RIGHT hand, so it projects to the
+## right of the screen. It was projected to the left, which mirrored the room
+## against the controls: Right strafed him right and the room slid right with
+## him, the way it does when you step left.
 func _project(point: Vector2) -> Vector2:
 	var depth := point.x - reflection.x
 	var scale := _perspective_scale(depth)
-	return Vector2(80.0 - (point.y - reflection.y) * scale, 53.0 + 19.0 * scale)
+	return Vector2(80.0 + (point.y - reflection.y) * scale, 53.0 + 19.0 * scale)
 
 func _draw_first_person_wall(rect: Rect2, gate: bool) -> void:
-	var left := _project(Vector2(rect.position.x, rect.end.y))
-	var right := _project(Vector2(rect.position.x, rect.position.y))
+	var left := _project(Vector2(rect.position.x, rect.position.y))
+	var right := _project(Vector2(rect.position.x, rect.end.y))
 	var scale := _perspective_scale(rect.position.x - reflection.x)
 	var top := left.y - 34.0 * scale
 	var shade := Color("f46bb7", 0.75 if _pulse_on() else 0.18) if gate else Color("5b3886")
@@ -401,6 +416,20 @@ func _draw_person(at: Vector2, child: bool, shade := Color.WHITE) -> void:
 		draw_texture_rect_region(ADULT, Rect2(at - Vector2(7, 16), Vector2(14, 21)),
 			Rect2(0, 0, 32, 48), shade)
 
-func _text(label: String, at: Vector2, color: Color, size: int) -> void:
-	draw_string(FONT, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color("140e2c"))
-	draw_string(FONT, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
+## What the title says about getting in and out, in the device's own names.
+func title_hint() -> String:
+	return "JUMP ENTER  %s LEAVE" % RetroTV.leave_key()
+
+## How wide `label` draws at `scale`, in screen pixels.
+static func text_width(label: String, scale := 1) -> float:
+	return FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x * scale
+
+## `label` with its baseline at `at`, at a whole multiple of the font's size.
+func _text(label: String, at: Vector2, color: Color, scale := 1) -> void:
+	draw_set_transform(at, 0.0, Vector2(scale, scale))
+	draw_string(FONT, Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color("140e2c"))
+	draw_string(FONT, Vector2.ZERO, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7, color)
+	draw_set_transform(Vector2.ZERO)
+
+func _text_center(label: String, y: float, color: Color, scale := 1) -> void:
+	_text(label, Vector2(roundf((W - text_width(label, scale)) * 0.5), y), color, scale)

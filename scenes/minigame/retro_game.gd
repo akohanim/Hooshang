@@ -11,7 +11,9 @@ extends Node2D
 ##
 ## While `active` is false it sits on its title screen — that is what the TV
 ## shows from across the room. RetroTV turns it on and listens for `exit_requested`
-## (pause pressed) and `finished` (course clear or game over).
+## (pause pressed) and `finished` (the course cleared). A game over goes back to
+## the title, so another go is one press of Jump rather than a walk back to the
+## TV.
 
 signal exit_requested
 signal finished
@@ -40,8 +42,19 @@ const DECEL := 420.0
 const MAX_FALL := 300.0
 const PW := 8.0
 const PH := 14.0
+## No enemy starts within this many px ahead of where he stands up after a
+## death. The checkpoint at col 92 had one 32px away, which walked into a
+## player who had not touched anything 1.15s after the respawn.
+const SAFE_RESPAWN := 96.0
+## The little Hooshang on the title, standing on the ground (row 13's top).
+const TITLE_KID := Rect2(74, 13 * T - 16, 12, 16)
+## The title's footer line, on the dirt under his feet.
+const TITLE_FOOTER_Y := 115.0
 
 enum Mode { TITLE, PLAY, DYING, CLEAR, GAME_OVER }
+## The course-clear walk: when he steps off the pole, and when he stops.
+const CLEAR_WALK_FROM := 1.2
+const CLEAR_WALK_TO := 3.4
 
 var active := false
 var mode := Mode.TITLE
@@ -121,6 +134,12 @@ func _build_level() -> void:
 		for h in k + 1: _put(150 + k, 12 - h, 13)
 	for k in 6:
 		for h in 6 - k: _put(158 + k, 12 - h, 13)
+	# The two columns between them are a notch, not a well: two blocks of
+	# floor leave it four deep, which any jump climbs out of. Six deep, a
+	# standing jump came up 2px short of the rim and only a run-up from the
+	# far wall got out (12 of 60 scripted tries).
+	for c in [156, 157]:
+		for r in [11, 12]: _put(c, r, 13)
 	_flag_col = 176
 	_put(_flag_col, 12, 13)
 	# Coins.
@@ -129,9 +148,11 @@ func _build_level() -> void:
 	for c in range(118, 122): coins_at[Vector2i(c, 10)] = true
 
 
-func _spawn_enemies() -> void:
+func _spawn_enemies(from_x: float) -> void:
 	enemies.clear()
 	for c in [28, 36, 46, 48, 58, 80, 83, 96, 110, 122, 136, 147]:
+		var ahead: float = c * T - from_x
+		if ahead >= 0.0 and ahead < SAFE_RESPAWN: continue
 		enemies.append({"pos": Vector2(c * T, 13 * T - 10), "vel": Vector2(-22, 0), "alive": true, "squash": 0.0, "awake": false})
 
 
@@ -147,7 +168,7 @@ func _respawn(x: float) -> void:
 	facing = 1
 	time_left = 300.0
 	popups.clear(); bumps.clear()
-	_spawn_enemies()
+	_spawn_enemies(x)
 	cam_x = clampf(pos.x - 60.0, 0.0, COLS * T - W)
 
 
@@ -202,10 +223,7 @@ func _physics_process(delta: float) -> void:
 				else:
 					_respawn(checkpoint_x); mode = Mode.PLAY; mode_t = 0.0
 		Mode.CLEAR:
-			if pos.y < 12 * T - PH:
-				pos.y = minf(pos.y + 60.0 * delta, 12 * T - PH)
-			elif mode_t > 1.2:
-				pos.x += 40.0 * delta
+			_tick_clear(delta)
 			if mode_t > 1.0 and time_left > 0.0:
 				var d := minf(time_left, 120.0 * delta)
 				time_left -= d; score += int(d * 10.0)
@@ -214,7 +232,7 @@ func _physics_process(delta: float) -> void:
 				mode = Mode.TITLE; mode_t = 0.0
 		Mode.GAME_OVER:
 			if mode_t > 3.0:
-				finished.emit()
+				_reset_run()
 				mode = Mode.TITLE; mode_t = 0.0
 	queue_redraw()
 
@@ -257,6 +275,21 @@ func _tick_play(delta: float) -> void:
 		score += 5000; vel = Vector2.ZERO
 		pos.x = _flag_col * T + 4 - PW
 		_play(&"clear")
+	cam_x = clampf(maxf(cam_x, pos.x - 70.0), 0.0, COLS * T - W)
+
+
+## Down the pole to the block at its foot, then hop off it and walk away on
+## the real ground — gravity and collision on, the way he walks anywhere else —
+## and stop to throw his arms up. The walk used to slide him along at the
+## block's height, eight pixels over the grass, in his jumping pose.
+func _tick_clear(delta: float) -> void:
+	if mode_t < CLEAR_WALK_FROM:
+		pos.y = minf(pos.y + 60.0 * delta, 12 * T - PH)
+		return
+	vel.x = 40.0 if mode_t < CLEAR_WALK_TO else 0.0
+	vel.y = minf(vel.y + GRAVITY * delta, MAX_FALL)
+	_move_x(vel.x * delta)
+	_move_y(vel.y * delta)
 	cam_x = clampf(maxf(cam_x, pos.x - 70.0), 0.0, COLS * T - W)
 
 
@@ -394,7 +427,10 @@ func _draw() -> void:
 	if mode in [Mode.PLAY, Mode.DYING, Mode.CLEAR]:
 		var frame := 0
 		if mode == Mode.DYING: frame = 4
-		elif mode == Mode.CLEAR: frame = 5 if pos.y >= 12 * T - PH and mode_t > 4.0 else 3
+		elif mode == Mode.CLEAR:
+			if mode_t < CLEAR_WALK_FROM or not on_ground: frame = 3
+			elif mode_t < CLEAR_WALK_TO: frame = 1 + int(anim_t * 7.0) % 2
+			else: frame = 5
 		elif not on_ground: frame = 3
 		elif absf(vel.x) > 5.0: frame = 1 + int(anim_t * (10.0 if absf(vel.x) > 80.0 else 7.0)) % 2
 		draw_set_transform(Vector2(roundf(pos.x) - cx + PW * 0.5, roundf(pos.y) + PH - 16), 0.0, Vector2(facing if frame != 4 else 1, 1))
@@ -449,9 +485,13 @@ func _draw_title() -> void:
 	_text_center("HOOSHANG", 44, Color8(252, 252, 248), 2)
 	_text_center("- 64 -", 62, Color8(252, 200, 56), 1)
 	if int(mode_t * 2.0) % 2 == 0:
-		_text_center("PRESS JUMP" if active else "INSERT KID", 88, Color.WHITE, 1)
-	_text_center("(C) 1996  ESC TO LEAVE" if active else "", 108, Color8(200, 220, 255), 1)
-	draw_texture_rect_region(SHEET, Rect2(74, 98 - 16 + 13, 12, 16), Rect2(12 * (int(anim_t * 4.0) % 2), 16, 12, 16))
+		_text_center("PRESS JUMP" if active else "INSERT KID", 86, Color.WHITE, 1)
+	if active: _text_center(title_footer(), TITLE_FOOTER_Y, Color8(200, 220, 255), 1)
+	draw_texture_rect_region(SHEET, TITLE_KID, Rect2(12 * (int(anim_t * 4.0) % 2), 16, 12, 16))
+
+
+func title_footer() -> String:
+	return "(C) 1996  %s TO LEAVE" % RetroTV.leave_key()
 
 
 func _banner(text: String) -> void:
@@ -474,7 +514,10 @@ func _play(name: StringName) -> void:
 	_player.play()
 
 
-## Square-wave blips, built once: [frequency Hz, seconds] steps per cue.
+## Square-wave blips, built once: [frequency Hz, seconds] steps per cue. The
+## wave keeps its phase from one step to the next and every cue ends on a short
+## release to silence — each one used to stop dead at 40% of its own volume,
+## which is a click at the end of every jump, coin and stomp.
 func _make_sounds() -> void:
 	var cues := {
 		&"jump": [[330, 0.03], [440, 0.03], [587, 0.05]],
@@ -486,19 +529,23 @@ func _make_sounds() -> void:
 	}
 	for name in cues:
 		var rate := 22050
-		var data := PackedByteArray()
+		var samples := PackedFloat32Array()
+		var phase := 0.0
 		for step in cues[name]:
 			var n := int(rate * float(step[1]))
-			var period := maxf(rate / float(step[0]), 2.0)
 			for i in n:
 				var fade := 1.0 - float(i) / n * 0.6
-				var v := (1.0 if fmod(i, period) < period * 0.5 else -1.0) * fade
-				data.append(int(128 + v * 70) & 0xff)
+				samples.append((1.0 if phase < 0.5 else -1.0) * fade)
+				phase = fmod(phase + float(step[0]) / rate, 1.0)
+		var release := int(rate * 0.006)
+		for i in release:
+			samples[samples.size() - 1 - i] *= float(i) / release
+		# 8-bit WAV data is signed in Godot.
+		var data := PackedByteArray()
+		for v in samples: data.append(roundi(v * 70.0) & 0xff)
 		var wav := AudioStreamWAV.new()
 		wav.format = AudioStreamWAV.FORMAT_8_BITS
 		wav.mix_rate = rate
 		wav.stereo = false
-		# 8-bit WAV data is signed in Godot.
-		for i in data.size(): data[i] = (data[i] - 128) & 0xff
 		wav.data = data
 		_sounds[name] = wav

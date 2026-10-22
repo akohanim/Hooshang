@@ -19,6 +19,9 @@ func run_case(skip_at: int) -> void:
 		world.collected.append(id)
 		world.inserted.append(id)
 	world.finish_rescue()
+	await frames(5)
+	check(not story.playing,"reunion waits for an approach on the cell floor")
+	world.player.respawn(world._cage.get_parent().get_node("PrisonJamshid").global_position+Vector2(-40,-6))
 	var seen: Array[String] = []
 	var last := ""
 	Engine.time_scale = 8
@@ -41,7 +44,7 @@ func run_case(skip_at: int) -> void:
 	check(not Game.completed, "rescue keeps the act in progress")
 	check(not world.player.input_locked and not world.player._frozen, "controls restored")
 	check(world.player.camera.limit_bottom == bottom, "camera bounds restored")
-	check(story.actor.position.x == 90, "Jamshid waits at the courtyard passage")
+	check(story.actor.position.x == story.passage_x, "Jamshid waits at the courtyard passage")
 	if skip_at == -1:
 		var expected: Array[String] = []
 		for line: Dictionary in TEXT.scenes.cell: expected.append(line.text)
@@ -57,7 +60,7 @@ func run_case(skip_at: int) -> void:
 	await frames(25)
 	story = world.get_node("CellReunion")
 	check(story.finished and not story.playing, "saved reunion does not replay")
-	check(story.actor != null and story.actor.position.x == 90, "saved actor waits at the passage")
+	check(story.actor != null and story.actor.position.x == story.passage_x, "saved actor waits at the passage")
 	world.queue_free()
 	await frames(3)
 	SaveGame._pending = {}

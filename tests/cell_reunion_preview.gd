@@ -13,6 +13,7 @@ func _ready() -> void:
 		world.collected.append(id)
 		world.inserted.append(id)
 	world.finish_rescue()
+	world.player.respawn(world._cage.get_parent().get_node("PrisonJamshid").global_position+Vector2(-40,-6))
 	var last := ""
 	var count := 0
 	for i in 10000:

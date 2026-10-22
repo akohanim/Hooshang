@@ -23,8 +23,16 @@ extends Node2D
 ## The picture is ALL shader (simorgh.gdshader); this script owns the course (a
 ## heightfield grid, uploaded as a texture), the physics, the chase and the
 ## scares. Same contract as RetroGame: 160x120, `activate()`/`deactivate()`,
-## `exit_requested` (pause) and `finished` (escaped or consumed). While idle it
-## shows the bright title — with a frame of something else now and then.
+## `exit_requested` (pause) and `finished` (escaped). Being consumed goes back
+## to the title rather than out of the PC, so another run is one press of Jump.
+## While idle it shows the bright title — with a frame of something else now
+## and then.
+##
+## It is not a side-scroller, and the controls have to say so: Up runs down
+## the corridor and Left/Right TURN. Read as Mario, holding Right spins him to
+## face the wall while Darkshang closes; the title says it, and the run itself
+## says "hold Up" until he has made a start.
+##
 ## Sound: tools/gen_simorgh_audio.py (santur music; heartbeat, drone, whisper,
 ## stinger and shriek for him).
 
@@ -58,6 +66,8 @@ const LEASH := 6.0          # past this gap he closes faster: he stays close
 const LIGHT_PUSH := 1.2     # a light pushes him back this many cells
 const BURST_PUSH := 3.0     # a star block's burst
 const FALL_TIME := 1.0      # seconds in the dark after falling into a pit
+const SKIP_END := 3.6       # Jump skips the CONSUMED card after this long
+const STARTED := 1.5        # cells down the corridor before the "hold Up" prompt goes
 
 const WALL_H := 3.0
 const PIT_H := -6.0
@@ -168,9 +178,7 @@ func _ready() -> void:
 	_hud.game = self
 	add_child(_hud)
 	_music = _player(-9.0)
-	_music.finished.connect(_on_music_finished)
 	_drone = _player(-40.0)
-	_drone.finished.connect(_on_drone_finished)
 	_heart = _player(-20.0)
 	_sfx = _player(-6.0)
 	_voice = _player(-4.0)
@@ -178,19 +186,31 @@ func _ready() -> void:
 			"heartbeat", "drone", "whisper", "stinger", "shriek"]:
 		var path: String = AUDIO + n + ".wav"
 		if ResourceLoader.exists(path): _sounds[n] = load(path)
-	_music.stream = _sounds.get("music")
-	_drone.stream = _sounds.get("drone")
+	_music.stream = _looped(_sounds.get("music"))
+	_drone.stream = _looped(_sounds.get("drone"))
 	_heart.stream = _sounds.get("heartbeat")
 	_fx.randomize()
 	_to_title()
 
 
-func _on_music_finished() -> void:
-	if active and mode != Mode.CAUGHT: _music.play()
+## The santur and the drone are written as seamless loops (gen_simorgh_audio.py
+## mixes them circularly), so they loop in the stream. Restarting them on
+## `finished` left a gap at every seam — six times in the music over a run.
+func _looped(stream: AudioStream) -> AudioStream:
+	var wav := stream as AudioStreamWAV
+	if wav == null: return stream
+	wav = wav.duplicate()
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = roundi(wav.get_length() * wav.mix_rate)
+	return wav
 
 
-func _on_drone_finished() -> void:
-	if active and arrived and mode in [Mode.PLAY, Mode.FALLING, Mode.CAUGHT]: _drone.play()
+## The santur is music, so the pause menu's MUSIC: OFF silences it too. The
+## drone, the heartbeat and the rest are him, and stay.
+func _start_music() -> void:
+	if active and _music.stream and Settings.music_enabled and not _music.playing:
+		_music.play()
 
 
 func _player(db: float) -> AudioStreamPlayer:
@@ -205,7 +225,6 @@ func _player(db: float) -> AudioStreamPlayer:
 func activate() -> void:
 	active = true
 	_to_title()
-	if _music.stream: _music.play()
 
 
 func deactivate() -> void:
@@ -229,7 +248,7 @@ func _to_title() -> void:
 	_heart.stop()
 	_music.pitch_scale = 1.0
 	_music.volume_db = -9.0
-	if active and _music.stream and not _music.playing: _music.play()
+	_start_music()
 	_build_course()
 
 
@@ -371,7 +390,7 @@ func _physics_process(delta: float) -> void:
 				mode = Mode.PLAY
 				mode_t = 0.0
 		Mode.CAUGHT:
-			_tick_caught(delta)
+			_tick_caught(delta, go)
 		Mode.ESCAPED:
 			view_z = feet + EYE
 			if mode_t > 6.0 or (go and mode_t > 3.0):
@@ -498,7 +517,7 @@ func _caught() -> void:
 	_voice_play("shriek")
 
 
-func _tick_caught(delta: float) -> void:
+func _tick_caught(delta: float, go: bool) -> void:
 	# the dark closes over the view, his face comes at you, then nothing
 	prox = 1.0
 	darkness = 1.0
@@ -506,9 +525,7 @@ func _tick_caught(delta: float) -> void:
 	angle += delta * 0.6
 	if mode_t > 0.9 and mode_t < 1.5: scare_t = 0.05
 	_drone.volume_db = lerpf(-4.0, -40.0, clampf((mode_t - 2.0) / 2.0, 0.0, 1.0))
-	if mode_t > 6.0:
-		_drone.stop()
-		finished.emit()
+	if mode_t > 6.0 or (go and mode_t > SKIP_END):
 		_to_title()
 
 
@@ -871,7 +888,11 @@ func _draw_hud(c: CanvasItem) -> void:
 			var bar := 11.0 * (1.0 - smoothstep(INTRO_TIME - 0.6, INTRO_TIME, mode_t))
 			c.draw_rect(Rect2(0, 0, W, bar), Color.BLACK)
 			c.draw_rect(Rect2(0, H - bar, W, bar), Color.BLACK)
-		Mode.PLAY, Mode.FALLING: _draw_lamp(c)
+		Mode.PLAY, Mode.FALLING:
+			_draw_lamp(c)
+			if needs_go_prompt():
+				c.draw_rect(Rect2(0, 92, W, 11), Color(0, 0, 0, 0.55))
+				_text(c, "HOLD UP TO RUN", 100, IVORY, 1)
 		Mode.CAUGHT:
 			if mode_t > 2.2:
 				c.draw_rect(Rect2(0, 0, W, H), Color.BLACK)
@@ -887,6 +908,11 @@ func _draw_hud(c: CanvasItem) -> void:
 				c.draw_rect(Rect2(66, 50, 9, 2), IVORY)
 				c.draw_rect(Rect2(85, 50, 9, 2), IVORY)
 			if mode_t > 2.75: _text(c, "for now", 70, Color(0.35, 0.3, 0.4), 1)
+
+
+## Until he has made a start down the corridor, the run says how to make one.
+func needs_go_prompt() -> bool:
+	return mode == Mode.PLAY and pos.x - START_X < STARTED
 
 
 ## The run's clock is a little oil lamp (cheragh): its flame burns down over
@@ -923,8 +949,16 @@ func _draw_title(c: CanvasItem) -> void:
 		c.draw_rect(Rect2(44, 84, W - 88, 11), Color(0.04, 0.05, 0.16, 0.82))
 		_text(c, "PRESS JUMP" if active else "INSERT DISK", 92, Color.WHITE, 1)
 	if active:
-		c.draw_rect(Rect2(0, 101, W, 11), Color(0, 0, 0, 0.5))
-		_text(c, "C JUMP  X RUN  ESC LEAVE", 109, TURQ, 1)
+		c.draw_rect(Rect2(0, 98, W, 22), Color(0, 0, 0, 0.5))
+		var lines := title_controls()
+		for k in lines.size(): _text(c, lines[k], 107 + 9 * k, TURQ, 1)
+
+
+## The title's two lines of controls, in the device's own names.
+func title_controls() -> PackedStringArray:
+	var pad := InputDevice.is_controller()
+	return PackedStringArray(["UP GO  LEFT/RIGHT TURN",
+		"%s JUMP  X RUN  %s LEAVE" % ["A" if pad else "C", RetroTV.leave_key()]])
 
 
 func _text(c: CanvasItem, text: String, y: float, color: Color, scale: int) -> void:
