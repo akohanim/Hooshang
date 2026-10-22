@@ -10,9 +10,15 @@ extends Node
 ##   - turning round to face it gets him caught, not a tiger running off;
 ##   - jumping on the spot is not copied: it stays on the ground and comes on;
 ##   - a respawn lays it down a run-up behind him, and it holds until he moves.
-## And the lemon waits on his words: while a line is up he is on the vine facing
-## the cliff (never stood up by the dialogue box), and the first bite comes only
-## after "I never ate a single one." has been read and dismissed.
+## The vine scene is staged on the rock: the vine is rooted in the cliff top and
+## hangs down IN FRONT of the face (most of it over the rock), it never moves,
+## not even while the mice gnaw; both mice stand on the cliff top, solid ground
+## under their feet by a physics ray; and the lemon is the game's own collectible
+## lemon. And the lemon waits on his words: while a line is up he is on the vine facing
+## the cliff (never stood up by the dialogue box); the lemon stays growing on the
+## cliff through both "All those lemons." and "I never ate a single one." (taken
+## sooner it sat over his face and read as eaten); and he picks it and eats it
+## between that line and "...Oh. That's good.".
 ##
 ## Headless:  Godot --headless --path . --fixed-fps 60 res://tests/act3_tiger_test.tscn
 
@@ -130,16 +136,38 @@ func vine_checks() -> void:
 	var eat_ok := true
 	var ate := false
 	var since := 0
+	var lemon: Node2D = null
+	var lemon_home := Vector2.ZERO
+	var lemon_early := false
+	var oh_seen := false
+	var ate_before_oh := false
 	var walked_mice := false
 	var chewed_black := {}
 	var chewed_white := {}
 	var mice_inward := true
 	var lower_tiger_shown := false
+	var beats := world.get_node("Act3Beats")
+	var lip: Vector2 = beats._lip(world.current_room)
+	var vine_at := Vector2.INF
+	var vine_moved := 0
+	var mouse_frames := 0
+	var mice_off_ground := 0
 	for i in 5400:
 		await frames(1)
 		since += 1
 		var black := world.current_room.get_node_or_null("MouseBlack") as VineMouse
 		var white := world.current_room.get_node_or_null("MouseWhite") as VineMouse
+		var vine := world.current_room.get_node_or_null("Vine") as Sprite2D
+		if vine != null:
+			if vine_at == Vector2.INF:
+				vine_at = vine.global_position
+			elif vine.global_position != vine_at or vine.rotation != 0.0:
+				vine_moved += 1
+		for mouse: VineMouse in [black, white]:
+			if mouse != null and mouse.modulate.a > 0.5:
+				mouse_frames += 1
+				if not _on_ground(mouse):
+					mice_off_ground += 1
 		if black != null and white != null:
 			walked_mice = walked_mice or black.animation == &"black_walk"
 			if black.animation == &"black_gnaw" and white.animation == &"white_gnaw":
@@ -166,10 +194,21 @@ func vine_checks() -> void:
 				read_last_line = true
 			line_up = line
 			since = 0
+		if lemon == null:
+			lemon = world.current_room.get_node_or_null("Lemon") as Node2D
+			if lemon != null:
+				lemon_home = lemon.global_position
+		# The lemon stays growing on the cliff until both his lines are done.
+		if lemon != null and not read_last_line and lemon.global_position.distance_to(lemon_home) > 0.5:
+			lemon_early = true
+		if line.begins_with("...Oh."):
+			oh_seen = true
 		if str(player.visual.animation) == "hang_eat":
 			ate = true
 			if not read_last_line:
 				eat_ok = false
+			if not oh_seen:
+				ate_before_oh = true
 		# Read each line for a second, then press on, as a player does.
 		if box.visible and since == 70:
 			_tap(&"jump", true)
@@ -181,12 +220,59 @@ func vine_checks() -> void:
 	check(faced_away == 0, "facing the cliff and the lemon while he speaks  [%d frames]" % faced_away)
 	check(ate, "he eats the lemon")
 	check(eat_ok, "the first bite waits until \"I never ate a single one.\" has been read")
+	check(not lemon_early, "the lemon stays on the cliff until both his lines are done")
+	check(ate_before_oh, "he has eaten it by the time he says \"...Oh. That's good.\"")
 	check(walked_mice, "both new mouse actors walk out before gnawing")
+	check(mouse_frames > 0 and mice_off_ground == 0,
+		"the mice stand on the cliff top, never in the air  [%d of %d frames off]" % [mice_off_ground, mouse_frames])
+	check(vine_at != Vector2.INF and vine_moved == 0, "the vine holds still, even while they gnaw  [%d frames moved]" % vine_moved)
+	var vine_node := world.current_room.get_node_or_null("Vine") as Sprite2D
+	var over := _share_over_face(vine_node, lip)
+	check(over > 0.75, "the vine hangs in front of the cliff face, not beside it  [%d%% over the rock]" % int(over * 100))
+	check(vine_node != null and vine_node.z_index > 0, "...drawn in front of the terrain")
+	var fruit := world.current_room.get_node_or_null("Lemon") as AnimatedSprite2D
+	check(fruit != null and fruit.sprite_frames == load("res://assets/props/lemon/lemon_frames.tres"),
+		"the lemon on the cliff is the game's own collectible lemon")
 	check(mice_inward, "mice face inward while gnawing")
 	check(lower_tiger_shown, "camera actually reveals the lower tiger during its upward look")
 	check(chewed_black.size() >= 3 and chewed_white.size() >= 3, "both mice animate through the final conversation")
 	check(bool(world.story.get("scene:vine", false)), "the scene plays out to the end of the act")
 	await capture("ending")
+
+
+## A mouse is on the ground when the world is solid just under both ends of its
+## body: a ray down from its feet, at its tail and at its nose.
+func _on_ground(mouse: VineMouse) -> bool:
+	var space := world.get_world_2d().direct_space_state
+	var feet := mouse.global_position + Vector2(0, Act3Beats.MOUSE_FEET)
+	for dx in [-5.0, 5.0]:
+		var from := feet + Vector2(dx, -1.0)
+		var hit := space.intersect_ray(PhysicsRayQueryParameters2D.create(from, from + Vector2(0, 3.0), 1))
+		if hit.is_empty():
+			return false
+	return true
+
+
+## How much of the vine below the cliff top is drawn over the rock (left of the
+## lip) rather than out in the air beside it.
+func _share_over_face(vine: Sprite2D, lip: Vector2) -> float:
+	if vine == null:
+		return 0.0
+	var img := vine.texture.get_image()
+	var w := img.get_width() / vine.hframes
+	var over := 0
+	var total := 0
+	for y in img.get_height():
+		for x in w:
+			if img.get_pixel(x, y).a < 0.5:
+				continue
+			var at := vine.global_position + Vector2(x + 0.5, y + 0.5)
+			if at.y < lip.y + 4.0:
+				continue
+			total += 1
+			if at.x < lip.x:
+				over += 1
+	return float(over) / maxf(1.0, total)
 
 
 func capture(label: String) -> void:

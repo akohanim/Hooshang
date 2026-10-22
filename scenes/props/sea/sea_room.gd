@@ -191,7 +191,15 @@ func _material(shader: Shader) -> ShaderMaterial:
 
 
 func _build_backdrop() -> void:
-	# A 'land' room (the way home) hangs its own painting instead of the sea.
+	# A 'land' room (the way home) hangs its own painting instead of the sea:
+	# planes in depth where it has them (LandBackdrop), else one flat picture.
+	if LandBackdrop.exists_for(str(get_parent().name)):
+		var planes := LandBackdrop.new()
+		planes.name = "LandBackdrop"
+		add_child(planes)
+		if planes.build(str(get_parent().name)):
+			return
+		planes.free()
 	var painted := str(get_parent().get_meta("backdrop", ""))
 	if painted != "" and ResourceLoader.exists(painted):
 		var art := Sprite2D.new()
@@ -230,6 +238,9 @@ func _tint_terrain(layer: TileMapLayer) -> void:
 	if level.has_meta("terrain_fill"):
 		(layer.material as ShaderMaterial).set_shader_parameter("fixed_fill", level.get_meta("terrain_fill"))
 		(layer.material as ShaderMaterial).set_shader_parameter("fixed_line", level.get_meta("terrain_line"))
+	var planes := get_node_or_null("LandBackdrop") as LandBackdrop
+	if planes != null:
+		planes.shade_earth(layer.material as ShaderMaterial)
 	for extra in ["Background", "Foreground"]:
 		var other := get_parent().get_node_or_null(extra) as TileMapLayer
 		if other != null:

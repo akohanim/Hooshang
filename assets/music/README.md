@@ -75,7 +75,7 @@ the act the way the colour does (`docs/act3/ACT3_DESIGN.md`):
 | `sea_reef.ogg` | Ch IV, loop | glass bells, shimmering pads, the whole melody (phrases A + B) |
 | `sea_trench.ogg` | Ch V chase, loop | a heartbeat that keeps getting heavier, a D/E-flat santur tremolo, swells from below |
 | `sea_floor.ogg` | the floor, once | one held chord in the light, then the third arrives and the theme turns to Mahur (major) |
-| `sea_dawn.ogg` | the real sea, loop | the full theme in Mahur, warm |
+| `sea_dawn.ogg` | (retired: was the real sea) | the full theme in Mahur, warm |
 
 Instruments are additive/FM: a santur of doubled, slightly detuned inharmonic
 courses with a hammer click; a ney (sine + soft octave, blooming vibrato, breath
@@ -89,6 +89,32 @@ floor cue plays once per arrival, and the office at dawn is silent.
 Act III's three small sound effects — `bubble`, `jelly`, `memory` — are made by
 `python3 tools/gen_act3_sfx.py` into `assets/audio/act3/` and registered in
 `systems/sfx.gd`'s `ACT3_CUES`.
-- `sea_chase.ogg` — THE TIGER: a tombak pattern at 152 BPM under a running santur
-  ostinato in Shur, a ney crying the theme's opening every four bars. Plays from the
-  tiger's roar to the edge (`Act3Music.chase()`); the vine is silence (`rest()`).
+- `sea_chase.ogg` — (retired) the first TIGER cue: a tombak pattern at 152 BPM under a
+  running santur ostinato in Shur. Replaced, with `sea_dawn.ogg`, by the way home's
+  ElevenLabs score below; both files are kept for comparison.
+
+## Act III, the way home (ElevenLabs)
+
+From the real sea to the end of the game the score is ACOUSTIC, the first real
+instruments in an act that was synthesised under the water: the real world, in
+colour. It follows the STORY, not the rooms (`scripts/act3/act3_music.gd`). The
+ney is Rumi's reed and the title theme's voice, so the homecoming and the lemon
+sing in its Dashti colour and the game ends where it began; the tiger is Homayoun,
+the same parent mode turned to menace. Silence is scored too. Prompts in
+`tools/gen_elevenlabs_music.py`, `music_v2_5`; mastered by
+`tools/master_elevenlabs_music.py` (exact tempos pinned, intro heads kept, the
+lemon a one-shot); measured, not auditioned by ear, so give it a listen.
+
+| cue | plays | what it is |
+|---|---|---|
+| `sea_sunrise.ogg` | the real sea (25) | ney homecoming melody in Dashti, santur like light on the water, strings blooming; rubato. Its swell and quiet first half play once (`loop_offset` 37.2) as he walks into the water and the carpet crosses the sun; the full middle loops (13 bars, 45 s, two-bar seam) |
+| `way_home.ogg` | the shore road, the meadow (26-27) | setar folk tune in Mahur, kamancheh answering, a relaxed daf; 92.00 BPM, 28 bars, 73 s |
+| `tall_grass.ogg` | the tall grass (28) | the wind stops: a cold drone, high harmonics, a lone setar note, a far heartbeat; no pulse. Crossfades in over 7 s, and the tiger's growl takes it to silence in 0.8 s so "...No." lands in quiet |
+| `tiger_chase.ogg` | the roar to the edge (28-31) | the second take (`tiger_chase_b`), drum-led: dohol and frame drums galloping a 6/8 at 152 BPM, low strings and snarling brass, kamancheh and tar on top, ney shrieks; ~4 dB more below 160 Hz than the first take. CUTS in on the roar (its first hit is kept, `loop_offset` 9.5), 19 bars, 60 s; cut out in 0.12 s as the edge gives way |
+| `vine_peril.ogg` | on the vine | a low cello drone, a slow heartbeat, a pizzicato clock tick for the mice; 60.00 BPM, tightens across its minute. Fades in as he looks down |
+| `the_lemon.ogg` | he picks the lemon, to the end | a PIECE, played once (98.7 s): a solo ney, then santur and setar, strings blooming to a climax at a minute, back to ney and santur, a held note into silence. Starts at once while the peril lets go under it (5 s), and plays on through the end cards and the paused results (`Act3Music.lemon()` sets `PROCESS_MODE_ALWAYS`) |
+
+Levels: the walk and the sunrise at the standard -17 dBFS RMS, the chase above
+(-15.5), the tall grass (-23) and the vine (-21) under, the lemon -18 over the
+whole piece. `tests/act3_music_test.tscn` checks the room map, the loops, the
+designed transitions and the story holding the score through doorways.

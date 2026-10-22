@@ -95,6 +95,7 @@ func _ready() -> void:
 	add_child(visual)
 	visual.play(&"walk")
 	z_index = 4
+	add_child(GroundShadow.new())
 
 
 ## Start running him down from where he stands.

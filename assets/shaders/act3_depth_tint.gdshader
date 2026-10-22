@@ -19,6 +19,21 @@ uniform float grain = 0.09;
 uniform vec3 fixed_fill = vec3(-1.0);
 uniform vec3 fixed_line = vec3(-1.0);
 
+// The way home's earth (scenes/props/sea/land_backdrop.gd): darker the deeper
+// it lies below the surface, in dithered steps, so the ground has body rather
+// than reading as one flat cut-out. `ground` is the backdrop's ground line (one
+// pixel per column, its row in red and green; row 0 as it is, row 1 smoothed)
+// and `ground_origin` the world position of that texture's column 0, row 0.
+// Depth is measured from the LOWER of the two lines, so a raised block shades
+// like the ground beside it instead of as a darker pillar. 0 (every sea room)
+// changes nothing.
+uniform sampler2D ground : filter_nearest;
+uniform vec2 ground_origin = vec2(0.0);
+uniform float earth_depth = 0.0;
+uniform float earth_span = 56.0;
+
+const float BAYER[16] = {0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0};
+
 varying vec2 world;
 
 void vertex() {
@@ -47,5 +62,16 @@ void fragment() {
 	float n = hash(floor(px / 2.0));
 	float g = (n > 0.62 ? 1.0 : (n < 0.2 ? -0.6 : 0.0)) * grain * chroma;
 	vec3 base = fill * (1.0 + g);
-	COLOR = vec4(mix(base, line, lum), c.a * COLOR.a);
+	vec3 rgb = mix(base, line, lum);
+	if (earth_depth > 0.0) {
+		int col = clamp(int(px.x - ground_origin.x), 0, textureSize(ground, 0).x - 1);
+		vec4 g = texelFetch(ground, ivec2(col, 0), 0);
+		vec4 smooth_g = texelFetch(ground, ivec2(col, 1), 0);
+		float top = ground_origin.y + max(round(g.r * 255.0) + round(g.g * 255.0) * 256.0,
+			round(smooth_g.r * 255.0) + round(smooth_g.g * 255.0) * 256.0);
+		float k = clamp((px.y - top - 6.0) / earth_span, 0.0, 1.0);
+		int b = int(mod(px.x, 4.0)) + int(mod(px.y, 4.0)) * 4;
+		rgb *= 1.0 - earth_depth * floor(k * 3.0 + (BAYER[b] + 0.5) / 16.0) / 3.0;
+	}
+	COLOR = vec4(rgb, c.a * COLOR.a);
 }

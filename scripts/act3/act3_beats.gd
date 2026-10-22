@@ -24,7 +24,24 @@ const MEMORY_SHEET := preload("res://assets/act3/sea/memories.png")
 const EMOTE_SCENE := preload("res://scenes/ui/EmoteBubble.tscn")
 const VINE_SHEET := preload("res://assets/act3/vine/vine.png")
 const MOUSE_SCENE := preload("res://scenes/props/sea/VineMouse.tscn")
-const LEMON_SHEET := preload("res://assets/act3/vine/lemon.png")
+## The lemon on the cliff is the game's own collectible lemon, the ones he has
+## been gathering for points the whole way: "All those lemons."
+const LEMON_FRAMES := preload("res://assets/props/lemon/lemon_frames.tres")
+## The vine scene's layout, measured from the cliff's top corner (the LIP): the
+## vine sheet's top-left, where his hands close on it, the bite the mice work at
+## (on the stem lying along the grass), the lemon on its twig in the face, and
+## where the first tiger stands, back from the edge behind the vine's roots.
+## VINE_ORIGIN / VINE_GRIP / VINE_GNAW_X are tools/gen_vine_scene.py's ORIGIN /
+## GRIP / GNAW: one set of numbers in two files.
+const VINE_ORIGIN := Vector2(-44, -12)
+const VINE_GRIP := Vector2(-3, 93)
+const VINE_GNAW_X := -15.0
+const LEMON_AT := Vector2(-16, 108)
+const TIGER_ABOVE_AT := Vector2(-68, 0)
+## A mouse's centre sits this far above the ground it stands on (14x8 frames,
+## feet on the bottom row), and gnaws this far either side of the bite.
+const MOUSE_FEET := 4.0
+const MOUSE_REACH := 7.0
 
 ## Scenes in play order: name -> the room it belongs to. A cold open marks
 ## every scene whose room comes before the start room as already seen.
@@ -60,7 +77,9 @@ var _tiger: ChaseTiger
 var _tiger_watch := false
 var _edge_watch := false
 var _vine: Sprite2D
-var _lemon: Sprite2D
+## He has fallen from the edge: from here on he hangs (no shadow at his feet).
+var _hanging := false
+var _lemon: AnimatedSprite2D
 
 
 func _ready() -> void:
@@ -167,7 +186,10 @@ func _process(_delta: float) -> void:
 	# ground only: the bank, the office carpet, the beach at sunrise.
 	if _shadow != null:
 		_shadow.global_position = player.global_position + Vector2(0, Player.HALF_HEIGHT)
-		_shadow.visible = played("floor") and player.is_on_floor() and not player.swimming()
+		# On the vine he is frozen and his last floor contact is stale: a shadow at
+		# his feet while he hangs in the air reads as standing on nothing.
+		_shadow.visible = played("floor") and player.is_on_floor() and not player.swimming() \
+			and not _hanging
 	# The river, not the waterfall: the waterfall runs onto spikes, and a
 	# conversation frozen in it would hand him back to them.
 	if not played("currents") and not _busy and str(_world.current_room.name) == "Act3_Level_6" \
@@ -820,6 +842,8 @@ func _play_tiger(room: Node2D) -> void:
 	out.tween_property(_tiger.visual, "modulate:a", 1.0, 0.8)
 	out.tween_property(_tiger, "global_position", at, 1.2).set_trans(Tween.TRANS_SINE)
 	Sfx.play(&"growl")
+	# The music is gone in a breath: "...No." is said into silence.
+	_music_cue("rest")
 	await _hold(0.5)
 	player.visual.flip_h = true
 	await _emote(player, EmoteBubble.Kind.EXCLAIM)
@@ -857,28 +881,34 @@ func _release_tiger(fresh: bool) -> void:
 	_tiger.chase(player)
 
 
-## The edge room's props, in place before he gets there: the vine on the cliff
-## face, and the lemon growing out of the rock beside it.
+## The edge room's props, in place before he gets there: the vine, rooted in
+## the cliff top and draped over the edge and down the face, in front of the
+## rock, and the lemon growing out of a crack beside it.
 func _dress_edge(room: Node2D) -> void:
 	if _vine != null and is_instance_valid(_vine):
 		return
-	var root := _mark_pos(room, "VineRoot") - Vector2(0, 4)
+	var lip := _lip(room)
 	_vine = Sprite2D.new()
 	_vine.name = "Vine"
 	_vine.texture = VINE_SHEET
 	_vine.hframes = 3
 	_vine.centered = false
-	_vine.offset = Vector2(-7, 0)
 	_vine.z_index = 3
 	room.add_child(_vine)
-	_vine.global_position = root
-	_lemon = Sprite2D.new()
+	_vine.global_position = lip + VINE_ORIGIN
+	_lemon = AnimatedSprite2D.new()
 	_lemon.name = "Lemon"
-	_lemon.texture = LEMON_SHEET
-	_lemon.hframes = 4
+	_lemon.sprite_frames = LEMON_FRAMES
 	_lemon.z_index = 3
 	room.add_child(_lemon)
-	_lemon.global_position = _mark_pos(room, "Lemon")
+	_lemon.global_position = lip + LEMON_AT
+	_lemon.play(&"spin")
+
+
+## The edge room's cliff-top corner: the top-right of the ground he runs off,
+## one cell up and left of the VineRoot mark (placed in the air beside it).
+func _lip(room: Node2D) -> Vector2:
+	return _mark_pos(room, "VineRoot") + Vector2(-4, -20)
 
 
 ## THIRTEEN — THE VINE. The land gives way; a vine; a tiger below, a tiger
@@ -891,6 +921,7 @@ func _play_vine(room: Node2D) -> void:
 		_tiger.stop()
 	_music_cue("rest")
 	_dress_edge(room)
+	_hanging = true
 	# The edge gives way under him.
 	var edge := _mark_pos(room, "Edge")
 	Sfx.play(&"crumble_break")
@@ -898,25 +929,25 @@ func _play_vine(room: Node2D) -> void:
 	_crumble(room, edge + Vector2(8, 6))
 	player.visual.flip_h = false
 	player.visual.play(&"fall")
-	var hang := _vine.global_position + Vector2(0, 72 + 11)
+	var lip := _lip(room)
+	var hang := lip + VINE_GRIP + Vector2(0, 11)
 	var drop := create_tween()
 	drop.tween_property(player, "global_position", Vector2(hang.x, player.global_position.y + 4), 0.28) \
 		.set_trans(Tween.TRANS_SINE)
 	drop.tween_property(player, "global_position", hang, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	# The tiger comes on to the edge and stops there.
+	# The tiger comes on to the edge and stops there, behind the vine's roots
+	# (where the mice are about to come out).
 	if _tiger != null:
 		_tiger.visual.flip_h = false
 		_tiger.visual.play(&"run")
-		var stand := _mark_pos(room, "TigerAbove") + Vector2(0, 4)
-		create_tween().tween_property(_tiger, "global_position", stand, 0.9)
+		create_tween().tween_property(_tiger, "global_position", lip + TIGER_ABOVE_AT, 0.9)
 	await drop.finished
 	# He catches the vine.
 	_hang_pose(player, &"hang")
 	Sfx.play(&"creak")
 	player.shake(1.2, 0.3)
-	var sway := create_tween().set_loops()
-	sway.tween_property(_vine, "rotation", 0.03, 1.1).set_trans(Tween.TRANS_SINE)
-	sway.tween_property(_vine, "rotation", -0.03, 1.1).set_trans(Tween.TRANS_SINE)
+	# The vine holds: rooted in the rock, it does not sway or shake, even under
+	# the mice. The danger is the gnawing, not the vine.
 	await _hold(1.2)
 	if _tiger != null:
 		_tiger.visual.play(&"look_down")
@@ -935,6 +966,7 @@ func _play_vine(room: Node2D) -> void:
 	pace.tween_callback(below.visual.set.bind("flip_h", false))
 	pace.tween_property(below, "global_position:x", floor_at.x, 1.4)
 	_hang_pose(player, &"hang_look_down")
+	_music_cue("peril")
 	await _hold(0.8)
 	var room_rect := _world.room_rect(room)
 	await _pan_camera(room_rect.end.y - 92.0, 1.8)
@@ -953,35 +985,37 @@ func _play_vine(room: Node2D) -> void:
 		await _hold(1.0)
 		_tiger.visual.play(&"look_down")
 	await _hold(1.0)
-	await _pan_camera(player.global_position.y - 20.0, 1.4)
+	# Frame the cliff top and him together: the mice are about to come out up there.
+	await _pan_camera((lip.y + player.global_position.y) * 0.5, 1.4)
 	# Two mice, one black and one white, come out to the root and gnaw.
 	await _mice(room)
 	_vine.frame = 1
 	await _emote(player, EmoteBubble.Kind.ELLIPSIS)
 	await _hold(1.0)
-	# And there, within reach of his hand: a lemon. Every step of it waits on his
-	# own words: he sees it, says so, takes it, says the rest, and only when that
-	# line is done does he eat. (A conversation re-poses him standing, facing the
-	# way he last ran; _hang_pose puts him back on the vine, facing the cliff.)
+	# And there, within reach of his hand: a lemon. He says both his lines with it
+	# still growing on the cliff, and only then picks it and eats it (SCRIPT.md:
+	# "He picks it. He eats it."), right before "...Oh. That's good." Taken any
+	# sooner it sat in his reaching hand at chin height, over his face, and he
+	# read as eating it while saying he never ate one. (A conversation re-poses
+	# him standing, facing the way he last ran; _hang_pose puts him back.)
 	_hang_pose(player, &"hang")
 	await _emote(player, EmoteBubble.Kind.EXCLAIM)
 	Dialogue.begin_conversation(self, player, true)
 	_hang_pose(player, &"hang")
 	await _hooshang("All those lemons.", "dazed")
-	Dialogue.end_conversation()
-	player.freeze()
-	_hang_pose(player, &"hang_reach")
-	await _hold(0.4)
-	var take := create_tween()
-	take.tween_property(_lemon, "global_position", player.global_position + Vector2(-8, -1), 0.5)
-	await take.finished
-	await _hold(0.6)
-	Dialogue.begin_conversation(self, player, true)
-	_hang_pose(player, &"hang_reach")
 	await _hooshang("I never ate a single one.", "vulnerable")
 	Dialogue.end_conversation()
 	player.freeze()
-	# His own line is what makes him do it.
+	# He picks it...
+	_hang_pose(player, &"hang_reach")
+	# The peril lets go, and the ney begins: the game's last music.
+	_music_cue("lemon")
+	await _hold(0.5)
+	var take := create_tween()
+	take.tween_property(_lemon, "global_position", player.global_position + Vector2(-8, -1), 0.45)
+	await take.finished
+	await _hold(0.3)
+	# ...he eats it.
 	_lemon.visible = false
 	_hang_pose(player, &"hang_eat")
 	for i in 3:
@@ -989,7 +1023,7 @@ func _play_vine(room: Node2D) -> void:
 		await _hold(0.9)
 	_vine.frame = 2
 	_hang_pose(player, &"hang_content")
-	await _hold(1.2)
+	await _hold(0.6)
 	Dialogue.begin_conversation(self, player, true)
 	_hang_pose(player, &"hang_content")
 	await _hooshang("...Oh. That's good.", "happy")
@@ -1032,35 +1066,40 @@ func _crumble(room: Node2D, at: Vector2) -> void:
 
 
 ## The black mouse and the white one come out of the crack at the root of the
-## vine and set to it, the vine trembling as they gnaw.
+## vine and set to it. The vine itself never moves.
 func _mice(room: Node2D) -> void:
-	var root := _vine.global_position
+	# Out of the crack among the roots, and along the grass on either side of the
+	# stem: always standing on the cliff top (their feet on its surface, every
+	# step short of the edge), never in the air. The white one goes on past the
+	# black, on the far side of the stem, and turns back to face it.
+	var lip := _lip(room)
+	var crack := lip + Vector2(VINE_ORIGIN.x + 6.0, -MOUSE_FEET)
+	var bite := lip.x + VINE_GNAW_X
 	var pair: Array[VineMouse] = []
 	for row in 2:
 		var mouse := MOUSE_SCENE.instantiate() as VineMouse
 		mouse.name = "Mouse" + ("Black" if row == 0 else "White")
 		mouse.white = row == 1
 		room.add_child(mouse)
-		mouse.global_position = root + Vector2(-18 if row == 0 else 18, 2)
+		mouse.flip_h = false
+		mouse.z_index = 5 if row == 0 else 4
+		mouse.global_position = crack
+		mouse.modulate.a = 0.0
 		pair.append(mouse)
+		var to := bite + (-MOUSE_REACH if row == 0 else MOUSE_REACH)
 		var walk := create_tween()
-		walk.tween_property(mouse, "global_position:x", root.x + (-6 if row == 0 else 6), 1.1)
-	await _hold(1.3)
-	for mouse in pair:
-		mouse.gnaw()
+		walk.tween_interval(0.5 * row)
+		walk.tween_property(mouse, "modulate:a", 1.0, 0.3)
+		walk.parallel().tween_property(mouse, "global_position:x", to, 0.06 * (to - crack.x))
+		walk.tween_callback(func():
+			mouse.flip_h = mouse.white
+			mouse.gnaw()
+		)
+	await _hold(2.4)
 	var gnaw := create_tween().set_loops()
-	gnaw.tween_callback(func():
-		Sfx.play(&"gnaw")
-		if is_instance_valid(_vine):
-			_vine.global_position.x = root.x + (1.0 if randf() < 0.5 else -1.0)
-	)
-	gnaw.tween_interval(0.16)
-	gnaw.tween_callback(func():
-		if is_instance_valid(_vine):
-			_vine.global_position.x = root.x
-	)
-	gnaw.tween_interval(0.12)
-	await _hold(2.0)
+	gnaw.tween_callback(Sfx.play.bind(&"gnaw"))
+	gnaw.tween_interval(0.28)
+	await _hold(1.4)
 
 
 ## Pan within this room via the camera's position. Juice owns Camera2D.offset

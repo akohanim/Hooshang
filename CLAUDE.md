@@ -388,6 +388,17 @@ so the two agree now. The tiles are still placeholder art.
   ate a single one.". (In `--playthrough`, while the tiger chases, the replay
   runs straight on between steps: stopping after every hop is the hesitation it
   punishes.)
+- `Godot --headless --path . res://tests/act3_land_backdrop_test.tscn` — the
+  way home's backdrops: every room hangs its planes clipped to its own rect,
+  every plane covers its room and HOLDS STILL while he crosses it and the camera
+  travels (mountains and sea included), clouds drift, the earth is shaded, the
+  edge's far wall draws over the terrain, and a leaping tiger's shadow stays on
+  the ground.
+- `Godot --headless --path . res://tests/act3_music_test.tscn` — the way
+  home's score: which room plays which cue, the loops and their intro heads,
+  the lemon a one-shot ending in silence, the designed cuts and fades, the
+  story holding the chase through doorways, and the lemon playing on through
+  the paused results.
 - `Godot --path . res://tests/act3_shot.tscn -- Act3_Level_17 ...` — capture
   harness (windowed, not pass/fail): photographs whole Act III rooms (two
   frames for a tall one) into `user://act3_shots/`, beats off.
@@ -1878,9 +1889,22 @@ going toward the light**: the act opens in the approved monochrome line art
   gnaw the vine, and he eats the lemon (`hang*` clips, `tools/build_adult_vine.lua`).
   Every step of that waits on his words: a conversation re-poses him standing
   (`cutscene_rest`), so `Act3Beats._hang_pose` puts him back on the vine after
-  each one opens, and the first bite comes only after "I never ate a single one.".
+  each one opens. He says "All those lemons." and "I never ate a single one."
+  with the lemon still on the cliff, then picks it and eats it, then "...Oh.
+  That's good." Taken any sooner, it sat in his reaching hand at chin height,
+  drawn over his face, and he read as eating it while saying he never ate one.
   The cliff body below its grassy top is invisible solid (`x`) with the rock
-  face PAINTED in the backdrop. Pans use `Camera2D.offset`, which ignores the
+  face PAINTED in the backdrop. **The vine scene is staged on the rock**, all of
+  it measured from the cliff's top corner (`Act3Beats._lip`, `VINE_ORIGIN` /
+  `VINE_GRIP` / `VINE_GNAW_X`, the same numbers as `tools/gen_vine_scene.py`'s
+  `ORIGIN` / `GRIP` / `GNAW`): the vine is rooted in the soil back from the
+  edge, lies along the grass, drapes over the lip and hangs down IN FRONT of the
+  face; it never moves (no sway, no tremble under the gnawing). Both mice come
+  out of the crack at its roots and stand on the cliff top either side of the
+  bite, the first tiger behind them; the lemon is the collectible's own `spin`
+  (`lemon_frames.tres`) on a twig in the face. `act3_tiger_test` checks the mice
+  have ground under both ends by a physics ray, the vine never moves and lies
+  mostly over the rock, and the lemon's frames. Pans use `Camera2D.offset`, which ignores the
   camera's limits, so `Act3Beats._pan_camera` measures from the room. Chase
   music: `sea_chase.ogg`; sounds roar/growl/gnaw/bite/creak (`gen_act3_sfx.py`).
 - **Act II hands off to Act III**: Act II's end card -> results -> `Act3World`
@@ -1933,11 +1957,48 @@ test rather than being noticed months later in play.
   voice blips all still index against the PLAIN rendered text
   (`DialogueBox._strip_tags`), never the raw BBCode source — see that method's
   doc for why a tag ahead of a `[p]` would otherwise shift the breath.
+- **The way home's backdrops are PLANES in depth** (`LandBackdrop`,
+  `scenes/props/sea/land_backdrop.gd`, built by `SeaRoom._build_backdrop` for
+  any room with `assets/act3/land/<room>/layers.json`; the flat `*.png` beside
+  those folders is only the fallback). `tools/gen_act3_land_backdrops.py` paints
+  each room as transparent layers plus a manifest: planes with a depth `p`
+  (0 sky .. 1 the room), clouds that drift, trees that sway from the root, the
+  grass (swayed per blade from `ground.png`), glints/shafts/waterfall, shadow
+  planes, birds and particles. **The planes HOLD STILL**, fixed to the room:
+  they first slid by depth (with him, sideways, in rooms whose camera never
+  pans; with the camera, in the tall edge), and on screen that read as the
+  mountains and the sea moving rather than as depth. The art is composed for the
+  camera at the top of the room. Each room's planes are CLIPPED to its rect:
+  their margins otherwise lay strips of the wood over the meadow. The wind is one
+  function (`act3_land_wind.gdshaderinc`) shared by trees, canopy and grass so a
+  gust crosses them all. The terrain's earth darkens with depth below a
+  SMOOTHED ground line (`act3_depth_tint`'s `earth_depth`; from each column's own
+  top a raised block came out a darker pillar). The edge's far wall is real solid
+  rock, so it hangs at p 1 OVER the terrain: on a plane of its own it slid off
+  the rock's visible top and read as a box stuck to it. Tigers carry a
+  `GroundShadow` (a ray down each frame, so it stays on the ground when they
+  leap). Re-run the painter after changing a land room's ground in
+  `tools/act3_rooms.py`. `tests/act3_land_backdrop_test.tscn`.
 - **A speaker's face sits on the side they are standing on.** Pass
   `DialogueBox.Side`; `LdtkRumiTrigger.portrait_side()` derives it from where the
   sprite actually is, so it cannot disagree with the screen. Hooshang is the
   player, so he is the other side.
 - **One portrait state per line.** Beats name a state (`"annoyed"`), not a file,
+  **From the real sea on, the score is ElevenLabs and follows the STORY**, not
+  the rooms: sunrise (25), the walk (26-27), the tall grass (28), silence on the
+  growl, the chase CUT in on the roar and cut out as the edge gives way, the
+  peril on the vine, and the lemon, a one-shot piece from the moment he picks it
+  that plays on through the paused results (`process_mode` ALWAYS). Once the
+  beats call `rest()`/`chase()`/`peril()`/`lemon()`, room changes no longer
+  pick the cue (a doorway mid-chase is not a cue). Each designed change is an
+  exact (from, to) transition in `Act3Music.TRANSITIONS`; Godot looks up an
+  exact pair, then (from, ANY), then (ANY, to), then (ANY, ANY), so never add a
+  (from, ANY) without checking what it shadows. ElevenLabs renders at an exact
+  BPM, but the mastering tool's onset tracker misread two of them (72.2 for 92,
+  64.85 for 60), and a loop cut in wrong "bars" drops the downbeat at the seam:
+  pin the tempo in `master_elevenlabs_music.py`'s `BPM`. Prompts, take choice,
+  levels and loop windows are all in `tools/gen_elevenlabs_music.py` and
+  `tools/master_elevenlabs_music.py`; `tests/act3_music_test.tscn`.
   so re-cutting the portrait sheet never touches the dialogue.
 - **Syncing the author's script** (`Hooshang - The Script.md`, kept outside the
   repo). ACT TWO: paste its `# ACT TWO` section into

@@ -15,6 +15,7 @@ also falls back to `~/.config/elevenlabs/api_key`).
 | `assets/music/darkshang_theme.ogg` | Act 1 Darkshang chase, Level_14–25 (`act1_music.gd` `chase_stream`) — "Escape From Homayun", oud + darbuka lead, made by hand in the ElevenLabs Music web app | the whole 120 s piece: its four 30 s sections (15 bars each @ 120 BPM) in order |
 
 | `assets/music/menu_theme.ogg` | The title screen (`MainMenu.tscn`'s `MenuMusic`) — `music_v2_5`, prompt in `tools/gen_elevenlabs_music.py`: ney lead in Dashti over santur/setar, 76 BPM, warm, sparse daf | its 7.2 s opening once, then 21 bars @ 76 BPM, 66 s (`loop_offset` 7.1586) |
+| `assets/music/sea_sunrise.ogg`, `way_home.ogg`, `tall_grass.ogg`, `tiger_chase.ogg`, `vine_peril.ogg`, `the_lemon.ogg` | Act III from the real sea to the end (`act3_music.gd`), scored to the story — see `assets/music/README.md`'s "the way home". `music_v2_5`, prompts in `tools/gen_elevenlabs_music.py`; the chase is the second, drum-led take (`tiger_chase_b`; the first, `tiger_chase`, is kept in `source/`) | per `manifest.json` `music.<name>.loop`; `the_lemon` is a one-shot |
 
 `tools/master_elevenlabs_music.py` finds the bar-aligned loop whose end best
 matches its start, crossfades the seam over one bar, and levels both to

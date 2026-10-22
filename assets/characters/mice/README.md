@@ -11,11 +11,13 @@ the body is still under half the adult protagonist's standing height.
 Each colour has a four-frame 90ms walk and a six-beat gnaw lasting 760ms.
 The walk alternates paws and tail; the gnaw lowers/raises the head, braces the
 paws, and briefly reveals an incisor. The white mouse mirrors horizontally.
-Both faces meet at the vine root without overlapping one another's bodies.
+Both faces meet at the bite, on the stem lying along the cliff top, without
+overlapping one another's bodies.
 
 `scenes/props/sea/VineMouse.tscn` owns playback. Act3Beats stages the approach,
 calls `gnaw()` on arrival, and leaves both loops running through the ending.
-Sound and the bounded 1px vine tremble remain controlled by the story beat.
+The gnawing's sound is the story beat's; the vine itself no longer trembles
+(it is rooted in the rock and holds still, see Act3Beats._mice).
 
 After saving Aseprite edits, run `python3 tools/export_finale_cast.py` to export
 the atlas/JSON and rebuild `mice_frames.tres` from their source tags and timing.

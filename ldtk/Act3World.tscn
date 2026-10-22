@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/act3/sea_world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://ldtk/hooshang_act3.ldtk" id="2_ldtk"]
@@ -10,8 +10,12 @@
 [ext_resource type="AudioStream" path="res://assets/music/sea_reef.ogg" id="8_reef"]
 [ext_resource type="AudioStream" path="res://assets/music/sea_trench.ogg" id="9_trench"]
 [ext_resource type="AudioStream" path="res://assets/music/sea_floor.ogg" id="10_floor"]
-[ext_resource type="AudioStream" path="res://assets/music/sea_dawn.ogg" id="11_dawn"]
-[ext_resource type="AudioStream" path="res://assets/music/sea_chase.ogg" id="12_chase"]
+[ext_resource type="AudioStream" path="res://assets/music/sea_sunrise.ogg" id="11_sunrise"]
+[ext_resource type="AudioStream" path="res://assets/music/way_home.ogg" id="12_way_home"]
+[ext_resource type="AudioStream" path="res://assets/music/tall_grass.ogg" id="13_stalk"]
+[ext_resource type="AudioStream" path="res://assets/music/tiger_chase.ogg" id="14_chase"]
+[ext_resource type="AudioStream" path="res://assets/music/vine_peril.ogg" id="15_peril"]
+[ext_resource type="AudioStream" path="res://assets/music/the_lemon.ogg" id="16_lemon"]
 
 [node name="Act3World" type="Node2D"]
 script = ExtResource("1_world")
@@ -42,7 +46,11 @@ wreck = ExtResource("7_wreck")
 reef = ExtResource("8_reef")
 trench = ExtResource("9_trench")
 floor_cue = ExtResource("10_floor")
-dawn = ExtResource("11_dawn")
-chase_cue = ExtResource("12_chase")
+sunrise = ExtResource("11_sunrise")
+way_home = ExtResource("12_way_home")
+stalk = ExtResource("13_stalk")
+chase_cue = ExtResource("14_chase")
+peril_cue = ExtResource("15_peril")
+lemon_cue = ExtResource("16_lemon")
 volume_db = -10.0
 bus = &"Music"
